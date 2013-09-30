@@ -1,6 +1,6 @@
-from omsi.analysis.omsi_lpf import omsi_lpf
-from omsi.analysis.omsi_npg import omsi_npg
-from omsi.analysis.omsi_peakcube import omsi_peakcube
+from omsi.analysis.findpeaks.omsi_lpf import omsi_lpf
+from omsi.analysis.findpeaks.omsi_npg import omsi_npg
+from omsi.analysis.findpeaks.omsi_peakcube import omsi_peakcube
 from omsi.dataformat.omsi_file import omsi_file
 
 import datetime
