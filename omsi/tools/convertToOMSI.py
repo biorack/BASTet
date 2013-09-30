@@ -214,6 +214,9 @@ def convert_files() :
             print "     - Spectrum chunking: "+str(chunks)
             print "     - Image chunking:    "+str(additional_chunks[0])
 
+	else :
+	    additional_chunks = user_additional_chunks
+
         #Get the mz data
         mzdata = inputFile.mz
 
