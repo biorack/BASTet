@@ -1,0 +1,2922 @@
+"""This module defines the API for reading and writing HDF5 files for storing
+   mass spectrometry imaging data, metadata, and analysis results according to
+   the format defined by the OpenMSI project""" 
+   
+""" TODO: omsi_file_msidata
+    -- The partial spectra case is untested and needs attention
+    -- The __getitem__ function for the partial_spectra case is not fully implemented yet
+    -- The estimates in def __best_dataset__(self,keys) are fairly crude at this point
+    -- The __setitem__ function should be implemented for the different cases as well (AHHHH).
+        --- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable."""
+
+import h5py
+import numpy as np
+import math
+from omsi.dataformat.omsi_format import *
+
+
+################################################################################
+################################################################################
+#   The main class for omsi data files   
+################################################################################
+################################################################################
+class omsi_file : 
+    """API for creating and managing a single OpemMSI data file.
+    """
+    
+    @classmethod
+    def get_omsi_object(cls, h5py_object) :
+        """This static method is used to retrieve the corresponding interface class for a given h5py group object
+        
+            :param h5py_object: h5py object for which the corresponding omis_file API object should be retrieved/generated
+            
+            :returns: None in case no corresponding object was found. Otherwise an instance of:
+            
+                * omsi_file : If the given object is a h5py.File object
+                * omsi_file_experiment : If the given object is an experiment groupt
+                * omsi_file_sample : If the given object is a sample group
+                * omsi_file_instrument : If the given object is an instrument group
+                * omsi_file_analysis : If the given object is an analysis group
+                * omsi_file_msidata : If the given object is a MSI data group
+                * The input h5py_object: If the given objet is a h5py.Dataset
+        
+        """
+        #If the input object is already an omsi API object then return it as is 
+        if isinstance( h5py_object , omsi_file ) or isinstance( h5py_object, omsi_file_experiment ) or \
+           isinstance( h5py_object , omsi_file_sample) or isinstance( h5py_object , omsi_file_instrument ) or \
+           isinstance( h5py_object , omsi_file_analysis ) or isinstance( h5py_object , omsi_file_msidata) :
+            return h5py_object
+        
+        if isinstance( h5py_object , h5py.File ) :
+            return omsi_file( h5py_object )
+        elif isinstance( h5py_object , h5py.Group ) :
+            #Check if the group has an explicit type attribute
+            try:
+                #Try to determine the type of the group based on the attributes
+                type_attribute = h5py_object.attrs[omsi_format_common.type_attribute]
+                if type_attribute == "omsi_file_experiment" :
+                    return omsi_file_experiment( h5py_object )
+                elif type_attribute == "omsi_file_sample" :
+                    return omsi_file_sample( h5py_object )
+                elif type_attribute == "omsi_file_instrument" :
+                    return omsi_file_instrument( h5py_object )
+                elif type_attribute == "omsi_file_analysis" :
+                    return omsi_file_analysis( h5py_object )
+                elif type_attribute == "omsi_file_msidata" :
+                    return omsi_file_msidata( h5py_object )
+                elif type_attribute == "omsi_file" :
+                    return omsi_file( h5py_object )
+                elif type_attribute == "omsi_file_dependencydata" :
+                    return omsi_file_dependencydata( h5py_object )
+                else :
+                    return None
+            except :
+                #If the attribute is missing, then try to determin the type based on he name of group
+                groupName = h5py_object.name.split("/")[-1]
+                if groupName.startswith( omsi_format_experiment.exp_groupname ) :
+                    return omsi_file_experiment( h5py_object )
+                elif groupName.startswith( omsi_format_sample.sample_groupname ) :
+                    return omsi_file_sample( h5py_object )
+                elif groupName.startswith( omsi_format_instrument.instrument_groupname ) :
+                    return omsi_file_instrument( h5py_object ) 
+                elif groupName.startswith( omsi_format_analysis.analysis_groupname ) :
+                    return omsi_file_analysis( h5py_object ) 
+                elif groupName.startswith( omsi_format_data.data_groupname ) :
+                    return omsi_file_msidata( h5py_object )
+                elif groupName.startswith( omsi_format_analysis.analysis_dependency_group ) :
+                    return omsi_file_dependencydata( h5py_object )
+                elif groupName == "" : #We are at the root group
+                    return omsi_file( h5py_object.file )
+                else :
+                    return None
+        elif isinstance( h5py_object , h5py.Dataset ) :
+            return h5py_object
+        else :
+            return None
+
+
+    def __init__( self , filename , mode='a') :
+         """Open the given file or create it if does not exit. 
+
+            The creation of the object may fail  if the file does not exist, and
+            the selected mode is 'r' or 'r+'.
+
+            Keyword arguments:
+
+            :param filename: string indicating the name+path of the OpenMSI data file. Alternatively this may also be an h5py.File instance. 
+            :param mode: read/write mode. One of : \n
+                         r = readonly, file must exist. \n
+                         r+ = read/write, file must exist. \n 
+                         w = Create file, truncate if exists. \n
+                         w- = create file, fail if exists. \n
+                         a = read/write if exists, create otherwise (default)
+         """
+         if isinstance( filename , h5py.File ) :
+             self.hdf_filename = filename.filename
+             self.hdf_file = filename
+         else : 
+            self.hdf_filename = filename                      #Name of the HDF5 file
+            self.hdf_file = h5py.File( filename , mode )      #This is a public attribute.
+         self.name = self.hdf_file.name
+         
+    def __getitem__(self, key) :
+        """Support direct read interaction with the h5py file"""
+        return self.hdf_file[key]
+
+    def __setitem__(self, key, value) :
+        """Support direct write interaction with the h5py file"""
+        self.hdf_file[key] = value
+        
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.hdf_file.items()
+       
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+            
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def get_h5py_file(self) :
+        """Get the h5py object for the omsi file
+
+           :returns: h5py redernce to the HDF5 file
+        """
+        return self.hdf_file
+
+    def get_filename(self) :
+        """Get the name of the omsi file
+
+           :returns: String indicating the filename (possibly including the full path, 
+                     depending on how the object has been initalized)
+        """
+        return self.hdf_filename
+
+    #####################################################
+    #  Access the different experiments, associated
+    #  properties etc. 
+    ####################################################
+    def get_exp_path(self, expIndex = None ) :
+        """Based on the index of experiment return the full path to the hdf5 
+           group containing the data for an experiment.
+
+           :param expIndex: The index of the experiment.
+
+           :returns: String indicating the path to the experiment.
+        """
+
+        expIndexStr = ""
+        if expIndex is not None :
+            expIndexStr = str(expIndex)
+        return "/" + omsi_format_experiment.exp_groupname + expIndexStr
+
+
+    def get_num_exp(self) :
+        """Get the number of experiments in this file.
+
+           :returns: Integer indicating the number of experiments. 
+        """
+
+        return omsi_file.get_num_items( self.hdf_file.get("/") , omsi_format_experiment.exp_groupname )
+
+
+    def get_exp(self, expIndex ) :
+       """Get the omsi_format_experiment object for the experiment with the given index
+
+          :param expIndex: The index of the requested experiment
+          :type expIndex: uint
+
+          :returns: h5py reference to the experiment with the given index. Returns None in case
+                    the experiment does not exist.
+       """
+
+       if expIndex < self.get_num_exp() :
+            return omsi_file_experiment( self.hdf_file[ unicode( omsi_format_experiment.exp_groupname +str( expIndex ) ) ] )
+       else : 
+            return None
+
+
+    def get_exp_by_identifier(self , expIdentifierString ) :
+        """Get the omsi_format_experiment object for the experiment with the given identifier.
+
+           :param expIdentifierString: The string used to identify the analysis
+           :type expIdentifierString: string
+         
+           :returns: Returns h5py object of the experiment group or None in case the experiment is not found."""
+
+        #Iterate through all groups of the root folder
+        for it in self.hdf_file.get("/").items() :
+            if it[0].startswith( omsi_format_experiment.exp_groupname ) :
+                 cur_exp_id = omsi_file_experiment( self.hdf_file[ it[0] ] ).get_exp_identifier()
+                 if cur_exp_id is not None :
+                     if cur_exp_id[0] == expIdentifierString :
+                         return omsi_file_experiment( self.hdf_file[ it[0] ] )
+        return None
+
+
+
+
+    #####################################################
+    #  Functions used for creation of the standard
+    #  data of the OMSI file format
+    ####################################################
+    def create_exp(self,  exp_identifier=None, flushIO=True) :
+        """Create a new group in the file for a new experiment and return the omsi_file_experiment object for the new experiment.
+
+           :param expIdentifier: The string used to identify the analysis
+           :type expIdentifierString: string or None (default)
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file.
+
+           :returns: omsi_file_experiment object for the newly created group for the experiment
+        """
+        import time 
+        numExp   = self.get_num_exp()
+        expIndex = numExp 
+        expName  = omsi_format_experiment.exp_groupname + str(expIndex)
+        #Using require_group ensures that the group is not overwritten if it already exists
+        exp = self.hdf_file.get("/").require_group(expName)
+        exp.attrs[omsi_format_common.type_attribute] = "omsi_file_experiment"
+        exp.attrs[omsi_format_common.version_attribute] = omsi_format_experiment.current_version
+        exp.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        exp_identifier_dataset = exp.require_dataset( name=omsi_format_experiment.exp_identifier_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        if exp_identifier is not None :
+            exp_identifier_dataset[0] = exp_identifier
+        else : 
+            exp_identifier_dataset[0] = "undefined"
+            
+        if flushIO :
+            self.hdf_file.flush()
+            
+        return  omsi_file_experiment( exp )
+
+
+    #####################################################
+    #  File related functions
+    ####################################################
+    def close_file(self) :
+        """Close the msi data file"""
+
+        self.hdf_file.flush() #Making sure all data has been written 
+        self.hdf_file.close() #Close the file
+        
+    def flush(self) :
+        """Flush all I/O"""
+        self.hdf_file.flush()
+
+
+    def write_XDMF_header(self, xdmfFilename ) :
+        """Write XDMF header file for the current HDF5 datafile
+
+           :param xdmfFilename: The name of the xdmf XML header file to be created for the HDF5 file.
+        """
+
+        import os 
+        #Open the output header file
+        xdmf = open( xdmfFilename , 'w')
+        #Write the starting header data
+        xdmf.write("<?xml version=\"1.0\" ?>\n")
+        xdmf.write("<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n")
+        xdmf.write("<Xdmf Version=\"2.0\">\n")
+        xdmf.write("<Domain>\n")
+        #For each experiment (/entry_#) and dataset (/entry_#/data_#) write an according entry
+        #poly.write("%d %f %f" % ( i , vertices[i,0] , vertices[i,1]  )  )
+        numExp = self.get_num_exp()
+        for ei in xrange(0,numExp) :
+            exp = self.get_exp(ei)
+            numDat = exp.get_num_msidata()
+            #For all datasets available for the experiment
+            for di in xrange(0,numDat) : 
+                data = exp.get_msidata(di)
+                nx = data.shape[0]
+                ny = data.shape[1]
+                nz = data.shape[2]
+                xdmf.write("<Grid Name=\"ImageGrid\" GridType=\"Uniform\">\n")
+                xdmf.write("  <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"%d %d %d\"/>\n" % (nx , ny, nz)) 
+                xdmf.write("  <Geometry GeometryType=\"Origin_DxDyDz\">\n")
+                xdmf.write("    <DataItem Format=\"XML\" Dimensions=\"1 3\">\n")
+                xdmf.write("      0.0\n")
+                xdmf.write("      0.0\n")
+                xdmf.write("      0.0\n")    
+                xdmf.write("    </DataItem>\n")
+                xdmf.write("    <DataItem Format=\"XML\" Dimensions=\"1 3\">\n")
+                xdmf.write("      %f\n" % (float(data.shape[0]) / float(data.shape[2])))
+                xdmf.write("      1.0\n")
+                xdmf.write("      1.0\n")
+                xdmf.write("    </DataItem>\n")
+                xdmf.write("  </Geometry>\n")
+                xdmf.write("  <Attribute Name=\"Spectrum\" AttributeType=\"Scalar\" Center=\"Node\">\n")
+                xdmf.write("    <DataItem Dimensions=\"%d %d %d\" NumberType=\"UInt\" Format=\"HDF\">\n" % (nx, ny, nz) )
+                xdmf.write("    "+ os.path.basename( self.hdf_filename ) +":/"+omsi_format_experiment.exp_groupname+str(ei)+"/"+omsi_format_msidata.data_groupname+str(di)+"\n" )
+                xdmf.write("    </DataItem>\n")
+                xdmf.write("  </Attribute>\n")
+                xdmf.write(" </Grid>\n")
+
+        #Write ending of xdmf file
+        xdmf.write("</Domain> \n")
+        xdmf.write("</Xdmf> \n")
+
+
+    #####################################################
+    #  Private helper functions and class methods
+    #################################################### 
+    @classmethod
+    def get_num_items( cls, fileGroup,  basename="" ) :
+        """Get the number of object with the given basename at the given path
+
+           :param fileGroup: The h5py object to be examined
+           :param basename: The name that should be searched for. 
+
+           :returns: Number of objexts with the given basename at the given path
+        """
+
+        numItems = 0
+        #Iterate through all groups of the root folder
+        for it in fileGroup.items() :
+            if it[0].startswith( basename ) :
+                 numItems = numItems + 1
+        return numItems
+
+    @classmethod   
+    def unit_test(cls , testFileName = "test.h5" ) :
+        """This simple unit test function creates a new OpenMSI HDF5 
+           data file and tries to populate it with dummy data
+
+          :param testFileName: The name of the test HDF5 file to be created.
+        """       
+        import numpy as np
+        from omsi.analysis.omsi_analysis_generic import omsi_analysis_generic
+        from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+        
+
+        testFile = omsi_file(testFileName)
+        print "1. Creating new test experiment"
+        exp =  testFile.create_exp()
+        if exp is None :
+            print "FAILED TEST"
+            exit()
+
+        print "Retrieving experiement wiht index 0"
+        print testFile.get_exp(0)
+
+        print "Setting experiment identifier"
+        exp_identifier_text = "Experiment 1"
+        exp.set_exp_identifier( exp_identifier_text )
+
+        print "Retrieving the experiment identifier"
+        print exp.get_exp_identifier()
+
+        print "Retrieving experiment by identifier"
+        print testFile.get_exp_by_identifier( exp_identifier_text )
+
+        print "Adding a full cube dataset to the experiment"
+        tempShape = tuple( [10,10,1000] )
+        tempNumElements = tempShape[0] * tempShape[1] * tempShape[2]
+        specChunking = tuple( [1,1,1000] )
+        slicChunking = tuple( [10,10,1] )
+        data_dataset, mz_dataset, data_group =  exp.create_msidata_full_cube(data_shape=tempShape, chunks=specChunking )
+        
+        print "Assigning data to dataset"
+        t = omsi_file_msidata( data_group )
+        t[:] =  np.arange( tempNumElements ).reshape( tempShape )
+        #data_dataset[:] = np.arange( tempNumElements ).reshape( tempShape )
+        
+        print "Assigning data to mz_data"
+        mz_dataset[:] = np.arange( tempShape[2] )
+    
+        print "Creating optimized copy of the data"
+        testDataObj = omsi_file_msidata( data_group )
+        testDataObj.create_optimized_chunking(chunks=slicChunking, compression=None, compression_opts=None , copy_data=True, print_status=True ) 
+
+        print "Retrieving the dataset"
+        dataset = exp.get_msidata( 0 )
+        print dataset
+        
+        print "Testing data slicing operations"
+        print dataset[5,5,:]
+        print dataset[:,:,1]
+        print dataset[3:4,1:4,5:50]
+        print dataset[ [1,3] , 8:9 , : ]
+        print dataset[:,:,:]
+        
+        print "Adding a partial cube dataset to the experiment"
+        mask = np.zeros( (tempShape[0], tempShape[1]), dtype='bool')
+        mask[1:8,5:10] = True
+        data_dataset1, mz_dataset1,  xy_index_dataset1, inv_xy_index_dataset1, dataGroup1 = exp.create_msidata_partial_cube(data_shape=tempShape, mask=mask, chunks=specChunking)
+        testDataObj1 = omsi_file_msidata( dataGroup1 )
+        testDataObj1[1:8,5:10,:] = np.arange( 7 * 5 * 1000  ).reshape( (7,5,1000) )
+        mz_dataset[:] = np.arange( tempShape[2] )
+        print "Creating optimized copy of the data"
+        testDataObj1.create_optimized_chunking(chunks=slicChunking, compression=None, compression_opts=None , copy_data=True, print_status=True ) 
+        print "Retrieving the dataset"
+        dataset = exp.get_msidata( 1 )
+        print dataset
+        print "Testing data slicing operations"
+        print dataset[1,1,:]
+        print dataset[:,:,1]
+        print dataset[1:2,1:2,5:50]
+        print dataset[ [1,3] , 8:9 , : ]
+        print dataset[:,:,:]
+
+        print "Checking for number of experiments"
+        print testFile.get_num_exp()
+
+        print "Checking for number of msidata for the experiment"
+        print exp.get_num_msidata()
+
+        print "Adding sample information"
+        sampleInfo = exp.create_sample_info()
+
+        print "Getting the sample information group"
+        print exp.get_sample_info()
+
+        print "Getting the sample name"
+        sampleName = sampleInfo.get_sample_name()
+        print sampleName[0]
+        print "Modifing sample name"
+        sampleInfo.set_sample_name( "Mouse" )
+        print sampleInfo.get_sample_name()[0] 
+
+        print "Adding instrument information"
+        mzdata = np.arange(10, dtype= 'float32')
+        instrumentInfo = exp.create_instrument_info("undefined", mzdata )
+
+        print "Getting the instrument information group"
+        print exp.get_instrument_info()
+
+        print "Getting the instrument name"
+        instrumentName = instrumentInfo.get_instrument_name()
+        if instrumentName is not None :
+            print instrumentName[0]
+        else :
+            print "FAILED TEST"
+        print "Modifing instrument name"
+        instrumentInfo.set_instrument_name( "LBNL_OpenMSI Python Instrument" )
+        print instrumentInfo.get_instrument_name()[0]
+
+        print "Getting the instrument mz data"
+        print instrumentInfo.get_instrument_mz()
+
+        print "Creating derived analysis"
+        testAnaIdName = "Peak Finding 123"
+        testAna = omsi_analysis_generic(nameKey=testAnaIdName)
+        print "Creating dummy analysis data"
+        testAnaData = omsi_analysis_data()
+        testAnaData['name'] = 'peakcube'
+        testAnaData['data'] = np.zeros( shape=(5,5,5) , dtype='float32' )
+        testAnaData['dtype'] = 'float32'
+        print "Adding the dummy analysis data to the analys object"
+        testAna.add_analysis_data( testAnaData )
+        print "Saving the analysis data to file"
+        analysis , ai = exp.create_analysis(testAna)
+        print "Getting the analysis identifier"
+        tempAnaId = analysis.get_analysis_identifier()
+        if tempAnaId is not None : 
+            print tempAnaId[0]
+        else :
+            print "FAILED TEST"
+        print "Getting the analysis type"
+        tempAnaType = analysis.get_analysis_type()
+        if tempAnaType is not None : 
+            print tempAnaType[0]
+        else :
+            print "FAILED TEST"
+        print "Getting the analysis by identifier"
+        print exp.get_analysis_by_identifier(testAnaIdName)
+
+        
+
+        print "Closing the file"
+        testFile.close_file()
+
+
+
+
+
+################################################################################
+################################################################################
+#   The main class for experiments within omsi data files   
+################################################################################
+################################################################################
+class omsi_file_experiment :
+    """Class for managing experiment specific data"""
+
+    def __init__(self, expGroup) :
+        """Initalize the experiment object given the h5py object of the experiment group
+
+           :param expGroup: The h5py object with the experiment group of the omsi hdf5 file.
+        """
+        self.experiment = expGroup
+        self.name = self.experiment.name
+        
+    def __getitem__(self, key) :
+        """Support direct read interaction with the experiment h5py group"""
+        return self.experiment[key]
+
+    def __setitem__(self, key, value) :
+        """Support direct write interaction with the experiment h5py group"""
+        self.experiment[key] = value
+       
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+            
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+            
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.experiment.items()
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.exp.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the experiment group was created in the HDF5 file.
+            
+           :returns: Python timestamp string generated using time.ctime().  
+                     None may be returned in case that the timestamp does not exists
+                     or cannot be retrieved from the file for some reason.
+            
+        """
+        try :
+            return self.exp.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+
+    ##########################################################
+    #  Access the data directly associated with the experiment
+    ##########################################################    
+    def get_h5py_experimentgroup(self) :
+        """Get the h5py object with the experiment data.
+
+           :returns: The hpy reference for the experiment with which this instance of
+                     omsi_file_experiment has been initalized.
+        """
+        return self.experiment
+
+    def get_exp_identifier(self) :
+        """Get the HDF5 dataset with the identifier description for the experiment.
+           
+           :returns: h5py object of the experiment identifer or None in case not present"""
+
+        exp_id = None
+        try : 
+            exp_id = self.experiment[ unicode(omsi_format_experiment.exp_identifier_name) ]
+        except :
+            exp_id = None
+            pass
+        return exp_id
+
+    def get_num_msidata(self) :
+        """Get the number of raw mass spectrometry images stored for a given experiment
+
+           :returns: Integer indicating the number of msi datasets available for the experiment.
+        """
+
+        return omsi_file.get_num_items( self.experiment , omsi_format_msidata.data_groupname ) 
+
+    def get_msidata(self, dataIndex, fill_space=True , fill_spectra=True, fill_value=0, preload_mz=True, preload_xy_index=True) :
+         """Get the dataset with the given index for the given experiment.
+         
+            For more detailed information about the use of the fill_space and fill_spectra and preload_mz and 
+            preload_xy_index options, see the init function of omsi.dataformat.omsi_file_msidata. 
+           
+            :param dataIndex: Index of the dataset.
+            :type dataIndex: unsigned int
+            :param fill_space: Define whether the data should be padded in space (filled with 0's) when accessing the data using [..] operator so that the data behaves like a 3D cube.
+            :param fill_spectra: Define whether the spectra should completed by adding 0's so that all spectra retrived via the [..] opeator so that always spectra of the full length are returned. 
+            :param preload_mz: Should the data for the mz axis be kept in memory or loaded on the fly when needed.
+            :param preload_xy_index: Should the xy index (if available) be preloaderd into memory or should the required data be loaded on the fly when needed.
+            :param fill_value: The integer value that should be used to fill in missing data values. 
+
+            :returns: omsi_file_msidata object for the given dataIndex or None in case the data
+                      with given index does not exist or the access failed for any
+                      other reason.
+         """
+         try :
+            return omsi_file_msidata( self.experiment[ unicode( omsi_format_msidata.data_groupname + str(dataIndex)  ) ] , fill_space=fill_space, fill_spectra=fill_spectra, fill_value=fill_value,                                       preload_mz=preload_mz, preload_xy_index=preload_xy_index )
+         except :
+            return None
+
+    def get_msidata_by_name(self, dataName ) :
+        """Get the h5py data object for the the msidata with the given name. 
+
+           :param dataName: The name of the dataset 
+           :type dataName: string
+
+           :returns: h5py object of the dataset or None in case the dataset is not found."""
+        #Iterate through all items of the experiment
+        for it in self.experiment.items() :
+            if it[0] == dataName : 
+                self.experiment[ it[0] ] 
+        return None
+
+    def set_exp_identifier(self , identifier) : 
+        """Overwrite the current identfier string for the experiment with the given string
+
+           :param identifier: The new experiment identifier string.
+        """
+
+        #Get the name of the intrument
+        expId = self.get_exp_identifier()
+        #Create the dataset for the id name if it does not exist
+        if expId is None :
+            expId =  self.experiment.require_dataset( name=omsi_format_experiment.exp_identifier_name , shape=(1,) , dtype=omsi_format_common.str_type )
+
+        expId[0] = identifier
+
+
+    ###########################################################
+    # Get sub-group object associated with the experiment
+    ###########################################################
+    def get_sample_info(self) :
+        """Get the omsi_file_sample object with the sample information.
+
+           :returns: omsi_file_sample object for the requested sample info. The function returns \
+                     None in case no sample information was found for the experiment  
+        """
+        sample_info = None
+        try: 
+            sample_info = omsi_file_sample(self.experiment[ unicode(omsi_format_sample.sample_groupname) ] )
+        except:
+            sample_info = None
+        return sample_info
+
+
+    def get_instrument_info(self) :
+        """Get the HDF5 group opbject with the instrument information.
+
+           :returns:  omsi_file_instrument object for the requested instrument info. The function returns \
+                      None in case no instrument information was found for the experiment  
+        """
+        instrument_info = None
+        try:
+            instrument_info = omsi_file_instrument( self.experiment[ unicode(omsi_format_instrument.instrument_groupname) ] )
+        except:
+            instrument_info = None
+        return instrument_info
+
+    def get_num_analysis(self ) :
+        """Get the number of raw mass spectrometry images stored for a given experiment
+
+           :returns: Integer indicating the number of analyses available for the experiment.
+        """
+        return omsi_file.get_num_items( self.experiment , omsi_format_analysis.analysis_groupname ) 
+
+
+    def get_analysis_identifiers(self) : 
+        """Get a list of all identifiers for all analysis stored for the experiment
+
+           :returns: List of strings of analysis identifiers.
+        """
+
+        re = []
+        #Iterate through all groups of the root folder
+        for it in self.experiment.items() :
+            if it[0].startswith( omsi_format_analysis.analysis_groupname ) :
+                cur_ana_id = omsi_file_analysis( self.experiment[ it[0] ] ).get_analysis_identifier()
+                if cur_ana_id is not None :
+                    re.append( cur_ana_id[0] )
+                else :
+                    re.append( "" )
+                
+        return re
+
+
+    def get_analysis(self, analysisIndex ) :
+        """Get the omsi_format_analysis analysis object for the experiment with
+           the given index. 
+
+           :param analysisIndex: The index of the analysis 
+           :type analysisIndex: Unsigned integer
+
+           :returns: omsi_file_analysis object for the requested analysis. The function \
+                          returns None in case the analysis object was not found.
+           """
+        try:
+            return omsi_file_analysis(  self.experiment[ unicode( omsi_format_analysis.analysis_groupname + str(analysisIndex)  )] )
+        except :
+            return None
+
+
+    def get_analysis_by_identifier(self, analysisIdentifierString ) : 
+        """Get the omsi_format_analysis analysis object for the the analysis with the given identifier.
+
+           :param analysisIdentifierString: The string used as identifier for the analysis.
+           :type analysisIdentifierString: string
+
+           :returns: h5py obejct of the analysis or None in case the analysis is not found."""
+
+        #Iterate through all groups of the root folder
+        for it in self.experiment.items() :
+            if it[0].startswith( omsi_format_analysis.analysis_groupname ) :
+                cur_ana_id = omsi_file_analysis( self.experiment[ it[0] ] ).get_analysis_identifier()
+                if cur_ana_id is not None :
+                    if cur_ana_id[0] == analysisIdentifierString :
+                        return omsi_file_analysis( self.experiment[ it[0] ] )
+        return None
+
+
+    ###########################################################
+    # Add new data to the experiment
+    ###########################################################
+    def __create_msidata_group__(self) :
+        
+        import time
+        numMSI = self.get_num_msidata()
+        dataIndex = numMSI 
+        data_group = self.experiment.require_group( omsi_format_msidata.data_groupname + str(dataIndex) )
+        data_group.attrs[omsi_format_common.type_attribute] = "omsi_file_msidata"
+        data_group.attrs[omsi_format_common.version_attribute] = omsi_format_msidata.current_version
+        data_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        return data_group
+    
+    def create_msidata_full_cube(self ,  data_shape , data_type = 'f' , mzdata_type='f', chunks=None, compression=None, compression_opts=None, flushIO=True) :
+        """Create a new mass spectrometry imaging dataset for the given experiment written as a full 3D cube. 
+
+           :param data_shape: Shape of the dataset. Eg. shape=(10,10,10) creates a 3D dataset with 10 entries per dimension
+           :param data_type:  numpy style datatype to be used for the dataset.
+           :param mzdata_type: numpy style datatype to be used for the mz data array.
+           :param chunks:  Specify whether chunkning should be used (True,False), or specify the chunk sizes to be used in x,y, and m/z explicitly.
+           :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+           :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              and compression ratio (zero is fastest, nine is best ratio).
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+        
+           :returns: The following two empty (but approbriately sized) h5py datasets are returned in order to be filled with data:
+            
+                * ``data_dataset`` : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * ``mz_dataset`` : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+           :returns: ``data_group`` : The h5py object with the group in the HDF5 file where the data should be stored. 
+        """
+        data_group =  self.__create_msidata_group__()   #Create the HDF5 group and initalize the OMSI object for managing the group
+        data_dataset, mz_dataset = omsi_file_msidata.__create_msidata_full_cube__( data_group=data_group, data_shape=data_shape , \
+                                                                          data_type=data_type, mzdata_type=mzdata_type, \
+                                                                          chunks=chunks, compression=compression, compression_opts=compression_opts)
+        if flushIO:
+            self.experiment.file.flush()
+        return data_dataset, mz_dataset, data_group
+
+
+    def create_msidata_partial_cube(self, data_shape, mask, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None, flushIO=True ) :
+        """Create a new mass spectrometry imaging dataset for the given experiment written as a partial 3D cube of complete spectra. 
+
+           :param data_shape: Shape of the dataset. Eg. shape=(10,10,10) creates a 3D dataset with 10 entries per dimension
+           :param mask: 2D boolean NumPy array used as mask to indicate which (x,y) locations have spectra associated with them.
+           :param data_type:  numpy style datatype to be used for the dataset.
+           :param mzdata_type: numpy style datatype to be used for the mz data array.
+           :param chunks:  Specify whether chunkning should be used (True,False), or specify the chunk sizes to be used in x,y, and m/z explicitly.
+           :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+           :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              and compression ratio (zero is fastest, nine is best ratio).
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+        
+           :returns: The following two empty (but approbriately sized) h5py datasets are returned in order to be filled with data:
+            
+                * ``data_dataset`` : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * ``mz_dataset`` : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+           :returns: The following already complete dataset
+            
+                * ``xy_index_dataset`` : This dataset indicates for each xy location to which index in ``data_dataset`` the \ 
+                                         location corresponds to. This dataset is needed to identify where spectra need to be written to.
+                
+           :returns: ``data_group`` : The h5py object with the group in the HDF5 file where the data should be stored. 
+        """
+        data_group =  self.__create_msidata_group__()   #Create the HDF5 group and initalize the OMSI object for managing the group
+        data_dataset, mz_dataset,  xy_index_dataset, inv_xy_index_dataset = omsi_file_msidata.__create_msidata_partial_cube__( data_group=data_group , data_shape=data_shape, \
+                                                                          mask=mask, data_type=data_type, mzdata_type=mzdata_type,  \
+                                                                          chunks=chunks, compression=compression, compression_opts=compression_opts)
+        if flushIO:
+            self.experiment.file.flush()
+        return data_dataset, mz_dataset,  xy_index_dataset, inv_xy_index_dataset, data_group
+
+
+    def create_msidata_partial_spectra(self, spectra_length, len_global_mz, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None, flushIO=True ) :
+        """Create a new mass spectrometry imaging dataset for the given experiment written as a partial 3D cube of partial spectra. 
+
+           :param spectra_length: 2D boolean NumPy array used indicating for wach (x,y) locations the length of the corresponding partial spectrum.
+           :param len_global_mz: The total number of m/z values in the global m/z axis for the full 3D cube
+           :param data_type: The dtype for the MSI dataset
+           :param mzdata_type: The dtype for the mz dataset
+           :param mzdata_type: numpy style datatype to be used for the mz data array.
+           :param chunks:  Specify whether chunkning should be used (True,False), or specify the chunk sizes to be used in x,y, and m/z explicitly.
+           :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+           :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              and compression ratio (zero is fastest, nine is best ratio).
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+        
+           :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
+
+                * ``data_dataset`` : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * ``mz_index_dataset`` : The 
+                * ``mz_dataset`` : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+           :returns: The following already complete dataset
+
+                * ``xy_index_dataset`` : This dataset indicates for each xy location at which index in ``data_dataset`` the \ 
+                                         corresponding spectrum starts. This dataset is needed to identify where spectra need to be written to.
+                * ``xy_index_end_dataset`` : This dataset indicates for each xy location at which index in ``data_dataset`` the \ 
+                                          the corresponding spectrum ends (exclusing the given value). This dataset is needed to \
+                                          identify where spectra need to be written to.
+       
+           :returns: ``data_group`` : The h5py object with the group in the HDF5 file where the data should be stored. 
+        """
+        data_group =  self.__create_msidata_group__()  #Create the HDF5 group and initalize the OMSI object for managing the group
+        data_dataset, mz_index_dataset, mz_dataset,  xy_index_start_dataset, xy_index_end_dataset = omsi_file_msidata.__create_msidata_partial_spectra__( data_group=data_group, \
+                                                                           spectra_length=spectra_length, len_global_mz=len_global_mz, \
+                                                                           data_type=data_type, mzdata_type=mzdata_type, \
+                                                                           chunks=chunks, compression=compression, compression_opts=compression_opts)
+        if flushIO:
+            self.experiment.file.flush()
+        return data_dataset, mz_index_dataset, mz_dataset,  xy_index_start_dataset, xy_index_end_dataset, data_group
+
+
+    def create_sample_info( self , sample_name=None, flushIO=True ) :
+        """Add information about the sample imaged to the experiment
+
+           :param sampleName: Optional name of the sample
+           :type sampleName: string, None
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+
+           :returns: h5py object of the newly created sample group.
+        """
+        import time
+        sample_group = self.experiment.require_group( omsi_format_sample.sample_groupname )
+        sample_group.attrs[omsi_format_common.type_attribute] = "omsi_file_sample"
+        sample_group.attrs[omsi_format_common.version_attribute] = omsi_format_sample.current_version
+        sample_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        if flushIO:
+            self.experiment.file.flush()
+        return omsi_file_sample.__create_sample_info__(sample_group=sample_group, sample_name=sample_name)
+        
+
+    def create_instrument_info( self , instrument_name=None , mzdata=None, flushIO=True) :
+        """Add information about the instrument used for creating the images for this experiment.
+
+           :param instrument_name: The name of the instrument
+           :type instrument_name: string, None
+           :param mzdata: Numpy array of the mz data values of the instrument
+           :type mzdata: numpy array or None
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+           
+           :returns: The function returns the h5py HDF5 handler to the instrument info group created for the experiment.
+           
+        """
+        #Create the group for instrument specific data
+        import time
+        instrument_group = self.experiment.require_group( omsi_format_instrument.instrument_groupname )
+        instrument_group.attrs[omsi_format_common.type_attribute] = "omsi_file_instrument"
+        instrument_group.attrs[omsi_format_common.version_attribute] = omsi_format_instrument.current_version
+        instrument_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        if flushIO:
+            self.experiment.file.flush()
+        return omsi_file_instrument.__create_instrument_info__( instrument_group=instrument_group , instrument_name=instrument_name, mzdata=mzdata )
+
+
+    def create_analysis( self, analysis, flushIO=True ) :
+        """Add a new group for storing derived analysis results for the current experiment
+
+          Create the analysis group and use omsi_file_analysis.__create_analysis__(...) to populate the
+          group with the approbriate data. 
+
+          :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis 
+          :type analysis: omsi.analysis.omsi_analysis_base:
+          :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+
+          :returns: The omsi_file_analysis object for the newly created analysis group and the integer index of the analysis
+         """
+        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+        import time
+        import numpy as np
+        if not isinstance( analysis , omsi_analysis_base ) :
+
+            errorMessage = "Could not write the analysis. The input object was of type "+str(type(analysis))+" not of omsi_analysis_base as expected."
+            raise NameError( errorMessage )
+
+        #Create a new group for the analysis data
+        numAna = self.get_num_analysis()
+        anaIndex = numAna
+        analysis_group = self.experiment.require_group( omsi_format_analysis.analysis_groupname + str( anaIndex ) )
+        analysis_group.attrs[omsi_format_common.type_attribute] = "omsi_file_analysis"
+        analysis_group.attrs[omsi_format_common.version_attribute] = omsi_format_analysis.current_version
+        analysis_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        if flushIO:
+            self.experiment.file.flush()
+        return omsi_file_analysis.__create_analysis__(analysis_group , analysis) , anaIndex
+
+
+
+################################################################################
+################################################################################
+#   The main class for sample information within omsi data files   
+################################################################################
+################################################################################
+class omsi_file_sample :
+    """Class for managing sample specific data"""
+    
+    @classmethod
+    def __create_sample_info__( cls , sample_group, sample_name=None ) :
+        """Add information about the sample imaged to the experiment
+
+           NOTE: This is a private helper function used to populate the given group for the \
+           sample data. Use the corresponding omsi_file_experiment.create_sample_info(...) \
+           to create a new sample group and populate it with data. 
+
+           :param sample_group: h5py group object that should be populated with the sample data. 
+           :param sample_name: Optional name of the sample
+           :type sampleName: string, None
+
+           :returns: h5py object of the newly created sample group.
+        """
+        sampleNameData = sample_group.require_dataset( name=omsi_format_sample.sample_name , shape=(1,), dtype=omsi_format_common.str_type )
+        if sample_name is None :
+            if len(sampleNameData[0]) == 0 :
+                sampleNameData[0] = "undefined"
+        else :
+            sampleNameData[0] = sample_name
+        return omsi_file_sample( sample_group )
+
+
+    def __init__(self, sampleGroup) :
+        """Initalize the sample object given the h5py object of the sample group
+
+           :param sampleGroup: The h5py object with the sample group of the omsi hdf5 file.
+        """
+        self.sample = sampleGroup
+        self.name = self.sample.name
+        
+    def __getitem__(self, key) :
+        """Support direct read interaction with the sample h5py group"""
+        return self.sample[key]
+
+    def __setitem__(self, key, value) :
+        """Support direct write interaction with the sample h5py group"""
+        self.sample[key] = value
+       
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.sample.items()
+
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.sample.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the sample group was created in the HDF5 file.
+        
+           :returns: Python timestamp string generated using time.ctime(). 
+                     None may be returned in case that the timestamp does not exists 
+                     or cannot be retrieved from the file for some reason.
+        
+        """
+        try :
+            return self.sample.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+    def get_h5py_samplegroup(self) :
+        """Get the h5py object for the HDF5 group of the sample data
+
+           :returns: h5py reference for the sample group.
+        """
+        return self.sample
+
+
+    def get_sample_name(self) :
+        """Get the HDF5 dataset with the name of the sample.
+
+           To retrieve the name string use get_sample_name()[...]
+
+           :returns: h5py object where the sample name is stored. 
+                     Returns None in case no sample name is found.
+        """
+        sample_name = None 
+        if self.sample is None :
+            return None
+        try:
+            sample_name = self.sample[ unicode(omsi_format_sample.sample_name) ]
+        except :
+            sample_name = None
+        return sample_name
+
+    def set_sample_name(self , nameString) : 
+        """Overwrite the name string for the sample with the given name string
+
+           :param nameString: The new sample name.
+           :type nameString: string
+        """
+
+        #Get the name of the intrument
+        name = self.get_sample_name()
+        #Create the dataset for the instrument name if it does not exist
+        if name is None :
+            name = self.sample.require_dataset( name=omsi_format_sample.sample_name , shape=(1,), dtype=omsi_format_common.str_type )
+
+        name[0] = nameString
+
+
+
+################################################################################
+################################################################################
+#   The main class for instrument information within omsi data files   
+################################################################################
+################################################################################
+class omsi_file_instrument : 
+    """Class for managing instrument specific data"""
+    
+    @classmethod
+    def __create_instrument_info__( cls , instrument_group, instrument_name=None , mzdata=None) :
+        """Populate the empty instrument group with the given data.
+        
+           NOTE: This is a private helper function used to populate the instrument group with data. \
+           Use the corresponding omsi_file_experiment.create_instrument_info(...) function to  \
+           generate a new instrument information data in HDF5
+        
+           :param instrument_group: The h5py group to which the instrument group data should be written to.
+           :param instrument_name: The name of the instrument used. 
+           :param mzdata: The mz data for the instrument.
+        """
+         #Name of the instrument
+        instrumentNameData = instrument_group.require_dataset( name=omsi_format_instrument.instrument_name , shape=(1,), dtype=omsi_format_common.str_type )
+        if instrument_name is None :
+            if len(instrumentNameData[0]) == 0 :
+                instrumentNameData[0] = "undefined"
+        else :
+            instrumentNameData[0] = instrument_name
+
+        #MZ data for the instrument
+        if mzdata is not None :
+            instrumentMZData = instrument_group.require_dataset( name=omsi_format_instrument.instrument_mz_name , shape=mzdata.shape , dtype=mzdata.dtype )
+            instrumentMZData[:] = mzdata[:]
+
+        return omsi_file_instrument( instrument_group )
+    
+
+    def __init__(self, instrumentGroup) :
+        """Initalize the instrument object given the h5py object of the instrument group
+  
+          :param instrumentGroup: The h5py object with the instrument group of the omsi hdf5 file.
+        """
+        self.instrument = instrumentGroup
+        self.name = self.instrument.name
+
+    def __getitem__(self, key) :
+        """Support direct read interaction with the instrument h5py group"""
+        return self.instrument[key]
+
+    def __setitem__(self, key, value) :
+        """Support direct write interaction with the instrument h5py group"""
+        self.instrument[key] = value
+       
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.instrument.items()
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.instrument.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the instrument group was created in the HDF5 file.
+            
+            :returns: Python timestamp string generated using time.ctime().
+                      None may be returned in case that the timestamp does not exists
+                      or cannot be retrieved from the file for some reason.
+            
+            """
+        try :
+            return self.instrument.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+
+    def get_h5py_instrumentgroup(self) :
+        """Get the h5py object with the instrument group.
+
+           :returns: h5py object of the instrument group.
+         """
+        return self.instrument
+
+    def get_instrument_name(self) :
+        """Get the HDF5 dataset with the name of the instrument.
+           
+           To get the string of the instrument name use:
+           get_instrument_name()[...]
+
+           :returns: h5py object to the dataset with the instrument name.
+                     Returns None in case no sample name is found.
+        """
+        instrument_name = None
+        if self.instrument is None :
+            return None
+        try:
+            instrument_name = self.instrument[ unicode(omsi_format_instrument.instrument_name) ]
+        except :
+            instrument_name = None
+        return instrument_name
+
+
+    def get_instrument_mz(self) :
+        """Get the HDF5 dataset with the mz data for the instrument.
+
+           To get the numpy array of the full mz data use:
+            get_instrument_mz()[:]
+
+           :returns: Returns the h5py object with the instrument mz data. 
+                     Returns None in case no mz data was found for the instrument.
+        """
+        instrument_mz = None
+        if self.instrument is None :
+            return None
+        try:
+            instrument_mz = self.instrument[ unicode(omsi_format_instrument.instrument_mz_name) ]
+        except:
+            instrument_mz = None
+        return instrument_mz
+
+
+    def set_instrument_name(self , name) : 
+        """Overwrite the current identfier string for the experiment with the given string.
+
+           :param name: The new instrument name.
+           :type name: string.
+        """
+
+        #Get the name of the intrument
+        nameDat = self.get_instrument_name()
+        #Create the dataset for the id name if it does not exist
+        if nameDat is None :
+            nameDat = self.instrument.require_dataset( name=omsi_format_instrument.instrument_name , shape=(1,), dtype=omsi_format_common.str_type )
+
+        nameDat[0] = name
+
+################################################################################
+################################################################################
+#   The main class for analysis data within omsi data files                    #
+################################################################################
+################################################################################
+class omsi_file_analysis :
+    """Class for managing analysis specific data in omsi hdf5 files"""
+
+    @classmethod
+    def __create_analysis__( cls, analysis_group,  analysis ) :
+        """Populate the given h5py group with the analysis data. 
+    
+            NOTE: This is a private helper function. Use the corresponding create_analysis function \
+            of omsi_file_experiment to create a completely new analysis. 
+
+            :param analysis_group: h5py group in which the analysis data should be stored. 
+            :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis 
+            :type analysis: omsi.analysis.omsi_analysis_base:
+
+            :returns: The omsi_file_analysis object for the newly created analysis group. The analysis data is \
+                      automatically written to file by this function so no addition work is required.
+            
+        """
+        #Write the analysis name 
+        analysisIdentifierData = analysis_group.require_dataset( name=omsi_format_analysis.analysis_identifier , shape=(1,), dtype=omsi_format_common.str_type )
+        analysisIdentifierData[0] = analysis.get_analysis_identifier()
+
+        #Write the analysis type
+        analysisTypeData = analysis_group.require_dataset( name=omsi_format_analysis.analysis_type , shape=(1,), dtype=omsi_format_common.str_type )
+        analysisTypeData[0] = analysis.get_analysis_type()
+
+        #Write the analysis data
+        for a in analysis.get_all_analysis_data() : 
+
+            cls.__write_omsi_analysis_data__(analysis_group , a ) 
+      
+        #Write all the parameters
+        parameter_group = analysis_group.require_group( omsi_format_analysis.analysis_parameter_group )
+        for p in analysis.get_all_parameter_data() : 
+
+            cls.__write_omsi_analysis_data__(parameter_group, p)
+            
+        #Write all data dependencies
+        dependency_group = analysis_group.require_group( omsi_format_analysis.analysis_dependency_group )
+        for d in analysis.get_all_dependency_data() : 
+
+            omsi_file_dependencydata.__create_dependency__(dependency_group , d)
+        
+        #Execute the custom data write for the analysis
+        analysis.write_to_omsi_file( analysis_group )
+        
+        return omsi_file_analysis( analysis_group ) 
+        
+        
+    @classmethod
+    def __write_omsi_analysis_data__( cls, data_group , ana_data ) :
+        """Private helper function used to write the data defined by a omsi_analysis_data object to HDF5.
+        
+            :param data_group: The h5py data group to which the data should be written to.
+            :param ana_data: The omsi_analysis_data object with the description of the data to be written.
+            :type ana_data: omsi.analysis.omsi_analysis_data
+        """
+    
+        #Create link in HDF5 to an existing dataset within the file
+        if isinstance( ana_data['dtype']  , int ) :
+            if ana_data['dtype'] == ana_data.ana_hdf5link :
+                linkObject = data_group.file.get( ana_data['data'] ) 
+                data_group[ ana_data['name'] ] = linkObject
+                omsiObj = omsi_file.get_omsi_object( linkObject )
+                try :
+                    #Check if we already have a type attribute 
+                    a = data_group[ ana_data['name'] ].attrs[ omsi_format_common.type_attribute ]
+                except :
+                    #Generate the type attribute from scratch
+                    if omsiObj is not None :
+                        omsiObjType = omsiObj.__class__.__name__
+                    else :
+                        omsiObjType = ""
+                    data_group[ ana_data['name'] ].attrs[ omsi_format_common.type_attribute ] = omsiObjType
+        #Create a new string-type dataset
+        elif ana_data['dtype'] == omsi_format_common.str_type :
+            tempData = data_group.require_dataset( name = ana_data['name'] , shape=(1,) , dtype=omsi_format_common.str_type  )
+            if ana_data['data'].size > 0 :
+                tempData[0] = ana_data['data']
+            else :
+                print "WARNGING: "+ana_data['name']+" dataset generated but not written. The given dataset was empty."
+        #Create a new dataset to store the current numpy-type dataset
+        elif 'numpy' in str(type( ana_data['data'] ) ) :
+            #Decide whether we want to enable chunking for the current analysis dataset
+            chunks=None
+            if ana_data['data'].size > 1000 :
+                chunks = True
+            #Write the current analysis dataset
+            tempData = data_group.require_dataset( name = ana_data['name'] , shape=ana_data['data'].shape , dtype=ana_data['dtype'], chunks=chunks )
+            if ana_data['data'].size > 0 :
+                tempData[:] = ana_data['data']
+            else :
+                print "WARNGING: "+ana_data['name']+" dataset generated but not written. The given dataset was empty."
+        #Unkown dtype. Attempt to convert the dataset to numpy and write it to file.
+        else :
+            print "WARNING: "+str(ana_data['name'])+": The data specified by the analysis object is not in numpy format. Attempting to convert the data to numpy"
+            try:
+                dat = np.asarray( ana_data['data'] )
+                if len( dat.shape ) == 0 :
+                    dat = np.asarray( [ ana_data['data'] ] )
+                tempData = data_group.require_dataset( name = ana_data['name'] , shape=dat.shape , dtype=str(dat.dtype) )
+                if dat.size  > 0 :
+                    tempData[:] = dat
+                else :
+                    print "WARNGING: "+ana_data['name']+" dataset generated but not written. The given dataset was empty."
+            except :
+                print "ERROR: "+str(ana_data['name'])+": The data specified by the analysis could not be converted to numpy for writing to HDF5"
+
+
+    def __init__(self, analysisGroup) :
+        """Initalize the analysis object given the h5py object of the sample group
+
+        
+           :param analysisGroup: The h5py object with the analysis group of the omsi hdf5 file.
+        """
+        self.analysis = analysisGroup
+        self.parameter = self.analysis[ unicode(omsi_format_analysis.analysis_parameter_group ) ]
+        self.dependency = self.analysis[ unicode(omsi_format_analysis.analysis_dependency_group ) ]
+        self.analysis_omsi_object = None
+        self.name = self.analysis.name
+        
+    def __getitem__(self, key) :
+        """Support direct read interaction with the analysis h5py group"""
+        try :
+            return self.analysis[key]
+        except :
+            try :
+                return self.parameter[key]
+            except :
+                try : 
+                    return msi_file.get_omsi_object( self.dependency[key] )
+                except :
+                    return None
+        return None #No errors have occured but no matching object has been found either
+
+    def __setitem__(self, key, value) :
+        """Support direct write interaction with the analysis h5py group"""
+        try : 
+            self.analysis[key] = value
+        except :
+            try :
+                self.parameter[key] = value
+            except :
+                try: 
+                    if key in self.dependency.items() :
+                        raise KeyError("Assignment to dependcies is not permitted via this mechanism")
+                    else :
+                        raise KeyError( "Requested assignment operation failed" )
+                except :
+                    raise KeyError( "Requested assignment operation failed" )
+
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.analysis.items()
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.analysis.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the analysis group was created in the HDF5 file.
+            
+            :returns: Python timestamp string generated using time.ctime().
+                      None may be returned in case that the timestamp does not exists
+                      or cannot be retrieved from the file for some reason.
+            
+            """
+        try :
+            return self.analysis.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+
+    def get_h5py_analysisgroup(self) :
+        """Retrun the h5py object with the analysis data.
+
+           The returned object can be used to read data directly from the HDF5 file.
+           Write operations to the analysis group can be performed only if the
+           associated omsi_file was opened with write permissions.
+
+           :returns: h5py object for the analysis group.
+        """
+        return self.analysis
+
+
+    def get_analysis_identifier(self) :
+        """Get the identifier name of the analysis.
+
+           Use get_analysis_identifier()[...] to retrive the identifier string.
+
+           :returns: h5py object for the dataset with the identifier string.
+                     Returns None, in case no identifer exisits. This should
+                     not be the case for a valid OpenMSI file.
+        """
+        if self.analysis is None :
+            return None
+
+        try:
+            return self.analysis[ unicode( omsi_format_analysis.analysis_identifier) ]
+        except:
+            return None
+
+
+    def get_analysis_type(self) : 
+        """Get the type for the analysis.
+
+           Use get_analysis_type()[...] tor retrieve the type string.
+ 
+           :returns: h5py object with the dataset of the analysis string. Returns,
+                     None in case no analysis type exists. This should not be the 
+                     case in a valid omsi file.
+        """
+        if self.analysis is None:
+            return None
+        try:
+            return self.analysis[ unicode( omsi_format_analysis.analysis_type) ]
+        except :
+            return None
+
+
+    def get_analysis_data_names( self ) :
+        """This function returns all dataset names (and groups) that are custom
+           to the analysis, i.e., that are not part of the omsi file standard.
+
+           :returns: List of analysis-specific dataset names.
+        """
+        re = []
+        if self.analysis is not None : 
+           for it in self.analysis.items() :
+               if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
+                  and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                   re.append( it[0] )
+        return re
+
+    def get_analysis_data_shapes_and_types(self) : 
+        """This function returns two dictionaries with all dataset names (and groups)
+           that are custom to the analysis, i.e., that are not part of the omsi
+           file standard, and idenifies the shape of the analysis data objects.
+ 
+           :returns: Dictonary indicating for each analysis-specific dataset its name (key) and
+                     shape (value). And a second dictionariy indicating the name (key) and dtype
+                     of the dataset.
+        """
+        re = {}
+        reT = {}
+        if self.analysis is not None : 
+            for it in self.analysis.items() :
+                if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
+                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                        try :
+                            re[ it[0] ] = self.analysis[ unicode( it[0] ) ].shape
+                        except :
+                            re[ it[0] ] = (0)
+                        try : 
+                            reT[ it[0] ] = self.analysis[  unicode( it[0] ) ].dtype
+                        except : 
+                            reT[ it[0] ] = "Unkown type"
+        return re, reT
+        
+
+    def get_all_analysis_data( self , load_data=False) :
+        """Get all analysis data associated with the analysis. 
+        
+           :param load_data: load_data: Should the data be loaded or just the h5py objects be stored in the dictionary. 
+         
+           :returns: List of names and numpy objects. Access using [index]['name'] and [index]['data'].
+        """
+        from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+        re = []
+        if self.analysis is not None : 
+            for it in self.analysis.items() :
+                if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
+                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                    re.append( omsi_analysis_data() )
+                    re[-1]['name'] = str( it[0] )
+                    if load_data :
+                        re[-1]['data'] = self.analysis[ unicode( it[0] ) ][:]
+                    else :
+                        re[-1]['data'] = self.analysis[ unicode( it[0] ) ]
+                    re[-1]['dtype'] = str( re[-1]['data'].dtype )
+        return re
+       
+    def get_all_parameter_data( self , load_data=False ) :
+        """Get all parameter data associated with the analysis. 
+           
+           :param load_data: Should the data be loaded or just the h5py objects be stored in the dictionary.
+
+           :returns: List of names and h5py object. Access using [index]['name'] and [index]['data'].
+        """
+        from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+        re = []
+        if self.parameter is not None :
+            for it in self.parameter.items() :
+                re.append( omsi_analysis_data() )
+                re[-1]['name'] = str( it[0] )
+                if load_data :
+                    re[-1]['data'] = self.parameter[ unicode( it[0] ) ][:]
+                else :
+                    re[-1]['data'] = self.parameter[ unicode( it[0] ) ]
+                re[-1]['dtype'] = str( re[-1]['data'].dtype )
+        return re
+
+    def get_all_dependency_data( self , omsi_dependency_format=True) :
+        """Get all direct dependencies associdated with the analysis.
+           
+           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_analysis_dependency object (True) or as an omsi_file_dependencydata object (False). 
+
+           :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
+        re = []
+        if self.dependency is not None :
+            for it in self.dependency.items() :
+                try :
+                    omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
+                    if omsi_dependency_format : 
+                        re.append( omsi_object.get_omsi_dependency() )
+                    else :
+                        re.append( omsi_object )
+                except :
+                    pass
+        return re
+
+
+    def get_all_dependency_data_recursive( self, omsi_dependency_format=True) :
+        """Get all direct and indirect dependencies associdated with the analysis. 
+        
+           NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+           
+           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+           
+           :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
+        from omsi.shared.omsi_dependency import omsi_dependency
+        
+        re = []
+        if self.dependency is not None :
+            for it in self.dependency.items() :
+                omsi_obj = omsi_file.get_omsi_object( self.dependency[ it[0] ] )
+                #If we can have recusive dependencies
+                if isinstance( omsi_obj , omsi_file_analysis ) :
+                    it_depend = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+                    re = re + it_depend
+                try :
+                    omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
+                    if omsi_dependency_format : 
+                        re.append( omsi_object.get_omsi_dependency() )
+                    else :
+                        re.append( omsi_object )
+                except :
+                    pass
+        return re
+
+################################################################################
+################################################################################
+#   The main class for accessing dependency datasets                           #
+################################################################################
+################################################################################
+class omsi_file_dependencydata :
+    """Class for managing data groups used for storing data dependcies"""
+    
+    @classmethod
+    def __create_dependency__( cls, data_group, dep_data ):
+        """Create a new dependency group within the given datagroup and initalize all the required datasets based on the given dependency information.
+        
+           :param data_group: The h5py group opbject to which the dependency dataset should be added
+           :type data_group: h5py.Group
+           :param dep_data: The analysis dependency specification.
+           :type dep_data: omsi.analysis.omsi_analysis_data.omsi_dependency_data
+           
+        """
+        import time
+        dep_group = data_group.require_group( dep_data['link_name'] )
+        dep_group.attrs[ omsi_format_common.type_attribute    ] = "omsi_file_dependencydata"
+        dep_group.attrs[ omsi_format_common.version_attribute ] = omsi_format_dependencydata.current_version
+        dep_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        param_name_data = dep_group.require_dataset( name = omsi_format_dependencydata.dependency_parameter , shape=(1,), dtype=omsi_format_common.str_type  )
+        param_name_data[0] = dep_data['param_name']
+        mainname_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_mainname , shape=(1,), dtype=omsi_format_common.str_type  )
+        mainname_data[0] = str(dep_data['omsi_object'].name)
+        selection_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_selection , shape=(1,), dtype=omsi_format_common.str_type  )
+        if dep_data['selection'] is not None :
+            from omsi.shared.omsi_data_selection import check_selection_string
+            if omsi_data_selection.check_selection_string( dep_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
+                selection_data[0] =  dep_data['selection']
+            else :
+                selection_data[0] = ""
+                errorMessage = "Invalid selection string given for data dependency : "+str( dep_data['selection'] ) 
+                raise ValueError( errorMessage )
+        else :
+            selection_data[0] = ""
+            
+        return omsi_file_dependencydata( dep_group )
+    
+    
+    def __init__(self, dependency_group) :
+        """Create a new omsi_file_dependencydata object for the given h5py.Group
+        
+            :param dependency_group: h5py.Group object with the dependency data
+            :type dependency_group: h5py.Group with a corresponding omsi type
+        """
+        self.dependency = dependency_group
+        self.name = self.dependency.name
+        
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.dependency.items()
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.dependency.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the dependency group was created in the HDF5 file.
+            
+            :returns: Python timestamp string generated using time.ctime().
+                      None may be returned in case that the timestamp does not exists
+                      or cannot be retrieved from the file for some reason.
+            
+            """
+        try :
+            return self.dependency.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+    def get_h5py_dependencygroup(self) :
+        """Retrun the h5py object with the dependency data.
+
+           The returned object can be used to read data directly from the HDF5 file.
+           Write operations to the analysis group can be performed only if the
+           associated omsi_file was opened with write permissions.
+
+           :returns: h5py object for the dependency group.
+        """
+        return self.dependency
+        
+    def __getitem__(self, key) :
+        """Retrieve the h5py dataset for any of the dependency datasetes or the omsi file API object.
+           If the key is a numpy selection (slicing) then the data is retrieved from the link the 
+           dependency is pointing to so that we can interact with the dependency as if it were the 
+           linked object.
+        """
+        if isinstance(key , string) :
+            if key == omsi_format_dependencydata.dependency_mainname :
+                return self.get_omsi_object()
+            else :
+                return self.dependency[key][0]
+        else :
+            omsi_object_name = self.dependency[ unicode(omsi_format_dependencydata.dependency_mainname) ][0]
+            h5py_object = self.dependency.file[ unicode(omsi_object_name)  ]
+            omsi_object = omsi_file.get_omsi_object( h5py_object )
+            return omsi_object[key]
+            
+    def get_dependency_type(self) :
+        """Indicated the type of the object the dependency is pointing to.
+        
+          :returns: String indicating the class of the omsi file API class that is suited to manage the dependency link or the name of the corresponding h5py class.
+        """
+        omsi_object = self.get_dependency_object()
+        return omsi_object.__class__.__name__
+        
+    def get_selection_string(self) :
+        """String indicating the applied selection. This is an empty string in case no selection was applied.
+        
+           :returns: Selection string. See the omsi.shared.omsi_data_selection for helper functions to deal with selection strings.
+        """
+        return self.dependency[ unicode(omsi_format_dependencydata.dependency_selection) ][0]
+
+    def get_parameter_name(self) :
+        """Get the string indicating the name of the dependend parameter of the analysis.
+        
+           :returns: String of the parameter name that has the dependency.
+        """
+        return self.dependency[ unicode(omsi_format_dependencydata.dependency_parameter) ][0]
+        
+    def get_dependency_omsiobject(self) :
+        """Get the omsi file API object corresponding to the object the dependency is pointing to.
+
+           :returns: An omsi file API object (e.g., omsi_file_analysis or omsi_file_msidata) if the link points to a group or the h5py.Dataset the link is pointing to.
+        """
+        omsi_object_name = self.dependency[ unicode(omsi_format_dependencydata.dependency_mainname) ][0]
+        h5py_object = self.dependency.file[ unicode(omsi_object_name)  ]
+        omsi_object = omsi_file.get_omsi_object( h5py_object )
+        return omsi_object
+
+    def get_link_name(self) :
+        """Get the name of the dependency link
+        
+            :returns: String indicating the name of the dependency link.
+        """
+        return self.dependency.name.split("/")[-1]
+
+    def get_omsi_dependency(self) :
+        """Get the dependency information as an omsi__dependency object (as defined in the omsi.shared.omsi_dependency module)
+        
+           :returns: omsi_dependency object with all the dependency data.
+        """
+        from omsi.shared.omsi_dependency import omsi_dependency
+        re = omsi_dependency()
+        try :
+            re['param_name'] = self.get_parameter_name()
+        except :
+            re['param_name'] = None
+        re['link_name'] = self.get_link_name()
+        try:
+            re['selection'] = self.get_selection_string()
+        except :
+            re['selection'] = None
+        try:
+            re['omsi_object'] = self.get_dependency_omsiobject()
+        except :
+            re['omsi_object'] = None
+        
+        return re 
+
+class omsi_file_msidata :
+    """Interface for interacting with mass spectrometry imaging datasets stored in omis HDF5 files.
+       The interface allows users to interact with the data as if it where a 3D cube even if data
+       is missing. Full spectra may be missing in cases where only a region of interest in space
+       has been imaged. Spectra may further be pre-processed so that each spectrum has only information
+       about its peaks so that each spectrum has it's own mz-axis.
+       
+       To load data ue standard array syntax, e.g., [1,1,:] can be used to retrieve the spectrums at
+       location (1,1).
+       
+       Current limitations:
+            
+            * The estimates in def __best_dataset__(self,keys) are fairly crude at this point
+            * The __getitem__ function for the partial_spectra case is not implemented yet.
+            * The __setitem__ function for the partial spectra case is not implemented yet (Note, it \
+              should also support dynamic expansion of the cube by adding previously missing spectra).
+            * For the partial cube case, assignement using __setitem__ function is only supported to \
+              valid spectra, i.e., spectra that were specified as occupied during the intital creation process.
+             
+       Public object variables:
+      
+            :ivar shape: Define the full 3D shape of the dataset (i.e., even if the data is stored in sparse manner)
+            :ivar dtype: The numpy datatyp of the main MSI data. This is the same as dataset.dtype
+            :ivar name: The name of the corresponding groupt in the HDF5 file. Used to generate hard-links to the group.
+            :ivar format_type: Define according to which standard the data is stored in the file
+            :ivar datasets: List of h5py objects containing possibly multiple different version of the same MSI data (spectra). There may be multiple versions stored with different layouts in order to optimize the selection process.
+            :ivar mz: dataset with the global mz axis information. If prelaod_mz is set in the constructor, then this is a numpy dataset with the preloaded data. Otherwise, this is the h5py dataset pointing to the data on disk.
+            :ivar xy_index: None if format_type is 'full_cube'. Otherwise, this is the 2D array indicating for each x/y location the index of the spectrum in dataset. If prelaod_xy_index is set in the constructor, then this is a numpy dataset with the preloaded data. Otherwise, this is the h5py dataset pointing to the data on disk. Negative (-1) entries indicate that no spectrum has been recored for the given pixel.
+            :ivar inv_xy_index:  2D dataset with n rows and 2 columns indicating for each spectrum i the (x,y) pixel index the spectrum belongs to. \
+                                 This index is stored for convenience purposesbut is not actually needed for data access.
+            :ivar mz_index: None if format_type is not 'partial_spectra'. Otherwise this is a dataset of the same size as the spectra data stored in dataset. Each entry indicates an index into the mz dataset to determine the mz_data value for a spectrum. This means mz[ mx_index ] gives the true mz value.
+            :ivar xy_index_end: None if format_type is not 'partial_spectra'. Otherwise this is a 2D array indicating for each x/y location the index where the given spectrum ends in the dataset. If prelaod_xy_index is set in the constructor, then this is a numpy dataset with the preloaded data. Otherwise, this is the h5py dataset pointing to the data on disk. Negative (-1) entries indicate that no spectrum has been recored for the given pixel.
+            
+       Private object variables:
+            
+            :ivar _data_group: Store the pointer to the HDF5 group with all the data
+            :ivar _fill_xy: Define whether the data should be reconstructed as a full image cube Set using the set_fill_space function(..)
+            :ivar _fill_mz: Define whether spectra should be remapped onto a global m/z axis. Set using the set_fill_spectra function(..)
+            
+    """
+
+    def __init__(self, data_group, fill_space=True , fill_spectra=True, fill_value=0, preload_mz=True, preload_xy_index=True) :
+        """ Initialize the omsi_msidata object.
+            
+            The fill options are provided to enable a more convenient access to the data independent of how the
+            data is stored in the file. If the fill options are enabled, then the user can interact with the
+            data as if it where a 3D cube while missing is data is filled in by the given fill value. 
+            
+            The prelaod options provided here refer to generally smaller parts of the data for which it may be
+            more efficient to load the data and keep it around rather than doing repeated reads. If the object is
+            used only for a single read and destroyed afterwards, then disabling the preload options may give a
+            slight advantage but in most cases enabling the preload should be Ok (default).
+        
+            :param data_group: The h5py object for the group with the omsi_msidata. 
+            :param fill_space: Define whether the data should be padded in space (filled with 0's) when accessing the data using [..]  \
+                               operator so that the data behaves like a 3D cube.
+            :param fill_spectra: Define whether the spectra should completed by adding 0's so that all spectra retrived via the [..] \ 
+                               opeator so that always spectra of the full length are returned. This option is provided to ease extension
+                               of the class to cases where only partial spectra are stored in the file but is not used at this point.
+            :param preload_mz: Should the data for the mz axis be kept in memory or loaded on the fly when needed.
+            :param preload_xy_index: Should the xy index (if available) be preloaderd into memory or should the required data be loaded on the fly when needed.
+            :param fill_value: The integer value that should be used to fill in missing data values. 
+        """
+        self.shape = []#Define the 3D shape of the dataset (i.e., even if the data is stored otherwise)
+        self.dtype = None #Which datatyp does the main MSI data have 
+        self.name = None #The name of the data group. This is replicated here to ease interaction with the interface.
+        self._data_group  = None #Store the pointer to the HDF5 group with all the data
+        self.format_type  = None  #Define according to which standard the data is stored in the file
+        self.datasets = []  #Store list of pointers to all copies of the HDF5 dataset
+        self.mz = None 
+        self.xy_index = None
+        self.inv_xy_index = None
+        self.xy_index_end = None
+        self.mz_index = None
+        self._fill_xy = fill_space   #Define whether the data should be reconstructed as a full image cube
+        self._fill_mz = fill_spectra #Define whether spectra should be remapped onto a global m/z axis
+        self.is_valid = False
+        if data_group is not None :
+            self._data_group = data_group
+            self.name = self._data_group.name
+            self.format_type =  omsi_format_msidata.format_types[  str( self._data_group .get( unicode( omsi_format_msidata.format_name ) )[0] )  ]
+        if self.format_type is not None :
+            #Initalize the dataset
+            self.datasets = [  self._data_group[ unicode(x[0]) ] for x in self._data_group.items() if x[0].startswith(omsi_format_msidata.dataset_name)  ]
+            self.dtype = self.datasets[0].dtype
+            #Initalize the mz data
+            if preload_mz :
+                self.mz = self._data_group [ unicode( omsi_format_msidata.mzdata_name ) ][:]
+            else :
+                self.mz = self._data_group [ unicode( omsi_format_msidata.mzdata_name ) ]
+            #Initalize the data shape 
+            if self.format_type == omsi_format_msidata.format_types['full_cube'] :
+                self.shape = self.datasets[0].shape
+                self.is_valid = True
+            else :
+                self.shape = self._data_group [ unicode( omsi_format_msidata_partial_cube.shape_name ) ][:]
+            
+            #We are done initalizaing all variables for the 'full_cube' format
+            #Initlize the xy index, inv_xy_index and mz-index for the other formats 
+            if self.format_type != omsi_format_msidata.format_types['full_cube'] :
+                if preload_xy_index :
+                    self.xy_index     = self._data_group [ unicode( omsi_format_msidata_partial_cube.xy_index_name ) ][:]
+                    self.inv_xy_index = self._data_group [ unicode( omsi_format_msidata_partial_cube.inv_xy_index_name)   ][:]
+                    if self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+                        self.xy_index_end = self._data_group [ unicode( omsi_format_msidata_partial_spectra.xy_index_end ) ][:]
+                        self.mz_index = self._data_group [ unicode( omsi_format_msidata.mz_index_name ) ]
+                        self.is_valid = True #We have successfully loaded all data for the partial_spectra case
+                    elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+                        self.is_valid = True #We have successfully loaded all data for the partial_cube case 
+                else :
+                    self.xy_index = self._data_group [ unicode( omsi_format_msidata_partial_cube.xy_index_name ) ]
+                    self.inv_xy_index = self._data_group [ unicode( omsi_format_msidata_partial_cube.inv_xy_index_name)   ]
+                    if self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+                        self.xy_index_end = self._data_group [ unicode( omsi_format_msidata_partial_spectra.xy_index_end ) ]
+                        self.mz_index = self._data_group [ unicode( omsi_format_msidata.mz_index_name ) ]
+                        self.is_valid = True #We have successfully loaded all data for the partial_spectra case
+                    elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+                        self.is_valid = True #We have successfully loaded all data for the partial_cube case 
+
+
+    def get_h5py_datasets(self, index=0):
+        """Get the h5py dataset object for the given dataset.
+        
+           :param index: The index of the dataset.
+           :returns: h5py object for the requested dataset.
+           :raises: and Index error is generated in case an invalid index is given.
+        """
+        return self.datasets[index]
+        
+    def get_h5py_mzdata(self) :
+        """Get the h5py object for the mz datasets. 
+        
+           :returns: h5py object of the requested mz dataset.
+        """
+        return self._data_group [ unicode( omsi_format_msidata.mzdata_name ) ]
+        
+    def get_h5py_datagroup(self):
+        """Get the h5py group object associated with this instance of omsi_file_msidata.
+        
+           :returns: h5py object of the requested data group (or None if the object is invalid)
+        """
+        return self._data_group
+        
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self._data_group.items()
+        
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+            
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self._data_group.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the dataset group was created in the HDF5 file.
+            
+            :returns: Python timestamp string generated using time.ctime().
+                      None may be returned in case that the timestamp does not exists
+                      or cannot be retrieved from the file for some reason.
+            
+            """
+        try :
+            return self._data_group.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+            
+    def create_data_dependency(self, dependency, flushIO=True ) :
+        """Create a new dependency for this dataset
+        
+           :param dependency" omsi.shared.omsi_dependency object describing the data dependency
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+           
+           :returns: omsi_file_dependencydata object with the dependency data or None in case that an error occured and the dependency has not been generated.
+        """
+        #Check whether we already have some dependencies. If yes append a new dependency otherwise create a new group
+        try:
+            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
+        except :
+            try :
+                dependency_group = self._data_group.require_group( omsi_format_data.data_dependency_group )
+            except :
+                return None
+        
+        #Create the dependency
+        try :
+            dep = omsi_file_dependencydata.__create_dependency__(dependency_group , dependency)
+            if flushIO:
+                self._data_group.file.flush()
+            return dep
+        except :
+           return None
+            
+    def create_sample_info( self , sample_name=None, flushIO=True) :
+        """Add information about the sample imaged to the experiment
+
+           :param sampleName: Optional name of the sample
+           :type sampleName: string, None
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+            
+           :returns: h5py object of the newly created sample group.
+        """
+        import time
+        sample_group = self._data_group.require_group( omsi_format_sample.sample_groupname )
+        sample_group.attrs[omsi_format_common.type_attribute] = "omsi_file_sample"
+        sample_group.attrs[omsi_format_common.version_attribute] = omsi_format_sample.current_version
+        sample_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        if flushIO:
+            self._data_group.file.flush()
+        return omsi_file_sample.__create_sample_info__(sample_group=sample_group, sample_name=sample_name)
+
+    def create_instrument_info( self , instrument_name=None , mzdata=None, flushIO=True) :
+        """Add information about the instrument used for creating the images for this experiment.
+
+           :param instrument_name: The name of the instrument
+           :type instrument_name: string, None
+           :param mzdata: Numpy array of the mz data values of the instrument
+           :type mzdata: numpy array or None
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+           
+           :returns: The function returns the h5py HDF5 handler to the instrument info group created for the experiment.
+           
+        """
+        #Create the group for instrument specific data
+        import time
+        instrument_group = self._data_group.require_group( omsi_format_instrument.instrument_groupname )
+        instrument_group.attrs[omsi_format_common.type_attribute] = "omsi_file_instrument"
+        instrument_group.attrs[omsi_format_common.version_attribute] = omsi_format_instrument.current_version
+        instrument_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        if flushIO:
+            self._data_group.file.flush()
+        return omsi_file_instrument.__create_instrument_info__( instrument_group=instrument_group , instrument_name=instrument_name, mzdata=mzdata )
+    
+    def get_sample_info(self) :
+        """Get the omsi_file_sample object with the sample information.
+
+           :returns: omsi_file_sample object for the requested sample info. The function returns \
+                     None in case no sample information was found for the experiment  
+        """
+        sample_info = None
+        try: 
+            sample_info = omsi_file_sample(self._data_group[ unicode(omsi_format_sample.sample_groupname) ] )
+        except:
+            #Check whether the parent group has information about the instrument
+            try:
+                sample_info = omsi_file.get_omsi_object( self._data_group.parent ).get_sample_info()
+            except :
+                sample_info = None
+        return sample_info
+
+    def get_instrument_info(self) :
+        """Get the HDF5 group opbject with the instrument information.
+
+           :returns:  omsi_file_instrument object for the requested instrument info. The function returns \
+                      None in case no instrument information was found for the experiment  
+        """
+        instrument_info = None
+        try:
+            instrument_info = omsi_file_instrument( self._data_group[ unicode(omsi_format_instrument.instrument_groupname) ] )
+        except:
+            #Check whether the parent group has information about the instrument
+            try:
+                instrument_info = omsi_file.get_omsi_object( self._data_group.parent ).get_instrument_info()
+            except :
+                instrument_info = None
+        return instrument_info
+        
+    def get_all_dependency_data( self , omsi_dependency_format=True) :
+        """Get all direct dependencies associdated with the MSI data.
+           
+           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_analysis_dependency object (True) or as an omsi_file_dependencydata object (False). 
+
+           :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
+        re = []
+        try :
+            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
+        except :
+            return re 
+        if dependency_group is not None :
+            for it in dependency_group.items() :
+                try :
+                    omsi_object =  omsi_file_dependencydata( dependency_group[ unicode(it[0]) ] )
+                    if omsi_dependency_format : 
+                        re.append( omsi_object.get_omsi_dependency() )
+                    else :
+                        re.append( omsi_object )
+                except :
+                   pass
+        return re
+
+
+    def get_all_dependency_data_recursive( self, omsi_dependency_format=True) :
+        """Get all direct and indirect dependencies associdated with the analysis. 
+        
+           NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+           
+           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+           
+           :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
+        from omsi.shared.omsi_dependency import omsi_dependency
+        re = []
+        try :
+            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
+        except :
+            return re 
+        if dependency_group is not None :
+            for it in dependency_group.items() :
+                omsi_obj = omsi_file.get_omsi_object( dependency_group[ it[0] ] )
+                #If we can have recusive dependencies
+                if isinstance( omsi_obj , omsi_file_analysis ) :
+                    it_depend = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+                    re = re + it_depend
+                try :
+                    omsi_object =  omsi_file_dependencydata( dependency_group[ unicode(it[0]) ] )
+                    if omsi_dependency_format : 
+                        re.append( omsi_object.get_omsi_dependency() )
+                    else :
+                        re.append( omsi_object )
+                except :
+                    pass
+        return re
+        
+    def has_sample_info(self, check_parent=False) :
+        """Check whether custom sample information is available for this dataset.
+        
+           :param check_parent: If no sample group is available for this dataset should we check \
+                                whether the parent object (i.e., the experiment group containing the dataset)\ 
+                                has information about the sample. (default=False)
+           :returns: Boolean indicating whether sample info is available.
+        """
+        try: 
+            self._data_group[ unicode(omsi_format_sample.sample_groupname) ] 
+            return True
+        except:
+            if check_parent :
+                try:
+                    if omsi_file.get_omsi_object( self._data_group.parent ).get_sample_info() is not None :
+                        return True
+                    else :
+                        return False
+                except:
+                    pass
+        return False
+
+    def has_instrument_info(self, check_parent=False) :
+        """Check whether custom instrument information is available for this dataset.
+        
+           :param check_parent: If no instrument group is available for this dataset should we check \
+                                whether the parent object (i.e., the experiment group containing the dataset) \ 
+                                has information about the instrument. (default=False)
+                                
+            :returns: Boolean indicating whether instrument info is available.
+        """
+        try: 
+            self._data_group[ unicode(omsi_format_instrument.instrument_groupname) ] 
+            return True
+        except:
+            if check_parent :
+                try:
+                    if omsi_file.get_omsi_object( self._data_group.parent ).get_instrument_info() is not None :
+                        return True
+                    else :
+                        return False
+                except:
+                    pass
+        return False
+    
+    def has_data_dependencies( self ) :
+        """Check whether any dependencies exisits for this datasets"""
+        try :
+            d = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
+            return True
+        except :
+            return False
+
+    def __setitem__(self, key, value) :
+        """The __getitem__ function is used in python to implement the [..] operator for setting data values.
+           This function allows the user to write the data as if it were a 3D cube using array notation [:,:,:]
+           even if the data may be stored in a different fashion in the file. If less than three
+           selections are specified then the remaining dimensions are assumed to be ":", i.e., all.
+           
+           :param key: Three elements of type index, list or slice defining the data selection
+        """
+        #The object is not fully initalized
+        if self._data_group is None :
+            raise ValueError("The msidata object has not been initalized.")
+        
+        #Complete the input selection if it is only partially specified. In this way we can
+        #assume in the following code that we always have three key selection parameters
+        if not isinstance(key, tuple) :
+            key = (key , slice(None) , slice(None))
+        elif len(key) == 1  :
+            key = (key , slice(None) , slice(None))
+        elif len(key) == 2  :
+            key = (key[0] , key[1] , slice(None))
+        elif len(key) != 3 :
+            raise ValueError("Invalid selection")
+        
+        #Check the data format and call the approbriate getitem function
+        if self.format_type == omsi_format_msidata.format_types['full_cube'] :
+            return self.__setitem_fullcube__(key, value) 
+        elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+            return  self.__setitem_partialcube__(key, value) 
+        elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+            return self.__setitem_partialspectra__(key,value)
+       
+    def __setitem_fullcube__(self, key, value) :
+        """Private helper function used in case that the data is stored as a full cube
+        
+           :param key: Three elements of type index, list or slice defining the data selection
+        """ 
+        #Update the data in all available version of the dataset
+        for d in self.datasets :
+            d[key] = value 
+
+    def __setitem_partialcube__(self, key, value ) :
+        """Private helper function used in case that the data is stored as a partial cube
+        
+           :param key: Three elements of type index, list or slice defining the data selection
+        """ 
+        #Check which elements need to be updated
+        indexList =  self.xy_index[ key[0] , key[1] ]
+        #Check whether only valid spectra are selected 
+        validSelectSize = (indexList>=0).sum()
+        try :
+            totalSize = indexList.size
+            indexList = indexList.reshape( indexList.size )
+        except :
+            totalSize = 1
+        if validSelectSize != totalSize :
+            raise KeyError("Assignment to uninitalized spectra is currently not supported")
+       
+        #Update the data in all available version of the dataset
+        for d in self.datasets :
+            d[ indexList.tolist() , key[2] ] = value.reshape( totalSize , self.__num_elements__(key[2]) )
+
+    def __setitem_partialspectra__(self, key , value ) :
+        """Private helper function used in case that the data is stored as a partial cube of partial spectra.
+        
+           :param key: Three elements of type index, list or slice defining the data selection
+        """ 
+        raise NotImplementedError("Assignement of partial spectra datasets is currently not implemented")
+
+
+    def __getitem__(self, key) :
+        """The __getitem__ function is used in python to implement the [..] operator. This function
+           allows the user to access the data as if it were a 3D cube using array notation [:,:,:]
+           even if the data may be stored in a different fashion in the file. If less than three
+           selections are specified then the remaining dimensions are assumed to be ":", i.e., all.
+           
+           :param key: Three elements of type index, list or slice defining the data selection
+        """
+       
+        #The object is not fully initalized
+        if self._data_group is None :
+            raise ValueError("The msidata object has not been initalized.")
+        
+        #Complete the input selection if it is only partially specified. In this way we can
+        #assume in the following code that we always have three key selection parameters
+        if not isinstance(key, tuple) :
+            key = (key , slice(None) , slice(None))
+        elif len(key) == 1  :
+            key = (key , slice(None) , slice(None))
+        elif len(key) == 2  :
+            key = (key[0] , key[1] , slice(None))
+        elif len(key) != 3 :
+            raise ValueError("Invalid selection")
+        
+        #Check the data format and call the approbriate getitem function
+        if self.format_type == omsi_format_msidata.format_types['full_cube'] :
+            return self.__getitem_fullcube__(key) 
+        elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+            return  self.__getitem_partialcube__(key) 
+        elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+           return  self.__getitem_partialspectra__(key)
+
+
+    def __getitem_fullcube__(self,key) :
+        """Private helper function used in case that the data is stored as a full cube
+        
+           :param key: Three elements of type index, list or slice defining the data selection
+        """ 
+        #Get the dataset that is best suited for the selection
+        d = self.__best_dataset__(key) 
+        #Access data using h5py
+        return d[key]
+        
+
+    def __getitem_partialcube__(self, key) :
+        """Private helper function used in case that the data is stored as a partial cube.
+        
+          :param key: Three elements of type index, list or slice defining the data selection
+        """ 
+        #Get the dataset that is best suited for the selection
+        d = self.__best_dataset__(key) 
+        #Compute the list elements to be loaded in (x,y)
+        indexList =  self.xy_index[ key[0] , key[1] ]
+        if indexList.size > 1:
+            cleanIndexList = indexList[ indexList>=0 ]
+        else :
+            indexList = np.asarray( [indexList] )
+            if indexList[0] < 0 :
+                cleanIndexList = np.empty(0, dtype=int)
+            else :
+                cleanIndexList = np.asarray( [indexList] , dtype=int )
+        cleanIndexList = cleanIndexList.reshape( cleanIndexList.size )
+        #Load the data
+        if cleanIndexList.size > 0 :
+            data = d[cleanIndexList , key[2]]
+        else :
+            data = np.empty(0, dtype=d.dtype)
+        
+        #Check if we need to complete the data with 0's. If the selection defines a range in  
+        #x and y (i.e we select a full rectangular region in space), then reconstruct the 
+        #full region by filling any missing data with 0's.
+        if self._fill_xy  :
+            #Compute how many elements we need to retrieve in the mz-axis
+            mzsize = self.__num_elements__(key[2])
+            reShape = indexList.shape + (mzsize, )
+            filldata = np.zeros( reShape , dtype = d.dtype )
+            filldata[ indexList>=0 ] = data.reshape((cleanIndexList.size, self.__num_elements__(key[2]) ))
+            return filldata
+            #if len( indexList.shape )==2 : 
+            #xsize  = indexList.shape[0]
+            #ysize  = indexList.shape[1]
+            #filldata = np.zeros( shape=(xsize ,  ysize , mzsize) , dtype=d.dtype )
+            #if not isinstance( key[0] , list ) and not isinstance( key[1] , list  ) :
+            #    filldata[ self.inv_xy_index[cleanIndexList,0]-self.__offset__(key[0]) , self.inv_xy_index[cleanIndexList,1]-self.__offset__(key[1])  ] = data.reshape((cleanIndexList.size, self.__num_elements__(key[2]) ))
+            #    return filldata
+            #if isinstance( key[0] , list ) :
+        else :
+            #Otherwise return a list of numpy arrays with the requested data completed with None objects for missing data
+            filldata = [ None ]*indexList.size
+            for i in xrange(0,indexList.size ) :
+                if indexList[i] >= 0 :
+                    filldata[i] = data[ cleanIndexList[i] , :]
+            return filldata 
+        
+    def __getitem_partialspectra__(self, key) :
+       """Private helper function used in case that the data is stored as full or partial cube with partial spectra.
+       
+          #:param key: Three elements of type index, list or slice defining the data selection
+       """
+       raise NotImplementedError("Selection for partial spectra datasets is currently not implemented. See __getitem_partialspectra__(...)")
+
+       ##Get the dataset that is best suited for the selection
+       #d = self.__best_dataset__(key) 
+       ##Determine the data values to be loaded in xy
+       #indexList_start = self.xy_index[ key[0] , key[1] ]
+       #indexList_end   = self.xy_index_end[ key[0] , key[1] ]
+       #index_select = (indexList_start>=0)
+       #if not isinstance( indexList_start , int ) :
+           #cleanIndexList_start = indexList_start[ index_select ]
+           #cleanIndexList_end = indexList_end[ index_select ]
+       #else :
+           #if indexList_start < 0 :
+               #cleanIndexList_start = np.empty(0, dtype=int)
+               #cleanIndexList_end   = np.empty(0, dtype=int)
+           #else :
+               #cleanIndexList_start = np.asarray( [ indexList_start ] , dtype=int )
+               #cleanIndexList_end   = np.asarray( [ indexList_end ]   , dtype=int )
+       
+       ##Load the full specta for each x/y location
+       #mz_data = [[]] * cleanIndexList.shape[0]
+       #for i in xrange(0,cleanIndexList.shape[0]) :
+           #mz_data[i] = self.mz_index[ cleanIndexList_start[i]:cleanIndexList_end[i] ]
+       
+       ##Determine which parts of the m/z data we actually need
+       #if isinstance(key[2] , int ) :
+           #mz_select = [ i==key[2] for i in mz_data  ]
+       #if isinstance(key[2] , slice ) :
+           #if key[2].step>1:
+               #raise NotImplementedError("Selections with a stepping are currently not supported by the interface for the m/z dimension and particle_spectra data")
+           ##Select full specta
+           #if (key[2].start is None or key[2].start == 0) and \
+               #(key[2].end is None or key[2].end == mz_indexList.shape[1]) and \
+               #(key[2].step is None or key[2].step == 1 ) :
+                   #mz_select = [ np.ones(dtype='bool', shape=i.shape ) for i in mz_data ]
+           ##Select an mz-range of the spectra
+           #else : 
+               #mz_select = [ np.logical_and( i>=key[2].start , i<key[2].end ) for i in mz_data  ]
+               ##mz_select = np.where( np.logical_and( mz_indexList>=key[2].start , mz_indexList<key[2].end )  , mz_indexList , -1 )
+       #elif isinstance(key[2] , list ) :
+           ##Treat the list the same way as an index selection if we only have one entry in the list
+           #if len( key[2] ) == 1 :
+               #mz_select = [ i==key[2][0] for i in mz_data  ]
+           ##Check if the list defines a continues selection
+           #for i in xrange(1,len(key[2])) :
+               #if key[2][i] != (key[2][i-1]+1) :
+                   #raise NotImplementedError("Selections using discontinoues lists are currently not supported by the interface for the m/z dimension and particle_spectra data.")
+                   ##Implementing discontinoues lists for selection will require a different treatment also when filling the data 
+           ##Treat the list as a continues slice-based selection. 
+           #mz_select = [ np.logical_and( i>=key[2][0] , i<key[2][-1] ) for i in mz_data  ]
+        
+       ##Load the requested spectra
+       #if self._fill_mz and self._fill_xy and (len( indexList_start.shape )==2)  :
+           ##Remap both the spatial and m/z coordinates so that the data behaves completely like a 3D cube
+           ##Compute how many elements we need to retrieve in the mz-axis
+           #mzsize = self.__num_elements__(key[2])
+           #ysize  = indexList_start.shape[0]
+           #xsize  = indexList_start.shape[1]
+           #filldata = np.zeros( shape=(xsize, ysize, mzsize) , dtype = d.dtype )
+           #mzi = 0
+           #for xi in xrange(0,xsize) :
+               #for yi in xrange(0,ysize) :
+                   #if indexList_start[xi,yi] >= 0 :
+                       #filldata[xi,yi,mz_select[mzi]] = d[ indexList_start[i]:indexList_end[i] ][ mz_select[mzi] ]
+                       #mzi = mzi+1
+       #elif self._fill_mz: #This includes the case where both fill_mz and fill_xy are set but fill_xy is not needed. 
+           #mzsize = self.__num_elements__(key[2])
+           #filldata = [np.zeros( mzsize) ] * len(mz_select)
+           #for i in xrange(0, len(mz_select) ):
+               #filldata[i][mz_select[i]] =  d[ cleanIndexList_start[i]:cleanIndexList_end[i] ][ mz_select[i] ]
+           #return filldata 
+       #elif self._fill_xy: #Only fill_xy is set but not the fill_mz
+           ##Remap only the spatial coordinates
+           #raise NotImplementedError("fill_xy without fill_mz set is currently not supported by the API")
+       #else : #This is the case where neither fill_mz nor fill_xy are set
+           ##Just load the data and return both the data and mz indicies
+           #filldata     =  [[]] * cleanIndexList.shape[0]
+           #fillmzdata   =  [[]] * cleanIndexList.shape[0]
+           #for i in xrange(0,cleanIndexList.shape[0]) :
+               #filldata[i]   = d[ cleanIndexList_start[i]:cleanIndexList_end[i] ][mz_select[i]]
+               #fillmzdata[i] = mz_data[i][mz_select[i]]
+           #return filldata, fillmzdata
+
+
+       
+    def set_fill_space(self, fill_space ) :
+        """Define whether spatial selection should be filled with 0's to retrieve full image slices"""
+        self._fill_xy = fill_space
+       
+    def set_fill_spectra(self, fill_spectra) :
+        """Define whether spectra should be filled with 0's to map them to the global mz axis when retrieved"""
+        self._fill_mz = fill_spectra
+    
+    @classmethod
+    def __create_msidata_full_cube__( cls,  data_group,  data_shape, data_type = 'f' , mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+        """ Create a new msi data group with all necessay datasets for storing a full 3D cube.
+        
+            NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
+            corresponding create_msidata functions in omsi_file_experiment to create a new MSI dataset in HDF5. 
+            
+            Required input parameters
+            
+            :param data_group: The hHDF5 group for which the dataset should be initalized.
+            :param data_shape: The 3D shape of the MSI dataset in x,y, and m/z
+            :param data_type: The dtype for the MSI dataset
+            :param mzdata_type: The dtype for the mz dataset
+            
+            Optional layout optimization parameters (these refer to the main MSI dataset only)
+            
+            :param chunks:  Specify whether chunking should be used (True,False), or specify the chunk sizes to be used explicitly.
+            :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+            :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              and compression ratio (zero is fastest, nine is best ratio).
+          
+            :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
+            
+                * data_dataset : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * mz_dataset : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+        """
+        #Data format
+        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset[0] = 'full_cube'
+        #mz data
+        mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(data_shape[2], )  , dtype=mzdata_type )
+        #Main MSI dataset
+        if compression is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=data_shape  , dtype=data_type , chunks=chunks)
+        elif compression_opts is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=data_shape  , dtype=data_type , chunks=chunks, compression=compression)
+        else :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=data_shape  , dtype=data_type , chunks=chunks, compression=compression, compression_opts=compression_opts)
+        #Return the datasets that need to be written
+        return data_dataset, mz_dataset
+        
+    
+    @classmethod
+    def __create_msidata_partial_cube__( cls, data_group, data_shape, mask, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+        """ Create a new msi data group with all necessay datasets for storing a full 3D cube
+            
+            NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
+            corresponding create_msidata functions in omsi_file_experiment to create a new MSI dataset in HDF5. 
+            
+            Required input parameters
+            
+            :param data_group: The hHDF5 group for which the dataset should be initalized.
+            :param data_shape: The 3D shape of the MSI dataset in x,y, and m/z
+            :param mask: 2D boolean NumPy array used as mask to indicate which (x,y) locations have spectra associated with them.
+            :param data_type: The dtype for the MSI dataset
+            :param mzdata_type: The dtype for the mz dataset
+            
+            Optional layout optimization parameters (these refer to the main MSI dataset only)
+            
+            :param chunks:  Specify whether chunking should be used (True,False), or specify the chunk sizes to be used explicitly.
+            :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+            :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              and compression ratio (zero is fastest, nine is best ratio).
+          
+            :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
+            
+                * ``data_dataset`` : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * ``mz_dataset`` : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+            :returns: The following already complete dataset
+            
+                * ``xy_index_dataset`` : This dataset indicates for each xy location to which index in ``data_dataset`` the \ 
+                                         location corresponds to. This dataset is needed to identify where spectra need to be written to.
+                * ``inv_xy_index_dataset`` : This datasets indicates for each spectrum its xy locating. The dataset is of the from \
+                                         n x 2 with inv_xy_index_dataset[:,0] being the x indices and inv_xy_index_dataset[:,1] \
+                                         being the y indicies.
+                                         
+        """
+        #Data format
+        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset[0] = 'partial_cube'
+        #mz data
+        mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(data_shape[2], )  , dtype=mzdata_type )
+        
+        #Main MSI dataset
+        xyshape = data_shape[0] * data_shape[1]
+        numSpectra = mask.sum()
+        mzshape = data_shape[2]
+        if isinstance( chunks, tuple ) :
+            chunks = ( chunks[0]*chunks[1] , chunks[2] )
+        if compression is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(numSpectra, mzshape)  , dtype=data_type , chunks=chunks)
+        elif compression_opts is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(numSpectra, mzshape)  , dtype=data_type , chunks=chunks, compression=compression)
+        else :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(numSpectra, mzshape)  , dtype=data_type , chunks=chunks, compression=compression, compression_opts=compression_opts)
+               
+        #Determine the minimal dtype for the xy index
+        xy_index_dtype = 'int16'
+        if xyshape < np.iinfo('int16').max :
+            xy_index_dtype = 'int16'
+        elif xyshape < np.iinfo('int32').max :
+            xy_index_dtype = 'int32'
+        elif xyshape < np.iinfo('int64').max :
+            xy_index_dtype= 'int64'
+        
+        #Create the xy_index_dataset
+        xy_index_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.xy_index_name , shape=(data_shape[0], data_shape[1] )  , dtype= xy_index_dtype )
+        xy_index_dataset[:,:]=-1
+        xy_index_dataset[mask] = np.arange(0,numSpectra)
+        
+        #Create the inverse inv_xy_index dataset
+        inv_xy_index_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.inv_xy_index_name , shape=(numSpectra,2)  , dtype= xy_index_dtype )
+        for xi in xrange(0,data_shape[0]) :
+            for yi in xrange(0,data_shape[1] ) :
+                if xy_index_dataset[xi,yi] >= 0 :
+                    inv_xy_index_dataset[ xy_index_dataset[xi,yi] , : ] = np.asarray( [xi,yi] )
+        
+        #Create the shape dataset
+        shape_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.shape_name , shape=(3, )  , dtype='uint32' )
+        shape_dataset[:] = np.asarray( data_shape , dtype='uint32')
+        
+        #Return the datasets that need to be written
+        return data_dataset, mz_dataset,  xy_index_dataset, inv_xy_index_dataset
+        
+
+    @classmethod
+    def __create_msidata_partial_spectra__( cls, data_group,  spectra_length, len_global_mz, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+        """Create a new msi data group with all necessay datasets for storing a full or partial cube of partial spectra
+       
+            NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
+            corresponding create_msidata functions in omsi_file_experiment to create a new MSI dataset in HDF5. 
+       
+            Required input parameters
+
+            :param data_group: The hDF5 group for which the dataset should be initalized.
+            :param spectra_length: 2D boolean NumPy array used indicating for wach (x,y) locations the length of the corresponding partial spectrum.
+            :param len_global_mz: The total number of m/z values in the global m/z axis for the full 3D cube
+            :param data_type: The dtype for the MSI dataset
+            :param mzdata_type: The dtype for the mz dataset
+
+            Optional layout optimization parameters (these refer to the main MSI dataset only)
+
+            :param chunks:  Specify whether chunking should be used (True,False), or specify the chunk sizes to be used explicitly.
+            :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                                Can also use an integer in range(10) indicating gzip.
+            :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                                For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
+                                a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                                and compression ratio (zero is fastest, nine is best ratio).
+
+            :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
+
+                * ``data_dataset`` : The primary h5py dataset for the MSI data with shape data_shape and dtype data_type.
+                * ``mz_index_dataset`` : The 
+                * ``mz_dataset`` : The h5py dataset for the mz axis data with shape [data_shape[2]] and dtype mzdata_type.
+                
+            :returns: The following already complete dataset
+
+                * ``xy_index_dataset`` : This dataset indicates for each xy location at which index in ``data_dataset`` the \ 
+                                         corresponding spectrum starts. This dataset is needed to identify where spectra need to be written to.
+                * ``xy_index_end_dataset`` : This dataset indicates for each xy location at which index in ``data_dataset`` the \ 
+                                          the corresponding spectrum ends (exclusing the given value). This dataset is needed to \
+                                          identify where spectra need to be written to.
+
+        """
+        #Data format
+        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset[0] = 'partial_spectra'
+        #mz data
+        mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(len_global_mz, )  , dtype=mzdata_type )
+        
+        #Main MSI dataset
+        mask = (spectra_length>0)
+        numSpectra = mask.sum()
+        total_len_spectra = spectra_length[mask].sum()
+        if isinstance( chunks, tuple ) :
+            chunks = ( chunks[0]*chunks[1]*chunks[2], )
+        if compression is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(total_len_spectra, )  , dtype=data_type , chunks=chunks)
+        elif compression_opts is None :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(total_len_spectra, )  , dtype=data_type , chunks=chunks, compression=compression)
+        else :
+            data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=(total_len_spectra, )  , dtype=data_type , chunks=chunks, compression=compression, compression_opts=compression_opts)
+            
+        #Determine the minimal dtype for the mz index
+        mz_index_dtype = 'uint16'
+        if len_global_mz < np.iinfo('uint16').max :
+            mz_index_dtype = 'uint16'
+        elif len_global_mz < np.iinfo('uint32').max :
+            mz_index_dtype = 'uint32'
+        elif len_global_mz < np.iinfo('uint64').max :
+            mz_index_dtype = 'uint64'
+        
+        #Create the mz-index dataset
+        if compression is None :
+            mz_index_dataset =  data_group.require_dataset( name=omsi_format_msidata_partial_spectra.mz_index_name, shape=(total_len_spectra, )  , dtype=mz_index_dtype , chunks=chunks)
+        elif compression_opts is None :
+            mz_index_dataset =  data_group.require_dataset( name=omsi_format_msidata_partial_spectra.mz_index_name, shape=(total_len_spectra, )  , dtype=mz_index_dtype , chunks=chunks, compression=compression)
+        else :
+            mz_index_dataset =  data_group.require_dataset( name=omsi_format_msidata_partial_spectra.mz_index_name, shape=(total_len_spectra, )  , dtype=mz_index_dtype , chunks=chunks, compression=compression, compression_opts=compression_opts)
+            
+        #Determine the minimal dtype for the xy index
+        xy_index_dtype = 'uint16'
+        if xyshape < np.iinfo('uint16').max :
+            xy_index_dtype = 'uint16'
+        elif xyshape < np.iinfo('uint32').max :
+            xy_index_dtype = 'uint32'
+        elif xyshape < np.iinfo('uint64').max :
+            xy_index_dtype= 'uint64'
+        
+        #Create the xy index start dataset
+        xy_index_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.xy_index_name , shape=(data_shape[0], data_shape[1] )  , dtype=xy_index_dtype )
+        xy_index_dataset[:]=-1
+        xy_index_dataset[mask] = np.insert( np.cumsum( spectra_length[mask] ) , 0 , 0 )[0:-1]
+        
+        #Create the xy index end dataset
+        xy_index_end_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_spectra.xy_index_end_name , shape=(data_shape[0], data_shape[1] )  , dtype=xy_index_dtype )
+        xy_index_end_dataset[:]=-1
+        xy_index_end_dataset[mask] = np.insert( np.cumsum( spectra_length[mask] ) , 0 , 0 )[1:]
+        
+        #Create the inverse inv_xy_index dataset
+        inv_xy_index_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.inv_xy_index_name , shape=(numSpectra,2)  , dtype= xy_index_dtype )
+        temp_count_xy_index = np.zeros(  shape=(data_shape[0], data_shape[1] ) , dtype=xy_index_dtype )
+        temp_count_xy_index[:] = -1
+        temp_count_xy_index[mask ]= np.insert( np.cumsum( np.ones(shape=(data_shape[0], data_shape[1]) , dtype='uint16')[mask]  ) , 0 , 0 )[0:-1]
+        for xi in xrange(0,data_shape[0]) :
+            for yi in xrange(0,data_shape[1] ) :
+                if temp_count_xy_index[xi,yi] >= 0 :
+                    inv_xy_index_dataset[ temp_count_xy_index[xi,yi] , : ] = np.asarray( [xi,yi] )
+        
+        #Create the shape dataset
+        shape_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.shape_name , shape=(3, )  , dtype='uint32' )
+        shape_dataset[:] = np.asarray( mask.shape , dtype='uint32')
+        
+        #Return the datasets that need to be written
+        return data_dataset, mz_index_dataset, mz_dataset,  xy_index_dataset, xy_index_end_dataset
+
+
+    def create_optimized_chunking(self, chunks=None, compression=None, compression_opts=None , copy_data=True, print_status=False , flushIO=True) :
+        """Helper function to allow one to create optimized copies of the dataset with different internal data layouts to speed up selections.
+           The function expects that the original data has already been written to the data group. The function takes 
+        
+           :param chunks:  Specify whether chunkning should be used (True,False), or specify the chunk sizes to be used explicitly.
+           :param compression: h5py compression option. Compression strategy.  Legal values are 'gzip', 'szip',  'lzf'. \
+                              Can also use an integer in range(10) indicating gzip.
+           :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
+                              For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is \
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed  \
+                              and compression ratio (zero is fastest, nine is best ratio).
+           :param copy_data: Should the MSI data be copied by this function to the new dataset or not. If False, then it is up to the  \
+                             user of the function to copy the approbriate data into the returned h5py dataset (not recommended but \ 
+                             may be useful for performance optimization).:wq
+           :param print_status: Should the function print the status of the conversion process to the command line?
+           :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+           
+           :returns: h5py dataset with the new copy of the data 
+        """
+        if len(self.datasets) == 0 :
+            raise ValueError("No datasets are currently stored for the dataset group that could be replicated")
+        
+        #Get the donor dataset. Try tp get the main dataset first. If it is not found take the first one from the list.
+        try :
+            d =  self._data_group .get( unicode( omsi_format_msidata.dataset_name+"0" ) )
+        except :
+            d = self.datasets[0]
+        
+        #Check and adjust the chunking
+        if isinstance( chunks, tuple ) :
+            if self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+                chunks = ( chunks[0]*chunks[1], chunks[2])
+                #Correct the chunking if it is larger than the actual data
+                if chunks[0] > d.shape[0] :
+                    chunks = (d.shape[0] , chunks[1] )
+                if chunks[1] > d.shape[1] :
+                    chunks = (chunks[0] , d.shape[1] )
+            elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+                chunks = ( chunks[0]*chunks[1]*chunks[2], )
+                #Correct the chunking if the chunk is larger than the actual data
+                if chunks[0] > d.shape[0] :
+                    chunks = (d.shape[0], )
+        
+        #Generate the new dataset in the HDF5 file
+        new_data_name = omsi_format_msidata.dataset_name+str(len(self.datasets))
+        if compression is None :
+            data_dataset =  self._data_group.require_dataset( name=new_data_name , shape=d.shape  , dtype=self.dtype  , chunks=chunks)
+        elif compression_opts is None :
+            data_dataset =  self._data_group.require_dataset( name=new_data_name , shape=d.shape  , dtype=self.dtype  , chunks=chunks, compression=compression)
+        else :
+            data_dataset =  self._data_group.require_dataset( name=new_data_name , shape=d.shape  , dtype=self.dtype  , chunks=chunks, compression=compression, compression_opts=compression_opts)
+        
+        if copy_data:
+            self.copy_msidataset(source=d , destination=data_dataset, print_status=print_status)
+            
+        if flushIO:
+            self._data_group.file.flush()
+    
+        #Add the dataset to the list of datasets
+        self.datasets.append( data_dataset )
+        
+        #Return the dataset. This is needed in case the caller decided to set copy_data to False and copy the data themselfs
+        return data_dataset
+        
+        
+    def copy_msidataset(self, source , destination , print_status=False) :
+        """Helper function used to copy a source msi dataset one chunk at a time to the destination dataset.
+           The data copy is done one destination chunk at a time to achieve chunk-aligned write
+           
+           :param source: The source h5py dataset
+           :param destination: The desitnation dataset. 
+           :param print_status: Should the function print the status of the conversion process to the command line?
+           
+        """
+        #Write the data from the donor to the target dataset
+        if print_status :
+            import sys
+        if self.format_type == omsi_format_msidata.format_types['full_cube'] :
+            
+            chunks = destination.chunks
+            numChunksX = int( math.ceil( float(source.shape[0])/float(chunks[0]) ) )
+            numChunksY = int( math.ceil( float(source.shape[1])/float(chunks[1]) ) )
+            numChunksZ = int( math.ceil( float(source.shape[2])/float(chunks[2]) ) )
+            numChunks = numChunksX*numChunksY*numChunksZ
+            itertest=0 
+            for xt in xrange(0, numChunksX ) :
+                xstart = xt*chunks[0]
+                xend = min(  xstart+chunks[0] , source.shape[0])
+                for yt in xrange(0, numChunksY ) :
+                    ystart = yt*chunks[1]
+                    yend = min( ystart+chunks[1] , source.shape[1] )
+                    for zt in xrange(0, numChunksZ ) :
+                        zstart = zt*chunks[2]
+                        zend = min( zstart+chunks[2] , source.shape[2] )
+                        destination[xstart:xend , ystart:yend, zstart:zend ] = source[xstart:xend , ystart:yend, zstart:zend ]
+                        itertest+=1
+                        if print_status :
+                            sys.stdout.write("[" +str( int( 100.* float(itertest)/float(numChunks) )) +"%]"+ "\r")
+                            sys.stdout.flush()
+
+        elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+            
+            chunks = destination.chunks
+            numChunksX = int( math.ceil( float(source.shape[0])/float(chunks[0]) ) )
+            numChunksY = int( math.ceil( float(source.shape[1])/float(chunks[1]) ) )
+            numChunks = numChunksX*numChunksY
+            itertest=0 
+            for xt in xrange(0, numChunksX ) :
+                xstart = xt*chunks[0]
+                xend = min(  xstart+chunks[0] , source.shape[0])
+                for yt in xrange(0, numChunksY ) :
+                    ystart = yt*chunks[1]
+                    yend = min( ystart+chunks[1] , source.shape[1] )
+                    destination[xstart:xend , ystart:yend] = source[xstart:xend , ystart:yend]
+                    itertest+=1
+                    if print_status :
+                        sys.stdout.write("[" +str( int( 100.* float(itertest)/float(numChunks) )) +"%]"+ "\r")
+                        sys.stdout.flush()
+                    
+        elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+            
+            chunks = destination.chunks
+            numChunksX = int( math.ceil( float(source.shape[0])/float(desitnation.chunks[0]) ) )
+            numChunks = numChunksX
+            itertest=0 
+            for xt in xrange(0, numChunksX ) :
+                xstart = xt*chunks[0]
+                xend = min(  xstart+chunks[0] , source.shape[0])
+                destination[xstart:xend] = source[xstart:xend]
+                itertest+=1
+                if print_status :
+                    sys.stdout.write("[" +str( int( 100.* float(itertest)/float(numChunks) )) +"%]"+ "\r")
+                    sys.stdout.flush()
+        
+
+    def __best_dataset__(self,keys, print_info=False) :
+        """Compute the index of the dataset that is best suited for executing the given selection
+        
+           :param keys: List of three keys indicting which elements should be selected from the MSI dataset.
+           
+           :returns: Integer indicating the index of the dataset to be used for the given selection.
+        """
+        #If there is only one version of the dataset then use that one
+        if len(self.datasets) == 1:
+            return self.datasets[0]
+        #Get the basic properties of the selection
+        sizeX = self.__num_elements__(keys[0])
+        sizeY = self.__num_elements__(keys[1])
+        sizeZ = self.__num_elements__(keys[2])
+        offsetX = self.__offset__(keys[0])
+        offsetY = self.__offset__(keys[1])
+        offsetZ = self.__offset__(keys[2])
+        
+        #Try to determine how many chunks need to be touched in order to fullfill the given selection
+        #Currently this is just an estimate assuming that we have spatially consecutive selections,
+        #i.e., if we have a stepping >1 in a slice or lists of non-neighboring elements, then this
+        #estimate will be wrong. This may result in a suggestion of a sub-optimal dataset with 
+        #respect to performance.
+        #For the particle_cube case the estimate is also not accurate for spatial selections since
+        #both x and y are linearized in this case. However, the estimate should still distinguish
+        #properly between selection in space vs. spectra.
+        #For the partial spectra case, currently no chunking optimization is currently available.
+        suggestion = self.datasets[0]
+        if self.format_type == omsi_format_msidata.format_types['full_cube'] :
+        
+            currentTouch = -1
+            currentLoad = -1
+            for d in self.datasets :
+                chunking = d.chunks
+                chunkLoad = chunking[0] * chunking[1] * chunking[2]
+                #Account for the missalignment of the selection with chunk boundaries
+                ox = offsetX - ( math.floor( float(offsetX)/chunking[0])*chunking[0] )
+                oy = offsetY - ( math.floor( float(offsetY)/chunking[1])*chunking[1] )
+                oz = offsetZ - ( math.floor( float(offsetZ)/chunking[2])*chunking[2] )
+                #Determine how many chunks need to be touched, assuming that we have continues selection.
+                touchX = math.ceil(float(sizeX+ox) / chunking[0])
+                touchY = math.ceil(float(sizeY+oy) / chunking[1])
+                touchZ = math.ceil(float(sizeZ+oz) / chunking[2])
+                touchTotal = touchX*touchY*touchZ
+                #Determine the amount of data that need to be loaded 
+                loadTotal = touchTotal*chunkLoad
+                #If less chunks have to be touched for this dataset then use that one instead
+                if loadTotal<currentLoad or currentLoad<0 :
+                    suggestion = d
+                    currentTouch = touchTotal
+                    currentLoad  = loadTotal
+                    
+        elif self.format_type == omsi_format_msidata.format_types['partial_cube'] :
+            
+            currentTouch = -1
+            currentLoad = -1
+            for d in self.datasets :
+                chunking = d.chunks
+                chunkLoad = chunking[0] * chunking[1]
+                #Account for the missalignment of the selection with chunk boundaries
+                ox = offsetX - ( math.floor( float(offsetX)/chunking[0])*chunking[0] )
+                oy = offsetY - ( math.floor( float(offsetY)/chunking[0])*chunking[0] )
+                oz = offsetZ - ( math.floor( float(offsetZ)/chunking[1])*chunking[1] )
+                #Determine how many chunks need to be touched, assuming that we have continues selection.
+                touchX = math.ceil(float(sizeX+ox) / chunking[0])
+                touchY = math.ceil(float(sizeY+oy) / chunking[0])
+                touchZ = math.ceil(float(sizeZ+oz) / chunking[1])
+                touchTotal = touchX*touchY*touchZ
+                #Determine the amount of data that need to be loaded 
+                loadTotal = touchTotal*chunkLoad
+                #If less chunks have to be touched for this dataset then use that one instead
+                if loadTotal<currentLoad or currentLoad<0 :
+                    suggestion = d
+                    currentTouch = touchTotal
+                    currentLoad  = loadTotal
+            
+        elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
+            
+            pass #ToDo currently no optimization is implemented for the partial spectra case
+        
+        if  print_info :
+            print "Selection: "+str(keys)
+            print "Suggest: "+str(suggestion.chunks)
+            print "Alternatives: "+str([d.chunks for d in self.datasets])
+            
+        return suggestion
+
+
+    def __offset__(self, key) :
+        """Determine the start offset of the given single key
+        
+           :param key: List, slice or interger indicating a single selection
+           
+           :returns: Integer indicating the lower bound of the selection defined by the key.
+        """
+        if isinstance(key,int) :
+            return key
+        elif isinstance(key,list) :
+            return min(key)
+        elif isinstance(key,slice) :
+            start = key.start
+            if start is None :
+                start = 0
+            return start 
+        else :
+           return 0
+    
+
+    def __num_elements__(self,key) :
+        """Compute the number of elements selected by a given single selection key
+        
+           :param key: List, slice or interger indicating a single selection
+           
+           :returns: The number of elements selected by the given key.
+        """
+        if isinstance(key,int) :
+            return 1
+        elif isinstance(key,list) :
+            return len(key)
+        elif isinstance(key,slice) :
+            start = key.start
+            if start is None :
+                start = 0
+            end = key.stop
+            if end is None :
+                end = self.shape[2]
+            step = key.step
+            if key.step is None:
+                step =1
+            return math.ceil( float(end-start)/float(step) )
+        else :
+           raise ValueError("Unexpected key value "+str(key))
+       

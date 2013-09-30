@@ -1,0 +1,606 @@
+from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+from omsi.shared.omsi_dependency import *
+from omsi.dataformat.omsi_file import omsi_file
+
+import datetime
+from time import time, ctime
+import numpy as np
+import math
+import sys
+from sys import argv,exit
+
+
+PRECISION = "double"
+SLWMIN_ARR_SIZE = 10000					# size of the dequeue for slmin
+PKSDET_ARR_SIZE = 4000					# limit of total of peaks that can be stored (C array sizes) per x/y spectra
+SET_MEM_CAP = 1200000000				# 1200000000 bytes = 1.12 gb :: max size of data per cl gate
+openCLfpFile = "opencl_findpeaks.cl"	# file name of the findpeaks opencl code
+
+# class omsi_findpeaks_local(omsi_analysis_base) :
+class omsi_lpf(omsi_analysis_base) :
+
+	def __init__(self, nameKey="undefined"):
+		super(omsi_lpf,self).__init__()
+		self.analysis_identifier = nameKey
+		
+	# ------------------------ viewer functions start ---------------------- 
+	
+	@classmethod
+	def v_qslice(cls , anaObj , z , viewerOption=0) :
+		"""Implement support for qslice URL requests for the viewer""" 
+		#Use the dependency data for slicing here. We do not have a native option to reconstruct images from local peak finding data
+		return super(omsi_lpf,cls).v_qslice( anaObj , z, viewerOption)
+	
+	@classmethod
+	def v_qspectrum( cls, anaObj , x, y , viewerOption=0) :
+		"""Implement support for qspectrum URL requests for the viewer"""
+		#Retrieve the h5py objects for the requried datasets from the local peak finding
+		if viewerOption == 0 :
+		
+			from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
+			import numpy as np
+			peak_mz = anaObj[ 'LPF_Peaks_MZ' ]
+			peak_values = anaObj[ 'LPF_Peaks_Vals' ]
+			arrayIndices =	anaObj[ 'LPF_Peaks_ArrayIndex' ][:]
+			indata_mz = anaObj[ 'LPF_indata_mz' ]
+			#Determine the shape of the original raw data
+			if (indata_mz is None) or (arrayIndices is None):
+				return None, None
+			Nx = arrayIndices[:, 0].max()
+			Ny = arrayIndices[:, 1].max()
+			NMZ = indata_mz.shape[0]
+			numSpectra = arrayIndices.shape[0]
+			#Determine the size of the selection and the set of selected items
+			xList = selection_to_indexlist(x, Nx)
+			yList = selection_to_indexlist(y, Ny)
+			if (check_selection_string( x ) == selection_type['indexlist']) and (check_selection_string( y ) == selection_type['indexlist']) :
+				if len(xList) == len(yList) :
+					items = [ (xList[i], yList[i]) for i in xrange(0,len(xList))  ]
+				else :
+					return None , None
+			else :
+				items = [0]*(len(xList)*len(yList))
+				index = 0
+				for xi in xList :
+					for yi in yList :
+						items[index] = (xi , yi )
+						index = index+1
+						
+			shapeX = len(items)
+			shapeY = 1
+			shapeZ = NMZ 
+			#Initalize the data cube to be returned
+			data = np.zeros( (shapeX, shapeY, shapeZ)  , dtype=peak_values.dtype )
+			#Fill the non-zero locations for the data cube with data
+			for ni in xrange(0, len(items) ) :
+				currentIndex = (items[ni][0]*Ny + items[ni][1])
+				currentDX = ni
+				currentDY = 0
+				startIndex = arrayIndices[ currentIndex ][2]
+				if currentIndex < numSpectra :
+					endIndex = arrayIndices[ (currentIndex+1) ][2]
+				else :
+					endIndex = peak_values.size
+				if startIndex != endIndex :
+					tempValues = peak_values[ startIndex : endIndex ]
+					tempMZ	   = peak_mz[ startIndex : endIndex ]
+					data[ currentDX , currentDY , tempMZ ] = tempValues
+				else : 
+					#The start and end index may be the same in case that no peaks for found for the given spectrum
+					#The data is already initalized to 0 so there is nothing to do here
+					pass
+			
+			if len(items) == 1 :
+				data = data.reshape( (shapeX , shapeZ) )
+			  
+			#Return the spectra and indicate that no customMZ data values (i.e. None) are needed 
+			return data, None
+			
+		elif viewerOption > 0 :
+			return super(omsi_lpf,cls).v_qspectrum( anaObj , x , y, viewerOption-1)
+		else :
+			return None, None
+		
+	@classmethod
+	def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
+		"""Implement support for qmz URL requests for the viewer"""
+		mzSpectra =	 None
+		labelSpectra = None
+		mzSlice = None
+		labelSlice = None
+		#We do not have native option for qslice, so we rely on the input data in all cases
+		if qspectrum_viewerOption == 0 and qslice_viewerOption==0: #Loadings
+			mzSpectra = anaObj[ 'LPF_indata_mz' ][:]
+			labelSpectra = "m/z"
+			mzSlice	 = None
+			labelSlice = None
+		elif qspectrum_viewerOption > 0 and qslice_viewerOption>0 :
+			mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( anaObj, qslice_viewerOption , qspectrum_viewerOption-1)
+		elif qspectrum_viewerOption == 0 and qslice_viewerOption>=0 : 
+			mzSpectra = anaObj[ 'LPF_indata_mz' ][:]
+			labelSpectra = "m/z"
+			tempA, tempB, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( anaObj, 0 , qspectrum_viewerOption)
+		
+		return mzSpectra, labelSpectra, mzSlice, labelSlice
+		
+		
+	@classmethod
+	def v_qspectrum_viewerOptions(cls , anaObj ) :
+		"""Define which viewerOptions are supported for qspectrum URL's"""
+		dependent_options = super(omsi_lpf,cls).v_qspectrum_viewerOptions(anaObj)
+		re = ["Local peaks"] + dependent_options
+		return re
+
+	@classmethod
+	def v_qslice_viewerOptions(cls , anaObj ) :
+		"""Define which viewerOptions are supported for qspectrum URL's"""
+		return super(omsi_lpf,cls).v_qslice_viewerOptions(anaObj)
+	
+	# ------------------------ viewer functions end ------------------------ 
+	# @classmethod
+	# def get_analysis_type(self) :
+	# 	return "omsi_lpf"
+	
+	# def execute_peakfinding(self, msidata , mzdata, integration_width=10, peakheight = 2, slwindow = 100, smoothwidth = 3) :
+	def execute_peakfinding(self, msidata , mzdata, integration_width=10, peakheight = 10, slwindow = 100, smoothwidth = 3 , msidata_dependency=None) :
+
+		import pyopencl as cl
+		
+		#Determine the data dimensions
+		Nx=msidata.shape[0]
+		Ny=msidata.shape[1]
+		Nz=msidata.shape[2]
+		print "Data shape: ", msidata.shape
+		print "[LPF]"
+		print "LPF Parameters:"
+		print "peakheight =", peakheight,"slwindow =", slwindow, "smoothwidth =", smoothwidth
+		sys.stdout.flush()
+
+		timebefore = time()				# timekeeping
+		
+		peak_values = []
+		peak_MZ = []
+		peak_arrayindex = np.zeros( shape=(Nx*Ny,3) , dtype='int64' )
+		pkcount = 0
+		cindex = 0
+		pcount = 0
+		
+		# float64 = double, float32 = float
+		if(PRECISION == "double"):
+			NP_TYPE = np.float64
+			mytypedef = "double"
+		else:
+			NP_TYPE = np.float32
+			mytypedef = "float"
+			
+		cl_info = cl.get_platforms()[0]
+		cl_info = cl_info.get_devices(device_type=cl.device_type.GPU)
+		cl_info = len(cl_info)
+		
+		# memory cap based on GPUs ammount
+		print "# of GPUs: ", cl_info
+		MEM_CAP = SET_MEM_CAP * cl_info * .90
+		
+		# x/y split due to gpu memory constraint
+		xsplit = 1
+		ysplit = Ny
+		for Nxi in xrange(1 , Nx+1):
+			splitarr = np.empty([Nxi,Ny,Nz], dtype=NP_TYPE)
+			if(splitarr.nbytes < MEM_CAP):
+				xsplit = Nxi
+			else:
+				break
+		
+		if(xsplit == 1):
+			ysplit = 1
+			for Nyi in xrange(1 , Ny+1):
+				splitarr = np.empty([1,Nyi,Nz], dtype=NP_TYPE)
+				if(splitarr.nbytes < MEM_CAP):
+					ysplit = Nyi
+				else:
+					break
+			for Nyi in xrange(1 , Ny+1):
+				ydiv = Ny / float(Nyi)
+				ydiv = int(math.ceil(ydiv))				
+				if(ysplit >= ydiv):
+					ysplit = ydiv
+					break
+
+		print "xsplit: ", xsplit, " ysplit: ", ysplit
+
+		xstart = ystart = 0
+		xend = xamt = xsplit
+		yend = yamt = ysplit
+		
+		xcount = Nx / float(xsplit)
+		xcount = int(math.ceil(xcount))
+		ycount = Ny / float(ysplit)
+		ycount = int(math.ceil(ycount))
+
+		for xc in xrange(xcount):
+			for yc in xrange(ycount):
+				print "#: " , pcount + 1 , "/" , xcount * ycount
+				sys.stdout.flush()
+
+				# opencl gate
+				[cl_maxtabVal, cl_maxtabPos, cl_maxtabTot] = self.cl_peakfind(msidata[xstart:xend,ystart:yend,:], smoothwidth, slwindow, peakheight)
+				
+				# building peak structures
+				for x in xrange(xamt):
+					for y in xrange(yamt):
+
+						totindex = y + ((yend - ystart) * x)
+						for t in xrange(cl_maxtabTot[totindex]):
+							peak_values.append(cl_maxtabVal[x,y,t])
+							peak_MZ.append(cl_maxtabPos[x,y,t])
+
+						peak_arrayindex[pkcount,0] = x + (xsplit * xc)
+						peak_arrayindex[pkcount,1] = y + (ysplit * yc)
+						peak_arrayindex[pkcount,2] = cindex
+						
+						pkcount += 1
+						cindex += cl_maxtabTot[totindex]
+			
+				ystart = yend
+				yend += ysplit
+				if(yend > Ny):
+					yend = Ny
+					yamt = yend - ystart
+				if(ystart >= Ny):
+					ystart = 0
+					yend = ysplit
+					yamt = ysplit
+					xstart = xend
+					xend += xsplit
+
+				if(xend > Nx):
+					xend = Nx
+					xamt = xend - xstart
+				if(xstart >= xend):
+					break
+				
+				pcount += 1
+
+		print "peak_arrayindex shape: ", np.array(peak_arrayindex).shape
+		print "peak_values: ", np.array(peak_values)
+		print "peak_values shape: ", np.array(peak_values).shape
+		print "peak_MZ: ", np.array(peak_MZ)
+		print "peak_MZ shape: ", np.array(peak_MZ).shape
+		
+		timetotal = time() - timebefore			# timekeeping
+		print "time (s): ", timetotal			# timekeeping
+		
+		
+		
+		print "Collecting data into HDF5..."
+		
+		#Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
+		#We here convert the single scalars to 1D numpy arrays to ensure consistency. The data write function can
+		#handle also a large range of python built_in types by converting them to numpy for storage in HDF5 but
+		#to ensure a consitent behavior we convert the values directly here
+		
+		#Clear any previously stored analysis data
+		self.clear_analysis_data()
+		self.clear_parameter_data()
+		self.clear_dependency_data()
+		
+		# Parameters
+		iw = np.asarray( [ integration_width ] )
+		self.add_parameter_data( name='LPF_integration_width' , data=iw , dtype=str(iw.dtype) )
+		ph = np.asarray( [ peakheight ] )
+		self.add_parameter_data( name='LPF_peakheight' , data=ph , dtype=str(ph.dtype) )
+		slw = np.asarray( [ slwindow ] )
+		self.add_parameter_data( name='LPF_slwindow' , data=slw , dtype=str(slw.dtype) )
+		smw = np.asarray( [ smoothwidth ] )
+		self.add_parameter_data( name='LPF_smoothwidth ' , data=smw , dtype=str(smw.dtype) )
+		
+		# LPF Results
+		pmz = np.asarray( peak_MZ )
+		self.add_analysis_data( name='LPF_Peaks_MZ' , data=pmz , dtype=str(pmz.dtype) )
+		pv = np.asarray( peak_values )
+		self.add_analysis_data( name='LPF_Peaks_Vals' , data=pv , dtype=str(pv.dtype) )
+		pai = np.asarray( peak_arrayindex )
+		self.add_analysis_data( name='LPF_Peaks_ArrayIndex' , data=peak_arrayindex , dtype=str(peak_arrayindex.dtype) )
+		mzs = mzdata[:]
+		self.add_analysis_data( name='LPF_indata_mz' , data=mzs, dtype=str(mzs.dtype) )
+		
+		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
+		if msidata_dependency is not None :
+			if isinstance( msidata_dependency , omsi_dependency ) :
+				#Add the depency as given by the user
+				self.add_dependency_data( msidata_dependency )
+			else :
+				#The user only gave us the object that we depend on so we need to construct the 
+				self.add_dependency_data( omsi_dependency( param_name = 'msidata', link_name='msidata', omsi_object=msidata_dependency, selection=None ) )
+
+
+		print "Collecting done."
+		print "--- finished ---"
+
+
+	def cl_peakfind(self, msidt, smoothsize, slwindow, peakheight):
+	
+		import pyopencl as cl
+		
+		# float64 = double, float32 = float
+		if(PRECISION == "double"):
+			NP_TYPE = np.float64
+			mytypedef = "double"
+		else:
+			NP_TYPE = np.float32
+			mytypedef = "float"
+	
+		dev_amt = len(cl.get_platforms()[0].get_devices(device_type=cl.device_type.GPU))
+		
+		msidt2d = np.reshape(msidt,(msidt.shape[0] * msidt.shape[1] , msidt.shape[2]))
+		total_split = int(math.ceil(msidt2d.shape[0] / float(dev_amt)))
+		current_split = 0
+	
+		in_data = []
+		xsize = []
+		ysize = []
+
+		for d in xrange(dev_amt):
+			in_data.append(np.array(msidt2d[current_split:total_split,:], dtype=NP_TYPE))
+			xsize.append(np.int32(in_data[d].shape[0]))
+			ysize.append(np.int32(in_data[d].shape[1]))
+			print "sizes", d+1, ":", xsize[d], ysize[d], "  ", 
+			current_split = total_split
+			total_split += total_split
+			if(total_split > msidt2d.shape[0]):
+				total_split = msidt2d.shape[0]
+	
+		# ------------- opencl init [s] -------------
+		dstr = "// opencl code \n"
+		if (mytypedef == "double"):
+			dstr += "#pragma OPENCL EXTENSION cl_khr_fp64: enable \n"
+		dstr += "typedef " + mytypedef + " clfloat; \n"
+	
+		mf = cl.mem_flags
+		f = open(openCLfpFile, 'r')
+		fstr = "".join(f.readlines())
+		fstr = dstr + fstr
+		f.close()
+	
+		cl_pl = cl.get_platforms()[0]
+		cl_dev = cl_pl.get_devices(device_type=cl.device_type.GPU)
+	
+		ctx = []
+		queue = []
+		prg = []
+		for d in xrange(dev_amt):
+			ctx.append(cl.Context(devices=[cl_dev[d]]))
+			queue.append(cl.CommandQueue(ctx[d]))
+			prg.append(cl.Program(ctx[d], fstr).build())
+	
+		# ------------- opencl init [e] -------------
+	
+		# ------ smoothgaussian [s] ------
+		x = np.array(range(-3 * smoothsize, 3 * smoothsize))
+		g = np.exp(-(x**2) / (2.0 * float(smoothsize)**2))
+		g = g / g.sum()
+		g = np.array(g, dtype = NP_TYPE)
+	
+		smoothsize = np.int32(smoothsize)
+	
+		input_buf = []
+		g_buf = []
+		output_buf = []
+		global_size = []
+		local_size = None
+		for d in xrange(dev_amt):
+			input_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=in_data[d]))
+			g_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=g))
+			output_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, in_data[d].nbytes))
+			global_size.append((in_data[d].shape[0],))
+			kernelargs = ( 	input_buf[d], 
+							g_buf[d],
+							smoothsize,
+							xsize[d], ysize[d],
+							output_buf[d])
+			prg[d].clSmoothed(queue[d], global_size[d], local_size, *(kernelargs))
+		
+		for d in xrange(dev_amt):
+			queue[d].finish()
+
+			cl.enqueue_copy(queue[d], in_data[d], output_buf[d])
+
+			input_buf[d].release()
+			g_buf[d].release()
+			output_buf[d].release()
+	
+		# ------ smoothgaussian [e] ------
+		print "\nsmooth - done // ",
+		sys.stdout.flush()
+		# ------ sliding window [s] ------
+		slwindow = np.int32(slwindow)
+		window_arr_size = np.int32(SLWMIN_ARR_SIZE)
+
+		input_buf = []
+		value_buf = []
+		index_buf = []
+		output_buf = []
+		
+		for d in xrange(dev_amt):
+			dummyVal = np.empty_like(in_data[d][:,0:SLWMIN_ARR_SIZE], dtype=NP_TYPE)
+			dummyPos = np.empty_like(dummyVal, dtype=np.int32)
+		
+			input_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=in_data[d]))
+			value_buf.append(cl.Buffer(ctx[d], mf.READ_WRITE, dummyVal.nbytes))
+			index_buf.append(cl.Buffer(ctx[d], mf.READ_WRITE, dummyPos.nbytes))
+			output_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, in_data[d].nbytes))
+
+			kernelargs = ( 	input_buf[d],
+							value_buf[d], index_buf[d],
+							window_arr_size,
+							slwindow,
+							xsize[d], ysize[d],
+							output_buf[d])
+		
+			prg[d].clSliding_window_minimum(queue[d], global_size[d], local_size, *(kernelargs))
+		
+		for d in xrange(dev_amt):
+			queue[d].finish()
+		
+			cl_slmin = np.empty_like(in_data[d])
+			cl.enqueue_copy(queue[d], cl_slmin, output_buf[d])
+		
+			in_data[d] = in_data[d] - cl_slmin
+		
+			input_buf[d].release()
+			value_buf[d].release()
+			index_buf[d].release()
+			output_buf[d].release()
+
+		# ------ sliding window [e] ------
+		print "sliding - done // ",
+		sys.stdout.flush()
+		# --------- peakdet [s] ----------
+	
+		my_size_limit = PKSDET_ARR_SIZE				# limit of total of peaks that can be stored (C array sizes)
+		cl_maxtabTotal = np.int32(my_size_limit)
+		cl_mintabTotal = np.int32(my_size_limit)
+		peakheight = np.int32(peakheight)
+
+		input_buf = []
+		maxtabVal_buf = []
+		maxtabPos_buf = []
+		maxtabTot_buf = []
+		mintabVal_buf = []
+		mintabPos_buf = []
+		mintabTot_buf = []
+		cl_maxtabVal =  []
+		cl_maxtabPos =  []
+		cl_maxtabTot =  []
+		cl_mintabVal =  []
+		cl_mintabPos =  []
+		cl_mintabTot =  []
+		
+		for d in xrange(dev_amt):
+			dummyVal = np.empty_like(in_data[d][:,0:my_size_limit], dtype=NP_TYPE)
+			dummyPos = np.empty_like(dummyVal, dtype=np.int32)
+			dummyTot = np.array(dummyVal[:,0], dtype=np.int32)
+		
+			input_buf.append(cl.Buffer(ctx[d], mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=in_data[d]))
+			maxtabVal_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyVal.nbytes))
+			maxtabPos_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyPos.nbytes))
+			maxtabTot_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyTot.nbytes))
+			mintabVal_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyVal.nbytes))
+			mintabPos_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyPos.nbytes))
+			mintabTot_buf.append(cl.Buffer(ctx[d], mf.WRITE_ONLY, dummyTot.nbytes))
+
+			kernelargs = ( 	input_buf[d],
+							maxtabVal_buf[d], maxtabPos_buf[d], maxtabTot_buf[d],
+							mintabVal_buf[d], mintabPos_buf[d], mintabTot_buf[d],
+							peakheight,
+							xsize[d], ysize[d],
+							cl_maxtabTotal, cl_mintabTotal	)
+		
+			prg[d].clPeakdet(queue[d], global_size[d], local_size, *(kernelargs))
+		
+			cl_maxtabVal.append(np.empty_like(dummyVal))
+			cl_maxtabPos.append(np.empty_like(dummyPos))
+			cl_maxtabTot.append(np.empty_like(dummyTot))
+			cl_mintabVal.append(np.empty_like(dummyVal))
+			cl_mintabPos.append(np.empty_like(dummyPos))
+			cl_mintabTot.append(np.empty_like(dummyTot))
+		
+		for d in xrange(dev_amt):
+			queue[d].finish()
+
+			cl.enqueue_copy(queue[d], cl_maxtabVal[d], maxtabVal_buf[d])
+			cl.enqueue_copy(queue[d], cl_maxtabPos[d], maxtabPos_buf[d])
+			cl.enqueue_copy(queue[d], cl_maxtabTot[d], maxtabTot_buf[d])
+			cl.enqueue_copy(queue[d], cl_mintabVal[d], mintabVal_buf[d])
+			cl.enqueue_copy(queue[d], cl_mintabPos[d], mintabPos_buf[d])
+			cl.enqueue_copy(queue[d], cl_mintabTot[d], mintabTot_buf[d])
+		
+			input_buf[d].release()
+			maxtabVal_buf[d].release()
+			maxtabPos_buf[d].release()
+			maxtabTot_buf[d].release()
+			mintabVal_buf[d].release()
+			mintabPos_buf[d].release()
+			mintabTot_buf[d].release()
+	
+		# --------- peakdet [e] ----------
+		print "peakdet - done"
+		sys.stdout.flush()
+
+		cl_maxtabVal = np.concatenate(cl_maxtabVal[:])
+		cl_maxtabPos = np.concatenate(cl_maxtabPos[:])
+		cl_maxtabTot = np.concatenate(cl_maxtabTot[:])
+
+		cl_maxtabVal = np.reshape(cl_maxtabVal,(msidt.shape[0], msidt.shape[1], cl_maxtabVal[1]))
+		cl_maxtabPos = np.reshape(cl_maxtabPos,(msidt.shape[0], msidt.shape[1], cl_maxtabPos[1]))
+		# cl_maxtabPos = np.reshape(cl_maxtabPos,(msidt.shape[0], msidt.shape[1]))
+	
+		return cl_maxtabVal, cl_maxtabPos, cl_maxtabTot
+
+def main(argv=None):
+	'''Then main function'''
+
+	if argv is None:
+		argv = sys.argv
+
+	#Check for correct usage
+	if len(argv) <2 :
+		print "USAGE: Call \"omsi_lpf OMSI_FILE [expIndex dataIndex peakHeight]	\" "
+		print "Local peakfinding using opencl"
+		exit(0)
+
+	#Read the input arguments 
+	omsiInFile	= argv[1]
+
+	sys.stdout.flush()
+	expIndex = 0
+	dataIndex = 0
+	mypeakheight = 10
+	
+	if len(argv)==4 :
+		expIndex = int(argv[2] )
+		dataIndex = int(argv[3] )
+	
+	if len(argv) == 5 :
+		expIndex = int(argv[2])
+		dataIndex = int(argv[3])
+		mypeakheight = int(argv[4])
+		
+	#Open the input HDF5 file
+	try:
+		omsiFile = omsi_file( omsiInFile, 'a' )
+	except:
+		print "Unexpected openeing the input file:", sys.exc_info()[0]
+		exit(0)
+	
+	print "Input file: " , omsiInFile
+	
+	#Get the experiment and dataset
+	exp = omsiFile.get_exp( expIndex )
+	data = exp.get_msidata( dataIndex )
+	mzdata = data.mz[:]
+	
+	#Execute the peak finding
+	myLPF = omsi_lpf(nameKey = "omsi_lpf_"+str(ctime()))
+	print "--- Executing LPF ---"
+	myLPF.execute_peakfinding( data , mzdata, peakheight = mypeakheight)
+	print "\n\nGetting peak finding analysis results"
+	pmz = myLPF['LPF_Peaks_MZ']
+	print "pmz:\n", pmz
+	pv = myLPF['LPF_Peaks_Vals']
+	print "pv:\n", pv
+	pai = myLPF['LPF_Peaks_ArrayIndex']
+	print "pai:\n", pai
+
+	print "\nsaving HDF5 analysis..."
+	analysis, analysisindex = exp.create_analysis(myLPF)
+	print "done!"
+
+	print "lpf analysis index:", analysisindex
+	print "omsi_lpf complete for input file: " , omsiInFile , "\n"
+	
+
+if __name__ == "__main__":
+	main()
+
