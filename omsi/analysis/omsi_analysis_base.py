@@ -181,7 +181,6 @@ class omsi_analysis_base(object) :
         """ Get the mz axes for the analysis
         
             :param anaObj: The omsi_file_analysis object for which slicing should be performed
-            :param viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them.
             :param qslice_viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them for the qslice URL pattern.
             :param qspectrum_viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them for the qspectrum URL pattern.
         
