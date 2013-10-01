@@ -168,7 +168,6 @@ def convert_files() :
     global datasetList
     global omsiFile
 
-
     ####################################################################
     #  Convert the MSI files and compute the requested analyses       ##
     ####################################################################
@@ -314,7 +313,7 @@ def convert_files() :
                 thumbnail = Image.merge( 'RGB' , (im1,im2,im3) )
                 expName = str( exp.get_h5py_experimentgroup().name )
                 expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsiFile.name+"_"+expIndex+".png"
+                thumbnailFilename = omsiFile.hdf_filename+"_"+expIndex+".png"
                 thumbnail.save( thumbnailFilename , 'PNG' )
             elif executeFPG :
                 print "    Generating thumbnail from FPG data"
@@ -338,7 +337,7 @@ def convert_files() :
                 thumbnail = Image.merge( 'RGB' , (im1,im2,im3) )
                 expName = str( exp.get_h5py_experimentgroup().name )
                 expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsiFile.name+"_"+expIndex+".png"
+                thumbnailFilename = omsiFile.hdf_filename+"_"+expIndex+".png"
                 thumbnail.save( thumbnailFilename , 'PNG' )
             else :
                 print "Generation of thumbnail from raw data is not yet supported. No thumbnail has been generated."
@@ -393,7 +392,7 @@ def convert_files() :
                 #thumbnail = Image.merge( 'RGB' , (im1,im2,im3) )
                 #expName = str( exp.get_h5py_experimentgroup().name )
                 #expIndex = expName[7:len(expName)]
-                #thumbnailFilename = omsiFile.name+"_"+expIndex+".png"
+                #thumbnailFilename = omsiFile.hdf_filename+"_"+expIndex+".png"
                 #thumbnail.save( thumbnailFilename , 'PNG' )
 
     
