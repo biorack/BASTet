@@ -71,7 +71,7 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         elif qspectrum_viewerOption == 0 and qslice_viewerOption>0 :
             mzSpectra =  anaObj[ 'peak_mz' ][:]
             labelSpectra = "m/z"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_findpeaks_global,cls).v_qmz( anaObj, 0 , qspectrum_viewerOption-1)
+            tempA, tempB, mzSlice, labelSlice = super(omsi_findpeaks_global,cls).v_qmz( anaObj, qslice_viewerOption-1 , 0)
         elif qspectrum_viewerOption > 0 and qslice_viewerOption==0 :
             mzSlice =  anaObj[ 'peak_mz' ][:]
             labelSlice = "m/z"
