@@ -30,7 +30,7 @@ class omsi_viewer_helper(object) :
            :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be performed typically like [:,:,zmin:zmax].
         """
         try :
-            analysisType = anaObj.get_analysis_type()[0].lstrip('omsi.analysis')
+            analysisType = anaObj.get_analysis_type()[0]
             data = cls.__string_to_class__( analysisType ).v_qslice(anaObj, z, viewerOption)
             if data is None :
                 return None
@@ -89,7 +89,7 @@ class omsi_viewer_helper(object) :
         
         """
         try :
-            analysisType = str(anaObj.get_analysis_type()[0]).lstrip('omsi.analysis')
+            analysisType = str(anaObj.get_analysis_type()[0])
             data , customMZ = cls.__string_to_class__( analysisType ).v_qspectrum(anaObj, x, y, viewerOption)
             if data is None :
                 return None, None
@@ -141,7 +141,7 @@ class omsi_viewer_helper(object) :
         mzSlice = None
         labelSlice = None
         try :
-            analysisType = str(anaObj.get_analysis_type()[0]).lstrip('omsi.analysis')
+            analysisType = str(anaObj.get_analysis_type()[0])
             mzSpectra, labelSpectra, mzSlice, labelSlice = cls.__string_to_class__( analysisType ).v_qmz(anaObj, qslice_viewerOption, qspectrum_viewerOption)
         except :
             pass
@@ -182,7 +182,7 @@ class omsi_viewer_helper(object) :
         """
         viewerOptions = []
         try :
-            analysisType = str(anaObj.get_analysis_type()[0]).lstrip('omsi.analysis')
+            analysisType = str(anaObj.get_analysis_type()[0])
             viewerOptions = cls.__string_to_class__( analysisType ).v_qspectrum_viewerOptions(anaObj)
         except :
             message = "An error occured while trying to check which qspectrum viewerOptions are available for the analysis: "+str(sys.exc_info())
@@ -199,7 +199,7 @@ class omsi_viewer_helper(object) :
         """
         viewerOptions = []
         try :
-            analysisType = str(anaObj.get_analysis_type()[0]).lstrip('omsi.analysis')
+            analysisType = str(anaObj.get_analysis_type()[0])
             viewerOptions = cls.__string_to_class__( analysisType ).v_qslice_viewerOptions(anaObj)
         except :
             message = "An error occured while trying to check which qslice viewerOptions are available for the analysis: "+str(sys.exc_info())
@@ -211,6 +211,10 @@ class omsi_viewer_helper(object) :
     def __string_to_class__(cls , className ) :
         """Convert the given string indicating the class to a python class"""
         try:
+            #Remove the omsi.analysis module name from the beginning if present
+            if className.startswith('omsi.analysis.') :
+                className = className[14:] 
+            #Get the class that corresponds to the given name   
             classObj = getattr(sys.modules[__name__], className)
             if isinstance(classObj , (types.ClassType, types.TypeType)):
                 return classObj
