@@ -9,6 +9,8 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
+.. _omsi_analysis_base
+
 :mod:`omsi_analysis_base` Module
 --------------------------------
 
