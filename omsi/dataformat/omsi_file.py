@@ -1322,10 +1322,10 @@ class omsi_file_analysis :
 
 
     def __init__(self, analysisGroup) :
-        """Initalize the analysis object given the h5py object of the sample group
+        """Initalize the analysis object given the h5py object of the analysis group.
 
-        
            :param analysisGroup: The h5py object with the analysis group of the omsi hdf5 file.
+
         """
         self.analysis = analysisGroup
         self.parameter = self.analysis[ unicode(omsi_format_analysis.analysis_parameter_group ) ]
