@@ -1,0 +1,11 @@
+source /project/projectdirs/openmsi/omsi_django/bin/activate.csh
+cd /project/projectdirs/openmsi/devel/openmsi-tk/doc
+make clean
+make html
+make singlehtml
+make epub
+make man
+make latex
+cd _build
+deactivate
+ls -la
