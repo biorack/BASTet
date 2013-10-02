@@ -2,7 +2,10 @@
 
 import h5py
 from omsi.dataformat.omsi_file import *
-from PIL import Image
+try :
+    from PIL import Image
+except :
+    import Image
 import numpy as np
 
 def main(argv=None):

@@ -1,6 +1,9 @@
 from omsi.dataformat.omsi_file import omsi_file
 import numpy as np
-from PIL import Image
+try: 
+    from PIL import Image
+except :
+    import Image
 import datetime
 import os, sys
 import subprocess
