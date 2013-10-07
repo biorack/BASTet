@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OMSI Software and File Format Documentation'
-copyright = u'2012, Oliver Rübel'
+copyright = u'2012, Oliver Rübel and Ben Bowen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -192,7 +192,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'omsi_doc.tex', u'OpenMSI: Software and File Format Documentation',
-   u'Oliver Rübel', 'manual'),
+   u'Oliver Rübel and Ben Bowen', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -222,7 +222,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'omsi_doc', u'omsi_doc Documentation',
-     [u'Oliver Rübel'], 1)
+     [u'Oliver Rübel and Ben Bowen'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -236,7 +236,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'omsi_doc', u'OMSI Software Documentation',
-   u'Oliver Rübel', 'omsi_doc', 'One line description of project.',
+   u'Oliver Rübel and Ben Bowen', 'omsi_doc', 'One line description of project.',
    'Miscellaneous'),
 ]
 
