@@ -213,8 +213,8 @@ class omsi_viewer_helper(object) :
         try:
             #Remove the omsi.analysis module name from the beginning if present
             if className.startswith('omsi.analysis.') :
-                className = className[14:] 
-            #Get the class that corresponds to the given name   
+                className = className.split(".")[-1]
+            #Get the class that corresponds to the given name
             classObj = getattr(sys.modules[__name__], className)
             if isinstance(classObj , (types.ClassType, types.TypeType)):
                 return classObj
