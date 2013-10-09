@@ -33,7 +33,7 @@ class omsi_dependency(dict) :
                    
                      dict.__setitem__(self, key , value )
                 else :
-		  raise ValueError( str(value) + " invalid onsi_object value for omsi_analysis_dependcy.")
+                    raise ValueError( str(value) + " invalid omsi_object value for omsi_analysis_dependcy.")
             elif key == 'selection' :
                 from omsi.shared.omsi_data_selection import check_selection_string
                 if check_selection_string( str(value) ) :
