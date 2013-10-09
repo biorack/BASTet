@@ -1571,12 +1571,13 @@ class omsi_file_analysis :
                     re = re + it_depend
                 try :
                     omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
-                    if omsi_dependency_format : 
+                    if omsi_dependency_format :
                         re.append( omsi_object.get_omsi_dependency() )
                     else :
                         re.append( omsi_object )
                 except :
-                    pass
+                    import sys
+                    print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
         return re
 
 ################################################################################
@@ -1680,7 +1681,7 @@ class omsi_file_dependencydata :
     def __getitem__(self, key) :
         """Retrieve the h5py dataset for any of the dependency datasetes or the omsi file API object.
            If the key is a numpy selection (slicing) then the data is retrieved from the link the 
-           dependency is pointing to so that we can interact with the dependency as if it were the 
+           dependency is pointing so that we can interact with the dependency as if it were the 
            linked object.
         """
         if isinstance(key , string) :
@@ -1734,9 +1735,9 @@ class omsi_file_dependencydata :
         return self.dependency.name.split("/")[-1]
 
     def get_omsi_dependency(self) :
-        """Get the dependency information as an omsi__dependency object (as defined in the omsi.shared.omsi_dependency module)
+        """Get the dependency information as an omsi.shared.omsi_dependency object (as defined in the omsi.shared.omsi_dependency module)
         
-           :returns: omsi_dependency object with all the dependency data.
+           :returns: omsi_dependency object with all the dependency data. 
         """
         from omsi.shared.omsi_dependency import omsi_dependency
         re = omsi_dependency()
