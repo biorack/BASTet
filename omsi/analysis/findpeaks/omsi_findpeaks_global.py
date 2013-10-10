@@ -71,11 +71,16 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         elif qspectrum_viewerOption == 0 and qslice_viewerOption>0 :
             mzSpectra =  anaObj[ 'peak_mz' ][:]
             labelSpectra = "m/z"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_findpeaks_global,cls).v_qmz( anaObj, qslice_viewerOption-1 , 0)
+            tempA, tempB, mzSlice, labelSlice = super(omsi_findpeaks_global,cls).v_qmz( anaObj, qslice_viewerOption=qslice_viewerOption-1 , qspectrum_viewerOption=0)
+            #NOTE: if qspectrum and qslice share the same axis, this call will not return the copied data, i.e., we need to copy the
+            #qspectrum values to the qslice values.
+            if mzSlice is None :
+                mzSlice = tempA
+                labelSlice = tempB
         elif qspectrum_viewerOption > 0 and qslice_viewerOption==0 :
             mzSlice =  anaObj[ 'peak_mz' ][:]
             labelSlice = "m/z"
-            mzSpectra, labelSpectra, tempA, tempB = super(omsi_findpeaks_global,cls).v_qmz( anaObj, 0 , qspectrum_viewerOption-1)
+            mzSpectra, labelSpectra, tempA, tempB = super(omsi_findpeaks_global,cls).v_qmz( anaObj, qslice_viewerOption=0 , qspectrum_viewerOption=qspectrum_viewerOption-1)
         
         return mzSpectra, labelSpectra, mzSlice, labelSlice
         

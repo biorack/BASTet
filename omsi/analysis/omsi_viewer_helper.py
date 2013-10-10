@@ -142,7 +142,7 @@ class omsi_viewer_helper(object) :
         labelSlice = None
         try :
             analysisType = str(anaObj.get_analysis_type()[0])
-            mzSpectra, labelSpectra, mzSlice, labelSlice = cls.__string_to_class__( analysisType ).v_qmz(anaObj, qslice_viewerOption, qspectrum_viewerOption)
+            mzSpectra, labelSpectra, mzSlice, labelSlice = cls.__string_to_class__( analysisType ).v_qmz(anaObj, qslice_viewerOption=qslice_viewerOption, qspectrum_viewerOption=qspectrum_viewerOption)
         except :
             pass
         return mzSpectra, labelSpectra, mzSlice, labelSlice
@@ -201,6 +201,7 @@ class omsi_viewer_helper(object) :
         try :
             analysisType = str(anaObj.get_analysis_type()[0])
             viewerOptions = cls.__string_to_class__( analysisType ).v_qslice_viewerOptions(anaObj)
+            #print str(analysisType) + " : " +str(viewerOptions)
         except :
             message = "An error occured while trying to check which qslice viewerOptions are available for the analysis: "+str(sys.exc_info())
             print message
