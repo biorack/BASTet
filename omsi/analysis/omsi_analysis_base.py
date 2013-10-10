@@ -280,7 +280,7 @@ class omsi_analysis_base(object) :
                 re_slice.append( "Raw Data: "+di['link_name'] )
                 re_spectrumdata.append( di['omsi_object'])
                 re_slicedata.append( di['omsi_object'] )
-            if isinstance( di['omsi_object'] , omsi_file_analysis ) :
+            elif isinstance( di['omsi_object'] , omsi_file_analysis ) :
                 analysisType = str(anaObj.get_analysis_type()[0])
                 if omsi_viewer_helper.supports_slice( di['omsi_object']) :
                     re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
@@ -288,6 +288,8 @@ class omsi_analysis_base(object) :
                 if omsi_viewer_helper.supports_spectra( di['omsi_object'] ) :
                     re_spectrum.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
                     re_spectrumdata.append( di['omsi_object'] )
+            else :
+                print "Unknown dependency"
         return re_slice, re_spectrum, re_slicedata, re_spectrumdata
         
         
