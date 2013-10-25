@@ -1737,7 +1737,7 @@ class omsi_file_dependencydata :
     def get_omsi_dependency(self) :
         """Get the dependency information as an omsi.shared.omsi_dependency object (as defined in the omsi.shared.omsi_dependency module)
         
-           :returns: omsi_dependency object with all the dependency data. 
+           :returns: omsi_dependency object with all the dependency data.
         """
         from omsi.shared.omsi_dependency import omsi_dependency
         re = omsi_dependency()

@@ -106,7 +106,7 @@ class omsi_analysis_base(object) :
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
-        re_slice, re_spectrum, re_slicedata, re_spectrumdata = cls.__construct_dependent_viewer_options__(anaObj)
+        re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         #Check whether the given selection is valid
         zType = check_selection_string(z)
         if zType == selection_type['invalid'] :
@@ -122,7 +122,7 @@ class omsi_analysis_base(object) :
         elif isinstance( re_slicedata[viewerOption] , omsi_file_analysis ) : 
         
             analysisType = str(re_slicedata[viewerOption].get_analysis_type()[0])
-            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qslice(anaObj=re_slicedata[viewerOption], z=z, viewerOption=0)
+            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qslice(anaObj=re_slicedata[viewerOption], z=z, viewerOption=re_slice_optionIndex[viewerOption])
             
         else:
             return None
@@ -150,26 +150,51 @@ class omsi_analysis_base(object) :
                 1) 1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be the last axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList selections x=[0]&y=[1] usually a 2D array is expected. For ragne selections x=0:1&y=1:2 we one usually expects a 3D arrya.
                 2) None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. Otherwise, return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z values are needed for interpretation of the returned spectrum).This may be needed, e.g., in cases where a per-spectrum peak analysis is performed and the peaks for each spectrum appear at different m/z values. 
         """
+        import numpy as np
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
-        from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
-        re_slice, re_spectrum, re_slicedata, re_spectrumdata = cls.__construct_dependent_viewer_options__(anaObj)
+        from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist,  selection_string_to_object
+        re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         #Check whether the given selection is valid
         xType = check_selection_string(x)
         yType = check_selection_string(y)
+        xSel = selection_string_to_object( y )
+        ySel = selection_string_to_object( x )
+        
         if (xType == selection_type['invalid']) or (yType == selection_type['invalid']) :
             return None , None
         if isinstance( re_spectrumdata[viewerOption] , omsi_file_msidata ) :
-            
-            try :
-                data = eval("re_spectrumdata[viewerOption][%s,%s, :]" %(x,y))
-                return data , None
-            except :
+            if xType == selection_type['invalid'] or yType == selection_type['invalid'] :
                 return None , None
+            if xType == selection_type['indexlist'] and yType == selection_type['indexlist'] :
+                #We now need to match up the index lists and load all the individial values
+                #ToDo: This is can be very inefficient for large lists
+                xSize = len(xSel)
+                ySize = len(ySel)
+                if xSize != ySize :
+                    raise KeyError( "Selection lists don't match" )
+                dataSet = re_spectrumdata[viewerOption]
+                zSize = dataSet.shape[2]
+                #Allocate the required memory
+                data = np.zeros( (xSize, zSize) , dtype=dataSet.dtype )
+                for i in xrange(0,xSize) :
+                    data[i,:] = dataSet[ xSel[i] , ySel[i] , : ]
+            else :
+                data = re_spectrumdata[viewerOption][ xSel , ySel, : ]
+            
+            return data ,None
+            
+            #try :
+            #    data = eval("re_spectrumdata[viewerOption][%s,%s, :]" %(x,y))
+            #    return data , None
+            #except :
+            #    import sys
+            #    print str(sys.exc_info())
+            #    return None , None
         
         elif isinstance( re_spectrumdata[viewerOption] , omsi_file_analysis ) : 
         
             analysisType = str(re_spectrumdata[viewerOption].get_analysis_type()[0])
-            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qspectrum(anaObj=re_spectrumdata[viewerOption], x=x, y=y, viewerOption=0)
+            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qspectrum(anaObj=re_spectrumdata[viewerOption], x=x, y=y, viewerOption=re_spectrum_optionIndex[viewerOption])
         
         else:
             return None , None
@@ -192,7 +217,7 @@ class omsi_analysis_base(object) :
                 - labelSlice : Lable for the slice mz axis or None if identical to labelSpectra.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
-        re_slice, re_spectrum, re_slicedata, re_spectrumdata = cls.__construct_dependent_viewer_options__(anaObj)
+        re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         mzSpectra=None
         labelSpectra=None
         mzSlice=None 
@@ -235,7 +260,7 @@ class omsi_analysis_base(object) :
         
             :returns: List of strings indicating the different available viewer options. The list should be empty if the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).
         """
-        re_slice, re_spectrum, re_slicedata, re_spectrumdata = cls.__construct_dependent_viewer_options__(anaObj)
+        re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         return re_spectrum
         #raise NotImplementedError( "Implement me: The v_qspectrum_viewerOptions function should return i) an empty list of v_qspectrum is not available, ii) a list of strings indicating the different types of data for which spectra can be retrieved for this analysis" )  
         
@@ -251,7 +276,7 @@ class omsi_analysis_base(object) :
         
             :returns: List of strings indicating the different available viewer options. The list should be empty if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
         """
-        re_slice, re_spectrum, re_slicedata, re_spectrumdata = cls.__construct_dependent_viewer_options__(anaObj)
+        re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         return re_slice
         
         #raise NotImplementedError( "Implement me: The v_qslice_viewerOptions function should return i) an empty list of v_qslice is not available, ii) a list of strings indicating the different types of data for which image slices can be retrieved for this analysis" )  
@@ -266,31 +291,49 @@ class omsi_analysis_base(object) :
             * ``re_spectrum`` : List of names for the spectrum options
             * ``re_slicedata`` : omsi_file_* API object associated with the slice options. These are either omis_file_analysis or omsi_file_msidata objects.
             * ``re_spectrumdata`` : omsi_file_* API object associated with the slice options. Theser are either omis_file_analysis or omsi_file_msidata objects.
+            * ``re_slice_optionIndex``: List of integrers indicating for the given entry the viewerOption to be used with the re_slicedata object for the given option.
+            * ``re_spectrum_optionIndex``: List of integrers indicating for the given entry the viewerOption to be used with the re_spectrumdata object for the given option. 
         """
+        
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         re_slice = []
         re_slicedata = [] 
-        re_spectrum = [] 
+        re_slice_optionIndex = []
+        re_spectrum = []
         re_spectrumdata = []
+        re_spectrum_optionIndex = []
+        
         dependencies = anaObj.get_all_dependency_data_recursive()
         for di in dependencies :
             #Check if we can slice the data
             if isinstance( di['omsi_object'] , omsi_file_msidata ) :
                 re_spectrum.append( "Raw Data: "+di['link_name'] )
                 re_slice.append( "Raw Data: "+di['link_name'] )
+                re_slice_optionIndex.append(0)
                 re_spectrumdata.append( di['omsi_object'])
                 re_slicedata.append( di['omsi_object'] )
+                re_spectrum_optionIndex.append(0)
             elif isinstance( di['omsi_object'] , omsi_file_analysis ) :
-                analysisType = str(anaObj.get_analysis_type()[0])
-                if omsi_viewer_helper.supports_slice( di['omsi_object']) :
-                    re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
+                slice_options    = omsi_viewer_helper.get_qslice_viewerOptions( di['omsi_object'] )
+                spectrum_options = omsi_viewer_helper.get_qspectrum_viewerOptions( di['omsi_object'] )
+                for si in range(0,len(slice_options) ) :
+                    re_slice.append( slice_options[si] )
                     re_slicedata.append( di['omsi_object'] )
-                if omsi_viewer_helper.supports_spectra( di['omsi_object'] ) :
-                    re_spectrum.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
+                    re_slice_optionIndex.append( si )
+                for si in range(0,len(spectrum_options) ) :
+                    re_spectrum.append( spectrum_options[si] )
                     re_spectrumdata.append( di['omsi_object'] )
+                    re_spectrum_optionIndex.append( si )    
+                #analysisType = str(anaObj.get_analysis_type()[0])
+                #if omsi_viewer_helper.supports_slice( di['omsi_object']) :
+                #    re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
+                #    re_slicedata.append( di['omsi_object'] )
+                #if omsi_viewer_helper.supports_spectra( di['omsi_object'] ) :
+                #    re_spectrum.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
+                #    re_spectrumdata.append( di['omsi_object'] )
             else :
                 print "Unknown dependency"
-        return re_slice, re_spectrum, re_slicedata, re_spectrumdata
+        return re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex
         
         
     def get_analysis_type(self) :
