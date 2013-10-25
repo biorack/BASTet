@@ -234,15 +234,17 @@ class omsi_analysis_base(object) :
                 labelSpectra = None
         #Determine the slice mz axis
         if len(re_slice) > 0 :
-            if re_spectrumdata[qspectrum_viewerOption] != re_slicedata[qslice_viewerOption] :
-                if isinstance( re_slicedata[qslice_viewerOption] , omsi_file_msidata ) :
-                    mzSlice = re_slicedata[qslice_viewerOption].mz[:]
-                    labelSlice= "m/z"
-                elif isinstance( re_slicedata[qslice_viewerOption]  , omsi_file_analysis ) :
-                    tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption] )
-                else :
-                    mzSlice=None 
-                    labelSlice = None
+            #if re_spectrumdata[qspectrum_viewerOption] != re_slicedata[qslice_viewerOption] :
+            if isinstance( re_slicedata[qslice_viewerOption] , omsi_file_msidata ) :
+                mzSlice = re_slicedata[qslice_viewerOption].mz[:]
+                labelSlice= "m/z"
+            elif isinstance( re_slicedata[qslice_viewerOption]  , omsi_file_analysis ) :
+                print "HERE"
+                tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption] )
+                print labelSlice
+            else :
+                mzSlice=None
+                labelSlice = None
                 
         return mzSpectra, labelSpectra, mzSlice, labelSlice
         #raise NotImplementedError( "Implement me: The v_qmz function should return i) array with the statix mz values for the spectra, ii) the lable to be used for the spectra and iii) array with the static mz values for the slices (or None if the same as the spectra), and iv) the lable to be used to the slices (or None if the same as for the spectra)" )  
