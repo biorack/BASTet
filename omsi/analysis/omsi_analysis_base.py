@@ -228,7 +228,7 @@ class omsi_analysis_base(object) :
                 mzSpectra = re_spectrumdata[qspectrum_viewerOption].mz[:]
                 labelSpectra = "m/z"
             elif isinstance( re_spectrumdata[qspectrum_viewerOption]  , omsi_file_analysis ) :
-                mzSpectra, labelSpectra, tempA, tempB = omsi_viewer_helper.get_axes( re_spectrumdata[qspectrum_viewerOption], 0 , 0 )
+                mzSpectra, labelSpectra, tempA, tempB = omsi_viewer_helper.get_axes( re_spectrumdata[qspectrum_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption])
             else :
                 mzSpectra = None
                 labelSpectra = None
@@ -239,7 +239,7 @@ class omsi_analysis_base(object) :
                     mzSlice = re_slicedata[qslice_viewerOption].mz[:]
                     labelSlice= "m/z"
                 elif isinstance( re_slicedata[qslice_viewerOption]  , omsi_file_analysis ) :
-                    tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], 0 , 0 )
+                    tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption] )
                 else :
                     mzSlice=None 
                     labelSlice = None
