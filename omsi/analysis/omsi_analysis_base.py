@@ -157,8 +157,8 @@ class omsi_analysis_base(object) :
         #Check whether the given selection is valid
         xType = check_selection_string(x)
         yType = check_selection_string(y)
-        xSel = selection_string_to_object( y )
-        ySel = selection_string_to_object( x )
+        xSel = selection_string_to_object( x )
+        ySel = selection_string_to_object( y )
         
         if (xType == selection_type['invalid']) or (yType == selection_type['invalid']) :
             return None , None
