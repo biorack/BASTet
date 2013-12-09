@@ -239,9 +239,7 @@ class omsi_analysis_base(object) :
                 mzSlice = re_slicedata[qslice_viewerOption].mz[:]
                 labelSlice= "m/z"
             elif isinstance( re_slicedata[qslice_viewerOption]  , omsi_file_analysis ) :
-                print "HERE"
                 tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption] )
-                print labelSlice
             else :
                 mzSlice=None
                 labelSlice = None
