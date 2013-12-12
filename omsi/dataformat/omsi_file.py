@@ -25,8 +25,45 @@ class omsi_file :
     """
     
     @classmethod
+    def get_h5py_object(cls, omsiObj):
+        """ This static method is a convenience function used to retrieve the corresponding h5py
+            interface object for any omsi file API object.
+            
+            :param omsiObj: omsi file API input object for which the corresponding h5py.Group, h5py.File, or h5py.Dataset 
+                            object should be retrieved. The omsiObj input may itself also be a h5py.Group, h5py.File, or
+                            h5py.Dataset, in which case omsiObj itself is returned by the function. 
+                            
+            :returns:  h5py.Group, h5py.File, or h5py.Dataset corresponding to the fiven omsiObj.
+            
+            :raises ValueError: A ValueError is raised in case that an unsupported omsiObj object is given, i.e., the 
+                                input object is not a omsi_file API object nor a h5py Group, File, or Dataset object. 
+        """
+        if isinstance( omsiObj , omsi_file ) :
+            h5pyObj = omsiObj.get_h5py_file()
+        elif isinstance( omsiObj ,  omsi_file_experiment ) :
+            h5pyObj = omsiObj.get_h5py_experimentgroup()
+        elif isinstance( omsiObj , omsi_file_sample ) :
+            h5pyObj = omsiObj.get_h5py_samplegroup()
+        elif isinstance( omsiObj , omsi_file_instrument ) :
+            h5pyObj = omsiObj.get_h5py_instrumentgroup()
+        elif isinstance( omsiObj , omsi_file_analysis ) :
+            h5pyObj = omsiObj.get_h5py_analysisgroup()
+        elif isinstance( omsiObj , omsi_file_dependencydata ) :
+            h5pyObj = omsiObj.get_h5py_dependencygroup()
+        elif isinstance( omsiObj , omsi_file_msidata ) :
+            h5pyObj = omsiObj.get_h5py_datagroup()
+        elif isinstance( omsiObj , h5py.File ) or \
+             isinstance( omsiObj , h5py.Group ) or \
+             isinstance( omsiObj , h5py.Dataset ) :
+            h5pyObj = omsiObj
+        else :
+            raise ValueError("Unsupported input object given to omsi_file.get_h5py_object.")
+        return h5pyObj
+    
+    @classmethod
     def get_omsi_object(cls, h5py_object) :
-        """This static method is used to retrieve the corresponding interface class for a given h5py group object
+        """This static method is convenience function used to retrieve the corresponding interface class for a
+           given h5py group object.
         
             :param h5py_object: h5py object for which the corresponding omis_file API object should be retrieved/generated
             
@@ -38,7 +75,11 @@ class omsi_file :
                 * omsi_file_instrument : If the given object is an instrument group
                 * omsi_file_analysis : If the given object is an analysis group
                 * omsi_file_msidata : If the given object is a MSI data group
+                * omsi_file_dependencydata : If the fiven object is a dependency group
                 * The input h5py_object: If the given objet is a h5py.Dataset
+                * None: In case that an unknown type is given. E.g. a user may have 
+                        given an unmanaged Group object that does not have a 
+                        corresponding omsi file API object. 
         
         """
         #If the input object is already an omsi API object then return it as is 
@@ -1798,7 +1839,7 @@ class omsi_file_msidata :
             
     """
 
-    def __init__(self, data_group, fill_space=True , fill_spectra=True, fill_value=0, preload_mz=True, preload_xy_index=True) :
+    def __init__(self, data_group, fill_space=True , fill_spectra=True, fill_value=0, preload_mz=False, preload_xy_index=False) :
         """ Initialize the omsi_msidata object.
             
             The fill options are provided to enable a more convenient access to the data independent of how the
