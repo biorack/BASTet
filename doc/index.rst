@@ -12,10 +12,9 @@ Documentation of the OpenMSI Toolkit:
    introduction
    convert_files
    custom_analysis
-   omsi
    HDF5_format
    HDF5_format_performance
- 
+   omsi 
 
 
 
