@@ -23,6 +23,12 @@ testacqu = f.s_read_acqu( exppath+"/acqu" )
 testmz   = f.s_mz_from_acqu( testacqu )
 testspotlist = f.s_read_spotlist(spotlist) 
    
+
+.....
+from bruckerflex_file import *
+dirname = "/Users/oruebel/Devel/msidata/Bruker_Data/UNC IMS Data/20130417 Bmycoides Paenibacillus Early SN03130/20130417 Bmyc Paeni Early LN/20130417 Bmyc Paeni Early LN"
+a = bruckerflex_file( dirname )
+   
 """
 
 import sys 
@@ -52,7 +58,7 @@ class bruckerflex_file :
                 
         """Open an img file for data reading.
 
-            :param spotlist_filename: Name of the textfile with the spotlist
+            :param spotlist_filename: Name of the textfile with the spotlist. Alternatively this may also be the folder with the spots. 
             :type spotlist_filename: string
             :param readall: Should the complete data be read into memory (this makes slicing easier). (default is True)
             :type readall: bool
@@ -81,7 +87,11 @@ class bruckerflex_file :
             
         """
         self.spotlist_filename = spotlist_filename
-        self.pixel_dict = self.s_read_spotlist( self.spotlist_filename )
+        if os.path.isdir( self.spotlist_filename ) :
+            self.spotlist_filename = None
+            self.pixel_dict = self.s_spot_from_dir( spotlist_filename )
+        else :
+            self.pixel_dict = self.s_read_spotlist( self.spotlist_filename )
         self.data_type = fid_encoding #Data type of the fid files
         
         #ToDo this reads a single spectrum (ie., fid file) to figure out the length of the spectra. This obviously means that we assume a single m/z axis for all spectra
@@ -218,6 +228,130 @@ class bruckerflex_file :
             regions.append( boundingBox )
         
         return regions
+    
+    
+    @staticmethod
+    def s_spot_from_dir( inDir ) :
+        """Similar to  s_read_spotlist but instead of using a spotlist file the structure of the data is parsed directly from the structure 
+            of the direcory containint all spots. 
+            
+            :param inDir: Name of the directory with all spots 
+            :type inDir: string
+            
+            :returns: The function returns a number of different items in from of a python dictionary. Most data is stored as 2D spatial maps, indicting for each (x,y) location the corresponding data. Most data is stored as 2D masked numpy arrays. The masked of the array indicated whether data has been recorded for a given pixel or not. The dict contains the following keys: 
+            
+                * 'spotfolder' : String indicating the folder where all the spot-data is located
+                * 'fid' : 2D numpy masked array of strings indicating for (x,y) pixel the fid file with the intensity values.
+                * 'acqu' : 2D numpy masked array of strings indicating for each (x,y) pixel the acqu file with the metadata for that pixel.
+                * 'regions' : 2D numpy masked array of integers indicating for each pixels the index of the region it belongs to.
+                * 'xpos' : 2D numpy masked array of integers indicated for each pixel its x position.
+                * 'ypos' : 2D numpy masked array of integers indicated for each pixel its x position.
+                * 'spotname' : 2D masked numpy array of strings indicating the name of the spot corresponding to a pixel.
+                
+        """
+    
+        #Compute list of spots from folder structure
+        spotfolder = os.path.abspath( inDir )
+        spotfolderList = []
+        spotnameList = []
+        pixelX = []
+        pixelY = []
+        pixelR = []
+        for l in os.listdir(inDir) :
+            ap = os.path.abspath( os.path.join( inDir, l ))
+            try :
+                if os.path.isdir( ap ) :
+                    print l 
+                    rxsplit = l.split("R")[1].split("X")
+                    pr = int(rxsplit[0])
+                    sp = rxsplit[1].split("Y")
+                    px = int(sp[0])
+                    py = int(sp[1])
+                    pixelR.append( pr )
+                    pixelX.append( px )
+                    pixelY.append( py )
+                    spotfolderList.append( ap )
+                    spotnameList.append( l )
+            except :
+                pass
+    
+        #Convert compute lists to numpy
+        numSpots = len( spotfolderList )
+        xpos = np.asarray( pixelX )
+        ypos = np.asarray( pixelY )
+        region = np.asarray( pixelR )
+        spotname = np.asarray( spotnameList )
+        
+        print xpos
+        print ypos
+        print region
+        print spotname 
+        
+        #Create maps for all entries
+        xi_min = 0 
+        xi_max = np.max( xpos )
+        yi_min = 0
+        yi_max = np.max( ypos )
+        xsize = xi_max - xi_min +1
+        ysize = yi_max - yi_min +1
+    
+        #Create 2D image maps of the data (this is to make the reading process easier)
+        region_map = np.empty( shape=(xsize,ysize) , dtype=region.dtype )
+        region_map.fill(-1)
+        region_map[ xpos , ypos ] = region[:]
+        mask = (region_map<0)
+        region_map = np.ma.masked_array( region_map , mask ) 
+        xpos_map =   np.empty( shape=(xsize,ysize) , dtype=xpos.dtype)
+        xpos_map[ xpos , ypos ] = xpos[:]
+        xpos_map = np.ma.masked_array( xpos_map , mask )
+        ypos_map = np.empty( shape=(xsize,ysize) , dtype=ypos.dtype)
+        ypos_map[ xpos , ypos ] = ypos[:]
+        ypos_map = np.ma.masked_array( ypos_map , mask )
+        spotname_map = np.empty( shape=(xsize,ysize) , dtype=spotname.dtype )
+        spotname_map [ xpos , ypos ] =spotname[:]
+        spotname_map = np.ma.masked_array( spotname_map , mask=mask )
+        
+        #Get a list of all files and compute and image map to indicate where the fid and acqu files
+        #for each pixel are located 
+        #filelist = bruckerflex_file.get_all_files(spotfolder)
+        #Compute the longest filename. This is only needed to determine the encoding for the fix-size numpy array. 
+        longestNameLength = 0 
+        for path, subdirs, files in os.walk(spotfolder):
+           for name in files:
+                fn = os.path.join(path, name)
+                if len(fn) > longestNameLength :
+                    longestNameLength = len(fn)
+        fltype = 'a'+str(longestNameLength)
+        fidfiles = np.empty( shape=(xsize,ysize) , dtype=fltype) #ToDo: If needed we need to change this to allow for multiple fid files per spot
+        acqufiles = np.empty( shape=(xsize,ysize) , dtype=fltype) #ToDo: Add additional storage for other files that may be needed
+        for path, subdirs, files in os.walk(spotfolder) :
+            for f in files :
+                #ToDo: We are only interested in fid and acqu files right now but that may need to change
+                if f.endswith("fid") or f.endswith("acqu") :
+                    #Compute the pixelindex for the file
+                    pindex = path.lstrip(spotfolder).lstrip("/").split("/")[0].split("X")[1].split("Y")
+                    xi = int(pindex[0])
+                    yi = int(pindex[1])
+                    #ToDo: Again if we are interested in more than fid and acqu files then we need to extend this check
+                    if f.endswith("fid") :
+                        fidfiles[xi,yi] = os.path.join( path , f)
+                    elif f.endswith("acqu") :
+                        acqufiles[xi,yi] = os.path.join( path , f)
+    
+        fidfiles  = np.ma.masked_array( fidfiles , mask )
+        acqufiles = np.ma.masked_array( acqufiles , mask )
+       
+        #Return all spatial maps of the different data we collected
+        re = {}
+        re['spotfolder'] = spotfolder
+        re['fid'] = fidfiles
+        re['acqu'] = acqufiles
+        re['regions'] = region_map
+        re['xpos'] = xpos_map
+        re['ypos'] = ypos_map
+        re['spotname'] = spotname_map
+        
+        return re 
     
 
     @staticmethod
