@@ -189,9 +189,9 @@ def convert_files() :
         #Open the img file
         try:
             currFormat = i['format']
-            if currFormat is "img" :
+            if currFormat == "img" :
                 inputFile = img_file( hdrFile=basefile+".hdr" , t2mFile=basefile+".t2m" , imgFile=basefile+".img" )
-            elif currFormat is "bruckerflex" :
+            elif currFormat == "brukerflex" :
                 inputFile = bruckerflex_file( spotlist_filename=basefile )
                 inputFile.set_region_selection( region_index=i['region'])
             else :
