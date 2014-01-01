@@ -261,7 +261,6 @@ class bruckerflex_file :
             ap = os.path.abspath( os.path.join( inDir, l ))
             try :
                 if os.path.isdir( ap ) :
-                    print l 
                     rxsplit = l.split("R")[1].split("X")
                     pr = int(rxsplit[0])
                     sp = rxsplit[1].split("Y")
@@ -281,11 +280,6 @@ class bruckerflex_file :
         ypos = np.asarray( pixelY )
         region = np.asarray( pixelR )
         spotname = np.asarray( spotnameList )
-        
-        print xpos
-        print ypos
-        print region
-        print spotname 
         
         #Create maps for all entries
         xi_min = 0 
