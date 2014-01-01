@@ -1,4 +1,4 @@
-"""Tool used to convert img files to OpenMSI HDF5 files. 
+"""Tool used to convert img files to OpenMSI HDF5 files.
 
   For usage information execute: python convertToOMSI --help
 """
@@ -43,7 +43,7 @@ omsiFile = None #The openMSI output data file to be used.
 ####################################################################
 #  Define available options for different parameters              ##
 ####################################################################
-availableFormats = ["img", "brukerflex", "auto"] #List of available data formats
+availableFormats = ["img", "bruckerflex", "auto"] #List of available data formats
 availableRegionOptions = ["split" , "merge" , "split+merge"]    #List defining the different options available for handling regions
 availableioOptions = ["chunk" , "spectrum", "all" ] #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
 
@@ -191,7 +191,7 @@ def convert_files() :
             currFormat = i['format']
             if currFormat == "img" :
                 inputFile = img_file( hdrFile=basefile+".hdr" , t2mFile=basefile+".t2m" , imgFile=basefile+".img" )
-            elif currFormat == "brukerflex" :
+            elif currFormat == "bruckerflex" :
                 inputFile = bruckerflex_file( spotlist_filename=basefile )
                 inputFile.set_region_selection( region_index=i['region'])
             else :
@@ -928,7 +928,7 @@ def printHelp():
     print "           automatically determine the input format. This option can be used to indicate"
     print "           the format explicitly to in case the auto option fails. Available options are:"
     print "          "+str(availableFormats)
-    print "--regions <option>: Some file formats (e.g., bruker) allow multiple regions to be imaged and stored"
+    print "--regions <option>: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored"
     print "           in a single file. This option allows one to specify how these regions should be"
     print "           treated during file conversion. E.g., one may want to store i) each region as a "
     print "           separate dataset in the output file (--regions split), ii) all regions combined "
