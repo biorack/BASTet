@@ -13,6 +13,10 @@ import h5py
 import numpy as np
 import math
 from omsi.dataformat.omsi_format import *
+try :
+    from mpi4py import MPI
+except :
+    pass 
 
 
 ################################################################################
@@ -136,7 +140,7 @@ class omsi_file :
             return None
 
 
-    def __init__( self , filename , mode='a') :
+    def __init__( self , filename , mode='a' , **kwargs) :
          """Open the given file or create it if does not exit. 
 
             The creation of the object may fail  if the file does not exist, and
@@ -151,13 +155,15 @@ class omsi_file :
                          w = Create file, truncate if exists. \n
                          w- = create file, fail if exists. \n
                          a = read/write if exists, create otherwise (default)
+            :param **kargs: Other keyword arguments to be used for opening the file using h5py. See the h5py.File documentation for details. 
+                         For example to use parallel HDF5, the following additional parameters can be given driver='mpio', comm:MPI.COMM_WORLD. 
          """
          if isinstance( filename , h5py.File ) :
              self.hdf_filename = filename.filename
              self.hdf_file = filename
          else : 
             self.hdf_filename = filename                      #Name of the HDF5 file
-            self.hdf_file = h5py.File( filename , mode )      #This is a public attribute.
+            self.hdf_file = h5py.File( filename , mode=mode, **kwargs )      #This is a public attribute.
          self.name = self.hdf_file.name
          
     def __getitem__(self, key) :
