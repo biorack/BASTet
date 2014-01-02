@@ -422,10 +422,12 @@ def check_format( name , formatOption ) :
         else :
             return None
     #Option 2: We need to determine the format ourselves
-    if name.endswith( "Spot List.txt") :
-        return "bruckerflex"
-    elif os.path.exists( name+".hdr") and os.path.exists( name+".t2m") and os.path.exists( name+".img") :
+    if os.path.exists( name+".hdr") and os.path.exists( name+".t2m") and os.path.exists( name+".img") :
         return "img"
+    elif name.endswith( "Spot List.txt") :
+        return "bruckerflex"
+    elif os.path.isdir( name ) :
+        return "bruckerflex"
     else :
         return None
 
@@ -450,7 +452,7 @@ def create_datasetList( inputFilenames, formatOption='auto', regionOption="split
         currDS['basename'] = i.rstrip('"').rstrip("'").lstrip('"').lstrip("'") #Remove " in case the user has entered file names with spaces using the "name" syntax
         currDS['format']   = check_format( name=currDS['basename'] , formatOption=formatOption )
         currDS['exp'] = 'new'
-        if currDS['format'] is 'bruckerflex' :
+        if currDS['format'] == 'bruckerflex' :
             if regionOption == "merge" or regionOption =="split+merge" :
                 currDS['region'] = None
                 re_datasetList.append( currDS )
