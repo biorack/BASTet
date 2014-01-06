@@ -29,14 +29,17 @@ class omsi_file :
     """
     
     @classmethod
-    def get_h5py_object(cls, omsiObj):
+    def get_h5py_object(cls, omsiObj, resolveDependencies=False):
         """ This static method is a convenience function used to retrieve the corresponding h5py
             interface object for any omsi file API object.
             
             :param omsiObj: omsi file API input object for which the corresponding h5py.Group, h5py.File, or h5py.Dataset 
                             object should be retrieved. The omsiObj input may itself also be a h5py.Group, h5py.File, or
                             h5py.Dataset, in which case omsiObj itself is returned by the function. 
-                            
+            :param resolveDependencies: Set to True if omsi_file_dependencydata objects should be resolved to retrieve the
+                            dependent object the dependency is pointing to. Dependencies are resolved recursively, i.e.,
+                            if a dependencie points to another dependencie then that one will be reolved as well. 
+                            Default value is False, i.e., the omis_file_dependency object itself is returned. 
             :returns:  h5py.Group, h5py.File, or h5py.Dataset corresponding to the fiven omsiObj.
             
             :raises ValueError: A ValueError is raised in case that an unsupported omsiObj object is given, i.e., the 
@@ -53,7 +56,10 @@ class omsi_file :
         elif isinstance( omsiObj , omsi_file_analysis ) :
             h5pyObj = omsiObj.get_h5py_analysisgroup()
         elif isinstance( omsiObj , omsi_file_dependencydata ) :
-            h5pyObj = omsiObj.get_h5py_dependencygroup()
+            if resolveDependencies :
+                h5pyObj = omsi_file.get_h5py_object( omsi_obj.get_dependency_omsiobject() , resolveDependencies )
+            else:
+                h5pyObj = omsiObj.get_h5py_dependencygroup()
         elif isinstance( omsiObj , omsi_file_msidata ) :
             h5pyObj = omsiObj.get_h5py_datagroup()
         elif isinstance( omsiObj , h5py.File ) or \
@@ -65,11 +71,15 @@ class omsi_file :
         return h5pyObj
     
     @classmethod
-    def get_omsi_object(cls, h5py_object) :
+    def get_omsi_object(cls, h5py_object, resolveDependencies=False ) :
         """This static method is convenience function used to retrieve the corresponding interface class for a
            given h5py group object.
         
             :param h5py_object: h5py object for which the corresponding omis_file API object should be retrieved/generated
+            :param resolveDependencies: Set to True if omsi_file_dependencydata objects should be resolved to retrieve the
+                            dependent object the dependency is pointing to. Dependencies are resolved recursively, i.e.,
+                            if a dependencie points to another dependencie then that one will be reolved as well. 
+                            Default value is False, i.e., the omis_file_dependency object itself is returned.
             
             :returns: None in case no corresponding object was found. Otherwise an instance of:
             
@@ -112,12 +122,17 @@ class omsi_file :
                 elif type_attribute == "omsi_file" :
                     return omsi_file( h5py_object )
                 elif type_attribute == "omsi_file_dependencydata" :
-                    return omsi_file_dependencydata( h5py_object )
+                    omsiObj = omsi_file_dependencydata( h5py_object )
+                    if resolveDependencies :
+                        return omsi_file.get_omsi_object( omsi_file.get_h5py_object( omsiObj.get_dependency_omsiobject() , resolveDependencies ) )
+                    else : 
+                        return omsiObj
                 else :
                     return None
             except :
                 #If the attribute is missing, then try to determin the type based on he name of group
                 groupName = h5py_object.name.split("/")[-1]
+                parentGroupName = h5py_object.parent.name.split("/")[-1]
                 if groupName.startswith( omsi_format_experiment.exp_groupname ) :
                     return omsi_file_experiment( h5py_object )
                 elif groupName.startswith( omsi_format_sample.sample_groupname ) :
@@ -128,8 +143,12 @@ class omsi_file :
                     return omsi_file_analysis( h5py_object ) 
                 elif groupName.startswith( omsi_format_data.data_groupname ) :
                     return omsi_file_msidata( h5py_object )
-                elif groupName.startswith( omsi_format_analysis.analysis_dependency_group ) :
-                    return omsi_file_dependencydata( h5py_object )
+                elif parentGroupName.startswith( omsi_format_analysis.analysis_dependency_group )  :
+                    omsiObj = omsi_file_dependencydata( h5py_object )
+                    if resolveDependencies :
+                        return omsi_file.get_omsi_object( omsi_file.get_h5py_object( omsiObj.get_dependency_omsiobject() , resolveDependencies ) )
+                    else : 
+                        return omsiObj
                 elif groupName == "" : #We are at the root group
                     return omsi_file( h5py_object.file )
                 else :
@@ -156,7 +175,7 @@ class omsi_file :
                          w- = create file, fail if exists. \n
                          a = read/write if exists, create otherwise (default)
             :param **kargs: Other keyword arguments to be used for opening the file using h5py. See the h5py.File documentation for details. 
-                         For example to use parallel HDF5, the following additional parameters can be given driver='mpio', comm:MPI.COMM_WORLD. 
+                         For example to use parallel HDF5, the following additional parameters can be given driver='mpio', comm:MPI.COMM_WORLD.
          """
          if isinstance( filename , h5py.File ) :
              self.hdf_filename = filename.filename
@@ -1764,14 +1783,16 @@ class omsi_file_dependencydata :
         """
         return self.dependency[ unicode(omsi_format_dependencydata.dependency_parameter) ][0]
         
-    def get_dependency_omsiobject(self) :
+    def get_dependency_omsiobject(self, recursive=True) :
         """Get the omsi file API object corresponding to the object the dependency is pointing to.
+        
+           :param recursive: Should dependencies be resolved recursively, i.e., if the dependeny points to another dependencies. Default=True.   
 
            :returns: An omsi file API object (e.g., omsi_file_analysis or omsi_file_msidata) if the link points to a group or the h5py.Dataset the link is pointing to.
         """
         omsi_object_name = self.dependency[ unicode(omsi_format_dependencydata.dependency_mainname) ][0]
         h5py_object = self.dependency.file[ unicode(omsi_object_name)  ]
-        omsi_object = omsi_file.get_omsi_object( h5py_object )
+        omsi_object = omsi_file.get_omsi_object( h5py_object , resolveDependencies=recursive )
         return omsi_object
 
     def get_link_name(self) :
