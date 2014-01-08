@@ -59,17 +59,30 @@ class omsi_format_analysis( omsi_format_common ) :
     analysis_identifier = "analysis_identifier"
     analysis_type = "analysis_type"
     analysis_parameter_group = "parameter"
-    analysis_dependency_group = "dependency"
     current_version = "0.1"
 
 class omsi_format_dependencydata( omsi_format_common ):
+    """Specification for the storage of a single dependency. 
     
+       This type of group does not have specific name to allow the user to specify a specific link_name to ease retrieval of the data. 
+    
+       :var dependency_parameter: `parameter_name` : Name of string dataset used to store the name of the dependend parameter 
+       :var dependency_selection: `selection` : Name of the string dataset used to store a selection string if needed.  
+       :var dependency_mainname:  `main_name` : Name of the string dataset used to store the description of the link to the object that this depends on. 
+    """
     dependency_parameter = "parameter_name"
     dependency_selection = "selection"
     dependency_mainname  = "main_name"
     current_version = "0.1"
+
+class omsi_format_dependencies( omsi_format_common ) : 
+    """Specification for the management of a collection of dependencies. 
     
-    
+       :var dependencies_groupname: `dependency` : Name of the group the dependencies are stored in. 
+    """
+    dependencies_groupname = "dependency"
+    current_version = "0.1"
+
 class omsi_format_data( omsi_format_common ) :
     """ Specification for storing raw data information. 
     
@@ -82,8 +95,7 @@ class omsi_format_data( omsi_format_common ) :
     data_groupname = "data_"  
     dataset_name= "data_"
     current_version = "0.1"
-    data_dependency_group = "dependency"
-
+   
 class omsi_format_msidata( omsi_format_data ):
     """Specification of the basic format for storing an MSI dataset consisting of a complete 3D cube 
        (or a 3D cube completed with 0s for missing data)
