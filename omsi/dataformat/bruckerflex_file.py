@@ -119,7 +119,18 @@ class bruckerflex_file :
         else :
             self.data = None
         
-        self.instrument_mz=0 #A numpy vector with the m/z values of the instrument        
+        self.instrument_mz=0 #A numpy vector with the m/z values of the instrument
+    
+    @classmethod
+    def is_bruckerflex(cls, infile ) :
+    
+        if os.path.isfile( infile ) and name.endswith( "Spot List.txt") :
+            return True 
+        elif os.path.isdir( name ) :
+            spotlist = s_spot_from_dir( name )
+            if len(spotlist[])> 0 :
+                return True 
+        return False 
   
     def get_regions(self) :
         """ Get list of all region dictionaries defining for each region the origin 
