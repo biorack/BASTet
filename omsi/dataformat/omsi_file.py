@@ -60,6 +60,8 @@ class omsi_file :
                 h5pyObj = omsi_file.get_h5py_object( omsi_obj.get_dependency_omsiobject() , resolveDependencies )
             else:
                 h5pyObj = omsiObj.get_h5py_dependencygroup()
+        elif isinstance( omsiObj , omsi_file_dependencies ) :
+            h5pyObj = omsi_file_dependencies.get_h5py_dependenciesgroup()
         elif isinstance( omsiObj , omsi_file_msidata ) :
             h5pyObj = omsiObj.get_h5py_datagroup()
         elif isinstance( omsiObj , h5py.File ) or \
@@ -127,6 +129,8 @@ class omsi_file :
                         return omsi_file.get_omsi_object( omsi_file.get_h5py_object( omsiObj.get_dependency_omsiobject() , resolveDependencies ) )
                     else : 
                         return omsiObj
+                elif type_attribute == "omsi_file_dependencies" :
+                    return omsi_file_dependencies( h5py_object )
                 else :
                     return None
             except :
@@ -143,7 +147,9 @@ class omsi_file :
                     return omsi_file_analysis( h5py_object ) 
                 elif groupName.startswith( omsi_format_data.data_groupname ) :
                     return omsi_file_msidata( h5py_object )
-                elif parentGroupName.startswith( omsi_format_analysis.analysis_dependency_group )  :
+                elif groupName.startswith( omsi_format_dependencies.dependencies_groupname ) :
+                    return omsi_file_dependencies( h5py_object )
+                elif parentGroupName.startswith( omsi_format_dependencies.dependencies_groupname )  :
                     omsiObj = omsi_file_dependencydata( h5py_object )
                     if resolveDependencies :
                         return omsi_file.get_omsi_object( omsi_file.get_h5py_object( omsiObj.get_dependency_omsiobject() , resolveDependencies ) )
@@ -1316,10 +1322,11 @@ class omsi_file_analysis :
             cls.__write_omsi_analysis_data__(parameter_group, p)
             
         #Write all data dependencies
-        dependency_group = analysis_group.require_group( omsi_format_analysis.analysis_dependency_group )
-        for d in analysis.get_all_dependency_data() : 
-
-            omsi_file_dependencydata.__create_dependency__(dependency_group , d)
+        dependencies_group = analysis_group.require_group( omsi_format_dependenies.dependencies_groupname )
+        dependencies_group.attrs[ omsi_format_common.type_attribute    ] = "omsi_file_dependencies"
+        dependencies_group.attrs[ omsi_format_common.version_attribute ] = omsi_format_dependencies.current_version
+        dependencies_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        omsiDep = omsi_file_dependencies.__create_dependencies__( dependencies_group=dependencies_group , dependencies_data_list=analysis.get_all_dependency_data() )
         
         #Execute the custom data write for the analysis
         analysis.write_to_omsi_file( analysis_group )
@@ -1395,7 +1402,11 @@ class omsi_file_analysis :
         """
         self.analysis = analysisGroup
         self.parameter = self.analysis[ unicode(omsi_format_analysis.analysis_parameter_group ) ]
-        self.dependency = self.analysis[ unicode(omsi_format_analysis.analysis_dependency_group ) ]
+        try : 
+            self.dependencies = omsi_file_dependencies( self.analysis[ unicode(omsi_format_dependencies.dependencies_groupname ) ] )
+        except :
+            print "WARNGING: omsi_file_analysis.__init__ : No dependencies group found."
+            self.dependencies = None
         self.analysis_omsi_object = None
         self.name = self.analysis.name
         
@@ -1408,7 +1419,7 @@ class omsi_file_analysis :
                 return self.parameter[key]
             except :
                 try : 
-                    return msi_file.get_omsi_object( self.dependency[key] )
+                    return self.dependencies[key] 
                 except :
                     return None
         return None #No errors have occured but no matching object has been found either
@@ -1422,7 +1433,7 @@ class omsi_file_analysis :
                 self.parameter[key] = value
             except :
                 try: 
-                    if key in self.dependency.items() :
+                    if key in self.dependencies.items() :
                         raise KeyError("Assignment to dependcies is not permitted via this mechanism")
                     else :
                         raise KeyError( "Requested assignment operation failed" )
@@ -1523,7 +1534,7 @@ class omsi_file_analysis :
         if self.analysis is not None : 
            for it in self.analysis.items() :
                if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
-                  and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                  and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_dependencies.dependencies_groupname :
                    re.append( it[0] )
         return re
 
@@ -1541,7 +1552,7 @@ class omsi_file_analysis :
         if self.analysis is not None : 
             for it in self.analysis.items() :
                 if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
-                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_dependencies.dependencies_groupname :
                         try :
                             re[ it[0] ] = self.analysis[ unicode( it[0] ) ].shape
                         except :
@@ -1565,7 +1576,7 @@ class omsi_file_analysis :
         if self.analysis is not None : 
             for it in self.analysis.items() :
                 if it[0] != omsi_format_analysis.analysis_identifier and it[0] != omsi_format_analysis.analysis_type \
-                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_analysis.analysis_dependency_group :
+                   and it[0] != omsi_format_analysis.analysis_parameter_group and  it[0] != omsi_format_dependencies.dependencies_groupname :
                     re.append( omsi_analysis_data() )
                     re[-1]['name'] = str( it[0] )
                     if load_data :
@@ -1602,17 +1613,215 @@ class omsi_file_analysis :
 
            :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
+        if self.dependencies is not None :
+            return self.dependencies.get_all_dependency_data( self, omsi_dependency_format=omsi_dependency_format)
+        else :
+            return []
+    
+
+    def get_all_dependency_data_recursive( self, omsi_dependency_format=True) :
+        """Get all direct and indirect dependencies associdated with the analysis. 
+        
+           NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+           
+           :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+           
+           :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
+        if self.dependencies is not None :
+            return self.dependencies.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+        else :
+            return []
+
+        
+#
+#     def get_all_dependency_data_graph( self, omsi_dependency_format=True, level=0) :
+#        """Get all direct and indirect dependencies associdated with the analysis. 
+#        
+#           NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+#           
+#           :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+#           :param level: Integer used to indicated the recursion level. Default value is 0. In most cases external users of this function will leave this value at 0. 
+#           
+#           :returns: Dictionary containing the following entries.
+#        
+#                * nodes : List of dictionaries, describing the elements in the dependency graph. For each element the following entries are given:
+#                
+#                    * dependency : The omsi_file_dependencydata object or omsi_dependency object (if omsi_dependency_format==True)  describing the dependency.
+#                    * level : The recursion level at which the object occurs. 
+#            
+#                * links : List of tuples with the links in the graph. Each tuple consits of two integer indicies for the nodes list.
+#           
+#        """
+#        from omsi.shared.omsi_dependency import omsi_dependency
+#        nodes = []
+#        links = [] 
+#        
+#        
+#        
+#        next((item for item in dicts if item["name"] == "Pam"), None) 
+#        
+#        if self.dependency is not None :
+#            for it in self.dependency.items() :
+#                omsi_obj = omsi_file.get_omsi_object( self.dependency[ it[0] ] )
+#                #If we can have recusive dependencies
+#                if isinstance( omsi_obj , omsi_file_analysis ) :
+#                    itd_nodes, itd_links = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+#                    for oi in range( )
+#                    
+#                    nodes = nodes + it_depend
+#                try :
+#                    omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
+#                    td = {}
+#                    if omsi_dependency_format :
+#                        td['dependency'] = omsi_object.get_omsi_dependency()
+#                    else :
+#                        td['dependency' ] = omsi_object
+#                    td['level'] = level
+#                except :
+#                    import sys
+#                    print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
+#        return re
+
+
+
+################################################################################
+################################################################################
+#   The main class for managing collections of dependencies                    #
+################################################################################
+################################################################################
+class omsi_file_dependencies :
+    """Class for managing collections of dependencies"""
+
+    @classmethod
+    def __create_dependencies__( cls , dependencies_group, dependencies_data_list=[] ) :
+        """Populate the given h5py group with the dependencies data.  
+    
+            NOTE: This is a private helper function. Use the corresponding create_dependencies function \
+            of omsi_file_analysis and omsi_file_msidata to create a completely new collection of dependencies.
+        
+            :param dependencies_group: h5py.Group object that should be used to store the dependencies data. 
+            :type dependencies_group: h5py.Group
+            :param dependencies_data_list: List of dependencies to be stored
+            :type dependencies_data_list: List of omsi.shared.omsi_dependency_data objects to be stored.
+        """
+        omsiObj = omsi_file_dependencies( dependencies_group )
+        for d in dependencies_data_list :
+            omsiObj.add_dependency( dependency_data = d )
+        return omsiObj
+
+    def add_dependency(self, dependency_data) :
+        """Add a new dependency to the collection.
+        
+           :param dependency_data: The analysis dependency specification.
+           :type dependency_data: omsi.shared.omsi_dependency_data 
+        """
+        depName = dependency_data['link_name']
+        #Check if the group alreay exists and raise an error if it does
+        try : 
+            temp = self.dependencies[depName]
+            raise KeyError( "Another dependencies with the same index already exists.")
+        except :
+            pass
+        new_dep_group = self.dependencies.require_group( depName )
+        new_dep_group.attrs[ omsi_format_common.type_attribute    ] = "omsi_file_dependencydata"
+        new_dep_group.attrs[ omsi_format_common.version_attribute ] = omsi_format_dependencydata.current_version
+        new_dep_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        depObj = omsi_file_dependencydata.__create_dependency__( data_group=new_dep_group , dependencies_data=dependency_data)
+        return depObj
+
+    def __init__(self, dependencies_group ) :
+
+        self.dependencies = dependencies_group
+        self.name = self.dependencies.name
+        
+    def __eq__(self, value ) :
+        """Check whether the two objects have the same h5py name"""
+        try:
+            equal = (value.name == self.name)
+            return equal
+        except:
+            return False
+
+    def __ne__(self, value ) :
+        """Check whether the two objects have different h5py names"""
+        return not self.__eq__(value)
+
+    def items(self) :
+        """Get the list of items associdated with the h5py.Group object managed by this object"""
+        return self.dependencies.items()
+        
+    def get_version(self) :
+        """Get the omsi version for the representation of this object in the HDF5 file"""
+        try :
+            return self.dependencies.attrs[omsi_format_common.version_attribute]
+        except :
+            return None
+
+    def get_timestamp(self) :
+        """Get the timestamp when the dependency group was created in the HDF5 file.
+            
+            :returns: Python timestamp string generated using time.ctime().
+                      None may be returned in case that the timestamp does not exists
+                      or cannot be retrieved from the file for some reason.
+            
+            """
+        try :
+            return self.dependencies.attrs[omsi_format_common.timestamp_attribute ]
+        except :
+            return None
+
+    def get_h5py_dependenciesgroup(self) :
+        """Retrun the h5py object with the dependency data.
+
+           The returned object can be used to read data directly from the HDF5 file.
+           Write operations to the analysis group can be performed only if the
+           associated omsi_file was opened with write permissions.
+
+           :returns: h5py object for the dependency group.
+        """
+        return self.dependencies
+        
+    def __getitem__(self, key) :
+        """Retrieve the h5py dataset for any of the dependency datasets or the omsi file API object.
+           If the key is a numpy selection (slicing) then the data is retrieved from the link the 
+           dependency is pointing so that we can interact with the dependency as if it were the 
+           linked object.
+        """
+        return self.dependencies[ key ]
+
+    def get_omsi_file_dependencydata( self , name )  :
+        """Retrieve the omsi_file_dependencydata object for the dependency with the given name"""
+        return get_omsi_object( self.dependencies[name])
+
+    def get_dependency_omsiobject(self, name, recursive=True) :
+        """Get the omsi file API object corresponding to the object the dependency is pointing to.
+        
+           :param name: Name of the dependency opbject to be loaded .
+           :param recursive: Should the dependency be resolved recursively, i.e., if the dependeny points to another dependencies. Default=True.   
+
+           :returns: An omsi file API object (e.g., omsi_file_analysis or omsi_file_msidata) if the link points to a group or the h5py.Dataset the link is pointing to.
+        """
+        return self.get_omsi_file_dependencydata(name).get_dependency_omsiobject( recursive=recursive )
+
+
+    def get_all_dependency_data( self , omsi_dependency_format=True) :
+        """Get all direct dependencies associdated with the analysis.
+           
+           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_analysis_dependency object (True) or as an omsi_file_dependencydata object (False). 
+
+           :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
+        """
         re = []
-        if self.dependency is not None :
-            for it in self.dependency.items() :
-                try :
-                    omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
-                    if omsi_dependency_format : 
-                        re.append( omsi_object.get_omsi_dependency() )
-                    else :
-                        re.append( omsi_object )
-                except :
-                    pass
+        for it in self.dependencies.items() :
+            try :
+                omsi_object =  omsi_file_dependencydata( self.dependencies[ unicode(it[0]) ] )
+                if omsi_dependency_format : 
+                    re.append( omsi_object.get_omsi_dependency() )
+                else :
+                    re.append( omsi_object )
+            except :
+                pass 
         return re
 
 
@@ -1621,30 +1830,30 @@ class omsi_file_analysis :
         
            NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
            
-           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+           :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
            
            :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         from omsi.shared.omsi_dependency import omsi_dependency
         
         re = []
-        if self.dependency is not None :
-            for it in self.dependency.items() :
-                omsi_obj = omsi_file.get_omsi_object( self.dependency[ it[0] ] )
-                #If we can have recusive dependencies
-                if isinstance( omsi_obj , omsi_file_analysis ) :
-                    it_depend = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
-                    re = re + it_depend
-                try :
-                    omsi_object =  omsi_file_dependencydata( self.dependency[ unicode(it[0]) ] )
-                    if omsi_dependency_format :
-                        re.append( omsi_object.get_omsi_dependency() )
-                    else :
-                        re.append( omsi_object )
-                except :
-                    import sys
-                    print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
+        for it in self.dependencies.items() :
+            omsi_obj = omsi_file.get_omsi_object( self.dependencies[ it[0] ] )
+            #If we can have recusive dependencies
+            if isinstance( omsi_obj , omsi_file_analysis ) :
+                it_depend = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+                re = re + it_depend
+            try :
+                omsi_object =  omsi_file_dependencydata( self.dependencies[ unicode(it[0]) ] )
+                if omsi_dependency_format :
+                    re.append( omsi_object.get_omsi_dependency() )
+                else :
+                    re.append( omsi_object )
+            except :
+                import sys
+                print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
         return re
+
 
 ################################################################################
 ################################################################################
@@ -1652,35 +1861,32 @@ class omsi_file_analysis :
 ################################################################################
 ################################################################################
 class omsi_file_dependencydata :
-    """Class for managing data groups used for storing data dependcies"""
+    """Class for managing data groups used for storing data dependencies"""
     
     @classmethod
-    def __create_dependency__( cls, data_group, dep_data ):
+    def __create_dependency__( cls, data_group, dependency_data ):
         """Create a new dependency group within the given datagroup and initalize all the required datasets based on the given dependency information.
         
            :param data_group: The h5py group opbject to which the dependency dataset should be added
            :type data_group: h5py.Group
-           :param dep_data: The analysis dependency specification.
-           :type dep_data: omsi.analysis.omsi_analysis_data.omsi_dependency_data
+           :param dependency_data: The analysis dependency specification.
+           :type dependency_data: omsi.shared.omsi_dependency_data
            
         """
         import time
-        dep_group = data_group.require_group( dep_data['link_name'] )
-        dep_group.attrs[ omsi_format_common.type_attribute    ] = "omsi_file_dependencydata"
-        dep_group.attrs[ omsi_format_common.version_attribute ] = omsi_format_dependencydata.current_version
-        dep_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        dep_group = data_group
         param_name_data = dep_group.require_dataset( name = omsi_format_dependencydata.dependency_parameter , shape=(1,), dtype=omsi_format_common.str_type  )
-        param_name_data[0] = dep_data['param_name']
+        param_name_data[0] = dependency_data['param_name']
         mainname_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_mainname , shape=(1,), dtype=omsi_format_common.str_type  )
-        mainname_data[0] = str(dep_data['omsi_object'].name)
+        mainname_data[0] = str(dependency_data['omsi_object'].name)
         selection_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_selection , shape=(1,), dtype=omsi_format_common.str_type  )
-        if dep_data['selection'] is not None :
+        if dependency_data['selection'] is not None :
             from omsi.shared.omsi_data_selection import check_selection_string
-            if omsi_data_selection.check_selection_string( dep_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
-                selection_data[0] =  dep_data['selection']
+            if omsi_data_selection.check_selection_string( dependency_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
+                selection_data[0] =  dependency_data['selection']
             else :
                 selection_data[0] = ""
-                errorMessage = "Invalid selection string given for data dependency : "+str( dep_data['selection'] ) 
+                errorMessage = "Invalid selection string given for data dependency : "+str( dependency_data['selection'] ) 
                 raise ValueError( errorMessage )
         else :
             selection_data[0] = ""
@@ -1750,7 +1956,7 @@ class omsi_file_dependencydata :
            dependency is pointing so that we can interact with the dependency as if it were the 
            linked object.
         """
-        if isinstance(key , string) :
+        if isinstance(key , str) or isinstance(key,unicode) :
             if key == omsi_format_dependencydata.dependency_mainname :
                 return self.get_omsi_object()
             else :
@@ -1906,6 +2112,12 @@ class omsi_file_msidata :
             self._data_group = data_group
             self.name = self._data_group.name
             self.format_type =  omsi_format_msidata.format_types[  str( self._data_group .get( unicode( omsi_format_msidata.format_name ) )[0] )  ]
+            try : 
+                self.dependencies = omsi_file_dependencies( self._data_group[ unicode(omsi_format_dependencies.dependencies_groupname ) ] )
+            except :
+                self.dependencies = None
+        else :
+            raise ValueError( "Data group must be h5py.Group object. None give.")
         if self.format_type is not None :
             #Initalize the dataset
             self.datasets = [  self._data_group[ unicode(x[0]) ] for x in self._data_group.items() if x[0].startswith(omsi_format_msidata.dataset_name)  ]
@@ -2004,7 +2216,7 @@ class omsi_file_msidata :
         except :
             return None
             
-    def create_data_dependency(self, dependency, flushIO=True ) :
+    def add_dependency(self, dependency, flushIO=True ) :
         """Create a new dependency for this dataset
         
            :param dependency" omsi.shared.omsi_dependency object describing the data dependency
@@ -2012,24 +2224,14 @@ class omsi_file_msidata :
            
            :returns: omsi_file_dependencydata object with the dependency data or None in case that an error occured and the dependency has not been generated.
         """
-        #Check whether we already have some dependencies. If yes append a new dependency otherwise create a new group
-        try:
-            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
-        except :
-            try :
-                dependency_group = self._data_group.require_group( omsi_format_data.data_dependency_group )
-            except :
-                return None
+        if not self.dependencies :
+            self.dependencies = self.__create_dependencies__( self._data_group , dependencies_data_list=[] ) 
         
-        #Create the dependency
-        try :
-            dep = omsi_file_dependencydata.__create_dependency__(dependency_group , dependency)
-            if flushIO:
-                self._data_group.file.flush()
-            return dep
-        except :
-           return None
-            
+        dep = self.dependencies.add_dependency( dependency )
+        if flushIO:
+            self._data_group.file.flush()
+        return dep
+        
     def create_sample_info( self , sample_name=None, flushIO=True) :
         """Add information about the sample imaged to the experiment
 
@@ -2105,61 +2307,31 @@ class omsi_file_msidata :
         return instrument_info
         
     def get_all_dependency_data( self , omsi_dependency_format=True) :
-        """Get all direct dependencies associdated with the MSI data.
+        """Get all direct dependencies associdated with the analysis.
            
            :param omsi_dependency_format: Should the dependcies be retrieved as omsi_analysis_dependency object (True) or as an omsi_file_dependencydata object (False). 
 
            :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
-        re = []
-        try :
-            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
-        except :
-            return re 
-        if dependency_group is not None :
-            for it in dependency_group.items() :
-                try :
-                    omsi_object =  omsi_file_dependencydata( dependency_group[ unicode(it[0]) ] )
-                    if omsi_dependency_format : 
-                        re.append( omsi_object.get_omsi_dependency() )
-                    else :
-                        re.append( omsi_object )
-                except :
-                   pass
-        return re
-
+        if self.dependencies is not None :
+            return self.dependencies.get_all_dependency_data( self, omsi_dependency_format=omsi_dependency_format)
+        else :
+            return []
+    
 
     def get_all_dependency_data_recursive( self, omsi_dependency_format=True) :
         """Get all direct and indirect dependencies associdated with the analysis. 
         
            NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
            
-           :param omsi_dependency_format: Should the dependcies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
+           :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True) or as an omsi_file_dependencydata object (False)
            
            :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
-        from omsi.shared.omsi_dependency import omsi_dependency
-        re = []
-        try :
-            dependency_group = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
-        except :
-            return re 
-        if dependency_group is not None :
-            for it in dependency_group.items() :
-                omsi_obj = omsi_file.get_omsi_object( dependency_group[ it[0] ] )
-                #If we can have recusive dependencies
-                if isinstance( omsi_obj , omsi_file_analysis ) :
-                    it_depend = omsi_obj.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
-                    re = re + it_depend
-                try :
-                    omsi_object =  omsi_file_dependencydata( dependency_group[ unicode(it[0]) ] )
-                    if omsi_dependency_format : 
-                        re.append( omsi_object.get_omsi_dependency() )
-                    else :
-                        re.append( omsi_object )
-                except :
-                    pass
-        return re
+        if self.dependencies is not None :
+            return self.dependencies.get_all_dependency_data_recursive( omsi_dependency_format=omsi_dependency_format)
+        else :
+            return []
         
     def has_sample_info(self, check_parent=False) :
         """Check whether custom sample information is available for this dataset.
@@ -2206,12 +2378,11 @@ class omsi_file_msidata :
                     pass
         return False
     
-    def has_data_dependencies( self ) :
+    def has_dependencies( self ) :
         """Check whether any dependencies exisits for this datasets"""
-        try :
-            d = self._data_group[ unicode(omsi_format_data.data_dependency_group) ]
+        if self.dependencies :
             return True
-        except :
+        else :
             return False
 
     def __setitem__(self, key, value) :
@@ -2476,7 +2647,23 @@ class omsi_file_msidata :
         self._fill_mz = fill_spectra
     
     @classmethod
-    def __create_msidata_full_cube__( cls,  data_group,  data_shape, data_type = 'f' , mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+    def __create_dependencies__( cls, data_group , dependencies_data_list=[] ) :
+        """Create a group for storing data dependencies
+        
+           :param data_group: The h5py.Group for which the dataset should be initalized.
+           :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies. Default is empty list []
+           
+           :returns: omsi_file_dependencies object created by the function. 
+        """
+        dependencies_group = data_group.require_group( omsi_format_dependenies.dependencies_groupname )
+        dependencies_group.attrs[ omsi_format_common.type_attribute    ] = "omsi_file_dependencies"
+        dependencies_group.attrs[ omsi_format_common.version_attribute ] = omsi_format_dependencies.current_version
+        dependencies_group.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
+        omsiDep = omsi_file_dependencies.__create_dependencies__( dependencies_group=dependencies_group , dependencies_data_list=dependencies_data_list )
+        return omsiDep 
+    
+    @classmethod
+    def __create_msidata_full_cube__( cls,  data_group,  data_shape, data_type = 'f' , mzdata_type='f', chunks=None, compression=None, compression_opts=None, dependencies_data_list=[]   ) :
         """ Create a new msi data group with all necessay datasets for storing a full 3D cube.
         
             NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
@@ -2484,7 +2671,7 @@ class omsi_file_msidata :
             
             Required input parameters
             
-            :param data_group: The hHDF5 group for which the dataset should be initalized.
+            :param data_group: The h5py.Group for which the dataset should be initalized.
             :param data_shape: The 3D shape of the MSI dataset in x,y, and m/z
             :param data_type: The dtype for the MSI dataset
             :param mzdata_type: The dtype for the mz dataset
@@ -2496,8 +2683,12 @@ class omsi_file_msidata :
                               Can also use an integer in range(10) indicating gzip.
             :param compression_opts: h5py compression settings.  This is an integer for gzip, 2-tuple for szip, etc.. \ 
                               For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
-                              a number between zero and nine (inclusive) to indicate the tradeoff between speed 
+                              a number between zero and nine (inclusive) to indicate the tradeoff between speed
                               and compression ratio (zero is fastest, nine is best ratio).
+                              
+            Other optional parameters
+            
+            :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies. Default is empty list []
           
             :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
             
@@ -2517,12 +2708,14 @@ class omsi_file_msidata :
             data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=data_shape  , dtype=data_type , chunks=chunks, compression=compression)
         else :
             data_dataset =  data_group.require_dataset( name=(omsi_format_msidata.dataset_name+"0") , shape=data_shape  , dtype=data_type , chunks=chunks, compression=compression, compression_opts=compression_opts)
+        #Create any dependencies
+        omsi_file_msidata.__create_dependencies__( data_group , dependencies_data_list )
         #Return the datasets that need to be written
         return data_dataset, mz_dataset
         
     
     @classmethod
-    def __create_msidata_partial_cube__( cls, data_group, data_shape, mask, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+    def __create_msidata_partial_cube__( cls, data_group, data_shape, mask, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None, dependencies_data_list=[]  ) :
         """ Create a new msi data group with all necessay datasets for storing a full 3D cube
             
             NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
@@ -2545,6 +2738,10 @@ class omsi_file_msidata :
                               For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
                               a number between zero and nine (inclusive) to indicate the tradeoff between speed 
                               and compression ratio (zero is fastest, nine is best ratio).
+                              
+            Other optional parameters
+            
+            :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies. Default is empty list []
           
             :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
             
@@ -2604,12 +2801,15 @@ class omsi_file_msidata :
         shape_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.shape_name , shape=(3, )  , dtype='uint32' )
         shape_dataset[:] = np.asarray( data_shape , dtype='uint32')
         
+        #Create any dependencies
+        omsi_file_msidata.__create_dependencies__( data_group , dependencies_data_list )
+        
         #Return the datasets that need to be written
         return data_dataset, mz_dataset,  xy_index_dataset, inv_xy_index_dataset
         
 
     @classmethod
-    def __create_msidata_partial_spectra__( cls, data_group,  spectra_length, len_global_mz, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None ) :
+    def __create_msidata_partial_spectra__( cls, data_group,  spectra_length, len_global_mz, data_type = 'f',  mzdata_type='f', chunks=None, compression=None, compression_opts=None, dependencies_data_list=[]  ) :
         """Create a new msi data group with all necessay datasets for storing a full or partial cube of partial spectra
        
             NOTE: This is a private helper function used to initalize the content of the dataset group in HDF5. Use the
@@ -2632,6 +2832,10 @@ class omsi_file_msidata :
                                 For gzip (H5 deflate filter) this is the aggression paramter. The agression parameter is
                                 a number between zero and nine (inclusive) to indicate the tradeoff between speed 
                                 and compression ratio (zero is fastest, nine is best ratio).
+                                
+            Other optional parameters
+            
+            :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies. Default is empty list []
 
             :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to be filled with data:
 
@@ -2716,6 +2920,9 @@ class omsi_file_msidata :
         #Create the shape dataset
         shape_dataset = data_group.require_dataset( name=omsi_format_msidata_partial_cube.shape_name , shape=(3, )  , dtype='uint32' )
         shape_dataset[:] = np.asarray( mask.shape , dtype='uint32')
+
+        #Create any dependencies
+        omsi_file_msidata.__create_dependencies__( data_group , dependencies_data_list )
         
         #Return the datasets that need to be written
         return data_dataset, mz_index_dataset, mz_dataset,  xy_index_dataset, xy_index_end_dataset
