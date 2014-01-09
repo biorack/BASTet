@@ -128,7 +128,7 @@ class bruckerflex_file :
             return True 
         elif os.path.isdir( name ) :
             spotlist = s_spot_from_dir( name )
-            if len(spotlist[])> 0 :
+            if len(spotlist)> 0 :
                 return True 
         return False 
   
