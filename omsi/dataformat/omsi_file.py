@@ -93,11 +93,11 @@ class omsi_file :
                 * omsi_file_msidata : If the given object is a MSI data group
                 * omsi_file_dependencydata : If the fiven object is a dependency group
                 * The input h5py_object: If the given objet is a h5py.Dataset
-                * None: In case that an unknown type is given. E.g. a user may have 
-                        given an unmanaged Group object that does not have a 
-                        corresponding omsi file API object. 
-        
+                * None: In case that an unknown type is given. E.g. a user may have \
+                        given an unmanaged Group object that does not have a \
+                        corresponding omsi file API object.
         """
+        
         #If the input object is already an omsi API object then return it as is 
         if isinstance( h5py_object , omsi_file ) or isinstance( h5py_object, omsi_file_experiment ) or \
            isinstance( h5py_object , omsi_file_sample) or isinstance( h5py_object , omsi_file_instrument ) or \
@@ -180,7 +180,7 @@ class omsi_file :
                          w = Create file, truncate if exists. \n
                          w- = create file, fail if exists. \n
                          a = read/write if exists, create otherwise (default)
-            :param **kargs: Other keyword arguments to be used for opening the file using h5py. See the h5py.File documentation for details. 
+            :param **kargs: Other keyword arguments to be used for opening the file using h5py. See the h5py.File documentation for details. \
                          For example to use parallel HDF5, the following additional parameters can be given driver='mpio', comm:MPI.COMM_WORLD.
          """
          if isinstance( filename , h5py.File ) :
@@ -264,7 +264,7 @@ class omsi_file :
           :param expIndex: The index of the requested experiment
           :type expIndex: uint
 
-          :returns: h5py reference to the experiment with the given index. Returns None in case
+          :returns: h5py reference to the experiment with the given index. Returns None in case \
                     the experiment does not exist.
        """
 
@@ -1805,9 +1805,9 @@ class omsi_file_dependencies :
 
 
     def get_all_dependency_data_graph( self, include_omsi_dependency=False, include_omsi_file_dependencydata=False, recursive=True, level=0, nameKey='name', prev_nodes=[], prev_links=[], parent_index=None, metadata_generator=None, metadata_generator_kwargs={}) :
-        """Get all direct and indirect dependencies associdated with the analysis in form of a graph describing all nodes and links in the provenance hierarchy. 
+        """ Get all direct and indirect dependencies associdated with the analysis in form of a graph describing all nodes and links in the provenance hierarchy.
         
-           NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+            NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
            
             :param include_omsi_dependency: Should the omsi_dependency object be included in the entries in the nodes dict?
             :param include_omsi_file_dependencydata: Should the omsi_file_dependencydata object be included in the entries in the nodes dict?
@@ -1819,10 +1819,10 @@ class omsi_file_dependencies :
                          defined by the input parameter nameKey.
             :param prev_links: Previouly established links in the list of nodes. Note, this list will be modified by the call.
             :param parent_index: Index of the parent node in the list of prev_nodes for this call.
-            :param metadata_generator: Optional parameter. Pass in a function that generates additional metadata about a given omsi API object.
-                           Note, the key's level and path and name (i.e., nameKey) are already set by this function. The metadata_generator
+            :param metadata_generator: Optional parameter. Pass in a function that generates additional metadata about a given omsi API object. \
+                           Note, the key's level and path and name (i.e., nameKey) are already set by this function. The metadata_generator \
                            may overwrite these key's, however, the path has to be unique as it is used to identify duplicate nodes. Overwriting
-                           the path with a non-unique value, hence, will lead to errors (missing entries) when generating the graph. 
+                           the path with a non-unique value, hence, will lead to errors (missing entries) when generating the graph.
                            Note, the metadata_generator function needs to support the following keyword arguments: 
                            
                               * inDict : The dictionary to which the metadata should be added to.
@@ -1831,9 +1831,7 @@ class omsi_file_dependencies :
                               * nameKey : The key to be used for storing the name 
             :param metadata_generator_kwargs: Dictionary of addtional keyword arguments that should be passed to the metadata_generator function.
            
-            :returns: Dictionary containing the following entries.
-        
-                * nodes : List of dictionaries, describing the elements in the dependency graph. For each element the following entries are given:
+            :returns: Dictionary containing two lists. 1) nodes : List of dictionaries, describing the elements in the dependency graph. 2) links : List of tuples with the links in the graph. Each tuple consits of two integer indicies for the nodes list. For each node the following entries are given:
             
                     * omsi_dependency: Optional key used to store the corresponding omsi_dependency object. Used only of include_omsi_dependency is True.
                     * omsi_file_dependencydata: Optional key used to store the corresponding omsi_file_dependencydata object. Used only of include_omsi_file_dependencydata is True.
@@ -1841,7 +1839,7 @@ class omsi_file_dependencies :
                     * level : The recursion level at which the object occurs.
                     * ... : Any other key/value pairs from the omsi_dependency dict. 
             
-                * links : List of tuples with the links in the graph. Each tuple consits of two integer indicies for the nodes list.
+                
            
         """
         from omsi.shared.omsi_dependency import omsi_dependency
