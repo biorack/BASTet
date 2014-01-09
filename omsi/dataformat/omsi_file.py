@@ -316,7 +316,7 @@ class omsi_file :
         exp.attrs[omsi_format_common.type_attribute] = "omsi_file_experiment"
         exp.attrs[omsi_format_common.version_attribute] = omsi_format_experiment.current_version
         exp.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
-        exp_identifier_dataset = exp.require_dataset( name=omsi_format_experiment.exp_identifier_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        exp_identifier_dataset = exp.require_dataset( name=unicode(omsi_format_experiment.exp_identifier_name) , shape=(1,) , dtype=omsi_format_common.str_type )
         if exp_identifier is not None :
             exp_identifier_dataset[0] = exp_identifier
         else : 
@@ -709,7 +709,7 @@ class omsi_file_experiment :
         expId = self.get_exp_identifier()
         #Create the dataset for the id name if it does not exist
         if expId is None :
-            expId =  self.experiment.require_dataset( name=omsi_format_experiment.exp_identifier_name , shape=(1,) , dtype=omsi_format_common.str_type )
+            expId =  self.experiment.require_dataset( name=unicode(omsi_format_experiment.exp_identifier_name) , shape=(1,) , dtype=omsi_format_common.str_type )
 
         expId[0] = identifier
 
@@ -1027,7 +1027,7 @@ class omsi_file_sample :
 
            :returns: h5py object of the newly created sample group.
         """
-        sampleNameData = sample_group.require_dataset( name=omsi_format_sample.sample_name , shape=(1,), dtype=omsi_format_common.str_type )
+        sampleNameData = sample_group.require_dataset( name=unicode(omsi_format_sample.sample_name) , shape=(1,), dtype=omsi_format_common.str_type )
         if sample_name is None :
             if len(sampleNameData[0]) == 0 :
                 sampleNameData[0] = "undefined"
@@ -1124,7 +1124,7 @@ class omsi_file_sample :
         name = self.get_sample_name()
         #Create the dataset for the instrument name if it does not exist
         if name is None :
-            name = self.sample.require_dataset( name=omsi_format_sample.sample_name , shape=(1,), dtype=omsi_format_common.str_type )
+            name = self.sample.require_dataset( name=unicode(omsi_format_sample.sample_name) , shape=(1,), dtype=omsi_format_common.str_type )
 
         name[0] = nameString
 
@@ -1151,7 +1151,7 @@ class omsi_file_instrument :
            :param mzdata: The mz data for the instrument.
         """
          #Name of the instrument
-        instrumentNameData = instrument_group.require_dataset( name=omsi_format_instrument.instrument_name , shape=(1,), dtype=omsi_format_common.str_type )
+        instrumentNameData = instrument_group.require_dataset( name=unicode(omsi_format_instrument.instrument_name) , shape=(1,), dtype=omsi_format_common.str_type )
         if instrument_name is None :
             if len(instrumentNameData[0]) == 0 :
                 instrumentNameData[0] = "undefined"
@@ -1275,7 +1275,7 @@ class omsi_file_instrument :
         nameDat = self.get_instrument_name()
         #Create the dataset for the id name if it does not exist
         if nameDat is None :
-            nameDat = self.instrument.require_dataset( name=omsi_format_instrument.instrument_name , shape=(1,), dtype=omsi_format_common.str_type )
+            nameDat = self.instrument.require_dataset( name=unicode(omsi_format_instrument.instrument_name) , shape=(1,), dtype=omsi_format_common.str_type )
 
         nameDat[0] = name
 
@@ -1303,11 +1303,11 @@ class omsi_file_analysis :
             
         """
         #Write the analysis name 
-        analysisIdentifierData = analysis_group.require_dataset( name=omsi_format_analysis.analysis_identifier , shape=(1,), dtype=omsi_format_common.str_type )
+        analysisIdentifierData = analysis_group.require_dataset( name=unicode(omsi_format_analysis.analysis_identifier) , shape=(1,), dtype=omsi_format_common.str_type )
         analysisIdentifierData[0] = analysis.get_analysis_identifier()
 
         #Write the analysis type
-        analysisTypeData = analysis_group.require_dataset( name=omsi_format_analysis.analysis_type , shape=(1,), dtype=omsi_format_common.str_type )
+        analysisTypeData = analysis_group.require_dataset( name=unicode(omsi_format_analysis.analysis_type) , shape=(1,), dtype=omsi_format_common.str_type )
         analysisTypeData[0] = analysis.get_analysis_type()
 
         #Write the analysis data
@@ -1360,8 +1360,8 @@ class omsi_file_analysis :
                         omsiObjType = ""
                     data_group[ ana_data['name'] ].attrs[ omsi_format_common.type_attribute ] = omsiObjType
         #Create a new string-type dataset
-        elif ana_data['dtype'] == omsi_format_common.str_type :
-            tempData = data_group.require_dataset( name = ana_data['name'] , shape=(1,) , dtype=omsi_format_common.str_type  )
+        elif (ana_data['dtype'] == omsi_format_common.str_type) or (ana_data['dtype'] == h5py.special_dtype(vlen=str)):
+            tempData = data_group.require_dataset( name = unicode(ana_data['name']) , shape=(1,) , dtype=omsi_format_common.str_type  )
             if ana_data['data'].size > 0 :
                 tempData[0] = ana_data['data']
             else :
@@ -1942,11 +1942,11 @@ class omsi_file_dependencydata :
         """
         import time
         dep_group = data_group
-        param_name_data = dep_group.require_dataset( name = omsi_format_dependencydata.dependency_parameter , shape=(1,), dtype=omsi_format_common.str_type  )
+        param_name_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_parameter) , shape=(1,), dtype=omsi_format_common.str_type  )
         param_name_data[0] = dependency_data['param_name']
-        mainname_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_mainname , shape=(1,), dtype=omsi_format_common.str_type  )
+        mainname_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_mainname) , shape=(1,), dtype=omsi_format_common.str_type  )
         mainname_data[0] = str(dependency_data['omsi_object'].name)
-        selection_data = dep_group.require_dataset( name =  omsi_format_dependencydata.dependency_selection , shape=(1,), dtype=omsi_format_common.str_type  )
+        selection_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_selection) , shape=(1,), dtype=omsi_format_common.str_type  )
         if dependency_data['selection'] is not None :
             from omsi.shared.omsi_data_selection import check_selection_string
             if omsi_data_selection.check_selection_string( dependency_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
@@ -2764,7 +2764,7 @@ class omsi_file_msidata :
                 
         """
         #Data format
-        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset = data_group.require_dataset( name= unicode(omsi_format_msidata.format_name) , shape=(1,) , dtype=omsi_format_common.str_type )
         format_dataset[0] = 'full_cube'
         #mz data
         mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(data_shape[2], )  , dtype=mzdata_type )
@@ -2825,7 +2825,7 @@ class omsi_file_msidata :
                                          
         """
         #Data format
-        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset = data_group.require_dataset( name=unicode(omsi_format_msidata.format_name) , shape=(1,) , dtype=omsi_format_common.str_type )
         format_dataset[0] = 'partial_cube'
         #mz data
         mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(data_shape[2], )  , dtype=mzdata_type )
@@ -2920,7 +2920,7 @@ class omsi_file_msidata :
 
         """
         #Data format
-        format_dataset = data_group.require_dataset( name= omsi_format_msidata.format_name , shape=(1,) , dtype=omsi_format_common.str_type )
+        format_dataset = data_group.require_dataset( name= unicode(omsi_format_msidata.format_name) , shape=(1,) , dtype=omsi_format_common.str_type )
         format_dataset[0] = 'partial_spectra'
         #mz data
         mz_dataset = data_group.require_dataset( name=omsi_format_msidata.mzdata_name , shape=(len_global_mz, )  , dtype=mzdata_type )

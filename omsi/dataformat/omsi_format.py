@@ -8,8 +8,7 @@ class omsi_format_common:
        :var str_type: `str_type  = h5py.new_vlen(str)` : Datatype used for storing strings in hdf5
        :var type_attribute: Name of the optional type attribute indicating which omsi_file_* class should be used to interact with a given group.
     """
-    
-    str_type = h5py.special_dtype(vlen=str) 
+    str_type = h5py.special_dtype(vlen=unicode) #h5py.special_dtype(vlen=str)
     type_attribute = "omsi_type"
     timestamp_attribute = "timestamp"
     version_attribute = "version"
