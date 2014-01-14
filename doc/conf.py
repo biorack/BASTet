@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# omsi_doc documentation build configuration file, created by
+# omsitk_doc documentation build configuration file, created by
 # sphinx-quickstart on Wed Aug  1 15:04:28 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -172,7 +172,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'omsi_docdoc'
+htmlhelp_basename = 'openmsi_tk_doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -191,7 +191,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'omsi_doc.tex', u'OpenMSI: Software and File Format Documentation',
+  ('index', 'openmsi_tk_doc.tex', u'OpenMSI: Software and File Format Documentation',
    u'Oliver Rübel and Ben Bowen', 'manual'),
 ]
 
