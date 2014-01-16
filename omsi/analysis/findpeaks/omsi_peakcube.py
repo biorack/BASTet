@@ -14,6 +14,8 @@ class omsi_peakcube(omsi_analysis_base) :
 		"""Initalize the basic data members"""
 		super(omsi_peakcube,self).__init__()
 		self.analysis_identifier = nameKey
+		self.parameter_names = [ 'peaksBins', 'peaksIntensities', 'peaksArrayIndex', 'peaksMZdata', 'HCpeaksLabels', 'HCLabelsList']
+		self.data_names = ['npg_peak_cube_mz' , 'npg_peak_mz' ]
 
 	# ------------------------ viewer functions start ---------------------- 
 	
@@ -100,8 +102,17 @@ class omsi_peakcube(omsi_analysis_base) :
 	# ------------------------ viewer functions end ------------------------
 	
 	# main PeakCube function
-	def omsi_peakcube_exec(self, peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, HCpeaksLabels, HCLabelsList, npgdata_dependency = None, lpfdata_dependency = None):
+    #omsi_peakcube_exec(self, peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, HCpeaksLabels, HCLabelsList, npgdata_dependency = None, lpfdata_dependency = None):
+	def execute_analysis(self):
 		print "Generating the peak cube..."
+
+		#Copy parameters to local variables for convenience
+		peaksBins = self['peaksBins']
+		peaksIntensities = self['peaksIntensities']
+		peaksArrayIndex = self['peaksArrayIndex']
+		peaksMZdata = self['peaksMZdata']
+		HCpeaksLabels = self['HCpeaksLabels']
+		HCLabelsList = self['HCLabelsList']
 		
 		myPeakCube = self.getPeakCube(peaksIntensities, peaksArrayIndex, HCpeaksLabels, HCLabelsList)
 		print "\ndone!"
@@ -122,29 +133,27 @@ class omsi_peakcube(omsi_analysis_base) :
 		self.clear_dependency_data()
 		
 		# Collect peak cube into hdf5
-		npgPCmz = np.asarray( myPeakCube )
-		self.add_analysis_data( name='npg_peak_cube_mz' , data=npgPCmz , dtype=str(npgPCmz.dtype) )
-		npgGMZ = np.asarray( myGlobalMz )
-		self.add_analysis_data( name='npg_peak_mz' , data=npgGMZ , dtype=str(npgGMZ.dtype) )
+		self['npg_peak_cube_mz'] = np.asarray( myPeakCube )
+		self['npg_peak_mz'] = np.asarray( myGlobalMz )
 		
-		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
-		if npgdata_dependency is not None :
-			# if isinstance( npgdata_dependency , omsi_dependency ) :
-			# 	#Add the depency as given by the user
-			# 	self.add_dependency_data( npgdata_dependency )
-			# elif isinstance( lpfdata_dependency, omsi_dependency):
-			# 	self.add_dependency_data( lpfdata_dependency )
-				
-			# else :
-			# 	#The user only gave us the object that we depend on so we need to construct the 
-			self.add_dependency_data( omsi_dependency( param_name = 'HCpeaksLabels', link_name='HCpeaksLabels', omsi_object=npgdata_dependency['npghc_peaks_labels'], selection=None ) )
-			self.add_dependency_data( omsi_dependency( param_name = 'HCLabelsList', link_name='HCLabelsList', omsi_object=npgdata_dependency['npghc_labels_list'], selection=None ) )
-				
-		if lpfdata_dependency is not None :
-				
-			self.add_dependency_data( omsi_dependency( param_name = 'peaksBins', link_name='peaksBins', omsi_object=lpfdata_dependency['LPF_Peaks_MZ'], selection=None ) )
-			self.add_dependency_data( omsi_dependency( param_name = 'peaksIntensities', link_name='peaksIntensities', omsi_object=lpfdata_dependency['LPF_Peaks_Vals'], selection=None ) )
-			self.add_dependency_data( omsi_dependency( param_name = 'peaksArrayIndex', link_name='peaksArrayIndex', omsi_object=lpfdata_dependency['LPF_Peaks_ArrayIndex'], selection=None ) )
+#		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
+#		if npgdata_dependency is not None :
+#			# if isinstance( npgdata_dependency , omsi_dependency ) :
+#			# 	#Add the depency as given by the user
+#			# 	self.add_dependency_data( npgdata_dependency )
+#			# elif isinstance( lpfdata_dependency, omsi_dependency):
+#			# 	self.add_dependency_data( lpfdata_dependency )
+#				
+#			# else :
+#			# 	#The user only gave us the object that we depend on so we need to construct the 
+#			self.add_dependency_data( omsi_dependency( param_name = 'HCpeaksLabels', link_name='HCpeaksLabels', omsi_object=npgdata_dependency['npghc_peaks_labels'], selection=None ) )
+#			self.add_dependency_data( omsi_dependency( param_name = 'HCLabelsList', link_name='HCLabelsList', omsi_object=npgdata_dependency['npghc_labels_list'], selection=None ) )
+#				
+#		if lpfdata_dependency is not None :
+#				
+#			self.add_dependency_data( omsi_dependency( param_name = 'peaksBins', link_name='peaksBins', omsi_object=lpfdata_dependency['LPF_Peaks_MZ'], selection=None ) )
+#			self.add_dependency_data( omsi_dependency( param_name = 'peaksIntensities', link_name='peaksIntensities', omsi_object=lpfdata_dependency['LPF_Peaks_Vals'], selection=None ) )
+#			self.add_dependency_data( omsi_dependency( param_name = 'peaksArrayIndex', link_name='peaksArrayIndex', omsi_object=lpfdata_dependency['LPF_Peaks_ArrayIndex'], selection=None ) )
 
 		print "Collecting done."
 		print "--- finished ---"
@@ -299,7 +308,14 @@ def main(argv=None):
 	# pc
 	myPC = omsi_peakcube(nameKey = "omsi_peakcube_"+str(ctime()))
 	print "--- Creating Peak Cube ---"
-	myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPL, NPGLL)
+	#myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPL, NPGLL)
+	myPC.execute(peaksBins=peaksBins,
+                 peaksIntensities = peaksIntensities,
+                 peaksArrayIndex = peaksArrayIndex,
+                 peaksMZdata = peaksMZdata,
+                 HCpeaksLabels = NPGPL,
+                 HCLabelsList = NPGLL )
+    
 	PCm = myPC['npg_peak_cube_mz']
 	print "NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm
 	PMz = myPC['npg_peak_mz']

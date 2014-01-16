@@ -50,14 +50,17 @@ class omsi_format_instrument( omsi_format_common ) :
 class omsi_format_analysis( omsi_format_common ) :
     """ Specification for storing analysis related data.
     
-       :var analysis_groupname: `analysis_` : Group with additional analysis results
-       :var analysis_identifier: `analysis_identifier` : Identifier for the analysis to enable look-up by analysis id
-       :var analysis_type: `analysis_type` : Dataset used to store the analysis type descriptor string
+        :var analysis_groupname: `analysis_` : Group with additional analysis results
+        :var analysis_identifier: `analysis_identifier` : Identifier for the analysis to enable look-up by analysis id
+        :var analysis_type: `analysis_type` : Dataset used to store the analysis type descriptor string
+        :var analysis_parameter_group: Group for storing analysis parameters. Dependent parameters are stored separately using a omsi_format_dependencies group.
+        :var analysis_runinfo_group: Group for storing run information, e.g., where was the analysis run, how long did it take etc.
     """
     analysis_groupname = "analysis_"
     analysis_identifier = "analysis_identifier"
     analysis_type = "analysis_type"
     analysis_parameter_group = "parameter"
+    analysis_runinfo_group = "runinfo"
     current_version = "0.1"
 
 class omsi_format_dependencydata( omsi_format_common ):
@@ -68,10 +71,12 @@ class omsi_format_dependencydata( omsi_format_common ):
        :var dependency_parameter: `parameter_name` : Name of string dataset used to store the name of the dependend parameter 
        :var dependency_selection: `selection` : Name of the string dataset used to store a selection string if needed.  
        :var dependency_mainname:  `main_name` : Name of the string dataset used to store the description of the link to the object that this depends on. 
+       :var dependency_datasetname: 'data_name` : Name fo the string dataset used to store the name of dataset within the mainname highlevel object. 
     """
     dependency_parameter = "parameter_name"
     dependency_selection = "selection"
     dependency_mainname  = "main_name"
+    dependency_datasetname = "data_name"
     current_version = "0.1"
 
 class omsi_format_dependencies( omsi_format_common ) : 

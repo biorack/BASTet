@@ -183,7 +183,8 @@ def convert_files() :
             print "Selected Region: "+str(i['region'])
         except :
             pass
-        print "HDF5 chunking: "+str(chunks)
+        if not auto_chunk :
+            print "HDF5 chunking: "+str(chunks)
         print "HDF5 compression: "+str(compression)+", "+str(compression_opts)
 
         #Open the img file
@@ -246,7 +247,7 @@ def convert_files() :
             write_data( inputFile, tempData, ioOption=ioOption, chunks=c)
             omsiFile.flush()
 
-        #Close the img file and free up any allocated memory
+        #Close the input data file and free up any allocated memory
         inputFile.close_file()
         
         ####################################################################
@@ -257,7 +258,7 @@ def convert_files() :
             print "Executing local peak finding"
             #Execute the peak finding
             fpl = omsi_findpeaks_local( nameKey = "omsi_findpeaks_local_"+str(time.ctime()) )
-            fpl.execute_peakfinding(data , mzdata, printStatus=True, msidata_dependency=    data)
+            fpl.execute( msidata=data , mzdata=mzdata, printStatus=True)
             #Save the peak-finding to file
             ana , ai = exp.create_analysis( fpl )
         #Compute the global peak finding and add the peak-cube data to the file
@@ -265,7 +266,7 @@ def convert_files() :
             print "Executing global peak finding"
             #Execute the peak finding
             fpg = omsi_findpeaks_global( nameKey = "omsi_findpeaks_global_"+str(time.ctime()) )
-            fpg.execute_peakfinding(data , mzdata, msidata_dependency=data)
+            fpg.execute( msidata=data , mzdata=mzdata )
             #Save the peak-finding to file
             ana , ai = exp.create_analysis( fpg )
             fpgPath = ana.get_h5py_analysisgroup().name
@@ -277,13 +278,11 @@ def convert_files() :
             nmf = omsi_nmf( nameKey = "omsi_nmf_"+str(time.ctime()) )
             if executeFPG and not nmf_useRawData :
                 print "   Using peak-cube data for NMF"
-                fpgData = fpg[ 'peak_cube' ]
-                dataPath = fpgPath+"/peak_cube"
-                dataMzPath =  fpgPath+"/peak_mz"
-                nmf.execute_nmf( fpgData , nmf_numComponents, nmf_timeout, nmf_numIter, nmf_tolerance,  msidata_dependency=ana)
+                fpgData = ana[ 'peak_cube' ]
+                nmf.execute( msidata=fpgData , numComponents=nmf_numComponents, timeOut=nmf_timeout, numIter=nmf_numIter, tolerance=nmf_tolerance)
             else :
                 print "   Using raw data for NMF"
-                nmf.execute_nmf( data , nmf_numComponents, nmf_timeout, nmf_numIter, nmf_tolerance, msidata_dependency=data)
+                nmf.execute_nmf( msidata=data , numComponents=nmf_numComponents, timeOut=nmf_timeout, numIter=nmf_numIter, tolerance=nmf_tolerance)
             #Save the nmf results to file
             ana, ai = exp.create_analysis( nmf )
         

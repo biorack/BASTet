@@ -23,6 +23,8 @@ class omsi_lpf(omsi_analysis_base) :
 	def __init__(self, nameKey="undefined"):
 		super(omsi_lpf,self).__init__()
 		self.analysis_identifier = nameKey
+		self.parameter_names = [ 'msidata' , 'mzdata', 'integration_width', 'peakheight', 'slwindow', 'smoothwidth']
+		self.data_names = [ 'LPF_Peaks_MZ' , 'LPF_Peaks_Vals' , 'LPF_Peaks_ArrayIndex' , 'LPF_indata_mz' ]
 		
 	# ------------------------ viewer functions start ---------------------- 
 	
@@ -138,14 +140,27 @@ class omsi_lpf(omsi_analysis_base) :
 		return super(omsi_lpf,cls).v_qslice_viewerOptions(anaObj)
 	
 	# ------------------------ viewer functions end ------------------------ 
-	# @classmethod
-	# def get_analysis_type(self) :
-	# 	return "omsi_lpf"
-	
-	# def execute_peakfinding(self, msidata , mzdata, integration_width=10, peakheight = 2, slwindow = 100, smoothwidth = 3) :
-	def execute_peakfinding(self, msidata , mzdata, integration_width=10, peakheight = 10, slwindow = 100, smoothwidth = 3 , msidata_dependency=None) :
+	def execute_analysis(self) :
 
 		import pyopencl as cl
+
+		#Set default parameter values if needed
+		if not self['integration_width'] :
+				self['integration_width']=10
+		if not self['peakheight'] :
+				self['peakheight']=10
+		if not self['slwindow'] :
+				self['slwindow'] = 100
+		if not self['smoothwidth'] :
+				self['smoothwidth'] = 3
+		
+		#Copy parameters to local variables for convenience
+		msidata = self['msidata']
+		mzdata = self['mzdata']
+		integration_width = self['integration_width'][0]
+		peakheight = self['peakheight'][0]
+		slwindow = self['slwindow'][0]
+		smoothwidth = self['smoothwidth'][0]
 		
 		#Determine the data dimensions
 		Nx=msidata.shape[0]
@@ -280,40 +295,12 @@ class omsi_lpf(omsi_analysis_base) :
 		#handle also a large range of python built_in types by converting them to numpy for storage in HDF5 but
 		#to ensure a consitent behavior we convert the values directly here
 		
-		#Clear any previously stored analysis data
-		self.clear_analysis_data()
-		self.clear_parameter_data()
-		self.clear_dependency_data()
-		
-		# Parameters
-		iw = np.asarray( [ integration_width ] )
-		self.add_parameter_data( name='LPF_integration_width' , data=iw , dtype=str(iw.dtype) )
-		ph = np.asarray( [ peakheight ] )
-		self.add_parameter_data( name='LPF_peakheight' , data=ph , dtype=str(ph.dtype) )
-		slw = np.asarray( [ slwindow ] )
-		self.add_parameter_data( name='LPF_slwindow' , data=slw , dtype=str(slw.dtype) )
-		smw = np.asarray( [ smoothwidth ] )
-		self.add_parameter_data( name='LPF_smoothwidth ' , data=smw , dtype=str(smw.dtype) )
-		
-		# LPF Results
-		pmz = np.asarray( peak_MZ )
-		self.add_analysis_data( name='LPF_Peaks_MZ' , data=pmz , dtype=str(pmz.dtype) )
-		pv = np.asarray( peak_values )
-		self.add_analysis_data( name='LPF_Peaks_Vals' , data=pv , dtype=str(pv.dtype) )
-		pai = np.asarray( peak_arrayindex )
-		self.add_analysis_data( name='LPF_Peaks_ArrayIndex' , data=peak_arrayindex , dtype=str(peak_arrayindex.dtype) )
-		mzs = mzdata[:]
-		self.add_analysis_data( name='LPF_indata_mz' , data=mzs, dtype=str(mzs.dtype) )
-		
-		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
-		if msidata_dependency is not None :
-			if isinstance( msidata_dependency , omsi_dependency ) :
-				#Add the depency as given by the user
-				self.add_dependency_data( msidata_dependency )
-			else :
-				#The user only gave us the object that we depend on so we need to construct the 
-				self.add_dependency_data( omsi_dependency( param_name = 'msidata', link_name='msidata', omsi_object=msidata_dependency, selection=None ) )
-
+		#Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
+		self['LPF_Peaks_MZ'] = np.asarray( peak_MZ )
+		self['LPF_Peaks_Vals'] = np.asarray( peak_values )
+		self['LPF_Peaks_ArrayIndex'] = np.asarray( np.asarray( peak_arrayindex ) )
+		self['LPF_Peaks_Vals'] = np.asarray( peak_values )
+		self['LPF_indata_mz'] = mzdata[:]
 
 		print "Collecting done."
 		print "--- finished ---"
@@ -584,7 +571,7 @@ def main(argv=None):
 	#Execute the peak finding
 	myLPF = omsi_lpf(nameKey = "omsi_lpf_"+str(ctime()))
 	print "--- Executing LPF ---"
-	myLPF.execute_peakfinding( data , mzdata, peakheight = mypeakheight)
+	myLPF.execute( data , mzdata, peakheight = mypeakheight)
 	print "\n\nGetting peak finding analysis results"
 	pmz = myLPF['LPF_Peaks_MZ']
 	print "pmz:\n", pmz

@@ -1,6 +1,10 @@
 from omsi.dataformat.omsi_file import omsi_file_analysis, omsi_file_msidata
 from omsi.analysis.omsi_analysis_data import *
 from omsi.shared.omsi_dependency import *
+import platform
+import time
+import datetime
+import sys
 
 class omsi_analysis_base(object) :
     """Base class for omsi analysis functionality. The class provides a large set of functionality designed
@@ -18,6 +22,16 @@ class omsi_analysis_base(object) :
            :param __data_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived classes need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
            :param __parameter_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
            :param __dependency_list: Dictonary of omsi_dependency to be written to the HDF5 file. Derived classes need to add all dependencies data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
+           :param parameter_names: List of strings of all names of analysis parameters 
+               (including those that may have dependencies). This is the combination of
+                all target keys of __dependency_list and __parameter_list. 
+           :param data_names: List of strings of all names of analysis output datasets.
+               These are the target keys for __data_list. 
+    
+       Execution Functions:
+       
+            * ``execute`` : Then main function the user needs to call in order to execute the analysis
+            * ``execute_analysis: This function needs to be implemented by child classes of omsi_analysis_base to implement the specifics of executing the analysis.
     
        I/O functions:
        
@@ -47,50 +61,116 @@ class omsi_analysis_base(object) :
         self.__data_list = []
         self.__parameter_list = []
         self.__dependency_list = []
-        
+        self.parameter_names = []
+        self.data_names = []
+        self.run_info = {}
+    
     def __getitem__(self, key) :
         """This class supports basic slicing to access data stored in the main member variables. 
            By default the data is retrieved from __data_list and the __getitem__(key) function.
            which implemtent the [..] operator, returns __data_list[key]['data']. The key is 
            a string indicating the name of the paramter to be retrieved. If the key is not 
            found in the __data_list then the function will try to retrieve the data from 
-           __parameter_list instead. By adding "parameter/key" or "dependency/key" 
-           one may also explicitly retrieve values from the __parameter_list and __dependency_list.
+           __parameter_list and __dependency_list instead. 
         """
-        if isinstance( key , str ) :
-            
-            try :
-                for i in self.__data_list :
-                    if i['name'] == key : 
-                        return i['data']
-            except :
-                pass
-            try:
-                for i in self.__parameter_list :
-                    if i['name'] == key : 
-                        return i['data']
-            except :
-                pass
-            if key.startswith("parameter/" ) :
-                key = key.lstrip('parameter/')
-                try : 
-                    for i in self.__parameter_list :
-                        if i['name'] == key : 
-                            return i['data']
-                except:
-                    pass
-            if key.startswith("dependency/" ) :
-                key = key.lstrip('dependency/')
-                try : 
-                    for i in self.__dependency_list :
-                        if i['name'] == key : 
-                            return i['omsi_object']
-                except :
-                    pass
+        if isinstance( key , str ) or isinstance( key, unicode ) :
+            for i in self.__data_list :
+                if i['name'] == key :
+                    return i['data']
+            for i in self.__parameter_list :
+                if i['name'] == key :
+                    return i['data']
+            for i in self.__dependency_list :
+                if i['param_name'] == unicode(key) :
+                    return i.get_data()
             return None
         else :
             return None
-                
+
+
+    def __setitem__(self, key , value ) :
+        """Set values in the __data, __parameter and __dependencies dicts. 
+           If the given key is found in the parameter_names list then it is assigned
+           to the paramerters/dependencies, otherwise the key is assumed to be a 
+           an output that needs to be added to the __data_list
+        """
+        if key in self.parameter_names :
+            self.set_parameters( **{key:value} )
+        elif key in self.data_names :
+            if not 'numpy' in str(type( value ) ) :
+                tempVal = np.asarray( value )
+                self.__data_list.append( omsi_analysis_data(name=key, data=tempVal, dtype=tempVal.dtype) )
+            else :
+                self.__data_list.append( omsi_analysis_data(name=key, data=value, dtype=value.dtype) )
+        else :
+            raise KeyError( 'Invalid key. The given key was not found as part of the analysis paramters not analysis output.')
+
+
+    def execute(self, **kwargs) :
+        """ Use this function to run the analysis. 
+        
+            :param **kwargs: Parameters to be used for the analysis. Parameters may also be set using
+                       the __setitem__ mechanism or as baches using the set_parameters function.
+                       
+            :returns: This function returns the output of the execute analysis function. 
+        """
+        #Set any parameters that are given to the execute function
+        self.set_parameters( **kwargs )
+        
+        #Record basic excution provenance information
+        self.run_info = {}
+        try : 
+            self.run_info['architecture'] = unicode( platform.architecture() )
+            self.run_info['java_ver'] = unicode( platform.java_ver() )
+            self.run_info['libc_ver'] = unicode( platform.libc_ver() )
+            self.run_info['linux_distribution'] = unicode( platform.linux_distribution() )
+            self.run_info['mac_ver'] = unicode( platform.mac_ver() )
+            self.run_info['machine'] = unicode( platform.machine() )
+            self.run_info['node'] = unicode( platform.node() )
+            self.run_info['platform'] = unicode( platform.platform() )
+            self.run_info['processor'] = unicode( platform.processor() )
+            self.run_info['python_branch'] = unicode( platform.python_branch() )
+            self.run_info['python_build'] = unicode( platform.python_build() )
+            self.run_info['python_compiler'] = unicode( platform.python_compiler() )
+            self.run_info['python_implementation'] = unicode( platform.python_implementation() )
+            self.run_info['python_revision'] = unicode( platform.python_revision() )
+            self.run_info['python_version'] = unicode( platform.python_version() )
+            self.run_info['release'] = unicode( platform.release() )
+            self.run_info['system'] = unicode( platform.system() )
+            self.run_info['uname'] = unicode( platform.uname() )
+            self.run_info['version'] = unicode( platform.version() )
+            self.run_info['win32_ver'] = unicode( platform.win32_ver() )
+        except :
+            print "WARNING: Recording of execution provenance failed: "+str( sys.exc_info() )
+            pass
+
+        #Execute the analysis
+        self.run_info['start_time'] = unicode(datetime.datetime.now())
+        startTime = time.time()
+
+        #Execute the analysis
+        re = self.execute_analysis()
+
+        #Finalize recording of post execution provenance
+        self.run_info['execution_time'] = unicode( time.time() - startTime )
+        self.run_info['end_time'] = unicode(datetime.datetime.now())
+
+        #Return the output of the analysis
+        return re
+        
+    def execute_analysis(self) :
+        """Implement this function to implement the execution of the actual analysis.
+        
+           This function may not require any input parameters. All input parameters are
+           recoded in the parameters and dependencies lists and should be retrieved 
+           from there, e.g, using basic slicing self[ paramName ]
+        
+           :returns: This function may return any developer-defined data. Note, all
+                     output that should be recorded must be put into the data list.
+        
+        """
+        raise NotImplementedError("Implement execute_analysis in order to be able to run the analysis.")
+        
 
     @classmethod
     def v_qslice(cls , anaObj , z , viewerOption=0) :
@@ -344,17 +424,13 @@ class omsi_analysis_base(object) :
     def get_analysis_data_names(self) :
         """Get a list of all analysis dataset names."""
         
-        return self.__data_list.keys()
+        return self.data_names
     
-    def get_parameter_data_names(self) :
-        """Get a list of all parameter dataset names."""
+    def get_parameter_names(self) :
+        """Get a list of all parameter dataset names (including those that may define 
+           dependencies."""
         
-        return self.__parameter_list.keys()
-    
-    def get_dependency_data_names(self) :
-        """Get a list of all parameter dataset names."""
-        
-        return self.__dependency_list.keys()
+        return self.parameter_names
     
     def get_analysis_data(self, index):
         """Given the index return the associated dataset to be written to the HDF5 file
@@ -403,6 +479,10 @@ class omsi_analysis_base(object) :
         for i in self.__dependency_list :
             if i['name'] == dataname : 
                 return i
+                
+    def get_all_run_info(self) :
+        """Get the dict with the complete info about the last run of the analysis"""
+        return self.run_info
         
     def get_all_analysis_data(self) :
         """Get the complete list of all analysis datasets to be written to the HDF5 file"""
@@ -444,76 +524,105 @@ class omsi_analysis_base(object) :
     def clear_dependency_data(self) : 
         """Clear the list of parameter data"""
         self.__dependency_list = []
-        
-    def add_analysis_data(self , name, data, dtype ) : 
-        """Add a new dataset to the list of data to be written to the HDF5 file
 
-          The input parameters will be transformed into a omsi_analysis_data dictionary.
+    def clear_analysis(self) :
+        """Clear all analysis, parameter and dependency data"""
+        self.clear_analysis_data()
+        self.clear_parameter_data()
+        self.clear_dependency_data()
 
-          :param name: The name for the dataset in the HDF5 format
-          :param data: The numpy array to be written to HDF5. The data write function 
-                omsi_file_experiment.create_analysis used for writing of the data to file can
-                in principal also handel other primitive data types by explicitly converting them
-                to numpy. However, in this case the dtype is determined based on the numpy conversion
-                and correct behavior is not guaranteed. I.e., even single scalars should be stored as
-                a 1D numpy array here.
-          :param dtype: The data type to be used during writing. For standard numpy data types this is just 
-                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are: 
-                 
-                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
-                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
+    def set_parameters( self, **kwargs) :
+        """Set all parameters given as input to the function. The inputs
+           are placed in either the __parameter_list or __dependency_list,
+           depending on whether the given input is user-defined or whether
+           the input has dependencies
+           
+           :param **kwargs: Dictionary of keyword arguments. All keys are 
+                   expected to be strings. All values are expected to be 
+                   either i) numpy arrays, ii) int, float, str or unicode
+                   variables, iii) h5py.Dataset or  h5py.Group, iv) or any
+                   the omsi_file API class objects. For iii) and iv) one 
+                   may provide a tuple t consisting of the dataobject t[0] and
+                   an additional selection string t[1].
         """
-        self.__data_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
-        
-    def add_parameter_data(self , name, data, dtype ) :
-        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
+        for k, v in kwargs.items() :
+            name = unicode(k)
+            value  = v
+            selection = None
+            if isinstance(v , tuple ) :
+                value = v[0]
+                selection = v[1]
+            if isinstance( v , h5py.Dataset) or isinstance( v, h5py.Group) or omsi_file.is_managed(v) :
+                curr_dependency = omsi_dependency( param_name = name, link_name=name, omsi_object=value, selection=selection ) 
+                self.__dependency_list.append( curr_dependency )
+            else : #Add to the list of user-defined parameters
+                try :
+                    dtype = value.dtype
+                except :
+                    if isinstance( value , float ) or isinstance( value , int ) or isinstance( value , bool) :
+                        value = np.asarray( [value] )
+                        dtype = value.dtype
+                    elif isinstance( value , str ) or isinstance( value , unicode ) :
+                        dtype = omsi_format_common.str_type
+                self.__parameter_list.append( omsi_analysis_data(name=name, data=value, dtype=value.dtype ) )
 
-           The input parameters will be transformed into a omsi_analysis_data dictionary.
 
-          :param name: The name for the dataset in the HDF5 format
-          :param data: The numpy array to be written to HDF5. The data write function 
-                omsi_file_experiment.create_analysis used for writing of the data to file can
-                in principal also handel other primitive data types by explicitly converting them
-                to numpy. However, in this case the dtype is determined based on the numpy conversion
-                and correct behavior is not guaranteed. I.e., even single scalars should be stored as
-                a 1D numpy array here.
-          :param dtype: The data type to be used during writing. For standard numpy data types this is just 
-                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are: 
-                 
-                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
-                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
-          
-        """
-        self.__parameter_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
-        
-        
-    def add_dependency_data(self , dependency ) :
-        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
 
-          :param dependency: The data that should be added to __dependency_list member to be written to HDF5.
-          :type data: omsi_dependency 
+#    def add_analysis_data(self , name, data, dtype ) : 
+#        """Add a new dataset to the list of data to be written to the HDF5 file
+#
+#          The input parameters will be transformed into a omsi_analysis_data dictionary.
+#
+#          :param name: The name for the dataset in the HDF5 format
+#          :param data: The numpy array to be written to HDF5. The data write function 
+#                omsi_file_experiment.create_analysis used for writing of the data to file can
+#                in principal also handel other primitive data types by explicitly converting them
+#                to numpy. However, in this case the dtype is determined based on the numpy conversion
+#                and correct behavior is not guaranteed. I.e., even single scalars should be stored as
+#                a 1D numpy array here.
+#          :param dtype: The data type to be used during writing. For standard numpy data types this is just 
+#                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are: 
+#                 
+#                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
+#                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
+#        """
+#        self.__data_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
 
-          :raises: ValueError in case data is not of omsi_dependency object. 
-        """
-        if isinstance( dependency , omsi_dependency ) :
-            self.__dependency_list.append( dependency )
-        else :
-             raise ValueError( "Invalid input for add_data_dependency function" )
-            
-        #from omsi.dataformat.omsi_file import omsi_file, omsi_file_analysis, omsi_file_experiment, omsi_file_instrument, omsi_file_sample, omsi_file_msidata
-        #if isinstance( link
-        #
-        #if isinstance( link_path , str ) :
-        #    self.__dependency_list.append( omsi_analysis_data( name=name , data=link_path  , dtype=omsi_analysis_data.ana_hdf5link  ) )
-        #elif isinstance( link_path , omsi_file_analysis ) or isinstance( link_path, omsi_file_msidata ) \
-        #     or isinstance( link_path, omsi_file_experiment ) or isinstance( link_path, omsi_file_sample ) \
-        #     or isinstance( link_path, omsi_file_instrument ) or isinstance( link_path, omsi_file ) :
-        #
-        #    self.__dependency_list.append( omsi_analysis_data( name=name , data=link_path.name , dtype=omsi_analysis_data.ana_hdf5link  ) )
-        #else :
-        #    errorMessage = "Could not add dependency data to the analysis as no valid HDF5 link could be identified."
-        #    raise ValueError( errorMessage )
-        
+#    def add_parameter_data(self , name, data, dtype ) :
+#        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
+#
+#           The input parameters will be transformed into a omsi_analysis_data dictionary.
+#
+#          :param name: The name for the dataset in the HDF5 format
+#          :param data: The numpy array to be written to HDF5. The data write function 
+#                omsi_file_experiment.create_analysis used for writing of the data to file can
+#                in principal also handel other primitive data types by explicitly converting them
+#                to numpy. However, in this case the dtype is determined based on the numpy conversion
+#                and correct behavior is not guaranteed. I.e., even single scalars should be stored as
+#                a 1D numpy array here.
+#          :param dtype: The data type to be used during writing. For standard numpy data types this is just 
+#                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are: 
+#                 
+#                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
+#                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
+#          
+#        """
+#        self.__parameter_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
+#        
+
+#    def add_dependency_data(self , dependency ) :
+#        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
+#
+#          :param dependency: The data that should be added to __dependency_list member to be written to HDF5.
+#          :type data: omsi_dependency 
+#
+#          :raises: ValueError in case data is not of omsi_dependency object. 
+#        """
+#        if isinstance( dependency , omsi_dependency ) :
+#            self.__dependency_list.append( dependency )
+#        else :
+#             raise ValueError( "Invalid input for add_data_dependency function" )
+
 
     def write_to_omsi_file(self , analysisGroup) :
         """This function can be optionally overwritten to implement a custom data write 
@@ -564,7 +673,7 @@ class omsi_analysis_base(object) :
            
            
         """
-        if str(analysisGroup.get_analysis_type()[0]) != str(self. get_analysis_type()) :
+        if str(analysisGroup.get_analysis_type()[0]) != str(self.get_analysis_type()) :
             errorMessage = "The type of the analysis specified in the omsi data file does not match the analysis type of the object "
             errorMessage = errorMessage + str(analysisGroup.get_analysis_type()[0]) + " != " + str(self.get_analysis_type())
             raise TypeError( errorMessage )
@@ -577,11 +686,10 @@ class omsi_analysis_base(object) :
         
         self.__data_list = analysisGroup.get_all_analysis_data(load_data=load_data)
         self.__parameter_list = analysisGroup.get_all_parameter_data(load_data= load_parameters)
-        self.__dependency_list = analysisGroup.get_all_dependency_data(omsi_format= dependencies_omsi_format)
+        self.__dependency_list = analysisGroup.get_all_dependency_data(omsi_dependency_format= dependencies_omsi_format)
         
         return True
-        
-       
+
         
     def get_analysis_identifier(self) :
         """Return the name of the analysis used as key when searching for a particular analysis"""

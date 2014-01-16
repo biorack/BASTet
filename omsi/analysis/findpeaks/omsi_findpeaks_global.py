@@ -13,6 +13,8 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         """Initalize the basic data members"""
         super(omsi_findpeaks_global,self).__init__()
         self.analysis_identifier = nameKey
+        self.parameter_names = [ 'msidata' , 'mzdata', 'integration_width', 'peakheight', 'slwindow', 'smoothwidth']
+        self.data_names = [ 'peak_cube' , 'peak_mz']
         
     @classmethod
     def v_qslice(cls , anaObj , z , viewerOption=0) :
@@ -99,22 +101,40 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         return re
 
     
-    def execute_peakfinding(self, msidata , mzdata, integration_width=10, peakheight = 2, slwindow = 100, smoothwidth = 3, msidata_dependency=None) :
+    def execute_analysis(self) :
         """Execute the global peak finding for the given msidata
         
            Keyword Arguments:
 
-           :param msidata: numpy or h5py data object with the msi data. This should be a 3D array.
-           :param mzdata: h5py or numpy object with the mzdata for the spectrum
-           :param integration_width: integer paramter indicating the window over which peaks should be integrated
-           :param peakheight: ???
-           :param slwindow: ???
-           :param smoothwidth: ???
-           :param msidata_dependency: The path or omsi_file_ object on which the msidata input data object depends/originates from. 
-
+           :param msidata: numpy or h5py data object with the msi data. This should be a 3D array. (Mandatory user input)
+           :param mzdata: h5py or numpy object with the mzdata for the spectrum. (Mandatory user input)
+           :param integration_width: integer paramter indicating the window over which peaks should be integrated. (Default=10)
+           :param peakheight: ??? . (Default=2)
+           :param slwindow: ??? . (Default=100)
+           :param smoothwidth: ??? . (Default=3)
+           
         """
+        #Make sure all imports are here
         from findpeaks import findpeaks
         import numpy as np
+        
+        #Set default parameter values if needed
+        if not self['integration_width'] :
+            self['integration_width']=10
+        if not self['peakheight'] :
+            self['peakheight']=2
+        if not self['slwindow'] :
+            self['slwindow'] = 100
+        if not self['smoothwidth'] :
+            self['smoothwidth'] = 3
+    
+        #Copy parameters to local variables for convenience
+        msidata = self['msidata']
+        mzdata = self['mzdata']
+        integration_width = self['integration_width'][0]
+        peakheight = self['peakheight'][0]
+        slwindow = self['slwindow'][0]
+        smoothwidth = self['smoothwidth'][0]
         
         #Load the input data
         data = msidata[:]
@@ -155,34 +175,10 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         #handle also a large range of python built_in types by converting them to numpy for storage in HDF5 but
         #to ensure a consitent behavior we convert the values directly here
             
-        #Clear any previously stored analysis data
-        self.clear_analysis_data()
-        self.clear_parameter_data()
-        self.clear_dependency_data()
-        
         #Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
-        self.add_analysis_data( name='peak_cube' , data=im , dtype=str(im.dtype) ) 
-        self.add_analysis_data( name='peak_mz' , data=mzdata[xp] , dtype=str(mzdata.dtype) ) 
+        self['peak_cube'] = im
+        self['peak_mz'] = mzdata[xp]
         
-        #Save the analysis parameters to the __parameter_list so that the data can be saved automatically by the omsi HDF5 file API
-        iw = np.asarray( [ integration_width ] )
-        self.add_parameter_data( name='integration_width' , data=iw , dtype=str(iw.dtype) ) 
-        ph = np.asarray( [ peakheight ] )
-        self.add_parameter_data( name='peakheight' , data=ph , dtype=str(ph.dtype) ) 
-        slw = np.asarray( [ slwindow ] )
-        self.add_parameter_data( name='slwindow' , data=slw , dtype=str(slw.dtype) ) 
-        smw = np.asarray( [ smoothwidth ] )
-        self.add_parameter_data( name='smoothwidth ' , data=smw  , dtype=str(smw.dtype) ) 
-        
-        #Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
-        if msidata_dependency is not None :
-            if isinstance( msidata_dependency , omsi_dependency ) :
-                #Add the depency as given by the user
-                self.add_dependency_data( msidata_dependency )
-            else :
-                #The user only gave us the object that we depend on so we need to construct the 
-                self.add_dependency_data( omsi_dependency( param_name = 'msidata', link_name='msidata', omsi_object=msidata_dependency, selection=None ) )
-
 
 def main(argv=None):
     '''Then main function'''

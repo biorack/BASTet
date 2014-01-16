@@ -12,6 +12,8 @@ class omsi_nmf(omsi_analysis_base) :
         """Initalize the basic data members"""
         super(omsi_nmf,self).__init__()
         self.analysis_identifier = nameKey
+        self.parameter_names = [ 'msidata' , 'numComponents', 'timeOut', 'numIter', 'tolerance' ]
+        self.data_names = ['wo' , 'ho']
         
     @classmethod
     def v_qslice(cls , anaObj , z , viewerOption=0) :
@@ -91,18 +93,34 @@ class omsi_nmf(omsi_analysis_base) :
         return re
         
         
-    def execute_nmf(self, msidata , numComponents=20, timeOut=600, numIter=2000, tolerance=0.0001, msidata_dependency=None) :
+    def execute_analysis(self) :
         """Execute the nmf for the given msidata
         
            Keyword Arguments:
-           :param msidata: h5py data object with the msi data.
-           :param numComponents: Number of components to compute
-           :param timeOut: Maximum time it should take
-           :param numIter: Number of iterations
-           :param tolerance: tolerance for a relative stopping condition
-           :param msidata_dependency: The h5py.Datase or the omsi_file_analysis or omsi_file_msidata object on which the msidata input data object depends/originates from. 
+           :param msidata: h5py data object with the msi data. (Mandatory user input)
+           :param numComponents: Number of components to compute. (Default=20)
+           :param timeOut: Maximum time it should take. (Default=600)
+           :param numIter: Number of iterations. (Default=2000)
+           :param tolerance: tolerance for a relative stopping condition. (Default=0.0001)
            
         """
+        #Define default settings for parameters 
+        if not self['numComponents'] :
+            self['numComponents'] = 20
+        if not self['timeOut'] :
+            self['timeOut'] = 600
+        if not self['numIter'] :
+            self['numIter'] = 2000
+        if not self['tolerance'] :
+            self['tolerance'] = 0.0001
+            
+        #Assign parameters to local variables for convenience
+        msidata = self['msidata']
+        numComponents = self['numComponents']
+        timeOut = self['timeOut']
+        numIter = self['numIter']
+        tolerance = self['tolerance'] 
+        
         #Copy the input data
         data = msidata[:]
         nx= data.shape[0]
@@ -114,11 +132,12 @@ class omsi_nmf(omsi_analysis_base) :
         #Reshape the data         
         data = data.reshape(numPixels, numBins)
         data = data.transpose()
-        temp = data.max(axis = 1)
-        idx = argwhere(temp>1000)
-        idx = ravel(idx)
-        data = data[idx,:];
-        Nz = idx.shape[0];
+        #temp = data.max(axis = 1)
+        #idx = argwhere(temp>1000)
+        #idx = ravel(idx)
+        #data = data[idx,:];
+        #Nz = idx.shape[0];
+        Nz = numBins
 
         #Execute nmf
         (wo,ho) = nmf(data, random.randn(Nz,numComponents), random.randn(numComponents ,numPixels), tolerance, timeOut, numIter)
@@ -127,35 +146,10 @@ class omsi_nmf(omsi_analysis_base) :
         ho = ho.transpose() 
         ho = ho.reshape( (nx,ny,numComponents))
         
-        #Clear any previously stored analysis data
-        self.clear_analysis_data()
-        self.clear_parameter_data()
-        self.clear_dependency_data()
-        
         #Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
-        self.add_analysis_data( name='wo' , data=wo , dtype=str(wo.dtype) )
-        self.add_analysis_data( name='ho' , data=ho , dtype=str(ho.dtype) )
-        
-        #Save the analysis parameters to the __parameter_list so that the data can be saved automatically by the omsi HDF5 file API
-        nc_param = asarray( [numComponents] )
-        self.add_parameter_data( name='numComponents' , data=nc_param , dtype=str(nc_param.dtype) )
-        t_param = asarray( [timeOut] )
-        self.add_parameter_data( name='timeOut' , data=t_param , dtype=str(t_param.dtype) )
-        ni_param = asarray( [numIter] )
-        self.add_parameter_data( name='numIter' , data=ni_param , dtype=str(ni_param.dtype) )
-        to_param = asarray( [tolerance] )
-        self.add_parameter_data( name='tolerance' , data=to_param , dtype=str(to_param.dtype) )
-        
-        #Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
-        if msidata_dependency is not None :
-            if isinstance( msidata_dependency , omsi_dependency ) :
-                #Add the depency as given by the user
-                self.add_dependency_data( msidata_dependency )
-            else :
-                #The user only gave us the object that we depend on so we need to construct the 
-                self.add_dependency_data( omsi_dependency( param_name = 'msidata', link_name='msidata', omsi_object=msidata_dependency, selection=None ) )
+        self['wo'] = wo
+        self['ho'] = ho
 
-           
 
 def main(argv=None):
     '''Then main function'''
@@ -202,8 +196,8 @@ def main(argv=None):
     print "Executing nmf analysis"
     testNMF.execute_nmf( data )
     print "Getting nmf analysis results"
-    wo = testNMF.get_analysis_data_by_name( 'wo' )['data']
-    ho = testNMF.get_analysis_data_by_name( 'ho' )['data']
+    wo = testNMF.get_analysis_data( 'wo' )['data']
+    ho = testNMF.get_analysis_data( 'ho' )['data']
     print ho
     print "Plotting nmf analysis results"
     Nx = data.shape[0]

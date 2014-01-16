@@ -28,16 +28,20 @@ class omsi_npg(omsi_analysis_base) :
 	
 	# class attributes: LPF data
 	# set on start of omsi_npg_exec
-	peaksBins = None
-	peaksIntensities = None
-	peaksArrayIndex = None
-	peaksMZdata = None
-	peaksMZ = None
+	##These have been replace by the parameter_names infrastrucutre 
+    #peaksBins = None
+	#peaksIntensities = None
+	#peaksArrayIndex = None
+	#peaksMZdata = None
+	#peaksMZ = None
 	
 	def __init__(self, nameKey="undefined"):
 		"""Initalize the basic data members"""
 		super(omsi_npg,self).__init__()
 		self.analysis_identifier = nameKey
+		self.parameter_names = [ 'peaksBins', 'npg_peaks_Intensities', 'npg_peaks_ArrayIndex', 'peaksMZdata', 'peaksMZ', 'npg_cluster_method', 'npg_split_max', 'npg_fasterhc_flag', 'npg_mz_threshold', 'npg_cluster_treecut' ]
+		self.data_names = [ 'npg_labels_medianmz' , 'npg_labels_list' , 'npg_peaks_labels' , 'npghc_tc_labels' , 'npghc_labels_list' , 'npghc_peaks_labels' ]
+    
 	#
 	# ------------------------ viewer functions start ---------------------- 
 	
@@ -134,18 +138,31 @@ class omsi_npg(omsi_analysis_base) :
 	# ------------------------ viewer functions end ------------------------
 	
 	# main NPG function
-	def omsi_npg_exec(self, peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ, MZ_TH = 0.05, clusterCut = 0.1, lpfdata_dependency = None):
-		# other parameters
-		fasterHC = 3				# set to 1 to perform split fastcluster, 2 for normal fastcluster, 3 for myHC
-		SplitMax = 1000				# size limiter for HC clutering (smaller is usually faster) used if fasterHC == 1 
-		clusterMethod = 'median'	# Hierarchical Clustering agglomeration method 
-		
-		# global variables placeholders
-		self.peaksBins = peaksBins
-		self.peaksIntensities = peaksIntensities
-		self.peaksArrayIndex = peaksArrayIndex
-		self.peaksMZdata = peaksMZdata
-		self.peaksMZ = peaksMZ
+	def execute_analysis(self) :
+
+		#Set default parameter values if needed
+		if not self['npg_cluster_treecut'] :
+				self['npg_cluster_treecut']=0.1
+		if not self['npg_mz_threshold'] :
+				self['npg_mz_threshold'] = 0.05
+		if not self['npg_fasterhc_flag'] :
+				self['npg_fasterhc_flag'] = 3
+		if not self['npg_cluster_method'] :
+				self['npg_cluster_method'] = 'median'
+		if not self['npg_split_max'] and (fasterHC==1) :
+				self['npg_split_max'] = 1000
+    
+		#Copy parameters to local variables for convenience
+		peaksBins = self['peaksBins']
+		peaksIntensities = self['npg_peaks_Intensities']
+		peaksArrayIndex = self['npg_peaks_ArrayIndex']
+		peaksMZData = self['peaksMZdata']
+		peaksMZ = self['peaksMZ']
+		MZ_TH = self['npg_mz_threshold'][0]
+		clusterCut = self['npg_cluster_treecut'][0]
+		fasterHC = self['npg_fasterhc_flag'][0]		# set to 1 to perform split fastcluster, 2 for normal fastcluster, 3 for myHC
+		SplitMax = self['npg_split_max'][0]         # size limiter for HC clutering (smaller is usually faster) used if fasterHC == 1
+		clusterMethod = unicode(self['npg_cluster_method'][0])	# Hierarchical Clustering agglomeration method
 		
 		# get dataset dimensions info from last peaksArrayIndex
 		pAILast = peaksArrayIndex.shape[0]-1
@@ -507,66 +524,20 @@ class omsi_npg(omsi_analysis_base) :
 		#handle also a large range of python built_in types by converting them to numpy for storage in HDF5 but
 		#to ensure a consitent behavior we convert the values directly here
 
-		#Clear any previously stored analysis data
-		self.clear_analysis_data()
-		self.clear_parameter_data()
-		self.clear_dependency_data()
-
-		# Parameters -------
-		mz_th = np.asarray( [ MZ_TH ] )
-		self.add_parameter_data( name='npg_mz_threshold' , data=mz_th , dtype=str(mz_th.dtype) )
-		tcut = np.asarray( [ clusterCut ] )
-		self.add_parameter_data( name='npg_cluster_treecut' , data=tcut , dtype=str(tcut.dtype) )
-		fHC = np.asarray( [ fasterHC ] )
-		self.add_parameter_data( name='npg_fasterhc_flag' , data=fHC , dtype=str(fHC.dtype) )
-		if(fasterHC == 1):
-			smx = np.asarray( [ SplitMax ] )
-			self.add_parameter_data( name='npg_split_max' , data=smx , dtype=str(smx.dtype) )
-
-
-		# ????? Note: this is a string, should be str.type?----
-		# self.add_analysis_data( omsi_analysis_data( name='npg_cluster_method' , data=clusterMethod , dtype=omsi_format.str_type ) )
-		cmethod = np.asarray( [ clusterMethod ] )
-		self.add_parameter_data( name='npg_cluster_method' , data=cmethod , dtype=str(cmethod.dtype) )
-
-
-		# LPF data  -------
-		npgPAI = np.asarray( peaksArrayIndex )
-		self.add_analysis_data( name='npg_peaks_ArrayIndex' , data=npgPAI , dtype=str(npgPAI.dtype) )
-		npgPI = np.asarray( peaksIntensities )
-		self.add_analysis_data( name='npg_peaks_Intensities' , data=npgPI , dtype=str(npgPI.dtype) )
-
 
 		# Results  -------
 		# NPG Results
-		npgLM = np.asarray( LabelsMedianMZ )
-		self.add_analysis_data( name='npg_labels_medianmz' , data=npgLM , dtype=str(npgLM.dtype) )
-		npgLL = np.asarray( UniqueLabels )
-		self.add_analysis_data( name='npg_labels_list' , data=npgLL , dtype=str(npgLL.dtype) )
-		npgPL = np.asarray( peaksLabels )
-		self.add_analysis_data( name='npg_peaks_labels' , data=npgPL , dtype=str(npgPL.dtype) )
-
+		self['npg_labels_medianmz'] = np.asarray( LabelsMedianMZ ) 
+		self['npg_labels_list'] = np.asarray( UniqueLabels )
+		self['npg_peaks_labels'] = np.asarray( peaksLabels )
+		
 		# NPG-HC Results
 		# if(fasterHC == 2):
 		# 	npghcLM = np.asarray( LinkageMatrix )
 		# 	self.add_analysis_data( name='npghc_linkage_matrix' , data=npghcLM , dtype=str(npghcLM.dtype) )
-		npgtcL = np.asarray( TreeCut + 1 )
-		self.add_analysis_data( name='npghc_tc_labels' , data=npgtcL , dtype=str(npgtcL.dtype) )
-		npghcLL = np.asarray( HCLabelsList )
-		self.add_analysis_data( name='npghc_labels_list' , data=npghcLL , dtype=str(npghcLL.dtype) )
-		npghcPL = np.asarray( HCpeaksLabels )
-		self.add_analysis_data( name='npghc_peaks_labels' , data=npghcPL , dtype=str(npghcPL.dtype) )
-
-		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
-		if lpfdata_dependency is not None :
-			if isinstance( lpfdata_dependency , omsi_dependency ) :
-				#Add the depency as given by the user
-				self.add_dependency_data( lpfdata_dependency )
-			else :
-				#The user only gave us the object that we depend on so we need to construct the 
-				self.add_dependency_data( omsi_dependency( param_name = 'LPF_Peaks_MZ', link_name='LPF_Peaks_MZ', omsi_object=lpfdata_dependency, selection=None ) )
-				self.add_dependency_data( omsi_dependency( param_name = 'LPF_Peaks_Vals', link_name='LPF_Peaks_Vals', omsi_object=lpfdata_dependency, selection=None ) )
-				self.add_dependency_data( omsi_dependency( param_name = 'LPF_Peaks_ArrayIndex', link_name='LPF_Peaks_ArrayIndex', omsi_object=lpfdata_dependency, selection=None ) )
+		self['npghc_tc_labels'] = np.asarray( TreeCut + 1 )
+		self['npghc_labels_list'] = np.asarray( HCLabelsList ) 
+		self['npghc_peaks_labels'] = np.asarray( HCpeaksLabels )
 
 		print "Collecting done."
 		print "--- finished ---"
@@ -767,8 +738,8 @@ class omsi_npg(omsi_analysis_base) :
 	def getClustersInfo(self, GpeaksLabels, GLabelsList):
 		import bisect
 		
-		peaksBins = self.peaksBins
-		peaksMZdata = self.peaksMZdata
+		peaksBins = self['peaksBins']
+		peaksMZdata = self['peaksMZdata']
 		
 		labelsArgs = np.argsort(GpeaksLabels)
 		SortedPL = GpeaksLabels[labelsArgs]
@@ -802,9 +773,8 @@ class omsi_npg(omsi_analysis_base) :
 	# binary search
 	# returns the peaks of a coordinate (x,y) from peaksArrayIndex
 	def getCoordPeaksB(self, xCoord, yCoord):
-		peaksArrayIndex = self.peaksArrayIndex
-		peaksMZ = self.peaksMZ
-		
+		peaksArrayIndex = self['npg_peaks_ArrayIndex']
+		peaksMZ = self['peaksMZ']
 		
 		pAILast = peaksArrayIndex.shape[0]-1
 		pAImaxX = peaksArrayIndex[pAILast][0]
@@ -836,8 +806,8 @@ class omsi_npg(omsi_analysis_base) :
 	# binary search
 	# returns the peak index of a coordinate (x,y) from peaksArrayIndex
 	def getCoordIdxB(self, xCoord, yCoord):
-		peaksArrayIndex = self.peaksArrayIndex
-		peaksMZ = self.peaksMZ
+		peaksArrayIndex = self['npg_peaks_ArrayIndex']
+		peaksMZ = self['peaksMZ']
 		
 		pAILast = peaksArrayIndex.shape[0]-1
 		pAImaxX = peaksArrayIndex[pAILast][0]
@@ -869,8 +839,8 @@ class omsi_npg(omsi_analysis_base) :
 	# 1. rPeaks = returns the peaks of a coordinate (x,y) from peaksArrayIndex
 	# 2. rLabels = returns the labels of the rPeaks
 	def getCoordInfoB(self, xCoord, yCoord, peaksLabels):
-		peaksArrayIndex = self.peaksArrayIndex
-		peaksMZ = self.peaksMZ
+		peaksArrayIndex = self['npg_peaks_ArrayIndex']
+		peaksMZ = self['peaksMZ']
 		
 		pAILast = peaksArrayIndex.shape[0]-1
 		pAImaxX = peaksArrayIndex[pAILast][0]
@@ -910,8 +880,8 @@ class omsi_npg(omsi_analysis_base) :
 	# this allows us to skip pixels with no peaks both 
 	# when checking a pixel itself and its neighbors
 	def getPixelMap(self, Nx, Ny):
-		peaksArrayIndex = self.peaksArrayIndex
-		peaksMZ = self.peaksMZ
+		peaksArrayIndex = self['npg_peaks_ArrayIndex']
+		peaksMZ = self['peaksMZ']
 			
 		pixelMap = np.zeros((Nx, Ny))
 	
@@ -1029,7 +999,12 @@ def main(argv=None):
 	# npg
 	myNPG = omsi_npg(nameKey = "omsi_npg_"+str(ctime()))
 	print "--- Executing NPG ---"
-	myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ)
+	#myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ)
+	myNPG.execute( peaksBins=peaksBins,
+                   npg_peaks_Intensities=peaksIntensities,
+                   npg_peaks_ArrayIndex=peaksArrayIndex,
+                   peaksMZdata=peaksMZdata,
+                   peaksMZ=peaksMZ)
 	print "\nResults:"
 	NPGPL = myNPG['npghc_peaks_labels']
 	print "NPG HC Peaks Labels: \n", NPGPL

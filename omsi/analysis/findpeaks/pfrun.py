@@ -201,7 +201,7 @@ def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
 	# LPF --------------
 	print "\n--- Executing LPF ---"
 	myLPF = omsi_lpf(nameKey = "omsi_lpf_"+str(ctime()))
-	myLPF.execute_peakfinding( data, peaksMZdata, peakheight = ph, slwindow = slw, smoothwidth = smw)
+	myLPF.execute( msidata=data, mzdata=peaksMZdata, peakheight = ph, slwindow = slw, smoothwidth = smw)
 	print "\n\nResults"
 	peaksBins = myLPF['LPF_Peaks_MZ'][:]
 	print "peaksBins:\n", peaksBins
@@ -246,7 +246,14 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	# NPG --------------
 	print "\n--- Executing NPG ---"
 	myNPG = omsi_npg(nameKey = "omsi_npg_"+str(ctime()))
-	myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ, MZ_TH = mzth, clusterCut = tcut)
+	#myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ, MZ_TH = mzth, clusterCut = tcut)
+	myNPG.execute( peaksBins=peaksBins,
+                   npg_peaks_Intensities=peaksIntensities,
+                   npg_peaks_ArrayIndex=peaksArrayIndex,
+                   peaksMZdata=peaksMZdata,
+                   peaksMZ=peaksMZ,
+                   npg_mz_threshold=mzth,
+                   npg_cluster_treecut=tcut   )
 	print "\n\nResults"
 	NPGPL = myNPG['npghc_peaks_labels']
 	print "NPG HC Peaks Labels: \n", NPGPL
@@ -290,7 +297,14 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 	
 	print "\n--- Creating Peak Cube ---"
 	myPC = omsi_peakcube(nameKey = "omsi_peakcube_"+str(ctime()))
-	myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPeaksLabels, NPGLabelsList)
+	#myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPeaksLabels, NPGLabelsList)
+	myPC.execute( peaksBins = peaksBins,
+                  peaksIntensities = peaksIntensities,
+                  peaksArrayIndex = peaksArrayIndex,
+                  peaksMZdata = peaksMZdata,
+                  HCpeaksLabels = NPGPeaksLabels ,
+                  HCLabelsList = NPGLabelsList)
+
 
 	PCm = myPC['npg_peak_cube_mz']
 	print "NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm

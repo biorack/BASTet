@@ -52,7 +52,7 @@ class omsi_analysis_generic(omsi_analysis_base) :
            :param analysisGroup: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
            :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
            :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects. 
-           :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default) or just as h5py objects. 
+           :param dependencies_omsi_format: Should dependencies be loaded as omsi_file API objects (default) or just as h5py objects. 
            
            Returns
 
