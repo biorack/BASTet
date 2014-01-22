@@ -187,11 +187,12 @@ def convert_files() :
             print "HDF5 chunking: "+str(chunks)
         print "HDF5 compression: "+str(compression)+", "+str(compression_opts)
 
-        #Open the img file
+        #Open the input file
         try:
             currFormat = i['format']
+            print "Input file format: "+str(currFormat)
             if currFormat == "img" :
-                inputFile = img_file( hdrFile=basefile+".hdr" , t2mFile=basefile+".t2m" , imgFile=basefile+".img" )
+                inputFile = img_file( basename = basefile ) # hdrFile=basefile+".hdr" , t2mFile=basefile+".t2m" , imgFile=basefile+".img" )
             elif currFormat == "bruckerflex" :
                 inputFile = bruckerflex_file( spotlist_filename=basefile )
                 inputFile.set_region_selection( region_index=i['region'])
@@ -421,12 +422,17 @@ def check_format( name , formatOption ) :
         else :
             return None
     #Option 2: We need to determine the format ourselves
-    if os.path.exists( name+".hdr") and os.path.exists( name+".t2m") and os.path.exists( name+".img") :
+    #if os.path.exists( name+".hdr") and os.path.exists( name+".t2m") and os.path.exists( name+".img") :
+    #    return "img"
+    if img_file.is_img( name ) :
         return "img"
-    elif name.endswith( "Spot List.txt") :
+    elif bruckerflex_file.is_bruckerflex( name ) :
         return "bruckerflex"
-    elif os.path.isdir( name ) :
-        return "bruckerflex"
+
+    #elif name.endswith( "Spot List.txt") :
+    #    return "bruckerflex"
+    #elif os.path.isdir( name ) :
+    #    return "bruckerflex"
     else :
         return None
 

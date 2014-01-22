@@ -82,14 +82,16 @@ class bruckerflex_file :
             :var metadata: Dictionary with metadata from the acqu file
             :var mz: The 1D numpy array with the m/z axis information
             :var data: If readall is set to true then this 3D array includes the complete data of the MSI data cube. Missing data values (e.g., from regions not imaged during the aquistion processes) are completed with zero values. 
-            :var regions_dicts: 
+            :var regions_dicts:
 
-            
+            :raises ValueError: In case that no valid data is found.
         """
         self.spotlist_filename = spotlist_filename
         if os.path.isdir( self.spotlist_filename ) :
             self.spotlist_filename = None
             self.pixel_dict = self.s_spot_from_dir( spotlist_filename )
+            if not self.pixel_dict :
+                raise ValueError( "Invalid bruckerflex file. No valid spots found in the given directory")
         else :
             self.pixel_dict = self.s_read_spotlist( self.spotlist_filename )
         self.data_type = fid_encoding #Data type of the fid files
@@ -122,14 +124,20 @@ class bruckerflex_file :
         self.instrument_mz=0 #A numpy vector with the m/z values of the instrument
     
     @classmethod
-    def is_bruckerflex(cls, infile ) :
-    
-        if os.path.isfile( infile ) and name.endswith( "Spot List.txt") :
+    def is_bruckerflex(cls, name ) :
+        """Determine whether the given file or name specifies a bruckerflex file
+        
+           :param name: name of the file or dir
+           :type name: string
+           
+           :return: Boolean indicating whether the name is a valid bruckerflex
+        """
+        if os.path.isfile( name ) and name.endswith( "Spot List.txt") :
             return True 
         elif os.path.isdir( name ) :
-            spotlist = s_spot_from_dir( name )
-            if len(spotlist)> 0 :
-                return True 
+            #Check if there are any spots in the directory
+            if cls.s_spot_from_dir( name ) :
+                return True
         return False 
   
     def get_regions(self) :
@@ -249,7 +257,7 @@ class bruckerflex_file :
             :param inDir: Name of the directory with all spots 
             :type inDir: string
             
-            :returns: The function returns a number of different items in from of a python dictionary. Most data is stored as 2D spatial maps, indicting for each (x,y) location the corresponding data. Most data is stored as 2D masked numpy arrays. The masked of the array indicated whether data has been recorded for a given pixel or not. The dict contains the following keys: 
+            :returns: The function returns None in case that no valid spots were found. The function returns a number of different items in from of a python dictionary. Most data is stored as 2D spatial maps, indicting for each (x,y) location the corresponding data. Most data is stored as 2D masked numpy arrays. The masked of the array indicated whether data has been recorded for a given pixel or not. The dict contains the following keys:
             
                 * 'spotfolder' : String indicating the folder where all the spot-data is located
                 * 'fid' : 2D numpy masked array of strings indicating for (x,y) pixel the fid file with the intensity values.
@@ -262,12 +270,12 @@ class bruckerflex_file :
         """
     
         #Compute list of spots from folder structure
-        spotfolder = os.path.abspath( inDir )
-        spotfolderList = []
-        spotnameList = []
-        pixelX = []
-        pixelY = []
-        pixelR = []
+        spotfolder = os.path.abspath( inDir )  #The base folder where the spots are supposed to be located 
+        spotfolderList = []  #List of folders with the spots
+        spotnameList = []    #List of names for the spots
+        pixelX = []          #X location of each spot
+        pixelY = []          #Y location of each spot
+        pixelR = []          #Region index of each spot
         for l in os.listdir(inDir) :
             ap = os.path.abspath( os.path.join( inDir, l ))
             try :
@@ -284,6 +292,10 @@ class bruckerflex_file :
                     spotnameList.append( l )
             except :
                 pass
+    
+        #Check if we have any files at all
+        if len(spotfolderList) == 0 :
+            return None
     
         #Convert compute lists to numpy
         numSpots = len( spotfolderList )
