@@ -52,7 +52,7 @@ class omsi_dependency(dict) :
                         dict.__setitem__( self, omsi_object , omsi_file.get_omsi_object( parent ) ) 
                     dict.__setitem__( self, '_data' , None) #Any previously loaded date may be invalide (delete)
                 else :
-                    raise ValueError( str(value) + " invalid omsi_object paramter for omsi_dependcy without valid data dependency.")
+                    raise ValueError( str(value) + " invalid omsi_object parameter for omsi_dependcy without valid data dependency.")
             elif key == 'selection' :
                 from omsi.shared.omsi_data_selection import check_selection_string
                 if check_selection_string( str(value) ) :
