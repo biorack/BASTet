@@ -1840,7 +1840,7 @@ class omsi_file_dependencies :
                     re.append( omsi_object )
             except :
                 import sys
-                print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
+                print "WARNING: Error occured in omsi_file_dependencies::get_all_dependency_data_recursive(...):  "+unicode(it[0])+"   :" +str(sys.exc_info())
         return re
 
 
@@ -1955,7 +1955,7 @@ class omsi_file_dependencies :
                 #print "-----B----"+str(links)
             except :
                 import sys
-                print "WARNING: Error occured in omsi_file_analysis::get_all_dependency_data_recursive(...):"+str(sys.exc_info())
+                print "WARNING: Error occured in omsi_file_dependencies::get_all_dependency_data_graph(...):"+str(sys.exc_info())
                         
         return nodes, links
 
