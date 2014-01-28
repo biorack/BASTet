@@ -1,6 +1,7 @@
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data
 from omsi.shared.omsi_dependency import *
+        
 
 
 ###############################################################
@@ -107,7 +108,7 @@ class omsi_analysis_template(omsi_analysis_base) :
         """
         
         #Convert the z selection to a python selection
-        from omsi.shared.omsi_data_selection import *
+        from omsi.shared.omsi_data_selection import selection_string_to_object
         zselect = selection_string_to_object(z) #Convert the selection string to a python selection
 
         """EDIT_ME Specify the number of custom viewerOptions you are going to provide for qslice"""
@@ -151,7 +152,7 @@ class omsi_analysis_template(omsi_analysis_base) :
         """
         
         #Convert the x,y selection to a python selection
-        from omsi.shared.omsi_data_selection import *
+        from omsi.shared.omsi_data_selection import selection_string_to_object
         xselect = selection_string_to_object(x) #Convert the selection string to a python selection
         yselect = selection_string_to_object(y) #Convert the selection string to a python selection
 
@@ -209,7 +210,7 @@ class omsi_analysis_template(omsi_analysis_base) :
                 """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
                 mzSpectra, labelSpectra, mzSlice, labelSlice = \
                        super(omsi_analysis_template,cls).v_qmz( anaObj, \
-                             qslice_viewerOptionnumCustomSliceViewerOptions , \
+                             qslice_viewerOption-numCustomSliceViewerOptions , \
                              qspectrum_viewerOption-numCustomSpectrumViewerOptions)
 
         """Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:

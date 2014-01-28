@@ -10,8 +10,14 @@ class omsi_cx(omsi_analysis_base) :
     """Template intended to help with the development of new analysis classes.
     
        Search for EDIT_ME to find locations that need to be changed.
+       
+       EDIT_ME: Replace this text with the appropriate documentation for the analysis.
     
     """
+    
+    #This internal dict is used to avoid errors due to misinterpretation of the usage of dimensions
+    __dimension_index = { 'pixelDim' : 0 , 'imageDim' : 1 }
+    
 
     def __init__(self, nameKey="undefined"):
         """Initalize the basic data members"""
@@ -26,17 +32,19 @@ class omsi_cx(omsi_analysis_base) :
         
     
     def execute_analysis(self) :
-        """EDIT_ME: 
+        """ EDIT_ME:
         
-           Describe what your analysis does and how a user can use it. Note, a user will
-           call the function execute(...) which takes care of storing parameters, collecting
-           execution data etc., so that you only need to implement your analysis, the rest
-           is taken care of by omsi_analysis_base.
+            Replace this text with the appropriate documentation for the analysis.
+            Describe what your analysis does and how a user can use it. Note, a user will
+            call the function execute(...) which takes care of storing parameters, collecting
+            execution data etc., so that you only need to implement your analysis, the rest
+            is taken care of by omsi_analysis_base. omsi uses Sphynx syntax for the 
+            documentation.
            
-           Keyword Arguments:
+            Keyword Arguments:
 
-           :param mydata: ...
-           :type mydata: ...
+            :param mydata: ...
+            :type mydata: ...
            
         """
         
@@ -44,35 +52,37 @@ class omsi_cx(omsi_analysis_base) :
         if not self['rank'] :
             self['rank']=10
         if not self['objectiveDim'] :
-            self['objectiveDim']=1
+            self['objectiveDim']=self.__dimension_index['imageDim']
         
         #getting the values into local variables            
-        msidata = self['msidata']
+        msidata = self['msidata'][:] #Load all MSI data
         rank = self['rank'][0]
         objectiveDim = self['objectiveDim'][0]
   
-        """EDIT_ME 
-           3) Implement your analysis here
-        """
+        #Convert the input data to a 2D matrix for processing by the leverage score algorithm
+        numBins   = msidata.shape[-1]
+        numPixels = msidata.size / numBins #The last data dimension is assumed to contain the spectra
+        msidata = msidata.reshape(numPixels, numBins).transpose()
+        
+        #Compute the CX decomposition
         levScores = self.comp_lev_exact(msidata, rank, objectiveDim)
         infIndices = levScores.argsort()[::-1]
 
+        #Safe the output results
         self['levScores'] = levScores
         self['infIndices'] = infIndices
+    
 
     def comp_lev_exact(A, k, axis):
-        # This function computes the column or row leverage scores of the input matrix.
-        # Input:
-        #     A: n-by-d matrix
-        #     k: rank parameter, k <= min(n,d)
-        #     axis: 
-        #         0: compute row leverage scores;
-        #         1: compute column leverage scores.
-        # Output:
-        #     lev: leverage scores
-        #         if axis = 0, the length of lev is n,
-        #         otherwise, the length of lev is d.
-
+        """ This function computes the column or row leverage scores of the input matrix.
+        
+          
+            :param A: n-by-d matrix
+            :param k: rank parameter, k <= min(n,d)
+            :param axis: 0: compute row leverage scores; 1: compute column leverage scores.
+        
+            :returns: 1D array of leverage scores. If axis = 0, the length of lev is n.  otherwise, the length of lev is d.
+        """
         U, D, V = np.linalg.svd(A, full_matrices=False)
 
         if axis == 0:
@@ -97,13 +107,12 @@ class omsi_cx(omsi_analysis_base) :
            :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be performed typically like [:,:,zmin:zmax].
            
         """
-        
         #Convert the z selection to a python selection
-        from omsi.shared.omsi_data_selection import *
+        from omsi.shared.omsi_data_selection import selection_string_to_object
         zselect = selection_string_to_object(z) #Convert the selection string to a python selection
 
         """EDIT_ME Specify the number of custom viewerOptions you are going to provide for qslice"""
-        if anaObj['objectiveDim'][0] == 1:
+        if anaObj['objectiveDim'][0] == cls.__dimension_index['imageDim']:
             numCustomViewerOptions = 1
         else:
             numCustomViewerOptions = 0
@@ -152,7 +161,7 @@ class omsi_cx(omsi_analysis_base) :
         """
         
         #Convert the x,y selection to a python selection
-        from omsi.shared.omsi_data_selection import *
+        from omsi.shared.omsi_data_selection import selection_string_to_object
         xselect = selection_string_to_object(x) #Convert the selection string to a python selection
         yselect = selection_string_to_object(y) #Convert the selection string to a python selection
 
@@ -198,7 +207,7 @@ class omsi_cx(omsi_analysis_base) :
         """
         
         """EDIT_ME: Define the number of custom viewer options for qslice and qspectrum."""
-        if anaObj['objectiveDim'][0] == 1:
+        if anaObj['objectiveDim'][0] == cls.__dimension_index['imageDim'] :
             numCustomSliceViewerOptions = 1
         else:
             numCustomSliceViewerOptions = 0
@@ -218,22 +227,15 @@ class omsi_cx(omsi_analysis_base) :
                     qslice_viewerOptionnumCustomSliceViewerOptions , \
                     qspectrum_viewerOption-numCustomSpectrumViewerOptions)
 
+        #Implement the qmz pattern for all the custom qslice and qspectrum viewer options.
         if qslice_viewerOption == 0 and numCustomSliceViewerOptions == 1 :
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
-                    qslice_viewerOptionnumCustomSliceViewerOptions , \
+                    qslice_viewerOption-numCustomSliceViewerOptions , \
                     qspectrum_viewerOption-numCustomSpectrumViewerOptions)
             labelSlice = 'Informative Images'
             mzSlice = np.arange(anaObj['infIndices'].shape[0])
             
-        """Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:
-         
-           if qspectrum_viewerOption == 0 and qslice_viewerOption==0: 
-                mzSpectra =  anaObj[ 'peak_mz' ][:]
-                labelSpectra = "m/z"
-                mzSlice  = None
-                labelSlice = None
-        """
         return mzSpectra, labelSpectra, mzSlice, labelSlice
         
     @classmethod
@@ -254,7 +256,6 @@ class omsi_cx(omsi_analysis_base) :
            customOptions = ['Peak cube']
         """
 
-        """EDIT_ME Change the omsi_cx class-name to your class"""
         dependentOptions = super(omsi_cx ,cls).v_qspectrum_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
         return re
@@ -272,16 +273,12 @@ class omsi_cx(omsi_analysis_base) :
             :returns: List of strings indicating the different available viewer options. The list should be empty if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
         """
     
-        """EDIT_ME Define a list of custom viewerOptions are supported. E.g:
-           
-           customOptions = ['Peak cube']
-        """
-        if anaObj['objectiveDim'][0] == 1:
+        #Define a list of custom viewerOptions are supported. 
+        if anaObj['objectiveDim'][0] == cls.__dimension_index[imageDim]:
             customOptions = ['Informative Images']
         else:
             customOptions = []
                 
-        """EDIT_ME Change the omsi_cx class-name to your class"""
         dependentOptions = super(omsi_cx ,cls).v_qslice_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
         return re
