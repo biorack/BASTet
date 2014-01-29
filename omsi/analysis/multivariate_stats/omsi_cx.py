@@ -16,7 +16,7 @@ class omsi_cx(omsi_analysis_base) :
     """
     
     #This internal dict is used to avoid errors due to misinterpretation of the usage of dimensions
-    dimension_index = { 'pixelDim' : 0 , 'imageDim' : 1 }
+    dimension_index = {  'imageDim' : 0 , 'pixelDim' : 1}
     
 
     def __init__(self, nameKey="undefined"):
