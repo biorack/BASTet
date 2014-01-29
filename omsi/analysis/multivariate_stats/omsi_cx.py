@@ -56,6 +56,7 @@ class omsi_cx(omsi_analysis_base) :
         
         #getting the values into local variables            
         msidata = self['msidata'][:] #Load all MSI data
+        originalShape = msidata.shape
         rank = self['rank'][0]
         objectiveDim = self['objectiveDim'][0]
   
@@ -67,6 +68,11 @@ class omsi_cx(omsi_analysis_base) :
         #Compute the CX decomposition
         levScores = self.comp_lev_exact(msidata, rank, objectiveDim)
         infIndices = levScores.argsort()[::-1]
+        
+        #If the leverage scores are computed for pixels, then, convert back to image space
+        if self['objectiveDim']==self.dimension_index['pixelDim'] :
+            levScores  = levScores.reshape(  originalShape[0:-1] )
+            infIndices = infIndices.reshape( originalShape[0:-1] )
 
         #Safe the output results
         self['levScores'] = levScores
@@ -114,22 +120,27 @@ class omsi_cx(omsi_analysis_base) :
         zselect = selection_string_to_object(z) #Convert the selection string to a python selection
 
         """EDIT_ME Specify the number of custom viewerOptions you are going to provide for qslice"""
-        if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim']:
+        currObjectiveDim = anaObj['objectiveDim'][0]
+        if currObjectiveDim  == cls.dimension_index['imageDim']:
             numCustomViewerOptions = 1
         else:
-            numCustomViewerOptions = 0
+            numCustomViewerOptions = 2
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
             print "HERE"
             return super(omsi_cx,cls).v_qslice( anaObj , z, viewerOption=viewerOption-numCustomViewerOptions)
-        elif viewerOption == 0 :
+        elif viewerOption == 0 and currObjectiveDim  == cls.dimension_index['imageDim']:
             infIndices = anaObj['infIndices'][zselect]
             myObj = omsi_cx()
             myObj.read_from_omsi_file( analysisObj=anaObj , \
                                        load_data = False, \
                                        load_parameters = False )
             return myObj['msidata'][:,:,infIndices]
+        elif viewerOption == 0 and currObjectiveDim  == cls.dimension_index['pixelDim']:
+            return anaObj['levScores'][:]
+        elif viewerOption == 1 and currObjectiveDim  == cls.dimension_index['pixelDim']:
+            return anaObj['infIndices'][:]
         
         """EDIT_ME 
         
@@ -211,10 +222,11 @@ class omsi_cx(omsi_analysis_base) :
         """
         
         """EDIT_ME: Define the number of custom viewer options for qslice and qspectrum."""
-        if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim'] :
+        currObjectiveDim = anaObj['objectiveDim'][0]
+        if currObjectiveDim == cls.dimension_index['imageDim'] :
             numCustomSliceViewerOptions = 1
         else:
-            numCustomSliceViewerOptions = 0
+            numCustomSliceViewerOptions = 2
         
         numCustomSpectrumViewerOptions = 0 
         
@@ -233,14 +245,25 @@ class omsi_cx(omsi_analysis_base) :
                     qspectrum_viewerOption=qspectrum_viewerOption-numCustomSpectrumViewerOptions)
 
         #Implement the qmz pattern for all the custom qslice and qspectrum viewer options.
-        if qslice_viewerOption == 0 and numCustomSliceViewerOptions == 1 :
-            print 'HERE 2'
+        if qslice_viewerOption == 0 and currObjectiveDim == cls.dimension_index['imageDim'] :
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
                     qslice_viewerOption=0 , \
                     qspectrum_viewerOption=qspectrum_viewerOption-numCustomSpectrumViewerOptions)
             labelSlice = 'Informative Images'
             mzSlice = np.arange(anaObj['infIndices'].shape[0])
+    
+        if ( qslice_viewerOption == 0 or qslice_viewerOption == 1) and currObjectiveDim == cls.dimension_index['pixelDim'] :
+            mzSpectra, labelSpectra, mzSlice, labelSlice = \
+                super(omsi_cx,cls).v_qmz( anaObj, \
+                    qslice_viewerOption=0 , \
+                    qspectrum_viewerOption=qspectrum_viewerOption-numCustomSpectrumViewerOptions)
+            if qslice_viewerOption == 0 :
+                labelSlice = 'Pixel Leverage Scores'
+                mzSlice = np.arange(1)
+            elif qslice_viewerOption == 1 :
+                labelSlice = 'Pixel Rank'
+                mzSlice = np.arange(1)
             
         return mzSpectra, labelSpectra, mzSlice, labelSlice
         
@@ -283,7 +306,7 @@ class omsi_cx(omsi_analysis_base) :
         if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim']:
             customOptions = ['Informative Images']
         else:
-            customOptions = []#['Pixel Scores']
+            customOptions = ['Pixel Leverage Scores', 'Pixel Rank']
                 
         dependentOptions = super(omsi_cx ,cls).v_qslice_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
