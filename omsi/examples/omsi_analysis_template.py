@@ -11,6 +11,8 @@ class omsi_analysis_template(omsi_analysis_base) :
     """Template intended to help with the development of new analysis classes.
     
        Search for EDIT_ME to find locations that need to be changed.
+       
+       EDIT_ME Search for omsi_analysis_template and replace it with your classname throughout
     
     """
 
@@ -116,7 +118,7 @@ class omsi_analysis_template(omsi_analysis_base) :
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption-numCustomViewerOptions)
+            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption=numCustomViewerOptions)
         
         """EDIT_ME 
         
@@ -129,6 +131,7 @@ class omsi_analysis_template(omsi_analysis_base) :
            elif viewerOption == 1 :
                ...
         """
+        return None
     
 
     @classmethod
@@ -161,7 +164,8 @@ class omsi_analysis_template(omsi_analysis_base) :
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_findpeaks_global,cls).v_qspectrum( anaObj , x , y, viewerOption-numCustomViewerOptions)
+            """EDIT_ME Replace omsi_analysis_template with your classname"""
+            return super(omsi_analysis_template,cls).v_qspectrum( anaObj , x , y, viewerOption=numCustomViewerOptions)
         
         """EDIT_ME
         
@@ -178,7 +182,8 @@ class omsi_analysis_template(omsi_analysis_base) :
            elif viewerOption == 1 :
                ...
         """
-        
+        return None, None
+    
         
     @classmethod
     def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
@@ -210,8 +215,8 @@ class omsi_analysis_template(omsi_analysis_base) :
                 """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
                 mzSpectra, labelSpectra, mzSlice, labelSlice = \
                        super(omsi_analysis_template,cls).v_qmz( anaObj, \
-                             qslice_viewerOption-numCustomSliceViewerOptions , \
-                             qspectrum_viewerOption-numCustomSpectrumViewerOptions)
+                             qslice_viewerOption=numCustomSliceViewerOptions , \
+                             qspectrum_viewerOption=numCustomSpectrumViewerOptions)
 
         """Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:
          
