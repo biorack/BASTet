@@ -129,7 +129,7 @@ class omsi_cx(omsi_analysis_base) :
             myObj.read_from_omsi_file( analysisObj=anaObj , \
                                        load_data = False, \
                                        load_parameters = False )
-            return myObj['msidata'][:,:,zselect]
+            return myObj['msidata'][:,:,infIndices]
         
         """EDIT_ME 
         
