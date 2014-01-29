@@ -43,13 +43,13 @@ class omsi_analysis_generic(omsi_analysis_base) :
         return super(omsi_analysis_generic,cls).v_qslice_viewerOptions( anaObj )
     
     
-    def read_from_omsi_file(self, analysisGroup , load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
+    def read_from_omsi_file(self, analysisObj , load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
         """Overwrite the default implementation to remove the type check as this class should
         be able to store any unknown types of analysis in a generic fashion.
 
            Keyword Parameters:
 
-           :param analysisGroup: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
+           :param analysisObj: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
            :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
            :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects. 
            :param dependencies_omsi_format: Should dependencies be loaded as omsi_file API objects (default) or just as h5py objects. 
@@ -61,16 +61,16 @@ class omsi_analysis_generic(omsi_analysis_base) :
 
 
         """
-        self.real_analysis_type = analysisGroup.get_analysis_type() 
-        identifier = analysisGroup.get_analysis_identifier()
+        self.real_analysis_type = analysisObj.get_analysis_type()
+        identifier = analysisObj.get_analysis_identifier()
         if identifier is not None :
             self.analysis_identifier = identifier[0]
         else :
             print "The analysis identifier could not be read from the omsi file"
         
-        self.__data_list = analysisGroup.get_all_analysis_data(load_data=load_data)
-        self.__parameter_list = analysisGroup.get_all_parameter_data(load_data= load_parameters)
-        self.__dependency_list = analysisGroup.get_all_dependency_data(omsi_format= dependencies_omsi_format)
+        self.__data_list = analysisObj.get_all_analysis_data(load_data=load_data)
+        self.__parameter_list = analysisObj.get_all_parameter_data(load_data= load_parameters)
+        self.__dependency_list = analysisObj.get_all_dependency_data(omsi_format= dependencies_omsi_format)
         
         return True
         

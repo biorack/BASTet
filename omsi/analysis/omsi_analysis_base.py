@@ -624,7 +624,7 @@ class omsi_analysis_base(object) :
 #             raise ValueError( "Invalid input for add_data_dependency function" )
 
 
-    def write_to_omsi_file(self , analysisGroup) :
+    def write_to_omsi_file(self , analysisObj) :
         """This function can be optionally overwritten to implement a custom data write 
            function for the analysis to be used by the omsi_file API.
            
@@ -639,12 +639,12 @@ class omsi_analysis_base(object) :
            
            Keyword Arguments:
 
-           :param analysisGroup: The omsi_file_analysis object of the group for the analysis that can be used for writing.
+           :param analysisObj: The omsi_file_analysis object of the group for the analysis that can be used for writing.
 
            """
         pass
     
-    def read_from_omsi_file(self, analysisGroup, load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
+    def read_from_omsi_file(self, analysisObj, load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
         """This function can be optionally overwritten to implement a custom data read.
            
            The default implementation tries to reconstruct the original data as far
@@ -657,7 +657,7 @@ class omsi_analysis_base(object) :
            
            Keyword Parameters:
 
-           :param analysisGroup: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
+           :param analysisObj: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
            :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
            :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects. 
            :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default) or just as h5py objects. 
@@ -673,20 +673,20 @@ class omsi_analysis_base(object) :
            
            
         """
-        if str(analysisGroup.get_analysis_type()[0]) != str(self.get_analysis_type()) :
+        if str(analysisObj.get_analysis_type()[0]) != str(self.get_analysis_type()) :
             errorMessage = "The type of the analysis specified in the omsi data file does not match the analysis type of the object "
-            errorMessage = errorMessage + str(analysisGroup.get_analysis_type()[0]) + " != " + str(self.get_analysis_type())
+            errorMessage = errorMessage + str(analysisObj.get_analysis_type()[0]) + " != " + str(self.get_analysis_type())
             raise TypeError( errorMessage )
         
-        identifier = analysisGroup.get_analysis_identifier()
+        identifier = analysisObj.get_analysis_identifier()
         if identifier is not None :
             self.analysis_identifier = identifier[0]
         else :
             print "The analysis identifier could not be read from the omsi file"
         
-        self.__data_list = analysisGroup.get_all_analysis_data(load_data=load_data)
-        self.__parameter_list = analysisGroup.get_all_parameter_data(load_data= load_parameters)
-        self.__dependency_list = analysisGroup.get_all_dependency_data(omsi_dependency_format= dependencies_omsi_format)
+        self.__data_list = analysisObj.get_all_analysis_data(load_data=load_data)
+        self.__parameter_list = analysisObj.get_all_parameter_data(load_data= load_parameters)
+        self.__dependency_list = analysisObj.get_all_dependency_data(omsi_dependency_format= dependencies_omsi_format)
         
         return True
 
