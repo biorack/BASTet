@@ -16,7 +16,7 @@ class omsi_cx(omsi_analysis_base) :
     """
     
     #This internal dict is used to avoid errors due to misinterpretation of the usage of dimensions
-    __dimension_index = { 'pixelDim' : 0 , 'imageDim' : 1 }
+    dimension_index = { 'pixelDim' : 0 , 'imageDim' : 1 }
     
 
     def __init__(self, nameKey="undefined"):
@@ -52,7 +52,7 @@ class omsi_cx(omsi_analysis_base) :
         if not self['rank'] :
             self['rank']=10
         if not self['objectiveDim'] :
-            self['objectiveDim']=self.__dimension_index['imageDim']
+            self['objectiveDim']=self.dimension_index['imageDim']
         
         #getting the values into local variables            
         msidata = self['msidata'][:] #Load all MSI data
@@ -73,7 +73,7 @@ class omsi_cx(omsi_analysis_base) :
         self['infIndices'] = infIndices
     
 
-    def comp_lev_exact(A, k, axis):
+    def comp_lev_exact(self, A, k, axis):
         """ This function computes the column or row leverage scores of the input matrix.
         
           
@@ -91,6 +91,8 @@ class omsi_cx(omsi_analysis_base) :
             lev = np.sum(V[:k,:]**2,axis=0)
         
         return lev
+    
+    
     ###############################################################
     #  2) Integrating your analysis with the OpenMSI              #
     #     web-based viewer (Recommended)                          #
@@ -112,7 +114,7 @@ class omsi_cx(omsi_analysis_base) :
         zselect = selection_string_to_object(z) #Convert the selection string to a python selection
 
         """EDIT_ME Specify the number of custom viewerOptions you are going to provide for qslice"""
-        if anaObj['objectiveDim'][0] == cls.__dimension_index['imageDim']:
+        if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim']:
             numCustomViewerOptions = 1
         else:
             numCustomViewerOptions = 0
@@ -207,7 +209,7 @@ class omsi_cx(omsi_analysis_base) :
         """
         
         """EDIT_ME: Define the number of custom viewer options for qslice and qspectrum."""
-        if anaObj['objectiveDim'][0] == cls.__dimension_index['imageDim'] :
+        if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim'] :
             numCustomSliceViewerOptions = 1
         else:
             numCustomSliceViewerOptions = 0
@@ -255,7 +257,7 @@ class omsi_cx(omsi_analysis_base) :
            
            customOptions = ['Peak cube']
         """
-
+        customOptions = []
         dependentOptions = super(omsi_cx ,cls).v_qspectrum_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
         return re
@@ -274,7 +276,7 @@ class omsi_cx(omsi_analysis_base) :
         """
     
         #Define a list of custom viewerOptions are supported. 
-        if anaObj['objectiveDim'][0] == cls.__dimension_index[imageDim]:
+        if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim']:
             customOptions = ['Informative Images']
         else:
             customOptions = []
@@ -302,9 +304,29 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-    
-
    
 if __name__ == "__main__":
     main()
+
+
+"""Test script:
+    
+from omsi.dataformat.omsi_file import *
+from omsi.analysis.multivariate_stats.omsi_cx import *
+inputFile = 'test_cx.h5'
+f = omsi_file( inputFile , 'a' )
+e = f.get_exp(0)
+a = e.get_analysis(0)
+d = a['peak_cube']
+ocx = omsi_cx(nameKey='testCX')
+ocx.execute( msidata=d , rank=10, objectiveDim=omsi_cx.dimension_index['imageDim'] )
+e.create_analysis( ocx )
+f.close_file()
+"""
+
+
+
+
+
+
 
