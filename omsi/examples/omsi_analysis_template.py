@@ -118,7 +118,7 @@ class omsi_analysis_template(omsi_analysis_base) :
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption=numCustomViewerOptions)
+            return super(omsi_analysis_template,cls).v_qslice( anaObj , z, viewerOption=viewerOption-numCustomViewerOptions)
         
         """EDIT_ME 
         
@@ -165,7 +165,7 @@ class omsi_analysis_template(omsi_analysis_base) :
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
             """EDIT_ME Replace omsi_analysis_template with your classname"""
-            return super(omsi_analysis_template,cls).v_qspectrum( anaObj , x , y, viewerOption=numCustomViewerOptions)
+            return super(omsi_analysis_template,cls).v_qspectrum( anaObj , x , y, viewerOption=viewerOption-numCustomViewerOptions)
         
         """EDIT_ME
         
@@ -211,12 +211,12 @@ class omsi_analysis_template(omsi_analysis_base) :
         mzSlice = None
         labelSlice = None
         #Both viewerOptions point to a data dependency
-        if qspectrum_viewerOption > numCustomSpectrumViewerOptions and qslice_viewerOption>numCustomSliceViewerOptions :
+        if qspectrum_viewerOption >= numCustomSpectrumViewerOptions and qslice_viewerOption>=numCustomSliceViewerOptions :
                 """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
                 mzSpectra, labelSpectra, mzSlice, labelSlice = \
                        super(omsi_analysis_template,cls).v_qmz( anaObj, \
-                             qslice_viewerOption=numCustomSliceViewerOptions , \
-                             qspectrum_viewerOption=numCustomSpectrumViewerOptions)
+                             qslice_viewerOption= qslice_viewerOption-numCustomSliceViewerOptions , \
+                             qspectrum_viewerOption= qspectrum_viewerOption-numCustomSpectrumViewerOptions)
 
         """Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:
          

@@ -121,9 +121,9 @@ class omsi_cx(omsi_analysis_base) :
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption=numCustomViewerOptions)
-        
-        if viewerOption == 0 :
+            print "HERE"
+            return super(omsi_cx,cls).v_qslice( anaObj , z, viewerOption=viewerOption-numCustomViewerOptions)
+        elif viewerOption == 0 :
             infIndices = anaObj['infIndices'][zselect]
             myObj = omsi_cx()
             myObj.read_from_omsi_file( analysisObj=anaObj , \
@@ -224,19 +224,21 @@ class omsi_cx(omsi_analysis_base) :
         mzSlice = None
         labelSlice = None
         #Both viewerOptions point to a data dependency
-        if qspectrum_viewerOption > numCustomSpectrumViewerOptions and qslice_viewerOption>numCustomSliceViewerOptions :
+        if qspectrum_viewerOption >= numCustomSpectrumViewerOptions and qslice_viewerOption>=numCustomSliceViewerOptions :
             """EDIT_ME Replace the omsi_cx class name with your class name"""
+            print 'HERE 1'
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
-                    qslice_viewerOption=numCustomSliceViewerOptions , \
-                    qspectrum_viewerOption=numCustomSpectrumViewerOptions)
+                    qslice_viewerOption=qslice_viewerOption-numCustomSliceViewerOptions , \
+                    qspectrum_viewerOption=qspectrum_viewerOption-numCustomSpectrumViewerOptions)
 
         #Implement the qmz pattern for all the custom qslice and qspectrum viewer options.
         if qslice_viewerOption == 0 and numCustomSliceViewerOptions == 1 :
+            print 'HERE 2'
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
-                    qslice_viewerOption=numCustomSliceViewerOptions , \
-                    qspectrum_viewerOption=numCustomSpectrumViewerOptions)
+                    qslice_viewerOption=0 , \
+                    qspectrum_viewerOption=qspectrum_viewerOption-numCustomSpectrumViewerOptions)
             labelSlice = 'Informative Images'
             mzSlice = np.arange(anaObj['infIndices'].shape[0])
             
@@ -281,7 +283,7 @@ class omsi_cx(omsi_analysis_base) :
         if anaObj['objectiveDim'][0] == cls.dimension_index['imageDim']:
             customOptions = ['Informative Images']
         else:
-            customOptions = []
+            customOptions = []#['Pixel Scores']
                 
         dependentOptions = super(omsi_cx ,cls).v_qslice_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
@@ -320,9 +322,12 @@ f = omsi_file( inputFile , 'a' )
 e = f.get_exp(0)
 a = e.get_analysis(0)
 d = a['peak_cube']
-ocx = omsi_cx(nameKey='testCX')
-ocx.execute( msidata=d , rank=10, objectiveDim=omsi_cx.dimension_index['imageDim'] )
-e.create_analysis( ocx )
+ocxi = omsi_cx(nameKey='testCX_Images')
+ocxi.execute( msidata=d , rank=10, objectiveDim=omsi_cx.dimension_index['imageDim'] )
+ocxp = omsi_cx(nameKey='testCX_Pixel')
+ocxp.execute( msidata=d , rank=10, objectiveDim=omsi_cx.dimension_index['pixelDim'] )
+e.create_analysis( ocxi , flushIO=True)
+e.create_analysis( ocxp , flushIO=True)
 f.close_file()
 """
 
