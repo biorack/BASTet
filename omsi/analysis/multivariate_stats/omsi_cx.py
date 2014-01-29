@@ -121,12 +121,14 @@ class omsi_cx(omsi_analysis_base) :
 
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption-numCustomViewerOptions)
+            return super(omsi_myanalysis,cls).v_qslice( anaObj , z, viewerOption=numCustomViewerOptions)
         
         if viewerOption == 0 :
             infIndices = anaObj['infIndices'][zselect]
             myObj = omsi_cx()
-            myObj.read_from_omsi_file( anaObj.name, load_data = false, load_parameters = false )
+            myObj.read_from_omsi_file( analysisObj=anaObj , \
+                                       load_data = False, \
+                                       load_parameters = False )
             return myObj['msidata'][:,:,zselect]
         
         """EDIT_ME 
@@ -140,6 +142,7 @@ class omsi_cx(omsi_analysis_base) :
            elif viewerOption == 1 :
                ...
         """
+        return None
     
 
     @classmethod
@@ -169,11 +172,9 @@ class omsi_cx(omsi_analysis_base) :
 
         """EDIT_ME Specify the number of custom viewerOptions you are going to provide for qslice"""
         numCustomViewerOptions = 0
-            
         #Expose the qslice viewer functionality of any data dependencies
         if viewerOption >= numCustomViewerOptions :
-            return super(omsi_findpeaks_global,cls).v_qspectrum( anaObj , x , y, viewerOption-numCustomViewerOptions)
-        
+            return super(omsi_cx,cls).v_qspectrum( anaObj , x , y, viewerOption=numCustomViewerOptions)
         
         """EDIT_ME
         
@@ -190,6 +191,7 @@ class omsi_cx(omsi_analysis_base) :
            elif viewerOption == 1 :
                ...
         """
+        return None, None
         
         
     @classmethod
@@ -226,15 +228,15 @@ class omsi_cx(omsi_analysis_base) :
             """EDIT_ME Replace the omsi_cx class name with your class name"""
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
-                    qslice_viewerOptionnumCustomSliceViewerOptions , \
-                    qspectrum_viewerOption-numCustomSpectrumViewerOptions)
+                    qslice_viewerOption=numCustomSliceViewerOptions , \
+                    qspectrum_viewerOption=numCustomSpectrumViewerOptions)
 
         #Implement the qmz pattern for all the custom qslice and qspectrum viewer options.
         if qslice_viewerOption == 0 and numCustomSliceViewerOptions == 1 :
             mzSpectra, labelSpectra, mzSlice, labelSlice = \
                 super(omsi_cx,cls).v_qmz( anaObj, \
-                    qslice_viewerOption-numCustomSliceViewerOptions , \
-                    qspectrum_viewerOption-numCustomSpectrumViewerOptions)
+                    qslice_viewerOption=numCustomSliceViewerOptions , \
+                    qspectrum_viewerOption=numCustomSpectrumViewerOptions)
             labelSlice = 'Informative Images'
             mzSlice = np.arange(anaObj['infIndices'].shape[0])
             
