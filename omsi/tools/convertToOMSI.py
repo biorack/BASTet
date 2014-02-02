@@ -20,6 +20,11 @@ try :
     from PIL import Image
 except :
     pass
+try :
+    import urllib2
+    import urllib 
+except :
+    pass #This is to ensuer the script is usabel without urllib2 when register to DB is not requested 
 
 
 ####################################################################
@@ -61,6 +66,14 @@ compression_opts=4 #For gzip this a value between 0-9 (inclusive) indicating how
 suggest_file_chunkings = False #Should we only suggest file chunkings and quit without converting any data
 
 ####################################################################
+#  Define file add options                                        ##
+####################################################################
+add_file_to_db = True  #Add the file to the database
+db_server_url = "https://openmsi.nersc.gov/"  #Specify the server where the database is registered
+file_owner = None #Specify for which owner the file should be registered
+#require_login = False #Require login before conversion
+
+####################################################################
 #  Define analysis options and parameter settings                 ##
 ####################################################################
 executeNMF = True  #Define whether NMF should be performed
@@ -83,6 +96,10 @@ def main(argv=None):
     global datasetList
     global formatOption
     global regionOption
+    global add_file_to_db
+    global db_server_url 
+    global file_owner
+    #global require_login
 
     
     ####################################################################
@@ -100,6 +117,12 @@ def main(argv=None):
         print "Terminated. Conflicting input parameters found. See WARNINGS above for details."
     if inputWarning or inputError :
         exit()
+
+    ####################################################################
+    #   Reuqire login if requested                                     #
+    ####################################################################
+    #if require_login :
+    #    loginUser()
 
     ####################################################################
     #   Create the output HDF5 file if needed                          #
@@ -138,6 +161,17 @@ def main(argv=None):
     #  Close the HDF5 file and exit                                    #
     ####################################################################
     omsiFile.close_file()
+
+    ####################################################################
+    #  Register the file with the database                             #
+    ####################################################################
+    if add_file_to_db :
+        status = registerFileWithDb( filepath=omsiOutFile , dbServer=db_server_url , fileOwner=file_owner)
+        print "Registered file with DB: "+str(status)
+
+    ####################################################################
+    #  Exit                                                            #
+    ####################################################################
     exit(0)
 
 
@@ -650,6 +684,71 @@ def write_data( inputFile, data , ioOption="spectrum", chunks=None) :
                     sys.stdout.write("[" +str( int( 100.* float(itertest)/float(numChunks) )) +"%]"+ "\r")
                     sys.stdout.flush()
 
+"""
+def loginUser( requestPassword=False ) :
+
+    global db_server_url 
+    import getpass
+    #Setup the user login mechanism in urllib2
+    if db_server_url.startswith("http:") :
+        db_server_url = "https:" + db_server_url.lstrip("http:")
+    password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    username = raw_input("Login: >> ") #Enter username
+    password = getpass.getpass()       #Enter password
+    password_mgr.add_password(None, db_server_url, username, password)
+    handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+    opener = urllib2.build_opener(handler)
+    urllib2.install_opener(opener)
+
+    #Login the user to the website
+    login_data = urllib.urlencode({
+            'username' : username,
+            'password' : password,
+        })
+        
+    response = urllib2.urlopen( db_server_url , login_data)
+    print response
+"""
+
+def registerFileWithDb( filepath, dbServer, fileOwner) :
+    """ Function used to register a given file with the database
+        
+        :param filepath: Path of the file to be added to the database
+        :param dbServer: The database server url
+        :param fileOwner: The owner to be used, or None if the owner should be determined based on the file URL.
+        
+        :returns: Boolean indicating whether the operation was successful
+    
+    """
+    #Determine the owner
+    currOwner = fileOwner
+    if not currOwner :
+        currOwner = os.path.dirname( filepath ).split("/")[-1]
+    if not currOwner :
+        print "ERROR: Fild could not be added to DB. Owner could not be determined."
+        return False
+
+
+    #Construct the db add-file url
+    addFileURL = os.path.join(dbServer , "openmsi/resources/addfile" )
+    addFileURL = addFileURL+"?file="+os.path.abspath(filepath)+"&owner="+currOwner
+
+    #Make the url request
+    try :
+        print "Registering file with DB: "+addFileURL
+        t = urllib2.urlopen( url=addFileURL )
+        if t.code == 200 :
+            return True
+        else :
+            return False 
+    except urllib2.HTTPError as e :
+        print "ERROR: File could not be added to DB:"
+        print "      Error-code:" +str(e.code)
+        print "      Error info:" +str(e.read())
+        return False
+
+    return False
+
 
 def parseInputArgs( argv ) :
     """Process input parameters and define the script settings.
@@ -684,6 +783,11 @@ def parseInputArgs( argv ) :
     global nmf_numIter
     global nmf_tolerance
     global nmf_useRawData
+    global add_file_to_db
+    global db_server_url
+    global add_file_url
+    global file_owner
+    #global require_login
     
     #Initalize the output values to be returned 
     inputError = False          #Parameter used to track whether an error has occured while parsing the input parameters
@@ -815,7 +919,7 @@ def parseInputArgs( argv ) :
             startIndex = startIndex + 2
             try :
                 ioOption = str(argv[i+1])
-                if ioOption!="spectrum" and ioOption!="all" and ioOption != "chunk" :
+                if ioOption not in availableioOption  :
                     raise ValueError("Invalid io option")
             except:
                 print "An error accured while parsing the --io command. Something may be wrong with the indicated io-type."
@@ -851,6 +955,21 @@ def parseInputArgs( argv ) :
                 print "ERROR: The indicated --regions option "+regionOption+" is not supported. Avaiable options are:"
                 print "       "+str(availableRegionOptions)
                 inputError=True
+        elif ar=="--add-to-db" :
+            startIndex = startIndex+1
+            add_file_to_db = True
+        elif ar =="--no-add-to-db" :
+            startIndex = startIndex+1
+            add_file_to_db = False
+        elif ar=="--db-server" :
+            startIndex = startIndex+2
+            db_server_url = str(argv[i+1])
+        elif ar =="--owner" :
+            startIndex = startIndex+2
+            file_owner = str(argv[i+1])
+        #elif ar =="--login" :
+        #    startIndex = startIndex+1
+        #    require_login = True
         elif ar.startswith("--") :
             startIndex = startIndex+1
             inputError = True
@@ -899,8 +1018,6 @@ def parseInputArgs( argv ) :
 
     #Finish and return
     return inputError, inputWarning, outputFilename, inputFilenames
-
-
 
 
 def printHelp():
@@ -975,7 +1092,20 @@ def printHelp():
     print "             ii) spectrum : Read one spectrum at a time and write it to the file. "
     print "             iii) chunk : Read one chunk at a time and write it to the file."
     print ""
-    print "---ANALYSIS OPTIONS---"
+    print "===DATABSE OPTIONS==="
+    print ""
+    print "These options control whether the generated output file should be added to a server database"
+    print "to manage web file access permissions"
+    print "Default options are: --add-to-db --db-server http://openmsi.nersc.gov"
+    print "--add-to-db : Add the output HDF5 file to the database."
+    print "--no-add-to-db : Disable adding the file to the database."
+    print "--db-server : Specify the online server where the file should be registers. Default is"
+    print "              http://openmsi.nersc.gov "
+    print "--owner : Name of the user that should be assigned as owner. By default the owner is"
+    print "          determined automatically based on the file path."
+    #print "--login : If set, then the script will ask for login information at the beginning of the script."
+    print ""
+    print "===ANALYSIS OPTIONS==="
     print ""
     print "NMF: Default ON: (nc=20, timout=600, niter=2000, tolerance=0.0001, raw=False)"
     print "--nmf : Compute the nmf for all the input data files and store the results in the"
