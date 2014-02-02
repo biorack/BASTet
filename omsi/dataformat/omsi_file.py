@@ -1608,7 +1608,7 @@ class omsi_file_analysis :
         
            :param load_data: load_data: Should the data be loaded or just the h5py objects be stored in the dictionary. 
          
-           :returns: List of names and numpy objects. Access using [index]['name'] and [index]['data'].
+           :returns: List of omsi_analysis_data objects with the names and h5py or numpy objects. Access using [index]['name'] and [index]['data'].
         """
         from omsi.analysis.omsi_analysis_data import omsi_analysis_data
         re = []
@@ -1631,7 +1631,7 @@ class omsi_file_analysis :
            
            :param load_data: Should the data be loaded or just the h5py objects be stored in the dictionary.
 
-           :returns: List of names and h5py object. Access using [index]['name'] and [index]['data'].
+           :returns: List of omsi_analysis_data objects with names and h5py or numpy object. Access using [index]['name'] and [index]['data'].
         """
         from omsi.analysis.omsi_analysis_data import omsi_analysis_data
         re = []
