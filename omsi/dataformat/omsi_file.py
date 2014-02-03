@@ -342,7 +342,10 @@ class omsi_file :
         exp.attrs[omsi_format_common.timestamp_attribute ] = str(time.ctime())
         exp_identifier_dataset = exp.require_dataset( name=unicode(omsi_format_experiment.exp_identifier_name) , shape=(1,) , dtype=omsi_format_common.str_type )
         if exp_identifier is not None :
-            exp_identifier_dataset[0] = exp_identifier
+            if omsi_format_common.__str_type_unicode :
+                exp_identifier_dataset[0] = exp_identifier
+            else :
+                exp_identifier_dataset[0] = str(exp_identifier)
         else : 
             exp_identifier_dataset[0] = "undefined"
             
@@ -734,9 +737,11 @@ class omsi_file_experiment :
         #Create the dataset for the id name if it does not exist
         if expId is None :
             expId =  self.experiment.require_dataset( name=unicode(omsi_format_experiment.exp_identifier_name) , shape=(1,) , dtype=omsi_format_common.str_type )
-
-        expId[0] = identifier
-
+        
+        if omsi_format_common.__str_type_unicode :
+            expId[0] = identifier
+        else : 
+            expId[0] = str(identifier)
 
     ###########################################################
     # Get sub-group object associated with the experiment
@@ -1052,7 +1057,10 @@ class omsi_file_sample :
             if len(sampleNameData[0]) == 0 :
                 sampleNameData[0] = "undefined"
         else :
-            sampleNameData[0] = sample_name
+            if omsi_format_common.__str_type_unicode :
+                sampleNameData[0] = sample_name
+            else:
+                sampleNameData[0] = str(sample_name)
         return omsi_file_sample( sample_group )
 
 
@@ -1146,8 +1154,10 @@ class omsi_file_sample :
         if name is None :
             name = self.sample.require_dataset( name=unicode(omsi_format_sample.sample_name) , shape=(1,), dtype=omsi_format_common.str_type )
 
-        name[0] = nameString
-
+        if omsi_format_common.__str_type_unicode :
+            name[0] = nameString
+        else :
+            name[0] = str(nameString)
 
 
 ################################################################################
@@ -1176,8 +1186,10 @@ class omsi_file_instrument :
             if len(instrumentNameData[0]) == 0 :
                 instrumentNameData[0] = "undefined"
         else :
-            instrumentNameData[0] = instrument_name
-
+            if omsi_format_common.__str_type_unicode :
+                instrumentNameData[0] = instrument_name
+            else : 
+                instrumentNameData[0] = str(instrument_name)
         #MZ data for the instrument
         if mzdata is not None :
             instrumentMZData = instrument_group.require_dataset( name=omsi_format_instrument.instrument_mz_name , shape=mzdata.shape , dtype=mzdata.dtype )
@@ -1296,8 +1308,10 @@ class omsi_file_instrument :
         #Create the dataset for the id name if it does not exist
         if nameDat is None :
             nameDat = self.instrument.require_dataset( name=unicode(omsi_format_instrument.instrument_name) , shape=(1,), dtype=omsi_format_common.str_type )
-
-        nameDat[0] = name
+        if omsi_format_common.__str_type_unicode :
+            nameDat[0] = name
+        else :
+            nameDat[0] = str(name)
 
 ################################################################################
 ################################################################################
@@ -1326,11 +1340,17 @@ class omsi_file_analysis :
         
         #Write the analysis name 
         analysisIdentifierData = analysis_group.require_dataset( name=unicode(omsi_format_analysis.analysis_identifier) , shape=(1,), dtype=omsi_format_common.str_type )
-        analysisIdentifierData[0] = analysis.get_analysis_identifier()
+        if omsi_format_common.__str_type_unicode :
+            analysisIdentifierData[0] = analysis.get_analysis_identifier()
+        else :
+            analysisIdentifierData[0] = str(analysis.get_analysis_identifier())
 
         #Write the analysis type
         analysisTypeData = analysis_group.require_dataset( name=unicode(omsi_format_analysis.analysis_type) , shape=(1,), dtype=omsi_format_common.str_type )
-        analysisTypeData[0] = analysis.get_analysis_type()
+        if omsi_format_common.__str_type_unicode :
+            analysisTypeData[0] = analysis.get_analysis_type()
+        else :
+            analysisTypeData[0] = str(analysis.get_analysis_type())
 
         #Write the analysis data
         for a in analysis.get_all_analysis_data() : 
@@ -1400,7 +1420,10 @@ class omsi_file_analysis :
         elif (ana_data['dtype'] == omsi_format_common.str_type) or (ana_data['dtype'] == h5py.special_dtype(vlen=str)):
             tempData = data_group.require_dataset( name = unicode(ana_data['name']) , shape=(1,) , dtype=omsi_format_common.str_type  )
             if len( unicode(ana_data['data'])) > 0 :
-                tempData[0] = ana_data['data']
+                if omsi_format_common.__str_type_unicode :
+                    tempData[0] = ana_data['data']
+                else :
+                    tempData[0] = str(ana_data['data'])
             else :
                 print "WARNGING: "+ana_data['name']+" dataset generated but not written. The given dataset was empty."
         #Create a new dataset to store the current numpy-type dataset
@@ -1981,13 +2004,19 @@ class omsi_file_dependencydata :
         dep_group = data_group
         #Save the name of the parameter
         param_name_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_parameter) , shape=(1,), dtype=omsi_format_common.str_type  )
-        param_name_data[0] = dependency_data['param_name']
+        if omsi_format_common.__str_type_unicode :
+            param_name_data[0] = dependency_data['param_name']
+        else :
+            param_name_data[0] = str(dependency_data['param_name'])
         #Save the selection
         selection_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_selection) , shape=(1,), dtype=omsi_format_common.str_type  )
         if dependency_data['selection'] is not None :
             from omsi.shared.omsi_data_selection import check_selection_string
             if omsi_data_selection.check_selection_string( dependency_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
-                selection_data[0] =  dependency_data['selection']
+                if omsi_format_common.__str_type_unicode :
+                    selection_data[0] =  dependency_data['selection']
+                else :
+                    selection_data[0] =  str(dependency_data['selection'])
             else :
                 selection_data[0] = ""
                 errorMessage = "Invalid selection string given for data dependency : "+str( dependency_data['selection'] ) 
@@ -1996,11 +2025,17 @@ class omsi_file_dependencydata :
             selection_data[0] = ""
         #Save the main omsi object
         mainname_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_mainname) , shape=(1,), dtype=omsi_format_common.str_type  )
-        mainname_data[0] = str(dependency_data['omsi_object'].name)
+        if omsi_format_common.__str_type_unicode :
+            mainname_data[0] = unicode(dependency_data['omsi_object'].name)
+        else :
+            mainname_data[0] = str(dependency_data['omsi_object'].name)
         #Save the additional dataset name
         dataset_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_datasetname) , shape=(1,), dtype=omsi_format_common.str_type  )
         if dependency_data['dataname'] :
-            dataset_data[0] = dependency_data['dataname']
+            if omsi_format_common.__str_type_unicode :
+                dataset_data[0] = dependency_data['dataname']
+            else :
+                dataset_data[0] = str(dependency_data['dataname'])
         else : 
             dataset_data[0] = u''
         
