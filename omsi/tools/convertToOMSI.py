@@ -785,7 +785,8 @@ def setApacheACL( filepath ) :
     """
     print "Setting NERSC ACL permssiosn for Apache"
     import os
-    command = "setfacl -R -m u:apache:rwx "+filepath
+    #command = "setfacl -R -m u:apache:rwx "+filepath
+    command = "setfacl -R -m u:48:rwx "+filepath
     os.system(command)
     
 
