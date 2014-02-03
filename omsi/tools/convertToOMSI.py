@@ -727,7 +727,7 @@ def registerFileWithDb( filepath, dbServer, fileOwner) :
     
     #Check if the 
     if dbServer == default_db_server_url and check_add_nersc:
-        if (not "/project/projectdirs/openmsi" in filepath) or (not filepath.startswith("/data/openmsi/")) :
+        if (not "/project/projectdirs/openmsi" in filepath) and (not filepath.startswith("/data/openmsi/")) :
             print "WARNING: It appears that you want to add a file to openmsi.nersc.gov that is not in a default location."
             print "Do you want to add the file? (Y/N):"
             numTrys = 3
