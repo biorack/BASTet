@@ -12,7 +12,7 @@ class omsi_format_common:
         str_type = h5py.special_dtype(vlen=unicode)
         __str_type_unicode = True
     except :
-        h5py.special_dtype(vlen=str)
+        str_type = h5py.special_dtype(vlen=str)
         __str_type_unicode = False 
     type_attribute = "omsi_type"
     timestamp_attribute = "timestamp"
