@@ -69,7 +69,9 @@ suggest_file_chunkings = False #Should we only suggest file chunkings and quit w
 #  Define file add options                                        ##
 ####################################################################
 add_file_to_db = True  #Add the file to the database
-db_server_url = "https://openmsi.nersc.gov/"  #Specify the server where the database is registered
+check_add_nersc = True #This option is to ensure that when the script is run elsewhere that we do not just call add file without actually saving the file at NERSC
+default_db_server_url = "https://openmsi.nersc.gov/"
+db_server_url = default_db_server_url  #Specify the server where the database is registered
 file_owner = None #Specify for which owner the file should be registered
 #require_login = False #Require login before conversion
 
@@ -720,14 +722,40 @@ def registerFileWithDb( filepath, dbServer, fileOwner) :
         :returns: Boolean indicating whether the operation was successful
     
     """
+    global default_db_server
+    global check_add_nersc
+    
+    #Check if the 
+    if dbServer == default_db_server_url and check_add_nersc:
+        if (not "/project/projectdirs/openmsi" in filepath) or (not filepath.startswith("/data/openmsi/")) :
+            print "WARNING: It appears that you want to add a file to openmsi.nersc.gov that is not in a default location."
+            print "Do you want to add the file? (Y/N):"
+            numTrys = 3
+            for i in range(numTrys) :
+                userInput = raw_input()
+                if userInput == "Y" or userInput == "y" or userInput=="Yes" or userInput=="yes" or userInput=="YES":
+                    break 
+                elif userInput == "N" or userInput == "n" or userInput=="No" or userInput=="no" or userInput=="NO":
+                    return False
+                else :
+                    if i==(numTrys-1) :
+                        print "Aborting adding file to the database."
+                        return False
+                    print "Unrecognized repsonse. Do you want to add the file? (Y/N): "
+    
+    #If we are at NERSC then set the NERSC Apache permissions
+    if 'nersc.gov' in dbServer :
+        setApacheACL( filepath )
+
     #Determine the owner
     currOwner = fileOwner
     if not currOwner :
         currOwner = os.path.dirname( filepath ).split("/")[-1]
     if not currOwner :
-        print "ERROR: Fild could not be added to DB. Owner could not be determined."
+        print "ERROR: File could not be added to DB. Owner could not be determined."
         return False
 
+            
 
     #Construct the db add-file url
     addFileURL = os.path.join(dbServer , "openmsi/resources/addfile" )
@@ -749,6 +777,17 @@ def registerFileWithDb( filepath, dbServer, fileOwner) :
 
     return False
 
+
+def setApacheACL( filepath ) :
+    """Helper function used to set acl permissions for apache to make the given file accesible
+       to Apache at NERSC. This necessary to make the file readable for adding it to the
+       database.
+    """
+    print "Setting NERSC ACL permssiosn for Apache"
+    import os
+    command = "setfacl -R -m u:apache:rwx "+filepath
+    os.system(command)
+    
 
 def parseInputArgs( argv ) :
     """Process input parameters and define the script settings.
@@ -958,12 +997,14 @@ def parseInputArgs( argv ) :
         elif ar=="--add-to-db" :
             startIndex = startIndex+1
             add_file_to_db = True
+            check_add_nersc = False
         elif ar =="--no-add-to-db" :
             startIndex = startIndex+1
             add_file_to_db = False
         elif ar=="--db-server" :
             startIndex = startIndex+2
             db_server_url = str(argv[i+1])
+            check_add_nersc=False
         elif ar =="--owner" :
             startIndex = startIndex+2
             file_owner = str(argv[i+1])
