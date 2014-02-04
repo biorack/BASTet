@@ -552,7 +552,7 @@ class omsi_analysis_base(object) :
             if isinstance(v , tuple ) :
                 value = v[0]
                 selection = v[1]
-            if isinstance( v , h5py.Dataset) or isinstance( v, h5py.Group) or omsi_file.is_managed(v) :
+            if isinstance( value , h5py.Dataset) or isinstance( value, h5py.Group) or omsi_file.is_managed(value) :
                 curr_dependency = omsi_dependency( param_name = name, link_name=name, omsi_object=value, selection=selection ) 
                 self.__dependency_list.append( curr_dependency )
             else : #Add to the list of user-defined parameters
