@@ -51,6 +51,7 @@ omsiFile = None #The openMSI output data file to be used.
 availableFormats = ["img", "bruckerflex", "auto"] #List of available data formats
 availableRegionOptions = ["split" , "merge" , "split+merge"]    #List defining the different options available for handling regions
 availableioOptions = ["chunk" , "spectrum", "all" ] #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
+availableErrorOptions = [ "terminate-and-cleanup" , "terminate-only" , "continue-on-error" ]
 
 ####################################################################
 #  Define the input parameters used during the conversion         ##
@@ -74,6 +75,11 @@ default_db_server_url = "https://openmsi.nersc.gov/"
 db_server_url = default_db_server_url  #Specify the server where the database is registered
 file_owner = None #Specify for which owner the file should be registered
 #require_login = False #Require login before conversion
+
+####################################################################
+#  Define error-handling options                                  ##
+####################################################################
+error_handling = "terminate-and-cleanup"
 
 ####################################################################
 #  Define analysis options and parameter settings                 ##
@@ -101,6 +107,8 @@ def main(argv=None):
     global add_file_to_db
     global db_server_url 
     global file_owner
+    global error_handling
+    global availableErrorOptions
     #global require_login
 
     
@@ -126,6 +134,28 @@ def main(argv=None):
     #if require_login :
     #    loginUser()
 
+    
+    ####################################################################
+    # Generate the list of datasets to be converted                    #
+    ####################################################################
+    try : 
+        datasetList = create_datasetList( inputFilenames=inputFilenames, formatOption=formatOption, regionOption=regionOption)
+        print "Number of conversion: "+str(len( datasetList ))
+    except :
+        print "ERROR: An error occured during the generation of the input filelist."
+        print "       -- Not HDF5 output file has been generated."
+        print "       -- No file has been added to the database."
+        print "       -- Terminating"
+        raise 
+        exit(0)
+            
+    ####################################################################
+    #  Suggest only chunking for the files if requested                #
+    ####################################################################
+    if suggest_file_chunkings : 
+        suggest_chunkings_for_files( datasetList )
+        exit()
+
     ####################################################################
     #   Create the output HDF5 file if needed                          #
     ####################################################################
@@ -135,19 +165,6 @@ def main(argv=None):
     except:
         print "Unexpected error creating the output file:", sys.exc_info()[0]
         exit(0)
-    
-    ####################################################################
-    # Generate the list of datasets to be converted                    #
-    ####################################################################
-    datasetList = create_datasetList( inputFilenames=inputFilenames, formatOption=formatOption, regionOption=regionOption)
-    print "Number of conversion: "+str(len( datasetList ))
-
-    ####################################################################
-    #  Suggest only chunking for the files if requested                #
-    ####################################################################
-    if suggest_file_chunkings : 
-        suggest_chunkings_for_files( datasetList )
-        exit()
 
     ####################################################################
     # Convert all files                                                #
@@ -155,9 +172,26 @@ def main(argv=None):
     try :
         convert_files()
     except:
-        omsiFile.close_file()
-        print "ERROR: An error occured during the file conversion. Closing the output file and terminating."
+        print "ERROR: An error occured during the file conversion."
+        #Try to close the output file
+        try:
+            omsiFile.close_file()
+        except :
+            pass
+        if error_handling == "terminate-and-cleanup" :
+            print "--The generated HDF5 will not be added to the database."
+            add_file_to_db = False 
+            print "--Attempting to delete the generated HDF5 file."
+            os.remove(omsiOutFile)
+            print "--Successfully deleted the generated HDF5 file: "+str(omsiOutFile)
+        if error_handling == "terminate-only" or error_handling == "continue-on-error" :
+            print "--The generated HDF5 will not be added to the database."
+            add_file_to_db = False
+            print "--The output HDF5 file (if generate) remains at: "+str(omsiOutFile)
+            print "  Output file found: "+str(os.path.exists(omsiOutFile))
+        #Pass on which-ever error has occured 
         raise
+        exit(0)
 
     ####################################################################
     #  Close the HDF5 file and exit                                    #
@@ -203,6 +237,8 @@ def convert_files() :
     global nmf_useRawData
     global datasetList
     global omsiFile
+    global error_handling
+    global availableErrorOptions
 
     ####################################################################
     #  Convert the MSI files and compute the requested analyses       ##
@@ -235,12 +271,21 @@ def convert_files() :
             else :
                 print "ERROR: The following file will not be converted because the file type could not be determined: "+basefile
                 print "INFO: If you know the correct file format then try converting the file using the approbirate --format <formatname> option."
+                if error_handling == "continue-on-error" :
+                    pass
+                elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only" :
+                    raise ValueError("Unrecognized file format.")
+                    return
                 
             print "In data shape: "+str(inputFile.shape) 
         except:
             print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
-            print basefile+" failure during converion. Skipping the file and continue conversion of the other files.\n" 
-            continue 
+            if error_handling == "continue-on-error" :
+                print basefile+" failure during conversion. Skipping the file and continue conversion of the other files.\n"
+                continue
+            elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only" :
+                raise
+                return
 
         if auto_chunk : 
         
@@ -487,6 +532,9 @@ def create_datasetList( inputFilenames, formatOption='auto', regionOption="split
        
        :returns: List of dictionaries describing the various conversion jobs
     """
+    global availableErrorOptions 
+    global error_handling
+    
     re_datasetList = []
     for i in inputFilenames :
         currDS = {}
@@ -511,7 +559,12 @@ def create_datasetList( inputFilenames, formatOption='auto', regionOption="split
                 except :
                     print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
                     print currDS['basename']+" failure during converion. Skipping the file and continue conversion of the other files.\n"
-                    continue
+                    if error_handling ==  "continue-on-error" :
+                        continue
+                    elif error_handling == "terminate-and-cleanup"  or error_handling == "terminate-only" :
+                        raise
+                    else :
+                        raise 
 
             if regionOption not in availableRegionOptions : #This is just to make sure that we have checked everything
                 print "WARNING: Undefined region option. Using the default option split+merge"
@@ -827,6 +880,8 @@ def parseInputArgs( argv ) :
     global db_server_url
     global add_file_url
     global file_owner
+    global availableErrorOptions
+    global error_handling
     #global require_login
     
     #Initalize the output values to be returned 
@@ -1012,6 +1067,15 @@ def parseInputArgs( argv ) :
         #elif ar =="--login" :
         #    startIndex = startIndex+1
         #    require_login = True
+        elif ar =="--error-handling" :
+            startIndex = startIndex+2
+            errorOption = str(argv[i+1])
+            if errorOption in availableErrorOptions :
+                error_handling = errorOption
+            else :
+                print "ERROR: The indicated --error-handling option "+errorOption+" is not supported. Available options are:"
+                print "     "+str(availableErrorOptions)
+                inputError = True
         elif ar.startswith("--") :
             startIndex = startIndex+1
             inputError = True
@@ -1086,6 +1150,15 @@ def printHelp():
     print "--suggest-chunking : Iterate over all given input files and suggest a chunking strategy."
     print "                     No data is converted when this option is given, i.e., no name for the"
     print "                     HDF5File should be given, but only input files should be listed."
+    print ""
+    print "===ERROR HANDLING OPTIONS==="
+    print "--error-handling <options>: Define how errors should be handled. Options are:"
+    print "                   i)   terminate-and-cleanup (default) : Terminate the conversion, delete the"
+    print "                           the HDF5 file and do not add the file to the database."
+    print "                   ii)  terminate-only,: Leave the generated HDF5 output file in place but  do not"
+    print "                            add the file to the database."
+    print "                   iii) continue-on-error: Ignore errors if possible and continue, even if this"
+    print "                            means that some data may be missing from the output."
     print ""
     print "===INPUT DATA OPTIONS==="
     print ""
