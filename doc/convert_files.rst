@@ -1,5 +1,12 @@
-Converting and Accessing Files
-==============================
+.. _converting-files:
+
+Converting and Files and Making them Accesible
+==============================================
+
+Converting an MSI file at NERSC
+-------------------------------
+
+To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:
 
 .. code-block:: none
     
@@ -9,6 +16,13 @@ Converting and Accessing Files
     python convertToOMSI.py <infile1> <output HDF5File>
 
 Note if you use the bash shell then use ``setupEnvironment.bash`` instead. 
+
+Below some additional notes on relevant file-related modules: 
+
+* ``omsi.tools.convertToOMSI`` : This python script, which is available via the OMSI software toolkit, provides functionality for converting img files to HDF5. The script takes a single or multiple img files as input and writes them to a single HDF5 file. The data of each img file is stored in a separate ``/entry_#/data_#`` object. The script also supports execution of a number of different analysis, such as, peak finding or nmf, directly during the data conversion. For up-to-date information about the usage of the script see ``python imgToHDF5 --help``. A summary of the main command-line options of the tool are available below.
+* ``omsi.dataformat.omsi_file`` : Module containing a set of python class for reading and writing HDF5 data files for the proposed OMSI HDF5 data layout. 
+* ``omsi.dataformat.img_file`` : Simple python class for reading img data files.
+* ``omsi.dataformat.bruckerflex_file`` : Simple python class for reading bruckerflex files.
 
 
 Making a converted file accesilbe to OpenMSI (Private)
@@ -34,11 +48,9 @@ Using the OpenMSI website the owner of the file can assign permissions to files 
 https://openmsi.nersc.gov/openmsi/resources/filemanager?file=<filename>
 
 
-    
-
 
 ``convertToOMSI``: Usage and Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------
 
 NOTE: In order to view a current, complete list of conversions options use:
 
