@@ -13,13 +13,15 @@ class omsi_analysis_template(omsi_analysis_base) :
        Search for EDIT_ME to find locations that need to be changed.
        
        EDIT_ME Search for omsi_analysis_template and replace it with your classname throughout
+       
+       EDIT_ME Replace this doc-string with your class documentation
     
     """
 
     def __init__(self, nameKey="undefined"):
         """Initalize the basic data members"""
         
-        """EDIT_ME Change the class-name to your class to call the init function of omsi_analysis_base"""
+        """EDIT_ME Change the class-name to your class to call the init function of omsi_analysis_base. If you did a replace all then this should be done already."""
         super(omsi_analysis_template,self).__init__()
         """EDIT_ME Add a list of names of input parameters for your analysis"""
         self.parameter_names = [ ]
@@ -29,20 +31,15 @@ class omsi_analysis_template(omsi_analysis_base) :
         
     
     def execute_analysis(self) :
-        """Implement this function to implement the execution of the actual analysis.
+        """EDIT_ME: 
+           Implement this function to implement the execution of the actual analysis.
         
            This function may not require any input parameters. All input parameters are
            recoded in the parameters and dependencies lists and should be retrieved 
            from there, e.g, using basic slicing self[ paramName ]
         
-           :returns: This function may return any developer-defined data. Note, all
-                     output that should be recorded must be put into the data list.
-        
-        """
-    
-    
-        """EDIT_ME: 
-        
+           EDIT_ME:
+           Remove this comment and replace it with your own documentation.
            Describe what your analysis does and how a user can use it. Note, a user will
            call the function execute(...) which takes care of storing parameters, collecting
            execution data etc., so that you only need to implement your analysis, the rest
@@ -52,6 +49,9 @@ class omsi_analysis_template(omsi_analysis_base) :
 
            :param mydata: ...
            :type mydata: ...
+           
+           :returns: This function may return any developer-defined data. Note, all
+                     output that should be recorded must be put into the data list.
            
         """
         
@@ -247,7 +247,7 @@ class omsi_analysis_template(omsi_analysis_base) :
         """
         customOptions = []
         
-        """EDIT_ME Change the omsi_analysis_template class-name to your class"""
+        """EDIT_ME Change the omsi_analysis_template class-name to your class. If you did a replace all, then this should be done already."""
         dependentOptions = super(omsi_analysis_template ,cls).v_qspectrum_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
         return re
@@ -271,7 +271,7 @@ class omsi_analysis_template(omsi_analysis_base) :
         """
         customOptions = []
         
-        """EDIT_ME Change the omsi_analysis_template class-name to your class"""
+        """EDIT_ME Change the omsi_analysis_template class-name to your class.  If you did a replace all, then this should be done already."""
         dependentOptions = super(omsi_analysis_template ,cls).v_qslice_viewerOptions(anaObj)
         re = customOptions + dependentOptions 
         return re
