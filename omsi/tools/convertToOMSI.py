@@ -50,7 +50,7 @@ omsiFile = None #The openMSI output data file to be used.
 ####################################################################
 availableFormats = ["img", "bruckerflex", "auto"] #List of available data formats
 availableRegionOptions = ["split" , "merge" , "split+merge"]    #List defining the different options available for handling regions
-availableioOptions = ["chunk" , "spectrum", "all" ] #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
+availableIOOptions = ["chunk" , "spectrum", "all" ] #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
 availableErrorOptions = [ "terminate-and-cleanup" , "terminate-only" , "continue-on-error" ]
 
 ####################################################################
@@ -364,7 +364,7 @@ def convert_files() :
                 nmf.execute( msidata=fpgData , numComponents=nmf_numComponents, timeOut=nmf_timeout, numIter=nmf_numIter, tolerance=nmf_tolerance)
             else :
                 print "   Using raw data for NMF"
-                nmf.execute_nmf( msidata=data , numComponents=nmf_numComponents, timeOut=nmf_timeout, numIter=nmf_numIter, tolerance=nmf_tolerance)
+                nmf.execute( msidata=data , numComponents=nmf_numComponents, timeOut=nmf_timeout, numIter=nmf_numIter, tolerance=nmf_tolerance)
             #Save the nmf results to file
             ana, ai = exp.create_analysis( nmf )
         
@@ -933,12 +933,12 @@ def parseInputArgs( argv ) :
             print "Set nmf-niter="+str(nmf_numIter)
         elif ar == "--nmf-tolerance" :
             startIndex = startIndex+2
-            nmf_numIter = float(argv[i+1])
-            print "Set nmf-tolerance="+str(nmf-tolerance)
+            nmf_tolerance = float(argv[i+1])
+            print "Set nmf-tolerance="+str(nmf_tolerance)
         elif ar == "--nmf-raw" :
             startIndex = startIndex+1
             nmf_useRawData = True
-            print "Set nmf-raw="+str(nmf-raw)
+            print "Set nmf-raw="+str(nmf_useRawData)
         elif ar == "--fpg" :
             startIndex = startIndex+1
             executeFPG = True
@@ -1014,7 +1014,7 @@ def parseInputArgs( argv ) :
             startIndex = startIndex + 2
             try :
                 ioOption = str(argv[i+1])
-                if ioOption not in availableioOption  :
+                if ioOption not in  availableIOOptions  :
                     raise ValueError("Invalid io option")
             except:
                 print "An error accured while parsing the --io command. Something may be wrong with the indicated io-type."
@@ -1202,7 +1202,7 @@ def printHelp():
     print "--no-compression: Disable the use of compression."
     print ""
     print "===I/O OPTIONS==="
-    print "--io <option>: Available options are: "
+    print "--io <option>: Available options are: "+str(availableIOOptions)
     print "             i) all : Read the full data in memory and write it at once" 
     print "             ii) spectrum : Read one spectrum at a time and write it to the file. "
     print "             iii) chunk : Read one chunk at a time and write it to the file."
