@@ -569,8 +569,8 @@ class omsi_file :
         testAnaData['name'] = 'peakcube'
         testAnaData['data'] = np.zeros( shape=(5,5,5) , dtype='float32' )
         testAnaData['dtype'] = 'float32'
-        print "Adding the dummy analysis data to the analys object"
-        testAna.add_analysis_data( testAnaData )
+        #print "Adding the dummy analysis data to the analys object"
+        #testAna.add_analysis_data( testAnaData )
         print "Saving the analysis data to file"
         analysis , ai = exp.create_analysis(testAna)
         print "Getting the analysis identifier"
@@ -640,7 +640,7 @@ class omsi_file_experiment :
     def get_version(self) :
         """Get the omsi version for the representation of this object in the HDF5 file"""
         try :
-            return self.exp.attrs[omsi_format_common.version_attribute]
+            return self.experiment.attrs[omsi_format_common.version_attribute]
         except :
             return None
 
@@ -653,7 +653,7 @@ class omsi_file_experiment :
             
         """
         try :
-            return self.exp.attrs[omsi_format_common.timestamp_attribute ]
+            return self.experiment.attrs[omsi_format_common.timestamp_attribute ]
         except :
             return None
 
@@ -2012,7 +2012,7 @@ class omsi_file_dependencydata :
         selection_data = dep_group.require_dataset( name = unicode(omsi_format_dependencydata.dependency_selection) , shape=(1,), dtype=omsi_format_common.str_type  )
         if dependency_data['selection'] is not None :
             from omsi.shared.omsi_data_selection import check_selection_string
-            if omsi_data_selection.check_selection_string( dependency_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
+            if check_selection_string( dependency_data['selection'] ) : #This should always be True since omsi_dependency checks for this but we need to be sure. 
                 if omsi_format_common.str_type_unicode :
                     selection_data[0] =  dependency_data['selection']
                 else :
@@ -2120,12 +2120,14 @@ class omsi_file_dependencydata :
             else :
                 return omsi_object[key]
             
-    def get_dependency_type(self) :
+    def get_dependency_type(self, recursive=True) :
         """Indicated the type of the object the dependency is pointing to.
+        
+          :param recursive: Should dependencies be resolved recursively, i.e., if the dependeny points to another dependencies. Default=True.
         
           :returns: String indicating the class of the omsi file API class that is suited to manage the dependency link or the name of the corresponding h5py class.
         """
-        omsi_object = self.get_dependency_object()
+        omsi_object = self.get_dependency_omsiobject( recursive=recursive)
         return omsi_object.__class__.__name__
         
     def get_selection_string(self) :
@@ -2482,7 +2484,7 @@ class omsi_file_msidata :
            :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         if self.dependencies is not None :
-            return self.dependencies.get_all_dependency_data( self, omsi_dependency_format=omsi_dependency_format)
+            return self.dependencies.get_all_dependency_data( omsi_dependency_format=omsi_dependency_format)
         else :
             return []
     
