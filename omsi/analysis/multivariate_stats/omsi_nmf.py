@@ -194,7 +194,7 @@ def main(argv=None):
     #Execute the nmf
     testNMF = omsi_nmf()
     print "Executing nmf analysis"
-    testNMF.execute_nmf( data )
+    testNMF.execute( msidata=data )
     print "Getting nmf analysis results"
     wo = testNMF.get_analysis_data( 'wo' )['data']
     ho = testNMF.get_analysis_data( 'ho' )['data']
