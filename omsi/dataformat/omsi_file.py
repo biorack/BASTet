@@ -77,7 +77,7 @@ class omsi_file :
             h5pyObj = omsiObj.get_h5py_analysisgroup()
         elif isinstance( omsiObj , omsi_file_dependencydata ) :
             if resolveDependencies :
-                h5pyObj = omsi_file.get_h5py_object( omsi_obj.get_dependency_omsiobject() , resolveDependencies )
+                h5pyObj = omsi_file.get_h5py_object( omsiObj.get_dependency_omsiobject() , resolveDependencies )
             else:
                 h5pyObj = omsiObj.get_h5py_dependencygroup()
         elif isinstance( omsiObj , omsi_file_dependencies ) :
@@ -3218,7 +3218,7 @@ class omsi_file_msidata :
         elif self.format_type == omsi_format_msidata.format_types['partial_spectra'] :
             
             chunks = destination.chunks
-            numChunksX = int( math.ceil( float(source.shape[0])/float(desitnation.chunks[0]) ) )
+            numChunksX = int( math.ceil( float(source.shape[0])/float(destination.chunks[0]) ) )
             numChunks = numChunksX
             itertest=0 
             for xt in xrange(0, numChunksX ) :
