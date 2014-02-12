@@ -25,7 +25,7 @@ def main(argv=None):
         
     #Check for correct usage
     if len(argv) !=4 :
-        printHelp()
+        print "Wrong usage."
         exit(0)
         
     omsiFile  = argv[1]
@@ -174,10 +174,10 @@ def generateBaseTestFile( omsiOutFile , xdim , ydim, zdim ) :
     sample = exp.create_sample_info()
     #Create an empty instrument description
     mzdata = np.ones( zdim )
-    instrument = exp.create_instrument_info(instrumentname="undefined" , mzdata=mzdata )
+    instrument = exp.create_instrument_info(instrument_name="undefined" , mzdata=mzdata )
     start = time.time()
     #Allocate space in the HDF5 file for the img data
-    data = exp.create_msidata(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' , chunks=None )
+    data = exp.create_msidata_full_cube(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' , chunks=None )
     #Write data one spectrum at a time
     for xi in xrange( 0 , xdim ) :
         sys.stdout.write("[" +str( int( 100.* float(xi)/float(xdim) )) +"%]"+ "\r")
@@ -217,19 +217,19 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
     sample = exp.create_sample_info()
     #Create an empty instrument description
     mzdata = np.ones( zdim )
-    instrument = exp.create_instrument_info(instrumentname="undefined" , mzdata=mzdata )
+    instrument = exp.create_instrument_info(instrument_name="undefined" , mzdata=mzdata )
 
     #Allocate space in the HDF5 file for the img data
     start = time.time()
     if compress : 
         #Use compresion
-        data = exp.create_msidata(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' ,  chunks=(xchunk,ychunk,zchunk) ,  compression='gzip' , compression_opts=4 )
+        data = exp.create_msidata_full_cube(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' ,  chunks=(xchunk,ychunk,zchunk) ,  compression='gzip' , compression_opts=4 )
     elif useChunking :
         #Use chunking
-        data = exp.create_msidata(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' ,  chunks=(xchunk,ychunk,zchunk) ) #,  compression='gzip' , compression_opts=4 )
+        data = exp.create_msidata_full_cube(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' ,  chunks=(xchunk,ychunk,zchunk) ) #,  compression='gzip' , compression_opts=4 )
     else :
         #Don't use chunking and compression
-        data = exp.create_msidata(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' )
+        data = exp.create_msidata_full_cube(data_shape=( xdim , ydim , zdim  ) , data_type = 'uint16' )
  
     itertest=0 
     if useChunking :
