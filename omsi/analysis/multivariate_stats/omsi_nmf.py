@@ -26,10 +26,10 @@ class omsi_nmf(omsi_analysis_base) :
             except:
                 return None
         elif viewerOption > 0 :
-            return super(omsi_nmf,cls).v_qslice( anaObj , z, viewerOption-1)
+            return super(omsi_nmf,cls).v_qslice(anaObj , z, viewerOption-1)
     
     @classmethod
-    def v_qspectrum( cls, anaObj , x, y , viewerOption=0) :
+    def v_qspectrum(cls, anaObj , x, y , viewerOption=0) :
         """Implement support for qspectrum URL requests for the viewer"""
         from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
         data = None
@@ -42,7 +42,7 @@ class omsi_nmf(omsi_analysis_base) :
                 data = eval("dataset[%s,%s, :]" %(x,y))
             customMZ = None
         elif viewerOption > 0 :
-            return super(omsi_nmf,cls).v_qspectrum( anaObj , x , y, viewerOption-1)
+            return super(omsi_nmf,cls).v_qspectrum(anaObj , x , y, viewerOption-1)
             
         return data, customMZ
         
@@ -55,37 +55,37 @@ class omsi_nmf(omsi_analysis_base) :
         labelSlice = None
         #We do not need to handle the qslice_viewerOption separately here since there is only one option right now
         if qspectrum_viewerOption == 0 and qslice_viewerOption==0: #Loadings
-            mzSpectra = arange( 0 ,  anaObj[ 'ho' ].shape[2] )
+            mzSpectra = arange(0 ,  anaObj[ 'ho' ].shape[2])
             labelSpectra = "Component Index"
             mzSlice  = None
             labelSlice = None
         elif qspectrum_viewerOption > 0 and qslice_viewerOption>0 :
-            mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz( anaObj, qslice_viewerOption=qslice_viewerOption-1 , qspectrum_viewerOption=qspectrum_viewerOption-1)
+            mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz(anaObj, qslice_viewerOption=qslice_viewerOption-1 , qspectrum_viewerOption=qspectrum_viewerOption-1)
         elif qspectrum_viewerOption == 0 and qslice_viewerOption>0 :
-            mzSpectra = arange( 0 ,  anaObj[ 'ho' ].shape[2] )
+            mzSpectra = arange(0 ,  anaObj[ 'ho' ].shape[2])
             labelSpectra = "Component Index"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz( anaObj, qslice_viewerOption=qslice_viewerOption-1, qspectrum_viewerOption=0)
+            tempA, tempB, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz(anaObj, qslice_viewerOption=qslice_viewerOption-1, qspectrum_viewerOption=0)
             #NOTE: if qspectrum and qslice share the same axis, this call will not return the copied data, i.e., we need to copy the
             #qspectrum values to the qslice values.
             if mzSlice is None :
                 mzSlice = tempA
                 labelSlice = tempB
         elif qspectrum_viewerOption > 0 and qslice_viewerOption==0 :
-            mzSlice =  arange( 0 ,  anaObj[ 'ho' ].shape[2] )
+            mzSlice =  arange(0 ,  anaObj[ 'ho' ].shape[2])
             labelSlice = "Component Index"
-            mzSpectra, labelSpectra, tempA, tempB = super(omsi_nmf,cls).v_qmz( anaObj,  qslice_viewerOption=0 , qspectrum_viewerOption=qspectrum_viewerOption-1)
+            mzSpectra, labelSpectra, tempA, tempB = super(omsi_nmf,cls).v_qmz(anaObj,  qslice_viewerOption=0 , qspectrum_viewerOption=qspectrum_viewerOption-1)
         
         return mzSpectra, labelSpectra, mzSlice, labelSlice
     
     @classmethod
-    def v_qspectrum_viewerOptions(cls , anaObj ) :
+    def v_qspectrum_viewerOptions(cls , anaObj) :
         """Define which viewerOptions are supported for qspectrum URL's"""
         dependent_options = super(omsi_nmf,cls).v_qspectrum_viewerOptions(anaObj)
         re = ["NMF Loadings"] + dependent_options
         return re
         
     @classmethod
-    def v_qslice_viewerOptions(cls , anaObj ) :
+    def v_qslice_viewerOptions(cls , anaObj) :
         """Define which viewerOptions are supported for qspectrum URL's"""
         dependent_options = super(omsi_nmf,cls).v_qslice_viewerOptions(anaObj)
         #print dependent_options
@@ -144,7 +144,7 @@ class omsi_nmf(omsi_analysis_base) :
 
         #Reshape the ho matrix to be a 3D image cube
         ho = ho.transpose() 
-        ho = ho.reshape( (nx,ny,numComponents))
+        ho = ho.reshape((nx,ny,numComponents))
         
         #Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
         self['wo'] = wo
@@ -177,27 +177,27 @@ def main(argv=None):
     expIndex = 0
     dataIndex = 0
     if len(argv)==4 :
-        expIndex = int(argv[2] )
-        dataIndex = int(argv[3] )
+        expIndex = int(argv[2])
+        dataIndex = int(argv[3])
 
     #Open the input HDF5 file
     try:
-        omsiFile = omsi_file( omsiOutFile , 'r' ) #Open file in read only mode
+        omsiFile = omsi_file(omsiOutFile , 'r') #Open file in read only mode
     except:
         print "Unexpected error creating the output file:", sys.exc_info()[0]
         exit(0)
 
     #Get the experiment and dataset
-    exp = omsiFile.get_exp( expIndex )
-    data = exp.get_msidata( dataIndex )
+    exp = omsiFile.get_exp(expIndex)
+    data = exp.get_msidata(dataIndex)
 
     #Execute the nmf
     testNMF = omsi_nmf()
     print "Executing nmf analysis"
-    testNMF.execute( msidata=data )
+    testNMF.execute(msidata=data)
     print "Getting nmf analysis results"
-    wo = testNMF.get_analysis_data( 'wo' )['data']
-    ho = testNMF.get_analysis_data( 'ho' )['data']
+    wo = testNMF.get_analysis_data('wo')['data']
+    ho = testNMF.get_analysis_data('ho')['data']
     print ho
     print "Plotting nmf analysis results"
     Nx = data.shape[0]
@@ -218,38 +218,38 @@ def main(argv=None):
     gs = gridspec.GridSpec(1, 4)
     imageFig = mainFig.add_subplot(gs[0])
 #    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor( log (ho1 + 1) ) 
+    imagePlot = imageFig.pcolor(log (ho1 + 1)) 
 
     imageFig = mainFig.add_subplot(gs[1])
 #    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor( log (ho2 + 1) )
+    imagePlot = imageFig.pcolor(log (ho2 + 1))
 
     imageFig = mainFig.add_subplot(gs[2])
 #    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor( log (ho3 + 1) )
+    imagePlot = imageFig.pcolor(log (ho3 + 1))
 
 
 #    do the three color
     ho = ho.transpose()
     ho = ho.reshape(Nx,Ny,3)
-    temp = log ( ho[:,:,0] + 1)
+    temp = log (ho[:,:,0] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
     ho[:,:,0] = temp
     
-    temp = log ( ho[:,:,1] + 1)
+    temp = log (ho[:,:,1] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
     ho[:,:,1] = temp
     
-    temp = log ( ho[:,:,2] + 1)
+    temp = log (ho[:,:,2] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
     ho[:,:,2] = temp
     
     imageFig = mainFig.add_subplot(gs[3])
     imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.imshow( ho )
+    imagePlot = imageFig.imshow(ho)
    
     plt.show()
 
