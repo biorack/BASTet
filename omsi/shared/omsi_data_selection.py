@@ -1,15 +1,15 @@
 import numpy as np
-import sys , os , time
+import sys, os, time
 
 
-from omsi.dataformat.omsi_file import omsi_file, omsi_file_analysis
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+#from omsi.dataformat.omsi_file import omsi_file, omsi_file_analysis
+#from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
 """This an extended list of types indicated by the check_selection_string function. Indicies <0 are assumed to be invalid selections."""
-selection_type = { 'invalid' :-1 , 'index':0 , 'indexlist':2, 'all':3, 'range':4 }
+selection_type = {'invalid':-1, 'index':0, 'indexlist':2, 'all':3, 'range':4}
 
 
-def check_selection_string( selectionString ) :
+def check_selection_string(selectionString):
     """Check whether the given selection string is valid, and indicate which type of selection
        the string defined. Checking the selection string is meant as a safeguard to prevent 
        attakers from being able to insert malitious code.
@@ -27,25 +27,25 @@ def check_selection_string( selectionString ) :
        """
     import re
     #Check if we actually have a string
-    if selectionString is None :
+    if selectionString is None:
         return selection_type['invalid']
     #Check if the selection defined a list of indicies
-    elif re.match('^\[([0-9 ]+,)*[0-9]+\]$' , selectionString) : 
+    elif re.match('^\[([0-9]+,)*[0-9]+\]$', selectionString): 
         return selection_type['indexlist'] 
     #Check if the selection defines and ":" all selection
-    elif re.match('^:$' , selectionString) : 
+    elif re.match('^:$', selectionString): 
         return selection_type['all']
     #Check if the selection defines a range  a:b type selection
-    elif re.match('^[0-9 ]+:-?[0-9 ]+$' , selectionString ) :   
+    elif re.match('^[0-9]+:-?[0-9]+$', selectionString):   
         return selection_type['range']
     #Check if the selection defines a single index value type selection 
-    elif re.match('^-?[0-9 ]+$' , selectionString) :
+    elif re.match('^-?[0-9]+$', selectionString):
         return selection_type['index']
     #If none of the above selection types are given, then the selection is declared invalid 
-    else :
+    else:
         return selection_type['invalid']
 
-def selection_string_to_object( selectionString ) :
+def selection_string_to_object(selectionString):
     """Convert the given selection string to a python selection object, i.e., either a slice, list or integer index.
     
        :param selectionString: A selection string of the type indexlist
@@ -58,31 +58,31 @@ def selection_string_to_object( selectionString ) :
             
     """
     selectionType = check_selection_string(selectionString) 
-    if selectionType == selection_type['indexlist'] :
+    if selectionType == selection_type['indexlist']:
         stringList = selectionString[1:-1].split(",")
-        try :
-            parsedList = [ int(i) for i in stringList ]
-        except :
+        try:
+            parsedList = [int(i) for i in stringList]
+        except:
             return None
         return parsedList
-    elif selectionType == selection_type['index'] :
+    elif selectionType == selection_type['index']:
         try: 
             return int(selectionString)
-        except :
+        except:
             return None
-    elif selectionType == selection_type['all'] :
-        return slice(None,None,None)
-    elif selectionType == selection_type['range'] :
+    elif selectionType == selection_type['all']:
+        return slice(None, None, None)
+    elif selectionType == selection_type['range']:
         splitString = selectionString.split(":")
-        if len(splitString) == 1 :
-            return slice( int(splitString[0]) , None, None )
-        elif len(splitString) == 2 :
-            return slice( int(splitString[0]) , int(splitString[1]), None )
+        if len(splitString) == 1:
+            return slice(int(splitString[0]), None, None)
+        elif len(splitString) == 2:
+            return slice(int(splitString[0]), int(splitString[1]), None)
         elif len(splitString) == 3: 
-            return slice( int(splitString[0]) , int(splitString[1]), int(splitString[2]) )
+            return slice(int(splitString[0]), int(splitString[1]), int(splitString[2]))
         
         
-def selection_to_indexlist( selectionString , axisSize=0) :
+def selection_to_indexlist(selectionString, axisSize=0):
     """Parse the indexlist selection string and return a python list of indicies
     
        :param selectionString: A selection string of the type indexlist
@@ -97,39 +97,39 @@ def selection_to_indexlist( selectionString , axisSize=0) :
 
     #Check if the given selection is in fact a indexlist
     selectionType = check_selection_string(selectionString) 
-    if selectionType == selection_type['indexlist'] :
+    if selectionType == selection_type['indexlist']:
         stringList = selectionString[1:-1].split(",")
-        try :
-            parsedList = [ int(i) for i in stringList ]
-        except :
-            return None
-        return parsedList
-    elif selectionType == selection_type['index'] :
         try:
-            return [ int(selectionString) ]
+            parsedList = [int(i) for i in stringList]
         except:
             return None
-    elif selectionType == selection_type['all'] :
-        try :
-            return range(0,axisSize)
-        except :
-            return None
-    elif selectionType == selection_type['range'] :
+        return parsedList
+    elif selectionType == selection_type['index']:
         try:
-            parsedRanges = [ int(i) for i in selectionString.split(":") ]
-            if len(parsedRanges) ==2 :
-                return range( parsedRanges[0] , parsedRanges[1] )
-            else :
+            return [int(selectionString)]
+        except:
+            return None
+    elif selectionType == selection_type['all']:
+        try:
+            return range(0, axisSize)
+        except:
+            return None
+    elif selectionType == selection_type['range']:
+        try:
+            parsedRanges = [int(i) for i in selectionString.split(":")]
+            if len(parsedRanges) == 2:
+                return range(parsedRanges[0], parsedRanges[1])
+            else:
                 return None
         except:
             return None
-    else :
+    else:
         return None
     
     
 
 
-def perform_reduction( data , reduction , axis , httpErr=False) :
+def perform_reduction(data, reduction, axis, httpErr=False):
     """ Helper function used reduce the data of a given numpy array. \n
        
         :param data: The input numpy array that should be reduced
@@ -139,23 +139,23 @@ def perform_reduction( data , reduction , axis , httpErr=False) :
         
         :returns: Reduced numpy data array or HttpResonse with a description of the error that occured.
     """
-    if httpErr :
+    if httpErr:
         from django.http import HttpResponseNotFound
     
-    if data is None :
-        return HttpResponseNotFound("Data reduction "+str(reduction)+" failed. None data cannot be reduced." )
+    if data is None:
+        return HttpResponseNotFound("Data reduction "+str(reduction)+" failed. None data cannot be reduced.")
     
     axis = int(axis)
-    if axis >= len(data.shape) :
-        return HttpResponseNotFound("Data reduction "+str(reduction)+" failed. The dimensionality of the data is lower than the axis requested to be used for reduction" )
+    if axis >= len(data.shape):
+        return HttpResponseNotFound("Data reduction "+str(reduction)+" failed. The dimensionality of the data is lower than the axis requested to be used for reduction")
     
     #Perform the data reduction operation. This can be a large range of numpy operations eg., min,max,mean,median,std,var
     try:
-        op = getattr(np , reduction)
-        #if data.shape[ axis ] > 1 :
-        data = op(data,axis=axis)
+        op = getattr(np, reduction)
+        #if data.shape[axis] > 1:
+        data = op(data, axis=axis)
         return data
-    except :#except:
+    except:
         return HttpResponseNotFound("Requested data reduction "+str(reduction)+" failed or not supported. Valid reduction operations are e.g.: min, max, mean, median, std, var."+" "+str(sys.exc_info()))
 
 
