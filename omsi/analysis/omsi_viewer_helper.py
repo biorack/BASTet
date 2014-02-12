@@ -46,7 +46,7 @@ class omsi_viewer_helper(object) :
             if reduction is not None:
                 data = perform_reduction( data , reduction , axis )
                 
-            if (reduction2 is not None) and ( not isinstance(data, HttpResponse ) ) :
+            if (reduction2 is not None) and (data is not None) :
                 data = perform_reduction( data , reduction2 , axis2 )
             
             if data is None :
