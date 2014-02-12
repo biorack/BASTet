@@ -223,7 +223,7 @@ def main(argv=None):
     #Execute the peak finding
     testFPG = omsi_findpeaks_global()
     print "Executing peakfinding analysis"
-    testFPG.execute_peakfinding( data , mzdata)
+    testFPG.execute( msidata=data , mzdata=mzdata)
     print "Getting peak finding analysis results"
     peakCube = testFPG[ 'peak_cube' ]['data']
     print peakCube
