@@ -266,7 +266,7 @@ def main(argv=None):
     #Execute the peak finding
     testFPL = omsi_findpeaks_local()
     print "Executing peakfinding analysis"
-    testFPL.execute_peakfinding( data , mzdata)
+    testFPL.execute( msidata=data , mzdata=mzdata)
     print "Getting peak finding analysis results"
     pmz = testFPL[ 'peak_mz' ]['data']
     print pmz
