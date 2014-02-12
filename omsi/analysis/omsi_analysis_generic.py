@@ -42,6 +42,10 @@ class omsi_analysis_generic(omsi_analysis_base) :
         """Define which viewerOptions are supported for qspectrum URL's"""
         return super(omsi_analysis_generic,cls).v_qslice_viewerOptions( anaObj )
     
+    @classmethod
+    def get_analysis_type(cls) :
+        """Return a string indicating the type of analysis performed"""
+        return "generic"
     
     def read_from_omsi_file(self, analysisObj , load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
         """Overwrite the default implementation to remove the type check as this class should
@@ -74,14 +78,10 @@ class omsi_analysis_generic(omsi_analysis_base) :
         
         return True
         
-    def get_real_analysis_type() :
+    def get_real_analysis_type(self) :
         """This class is designed to handle generic (including unkown) types of analysis.
         In cases, e.g., were this class is used to store analysis data from an HDF5
         file we may have an actual analysis type available even if we do not have
         a special analysis class may not be available in the current intallation"""
         return self.real_analysis_type
 
-    @classmethod
-    def get_analysis_type(self) :
-        """Return a string indicating the type of analysis performed"""
-        return "generic"
