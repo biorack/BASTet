@@ -29,7 +29,7 @@ try:
     import urllib2
     #import urllib
 except:
-    pass #This is to ensuer the script is usabel without urllib2 when register to DB is not requested
+    pass  #This is to ensuer the script is usable without urllib2 when register to DB is not requested
 
 
 ####################################################################
@@ -48,14 +48,14 @@ except:
             * 'region' : Optional key, indicating the region index to be converted or None if all regions should be merged. 
 """
 dataset_list = []
-omsi_output_file = None #The openMSI output data file to be used.
+omsi_output_file = None  #The openMSI output data file to be used.
 
 ####################################################################
 #  Define available options for different parameters              ##
 ####################################################################
-available_formats = ["img", "bruckerflex", "auto"] #List of available data formats
+available_formats = ["img", "bruckerflex", "auto"]  #List of available data formats
 available_region_options = ["split", "merge", "split+merge"]    #List defining the different options available for handling regions
-available_io_options = ["chunk", "spectrum", "all"] #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
+available_io_options = ["chunk", "spectrum", "all"]  #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
 available_error_options = ["terminate-and-cleanup", "terminate-only", "continue-on-error"]
 
 ####################################################################
@@ -103,7 +103,7 @@ nmf_use_raw_data = False  #Should the NMF be computed from the raw data or from 
 
 
 def main(argv=None):
-    '''The main function defining the control flow for the conversion'''
+    """The main function defining the control flow for the conversion"""
     #Get the global variables
     global omsi_output_file
     global dataset_list
@@ -297,8 +297,8 @@ def convert_files():
             print "     - Spectrum chunking: "+str(chunks)
             print "     - Image chunking:    "+str(additionalChunks[0])
 
-    else:
-        additionalChunks = user_additional_chunks
+        else:
+            additionalChunks = user_additional_chunks
 
         #Get the mz data
         mzdata = inputFile.mz
@@ -553,12 +553,11 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
             if region_option == 'split' or region_option == 'split+merge':
                 try:
                     tempFile = bruckerflex_file(spotlist_filename=currDS['basename'], readall=False)
-                    for i in xrange(0, tempFile.get_number_of_regions()):
-                        nDS = {}
-                        nDS['basename'] = currDS['basename']
-                        nDS['format'] = currDS['format']
-                        nDS['region'] = i
-                        nDS['exp'] = 'previous'
+                    for ri in xrange(0, tempFile.get_number_of_regions()):
+                        nDS = {'basename': currDS['basename'],
+                               'format': currDS['format'],
+                               'region': ri,
+                               'exp': 'previous'}
                         re_dataset_list.append(nDS)
                 except:
                     print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
@@ -594,7 +593,8 @@ def suggest_chunkings_for_files(dataset_list):
             print "Suggested Chunkings: " + basefile
             currFormat = i["format"]
             if currFormat is "img":
-                inputFile = img_file(hdrFile=basefile+".hdr", t2mFile=basefile+".t2m", inputFile=basefile+".img")
+                img_file()
+                inputFile = img_file(hdrFile=basefile+".hdr", t2mFile=basefile+".t2m", imgFile=basefile+".img")
             elif currFormat is "bruckerflex":
                 inputFile = bruckerflex_file(spotlist_filename=basefile, readall=False)
                 inputFile.set_region_selection(i["region"])
@@ -779,7 +779,7 @@ def register_file_with_db(filepath, db_server, file_owner_name):
         :returns: Boolean indicating whether the operation was successful
     
     """
-    global default_db_server
+    global default_db_server_url
     global check_add_nersc
     
     #Check if the 
@@ -882,7 +882,6 @@ def parse_input_args(argv):
     global nmf_use_raw_data
     global add_file_to_db
     global db_server_url
-    global add_file_url
     global file_owner
     global error_handling
     global check_add_nersc
@@ -916,60 +915,60 @@ def parse_input_args(argv):
         i = startIndex
         currentArg = argv[i]
         if currentArg == "--no-nmf":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_nmf = False
             print "Disable NMF"
         elif currentArg == "--nmf":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_nmf = True
             print "Enable NMF"
         elif currentArg == "--nmf-nc":
-            startIndex = startIndex+2
+            startIndex += 2
             nmf_num_components = int(argv[i+1])
             print "Set nmf-nc="+str(nmf_num_components)
         elif currentArg == "--nmf-timeout":
-            startIndex = startIndex+2
+            startIndex += 2
             nmf_timeout = int(argv[i+1])
             print "Set nmf_timeout="+str(nmf_timeout)
         elif currentArg == "--nmf-niter":
-            startIndex = startIndex+2
+            startIndex += 2
             nmf_num_iter = int(argv[i+1])
             if nmf_num_iter < 2:
                 inputWarning = True 
                 print "WARNING: --nfm-niter must be 2 or larger"
             print "Set nmf-niter="+str(nmf_num_iter)
         elif currentArg == "--nmf-tolerance":
-            startIndex = startIndex+2
+            startIndex += 2
             nmf_tolerance = float(argv[i+1])
             print "Set nmf-tolerance="+str(nmf_tolerance)
         elif currentArg == "--nmf-raw":
-            startIndex = startIndex+1
+            startIndex += 1
             nmf_use_raw_data = True
             print "Set nmf-raw="+str(nmf_use_raw_data)
         elif currentArg == "--fpg":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_fpg = True
             print "Enable find peaks global"
         elif currentArg == "--no-fpg":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_fpg = False
             print "Disable find peaks global"
             if "--fpg" in argv: 
                 inputWarning = True 
                 print "WARNING: --no-fpg and --fpg options are conflicting."
         elif currentArg == "--fpl":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_fpl = True
             print "Enable find peaks local"
         elif currentArg == "--no-fpl":
-            startIndex = startIndex+1
+            startIndex += 1
             execute_fpl = False
             print "Disable find peaks local"
             if "--fpl" in argv: 
                 inputWarning = True 
                 print "WARNING: --no-fpl and --fpl options are conflicting."
         elif currentArg == "--auto-chunking":
-            startIndex = startIndex+1
+            startIndex += 1
             auto_chunk = True
             if "--chunking" in argv:
                 inputWarning = True
@@ -981,7 +980,7 @@ def parse_input_args(argv):
                 inputWarning = True
                 print "WARNING: --optimized-chunking and --auto-chunking options are conflicting"
         elif currentArg == "--chunking":
-            startIndex = startIndex+4
+            startIndex += 4
             try: 
                 chunks = (int(argv[i+1]), int(argv[i+2]), int(argv[i+3]))
             except:
@@ -991,7 +990,7 @@ def parse_input_args(argv):
                 auto_chunk = False 
             print "Enable chunking: "+str(chunks)
         elif currentArg == "--no-chunking":
-            startIndex = startIndex+1
+            startIndex += 1
             chunks = None
             auto_chunk = False
             print "Disable chunking"
@@ -999,18 +998,18 @@ def parse_input_args(argv):
                 inputWarning = True
                 print "WARNGING: --no-chunking option is conflicting with another chunking option"
         elif currentArg == "--optimized-chunking":
-            startIndex = startIndex+4
+            startIndex += 4
             try:
                 user_additional_chunks.append((int(argv[i+1]), int(argv[i+2]), int(argv[i+3])))
             except: 
                 print "An error accured while parsing the --optimized-chunking command. Something may be wrong with the indicated chunk sizes for x y z."
                 inputError = True
         elif currentArg == "--compression":
-            startIndex = startIndex+1
+            startIndex += 1
             #This is already the default
             print "Enable compression"
         elif currentArg == "--no-compression":
-            startIndex = startIndex+1
+            startIndex += 1
             compression = None
             compression_opts = None
             print "Disable compression"
@@ -1018,7 +1017,7 @@ def parse_input_args(argv):
                 inputWarning = True 
                 print "WARNING: --no-compression and --compression options are conflicting."
         elif currentArg == "--io":
-            startIndex = startIndex + 2
+            startIndex += 2
             try:
                 io_option = str(argv[i+1])
                 if io_option not in  available_io_options:
@@ -1027,11 +1026,11 @@ def parse_input_args(argv):
                 print "An error accured while parsing the --io command. Something may be wrong with the indicated io-type."
                 inputError = True
         elif currentArg == "--thumbnail":
-            startIndex = startIndex+1
+            startIndex += 1
             generate_thumbnail = True
             print "Enable thumbnail"
         elif currentArg == "--no-thumbnail":
-            startIndex = startIndex+1
+            startIndex += 1
             generate_thumbnail = False
             print "Disable thumbnail"
             if "--thumbnail" in argv: 
@@ -1041,41 +1040,41 @@ def parse_input_args(argv):
             print_help()
             exit(0)
         elif currentArg == "--suggest-chunking":
-            startIndex = startIndex+1
+            startIndex += 1
             suggest_file_chunkings = True
         elif currentArg == "--format":
-            startIndex = startIndex+2
+            startIndex += 2
             format_option = str(argv[i+1])
             if format_option not in available_formats:
                 print "ERROR: The indicated --format option "+format_option+" is not supported. Available options are:"
                 print "     "+str(available_formats)
                 inputError = True
         elif currentArg == "--regions":
-            startIndex = startIndex+2
+            startIndex += 2
             region_option = str(argv[i+1])
             if region_option not in available_region_options:
                 print "ERROR: The indicated --regions option "+region_option+" is not supported. Avaiable options are:"
                 print "       "+str(available_region_options)
                 inputError = True
         elif currentArg == "--add-to-db":
-            startIndex = startIndex+1
+            startIndex += 1
             add_file_to_db = True
             check_add_nersc = False
         elif currentArg == "--no-add-to-db":
-            startIndex = startIndex+1
+            startIndex += 1
             add_file_to_db = False
         elif currentArg == "--db-server":
-            startIndex = startIndex+2
+            startIndex += 2
             db_server_url = str(argv[i+1])
             check_add_nersc = False
         elif currentArg == "--owner":
-            startIndex = startIndex+2
+            startIndex += 2
             file_owner = str(argv[i+1])
         #elif currentArg == "--login":
         #    startIndex = startIndex+1
         #    require_login = True
         elif currentArg == "--error-handling":
-            startIndex = startIndex+2
+            startIndex += 2
             errorOption = str(argv[i+1])
             if errorOption in available_error_options:
                 error_handling = errorOption
@@ -1084,7 +1083,7 @@ def parse_input_args(argv):
                 print "     "+str(available_error_options)
                 inputError = True
         elif currentArg.startswith("--"):
-            startIndex = startIndex+1
+            startIndex += 1
             inputError = True
             print "Unrecognized input option: "+currentArg
         else:
@@ -1108,7 +1107,7 @@ def parse_input_args(argv):
             print "PIL not available. Generation of thumbnail images disabled"
     
     #Enable chunking if compression is requested and chunking has been disabled
-    if (chunks == None) and (compression is not None):
+    if (chunks is None) and (compression is not None):
         print "WARNING: HDF5 compression is only available with chunking enabled. Do you want to enable chunking? (Y/N)"
         userInput = raw_input()
         if userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
