@@ -47,6 +47,7 @@ class omsi_file :
             return True
         else :
             return False
+
     
     @classmethod
     def get_h5py_object(cls, omsiObj, resolveDependencies=False):
@@ -259,7 +260,8 @@ class omsi_file :
     #  Access the different experiments, associated
     #  properties etc. 
     ####################################################
-    def get_exp_path(self, expIndex = None ) :
+    @staticmethod
+    def get_exp_path(expIndex = None ) :
         """Based on the index of experiment return the full path to the hdf5 
            group containing the data for an experiment.
 
@@ -326,8 +328,8 @@ class omsi_file :
     def create_exp(self,  exp_identifier=None, flushIO=True) :
         """Create a new group in the file for a new experiment and return the omsi_file_experiment object for the new experiment.
 
-           :param expIdentifier: The string used to identify the analysis
-           :type expIdentifierString: string or None (default)
+           :param exp_identifier: The string used to identify the analysis
+           :type exp_identifier: string or None (default)
            :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file.
 
            :returns: omsi_file_experiment object for the newly created group for the experiment
@@ -438,7 +440,7 @@ class omsi_file :
         #Iterate through all groups of the root folder
         for it in fileGroup.items() :
             if it[0].startswith( basename ) :
-                 numItems = numItems + 1
+                numItems += 1
         return numItems
 
     @classmethod   
@@ -961,8 +963,8 @@ class omsi_file_experiment :
     def create_sample_info( self , sample_name=None, flushIO=True ) :
         """Add information about the sample imaged to the experiment
 
-           :param sampleName: Optional name of the sample
-           :type sampleName: string, None
+           :param sample_name: Optional name of the sample
+           :type sample_name: string, None
            :param flushIO: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
 
            :returns: h5py object of the newly created sample group.
@@ -1048,7 +1050,7 @@ class omsi_file_sample :
 
            :param sample_group: h5py group object that should be populated with the sample data. 
            :param sample_name: Optional name of the sample
-           :type sampleName: string, None
+           :type sample_name: string, None
 
            :returns: h5py object of the newly created sample group.
         """
@@ -1618,7 +1620,7 @@ class omsi_file_analysis :
                         try :
                             re[ it[0] ] = self.analysis[ unicode( it[0] ) ].shape
                         except :
-                            re[ it[0] ] = (0)
+                            re[ it[0] ] = (0,)
                         try : 
                             reT[ it[0] ] = self.analysis[  unicode( it[0] ) ].dtype
                         except : 
@@ -1954,9 +1956,7 @@ class omsi_file_dependencies :
                 #print "PARENT:"+str(parent_index)
                 #3) Add a link from the current node to its parent
                 if parent_index is not None :
-                    tempLink = {}
-                    tempLink['source'] = parent_index
-                    tempLink['target'] = curr_index
+                    tempLink = {'source': parent_index, 'target': curr_index}
                     links.append(tempLink)
                     #print "LINK: "+str(tempLink)
         
@@ -3321,7 +3321,8 @@ class omsi_file_msidata :
         return suggestion
 
 
-    def __offset__(self, key) :
+    @staticmethod
+    def __offset__(key) :
         """Determine the start offset of the given single key
         
            :param key: List, slice or interger indicating a single selection
