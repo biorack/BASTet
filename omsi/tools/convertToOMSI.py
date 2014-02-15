@@ -29,7 +29,9 @@ try:
     import urllib2
     #import urllib
 except:
-    pass  #This is to ensuer the script is usable without urllib2 when register to DB is not requested
+    # This is to ensuer the script is usable without urllib2 when register to
+    # DB is not requested
+    pass
 
 
 ####################################################################
@@ -48,38 +50,56 @@ except:
             * 'region' : Optional key, indicating the region index to be converted or None if all regions should be merged. 
 """
 dataset_list = []
-omsi_output_file = None  #The openMSI output data file to be used.
+omsi_output_file = None  # The openMSI output data file to be used.
 
 ####################################################################
 #  Define available options for different parameters              ##
 ####################################################################
-available_formats = ["img", "bruckerflex", "auto"]  #List of available data formats
-available_region_options = ["split", "merge", "split+merge"]    #List defining the different options available for handling regions
-available_io_options = ["chunk", "spectrum", "all"]  #Available options for the data write. One chunk at a time'chunk', one spectrum at a time ('spectrum') or all at one once ('all')
-available_error_options = ["terminate-and-cleanup", "terminate-only", "continue-on-error"]
+# List of available data formats
+available_formats = ["img", "bruckerflex", "auto"]
+# List defining the different options available for handling regions
+available_region_options = ["split", "merge", "split+merge"]
+# Available options for the data write. One chunk at a time'chunk', one
+# spectrum at a time ('spectrum') or all at one once ('all')
+available_io_options = ["chunk", "spectrum", "all"]
+available_error_options = ["terminate-and-cleanup",
+                           "terminate-only", "continue-on-error"]
 
 ####################################################################
 #  Define the input parameters used during the conversion         ##
 ####################################################################
-io_option = "chunk" #Define how the data should be written to file, one cunk at a time ('chunk'), one spectrum at a time ('spectrum') or all at one once ('all')
-format_option = "auto" #Define which file format reader should be used
-region_option = "split+merge" #Define the region option to be used
-auto_chunk = True #Automatically decide which chunking should be used
-chunks = (4, 4, 2048) #Define the main chunking for the data
-user_additional_chunks = [] #User-defined optional additional chunked copies of the data used to optimize data seletion
-compression = 'gzip' #We use gzip by default because szip is not as generally available and LZF is usually only available with h5py.
-compression_opts = 4 #For gzip this a value between 0-9 (inclusive) indicating how agressive the compression should be. 0=fastest speed, 9=best compression ratio.
-suggest_file_chunkings = False #Should we only suggest file chunkings and quit without converting any data
+# Define how the data should be written to file, one cunk at a time
+# ('chunk'), one spectrum at a time ('spectrum') or all at one once
+# ('all')
+io_option = "chunk"
+format_option = "auto"  # Define which file format reader should be used
+region_option = "split+merge"  # Define the region option to be used
+auto_chunk = True  # Automatically decide which chunking should be used
+chunks = (4, 4, 2048)  # Define the main chunking for the data
+# User-defined optional additional chunked copies of the data used to
+# optimize data seletion
+user_additional_chunks = []
+# We use gzip by default because szip is not as generally available and
+# LZF is usually only available with h5py.
+compression = 'gzip'
+# For gzip this a value between 0-9 (inclusive) indicating how agressive
+# the compression should be. 0=fastest speed, 9=best compression ratio.
+compression_opts = 4
+# Should we only suggest file chunkings and quit without converting any data
+suggest_file_chunkings = False
 
 ####################################################################
 #  Define file add options                                        ##
 ####################################################################
-add_file_to_db = True  #Add the file to the database
-check_add_nersc = True #This option is to ensure that when the script is run elsewhere that we do not just call add file without actually saving the file at NERSC
+add_file_to_db = True  # Add the file to the database
+# This option is to ensure that when the script is run elsewhere that we
+# do not just call add file without actually saving the file at NERSC
+check_add_nersc = True
 default_db_server_url = "https://openmsi.nersc.gov/"
-db_server_url = default_db_server_url  #Specify the server where the database is registered
-file_owner = None #Specify for which owner the file should be registered
-#require_login = False #Require login before conversion
+# Specify the server where the database is registered
+db_server_url = default_db_server_url
+file_owner = None  # Specify for which owner the file should be registered
+# require_login = False #Require login before conversion
 
 ####################################################################
 #  Define error-handling options                                  ##
@@ -89,22 +109,24 @@ error_handling = "terminate-and-cleanup"
 ####################################################################
 #  Define analysis options and parameter settings                 ##
 ####################################################################
-execute_nmf = True  #Define whether NMF should be performed
-execute_fpg = True  #Define whether global peak finding should be executed
-execute_fpl = False #Define whether local peak finding should be execuated
-generate_thumbnail = True  #Should we generate thumbnail
+execute_nmf = True  # Define whether NMF should be performed
+execute_fpg = True  # Define whether global peak finding should be executed
+execute_fpl = False  # Define whether local peak finding should be execuated
+generate_thumbnail = True  # Should we generate thumbnail
 
-#Default NMF parameter settings
-nmf_num_components = 20 #Number of components for the NMF
-nmf_timeout = 600 #Timeout for the NMF
-nmf_num_iter = 2000 #Maximum number of iterations for the NMF
-nmf_tolerance = 0.0001  #Tolerance level for the nmf
-nmf_use_raw_data = False  #Should the NMF be computed from the raw data or from the global peak finding data
+# Default NMF parameter settings
+nmf_num_components = 20  # Number of components for the NMF
+nmf_timeout = 600  # Timeout for the NMF
+nmf_num_iter = 2000  # Maximum number of iterations for the NMF
+nmf_tolerance = 0.0001  # Tolerance level for the nmf
+# Should the NMF be computed from the raw data or from the global peak
+# finding data
+nmf_use_raw_data = False
 
 
 def main(argv=None):
     """The main function defining the control flow for the conversion"""
-    #Get the global variables
+    # Get the global variables
     global omsi_output_file
     global dataset_list
     global format_option
@@ -119,12 +141,14 @@ def main(argv=None):
     ####################################################################
     #   Determine the settings based on the user input                 #
     ####################################################################
-    #Get the user input options
+    # Get the user input options
     if argv is None:
         argv = sys.argv
-    #Parse the input arguments
-    inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(argv)
-    #  Terminate in case an error or warning has occured while processing the user input parameters.
+    # Parse the input arguments
+    inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(
+        argv)
+    # Terminate in case an error or warning has occured while processing the
+    # user input parameters.
     if inputError:
         print "Terminated. One or more error occured while parsing the command line inputs."
     if inputWarning:
@@ -135,28 +159,28 @@ def main(argv=None):
     ####################################################################
     #   Reuqire login if requested                                     #
     ####################################################################
-    #if require_login:
+    # if require_login:
     #    loginUser()
 
-    
     ####################################################################
     # Generate the list of datasets to be converted                    #
     ####################################################################
-    try: 
-        dataset_list = create_dataset_list(inputFilenames=inputFilenames, format_type=format_option, region_option=region_option)
-        print "Number of conversion: "+str(len(dataset_list))
+    try:
+        dataset_list = create_dataset_list(inputFilenames=inputFilenames,
+                                           format_type=format_option, region_option=region_option)
+        print "Number of conversion: " + str(len(dataset_list))
     except:
         print "ERROR: An error occured during the generation of the input filelist."
         print "       -- Not HDF5 output file has been generated."
         print "       -- No file has been added to the database."
         print "       -- Terminating"
-        raise 
+        raise
         exit(0)
-            
+
     ####################################################################
     #  Suggest only chunking for the files if requested                #
     ####################################################################
-    if suggest_file_chunkings: 
+    if suggest_file_chunkings:
         suggest_chunkings_for_files(dataset_list)
         exit()
 
@@ -164,7 +188,7 @@ def main(argv=None):
     #   Create the output HDF5 file if needed                          #
     ####################################################################
     try:
-        if omsiOutFile is not None: 
+        if omsiOutFile is not None:
             omsi_output_file = omsi_file(omsiOutFile)
     except:
         print "Unexpected error creating the output file:", sys.exc_info()[0]
@@ -177,23 +201,23 @@ def main(argv=None):
         convert_files()
     except:
         print "ERROR: An error occured during the file conversion."
-        #Try to close the output file
+        # Try to close the output file
         try:
             omsi_output_file.close_file()
         except:
             pass
         if error_handling == "terminate-and-cleanup":
             print "--The generated HDF5 will not be added to the database."
-            add_file_to_db = False 
+            add_file_to_db = False
             print "--Attempting to delete the generated HDF5 file."
             os.remove(omsiOutFile)
-            print "--Successfully deleted the generated HDF5 file: "+str(omsiOutFile)
+            print "--Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
         if error_handling == "terminate-only" or error_handling == "continue-on-error":
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
-            print "--The output HDF5 file (if generate) remains at: "+str(omsiOutFile)
-            print "  Output file found: "+str(os.path.exists(omsiOutFile))
-        #Pass on which-ever error has occured 
+            print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
+            print "  Output file found: " + str(os.path.exists(omsiOutFile))
+        # Pass on which-ever error has occured
         raise
 
     ####################################################################
@@ -205,8 +229,9 @@ def main(argv=None):
     #  Register the file with the database                             #
     ####################################################################
     if add_file_to_db:
-        status = register_file_with_db(filepath=omsiOutFile, db_server=db_server_url, file_owner_name=file_owner)
-        print "Registered file with DB: "+str(status)
+        status = register_file_with_db(
+            filepath=omsiOutFile, db_server=db_server_url, file_owner_name=file_owner)
+        print "Registered file with DB: " + str(status)
 
     ####################################################################
     #  Exit                                                            #
@@ -217,7 +242,7 @@ def main(argv=None):
 def convert_files():
     """Convert all files in the given list of files with their approbriate conversion options"""
 
-    #The following global variables are used here but not changed
+    # The following global variables are used here but not changed
     global available_formats
     global available_region_options
     global io_option
@@ -246,40 +271,42 @@ def convert_files():
     ####################################################################
     #  Convert the MSI files and compute the requested analyses       ##
     ####################################################################
-    #Iterate over all img files
+    # Iterate over all img files
     for i in dataset_list:  # xrange(startIndex,len(argv)-1):
 
         ####################################################################
         #  Convert the raw data to HDF5                                   ##
         ####################################################################
-        basefile = i['basename'] #argv[i].replace('"', "")
+        basefile = i['basename']  # argv[i].replace('"', "")
         print "Converting: " + basefile
         try:
-            print "Selected Region: "+str(i['region'])
+            print "Selected Region: " + str(i['region'])
         except:
             pass
         if not auto_chunk:
-            print "HDF5 chunking: "+str(chunks)
-        print "HDF5 compression: "+str(compression)+", "+str(compression_opts)
+            print "HDF5 chunking: " + str(chunks)
+        print "HDF5 compression: " + str(compression) + ", " + str(compression_opts)
 
-        #Open the input file
+        # Open the input file
         try:
             currFormat = i['format']
-            print "Input file format: "+str(currFormat)
+            print "Input file format: " + str(currFormat)
             if currFormat == "img":
-                inputFile = img_file(basename=basefile) # hdrFile=basefile+".hdr", t2mFile=basefile+".t2m", imgFile=basefile+".img")
+                # hdrFile=basefile+".hdr", t2mFile=basefile+".t2m",
+                # imgFile=basefile+".img")
+                inputFile = img_file(basename=basefile)
             elif currFormat == "bruckerflex":
                 inputFile = bruckerflex_file(spotlist_filename=basefile)
                 inputFile.set_region_selection(region_index=i['region'])
             else:
-                print "ERROR: The following file will not be converted because the file type could not be determined: "+basefile
+                print "ERROR: The following file will not be converted because the file type could not be determined: " + basefile
                 print "INFO: If you know the correct file format then try converting the file using the approbirate --format <formatname> option."
                 if error_handling == "continue-on-error":
                     pass
                 elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
                     raise ValueError("Unrecognized file format.")
-                
-            print "In data shape: "+str(inputFile.shape) 
+
+            print "In data shape: " + str(inputFile.shape)
         except:
             print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
             if error_handling == "continue-on-error":
@@ -288,147 +315,164 @@ def convert_files():
             elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
                 raise
 
-        if auto_chunk: 
-        
-            specChunks, imgChunks, tempChunks = suggest_chunking(xsize=inputFile.shape[0], ysize=inputFile.shape[1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
+        if auto_chunk:
+
+            specChunks, imgChunks, tempChunks = suggest_chunking(
+                xsize=inputFile.shape[0], ysize=inputFile.shape[1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
             chunks = specChunks
             additionalChunks = user_additional_chunks + [imgChunks]
             print "Converting data using the following chunking options:"
-            print "     - Spectrum chunking: "+str(chunks)
-            print "     - Image chunking:    "+str(additionalChunks[0])
+            print "     - Spectrum chunking: " + str(chunks)
+            print "     - Image chunking:    " + str(additionalChunks[0])
 
         else:
             additionalChunks = user_additional_chunks
 
-        #Get the mz data
+        # Get the mz data
         mzdata = inputFile.mz
 
-        #Define the layout for the img data in the HDF5
-        #Create a new experiment for the img file using the basefile as identifer string
-        if i['exp'] == 'new': #Create a new experiment for this dataset
+        # Define the layout for the img data in the HDF5
+        # Create a new experiment for the img file using the basefile as
+        # identifer string
+        if i['exp'] == 'new':  # Create a new experiment for this dataset
             exp = omsi_output_file.create_exp(exp_identifier=basefile)
-            #Create an empty sample descrition
+            # Create an empty sample descrition
             sample = exp.create_sample_info()
-            #Create an empty instrument description
-            instrument = exp.create_instrument_info(instrument_name="undefined", mzdata=mzdata)
-        elif i['exp'] == 'previous': #Store this dataset in combination with the previous one
-            exp = omsi_output_file.get_exp(omsi_output_file.get_num_exp() -1)
-        else:  #Store this dataset in combination with the given experiment index
+            # Create an empty instrument description
+            instrument = exp.create_instrument_info(
+                instrument_name="undefined", mzdata=mzdata)
+        # Store this dataset in combination with the previous one
+        elif i['exp'] == 'previous':
+            exp = omsi_output_file.get_exp(omsi_output_file.get_num_exp() - 1)
+        # Store this dataset in combination with the given experiment index
+        else:
             exp = omsi_output_file.get_exp(i['exp'])
-        
-        #Allocate space in the HDF5 file for the img data
-        dataDataset, mzDataset, dataGroup = exp.create_msidata_full_cube(data_shape=inputFile.shape, data_type=inputFile.data_type, chunks=chunks, compression=compression, compression_opts=compression_opts)
+
+        # Allocate space in the HDF5 file for the img data
+        dataDataset, mzDataset, dataGroup = exp.create_msidata_full_cube(
+            data_shape=inputFile.shape, data_type=inputFile.data_type, chunks=chunks, compression=compression, compression_opts=compression_opts)
         mzDataset[:] = mzdata
-        data = omsi_file_msidata(data_group=dataGroup, preload_mz=False, preload_xy_index=False) 
+        data = omsi_file_msidata(
+            data_group=dataGroup, preload_mz=False, preload_xy_index=False)
         write_data(inputFile, data, io_option=io_option, chunk_shape=chunks)
         omsi_output_file.flush()
-        
-        #Generate any additional data copies if requested
+
+        # Generate any additional data copies if requested
         for chunkSpec in additionalChunks:
-            print "Generating optimized data copy: "+str(chunkSpec)
+            print "Generating optimized data copy: " + str(chunkSpec)
             tempData = data.create_optimized_chunking(chunks=chunkSpec,
                                                       compression=compression,
                                                       compression_opts=compression_opts,
                                                       copy_data=False, print_status=True)
-            write_data(inputFile, tempData, io_option=io_option, chunk_shape=chunkSpec)
+            write_data(inputFile, tempData, io_option=io_option,
+                       chunk_shape=chunkSpec)
             omsi_output_file.flush()
 
-        #Close the input data file and free up any allocated memory
+        # Close the input data file and free up any allocated memory
         inputFile.close_file()
-        
+
         ####################################################################
         #  Execute the requested analyses                                 ##
         ####################################################################
-        #Compute the local peak finding and add the peak-cube data to the file
+        # Compute the local peak finding and add the peak-cube data to the file
         if execute_fpl:
             print "Executing local peak finding"
-            #Execute the peak finding
-            fpl = omsi_findpeaks_local(nameKey="omsi_findpeaks_local_"+str(time.ctime()))
+            # Execute the peak finding
+            fpl = omsi_findpeaks_local(
+                nameKey="omsi_findpeaks_local_" + str(time.ctime()))
             fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
-            #Save the peak-finding to file
+            # Save the peak-finding to file
             ana, anaIndex = exp.create_analysis(fpl)
-        #Compute the global peak finding and add the peak-cube data to the file
+        # Compute the global peak finding and add the peak-cube data to the
+        # file
         if execute_fpg:
             print "Executing global peak finding"
-            #Execute the peak finding
-            fpg = omsi_findpeaks_global(nameKey="omsi_findpeaks_global_"+str(time.ctime()))
+            # Execute the peak finding
+            fpg = omsi_findpeaks_global(
+                nameKey="omsi_findpeaks_global_" + str(time.ctime()))
             fpg.execute(msidata=data, mzdata=mzdata)
-            #Save the peak-finding to file
+            # Save the peak-finding to file
             ana, anaIndex = exp.create_analysis(fpg)
             fpgPath = ana.get_h5py_analysisgroup().name
-        #Compute the nmf analysis if requested
+        # Compute the nmf analysis if requested
         if execute_nmf:
             print "Executing nmf"
-            #Exectue the nmf analysis on the peak-cube or if peak finding was not performed then 
-            #execute nmf on the raw data data
-            nmf = omsi_nmf(nameKey="omsi_nmf_"+str(time.ctime()))
+            # Exectue the nmf analysis on the peak-cube or if peak finding was not performed then
+            # execute nmf on the raw data data
+            nmf = omsi_nmf(nameKey="omsi_nmf_" + str(time.ctime()))
             if execute_fpg and not nmf_use_raw_data:
                 print "   Using peak-cube data for NMF"
                 fpgData = ana['peak_cube']
-                nmf.execute(msidata=fpgData, numComponents=nmf_num_components, timeOut=nmf_timeout, numIter=nmf_num_iter, tolerance=nmf_tolerance)
+                nmf.execute(msidata=fpgData, numComponents=nmf_num_components,
+                            timeOut=nmf_timeout, numIter=nmf_num_iter, tolerance=nmf_tolerance)
             else:
                 print "   Using raw data for NMF"
-                nmf.execute(msidata=data, numComponents=nmf_num_components, timeOut=nmf_timeout, numIter=nmf_num_iter, tolerance=nmf_tolerance)
-            #Save the nmf results to file
+                nmf.execute(msidata=data, numComponents=nmf_num_components,
+                            timeOut=nmf_timeout, numIter=nmf_num_iter, tolerance=nmf_tolerance)
+            # Save the nmf results to file
             ana, anaIndex = exp.create_analysis(nmf)
-        
-        
+
         ####################################################################
         #  Generate the thumbnail image for the current file              ##
         ####################################################################
-        if generate_thumbnail: 
+        if generate_thumbnail:
             print "Generating the thumbnail image"
             if execute_nmf:
                 print "   Generating thumbnail from NMF data"
-                #Get the NMF data 
+                # Get the NMF data
                 ho = nmf['ho']
                 numX = ho.shape[0]
                 numY = ho.shape[1]
-                #Generate images for the first three NMF components
-                d1 = np.log(ho[:, :, 0].reshape((numX, numY))+1)
+                # Generate images for the first three NMF components
+                d1 = np.log(ho[:, :, 0].reshape((numX, numY)) + 1)
                 d1 = d1 / np.max(d1)
-                im1 = Image.fromarray(d1.astype('float')*255).convert('L')
-                d2 = np.log(ho[:, :, 1].reshape((numX, numY))+1)
+                im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
+                d2 = np.log(ho[:, :, 1].reshape((numX, numY)) + 1)
                 d2 = d2 / np.max(d2)
-                im2 = Image.fromarray(d2.astype('float')*255).convert('L')
-                d3 = np.log(ho[:, :, 2].reshape((numX, numY))+1)
+                im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
+                d3 = np.log(ho[:, :, 2].reshape((numX, numY)) + 1)
                 d3 = d3 / np.max(d3)
-                im3 = Image.fromarray(d3.astype('float')*255).convert('L')
-                #Generate thumbnail by merging the three gray-scale images as an RGB image
+                im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
+                # Generate thumbnail by merging the three gray-scale images as
+                # an RGB image
                 thumbnail = Image.merge('RGB', (im1, im2, im3))
                 expName = str(exp.get_h5py_experimentgroup().name)
                 expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
+                thumbnailFilename = omsi_output_file.hdf_filename + \
+                    "_" + expIndex + ".png"
                 thumbnail.save(thumbnailFilename, 'PNG')
             elif execute_fpg:
                 print "    Generating thumbnail from FPG data"
-                #Get the global peak finding data and compute the maximum peak values for each peak
+                # Get the global peak finding data and compute the maximum peak
+                # values for each peak
                 fpgData = fpg['peak_cube'][:]
                 maxPeakValues = fpgData.max(axis=0).max(axis=0)
                 numX = fpgData.shape[0]
                 numY = fpgData.shape[1]
-                #Generate images for the three most intense peaks
+                # Generate images for the three most intense peaks
                 s = np.argsort(maxPeakValues)
-                d1 = np.log(fpgData[:, :, s[-1]].reshape((numX, numY))+1)
+                d1 = np.log(fpgData[:, :, s[-1]].reshape((numX, numY)) + 1)
                 d1 = d1 / np.max(d1)
-                im1 = Image.fromarray(d1.astype('float')*255).convert('L')
-                d2 = np.log(fpgData[:, :, s[-2]].reshape((numX, numY))+1)
+                im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
+                d2 = np.log(fpgData[:, :, s[-2]].reshape((numX, numY)) + 1)
                 d2 = d2 / np.max(d2)
-                im2 = Image.fromarray(d2.astype('float')*255).convert('L')
-                d3 = np.log(fpgData[:, :, s[-3]].reshape((numX, numY))+1)
+                im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
+                d3 = np.log(fpgData[:, :, s[-3]].reshape((numX, numY)) + 1)
                 d3 = d3 / np.max(d3)
-                im3 = Image.fromarray(d3.astype('float')*255).convert('L')
-                #Generate thumbnail by merging the three gray-scale images as an RGB image
+                im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
+                # Generate thumbnail by merging the three gray-scale images as
+                # an RGB image
                 thumbnail = Image.merge('RGB', (im1, im2, im3))
                 expName = str(exp.get_h5py_experimentgroup().name)
                 expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
+                thumbnailFilename = omsi_output_file.hdf_filename + \
+                    "_" + expIndex + ".png"
                 thumbnail.save(thumbnailFilename, 'PNG')
             else:
                 print "Generation of thumbnail from raw data is not yet supported. No thumbnail has been generated."
                 print "Enable --nmf or --fpg in order to generate a thumbnail image."
-                #print "    Generating thumbnail from raw data"
-                ##Find three most intense peaks that are at least 1% of the m/z range appart
+                # print "    Generating thumbnail from raw data"
+                # Find three most intense peaks that are at least 1% of the m/z range appart
                 #numX = data.shape[0]
                 #numY = data.shape[1]
                 #numZ = data.shape[2]
@@ -436,87 +480,86 @@ def convert_files():
                 #mzImageRange = numZ/4000
                 #maxPeakValues = np.zeros(numZ)
                 #stepping = np.arange(0, numZ-5000, 5000)
-                #for i in stepping:
+                # for i in stepping:
                     #maxPeakValues[i:(i+5000)] = data[:, :, i:(i+5000)].std(axis=0).std(axis=0).reshape(5000)
                 #maxPeakValues[stepping[-1]:numZ] = data[:, :, stepping[-1]:numZ].std(axis=0).std(axis=0).reshape(numZ - stepping[-1])
-                #print maxPeakValues.shape
+                # print maxPeakValues.shape
                 #s = np.argsort(maxPeakValues)
                 #i1 = s[-1]
                 #i2 = s[-2]
-                #for i in reversed(range(0, len(s))):
-                    #if abs(s[i] - i1) > minMzStep:
+                # for i in reversed(range(0, len(s))):
+                    # if abs(s[i] - i1) > minMzStep:
                         #i2 = s[i]
-                        #break
+                        # break
                 #i3 = s[-3]
-                #for i in reversed(range(0, len(s))):
-                    #if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
+                # for i in reversed(range(0, len(s))):
+                    # if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
                         #i2 = s[i]
-                        #break
-                #print minMzStep
-                #print str(i1)+" "+str(i2)+" "+str(i3)
-                #print str(mzdata[i1])+" "+str(mzdata[i2])+" "+str(mzdata[i3])
+                        # break
+                # print minMzStep
+                # print str(i1)+" "+str(i2)+" "+str(i3)
+                # print str(mzdata[i1])+" "+str(mzdata[i2])+" "+str(mzdata[i3])
                 #low = max(0, s[i1]-mzImageRange)
                 #hi = min(numZ, s[i1]+mzImageRange)
-                #print str(low) + " " + str(hi)
+                # print str(low) + " " + str(hi)
                 #d1 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
                 #d1 = d1 / np.max(d1)
                 #im1 = Image.fromarray(d1.astype('float')*255).convert('L')
                 #low = max(0, s[i2]-mzImageRange)
                 #hi = min(numZ, s[i2]+mzImageRange)
-                #print str(low) + " " + str(hi)
+                # print str(low) + " " + str(hi)
                 #d2 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
                 #d2 = d2 / np.max(d2)
                 #im2 = Image.fromarray(d2.astype('float')*255).convert('L')
                 #low = max(0, s[i3]-mzImageRange)
                 #hi = min(numZ, s[i3]+mzImageRange)
-                #print str(low) + " " + str(hi)
+                # print str(low) + " " + str(hi)
                 #d3 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
                 #d3 = d3 / np.max(d3)
                 #im3 = Image.fromarray(d3.astype('float')*255).convert('L')
-                ##Generate thumbnail by merging the three gray-scale images as an RGB image
+                # Generate thumbnail by merging the three gray-scale images as an RGB image
                 #thumbnail = Image.merge('RGB', (im1, im2, im3))
                 #expName = str(exp.get_h5py_experimentgroup().name)
                 #expIndex = expName[7:len(expName)]
                 #thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
                 #thumbnail.save(thumbnailFilename, 'PNG')
 
-    
     ####################################################################
     #  Generate the XDMF header file for the HDF5 file                ##
     ####################################################################
-    omsi_output_file.write_XDMF_header(omsi_output_file.get_filename() +".xdmf")
-    
+    omsi_output_file.write_XDMF_header(
+        omsi_output_file.get_filename() + ".xdmf")
 
 
 def check_format(name, format_type):
     """Helper function used to determine the file format that should be used
-    
+
        :param name: Name of the folder/file that we should read
        :param format_type: String indicating the format-option given by the user. \
                     If the format is not determined (i.e., "auto") then this function \
                     tries to determine the approbriate foramt. Otherwise this option \
                     is returned as is, as the user explicilty said which format should \
-                    be used. 
+                    be used.
        :returns: String indicating the approbriate format. Returns None in case no valid option was found.
     """
     global available_formats
-    #Option 1: The user told us the format we should use
+    # Option 1: The user told us the format we should use
     if format_type is not "auto":
         if format_type in available_formats:
             return format_type
         else:
             return None
-    #Option 2: We need to determine the format ourselves
-    #if os.path.exists(name+".hdr") and os.path.exists(name+".t2m") and os.path.exists(name+".img"):
+    # Option 2: We need to determine the format ourselves
+    # if os.path.exists(name+".hdr") and os.path.exists(name+".t2m") and os.path.exists(name+".img"):
     #    return "img"
     if img_file.is_img(name):
         return "img"
     elif bruckerflex_file.is_bruckerflex(name):
         return "bruckerflex"
 
-    #elif name.endswith("Spot List.txt"):
+    # elif name.endswith("Spot List.txt"):
     #    return "bruckerflex"
-    #elif os.path.isdir(name):
+    # elif os.path.isdir(name):
     #    return "bruckerflex"
     else:
         return None
@@ -525,7 +568,7 @@ def check_format(name, format_type):
 def create_dataset_list(inputFilenames, format_type='auto', region_option="split+merge"):
     """Based on the list of inputFilenames, generate the dataset_list, which contains a dictionary describing
        each conversion job
-       
+
        :param inputFilenames: List of names of files to be converted.
        :param format_type: Define which file-format should be used. Default value is 'auto' indicating the \
                    function should determine for each file the format to be used. See also available_formats parameter.
@@ -533,26 +576,30 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
                     to split all regions into indiviudal datasets ('split'), merge all regions into a single \
                     dataset ('merge'), or do both ('split+merge'). See also the available_region_options parameter \
                     for details. By default the function will do 'split+merge'.
-       
+
        :returns: List of dictionaries describing the various conversion jobs
     """
-    global available_error_options 
+    global available_error_options
     global error_handling
-    
+
     re_dataset_list = []
     for i in inputFilenames:
         currDS = {}
-        currDS['basename'] = i.rstrip('"').rstrip("'").lstrip('"').lstrip("'") #Remove " in case the user has entered file names with spaces using the "name" syntax
-        currDS['format'] = check_format(name=currDS['basename'], format_type=format_type)
+        # Remove " in case the user has entered file names with spaces using
+        # the "name" syntax
+        currDS['basename'] = i.rstrip('"').rstrip("'").lstrip('"').lstrip("'")
+        currDS['format'] = check_format(name=currDS['basename'],
+                                        format_type=format_type)
         currDS['exp'] = 'new'
         if currDS['format'] == 'bruckerflex':
             if region_option == "merge" or region_option == "split+merge":
                 currDS['region'] = None
                 re_dataset_list.append(currDS)
-        
+
             if region_option == 'split' or region_option == 'split+merge':
                 try:
-                    tempFile = bruckerflex_file(spotlist_filename=currDS['basename'], readall=False)
+                    tempFile = bruckerflex_file(
+                        spotlist_filename=currDS['basename'], readall=False)
                     for ri in xrange(0, tempFile.get_number_of_regions()):
                         nDS = {'basename': currDS['basename'],
                                'format': currDS['format'],
@@ -561,98 +608,105 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
                         re_dataset_list.append(nDS)
                 except:
                     print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
-                    print currDS['basename']+" failure during converion. Skipping the file and continue conversion of the other files.\n"
+                    print currDS['basename'] + " failure during converion. Skipping the file and continue conversion of the other files.\n"
                     if error_handling == "continue-on-error":
                         continue
-                    elif error_handling == "terminate-and-cleanup"  or error_handling == "terminate-only":
+                    elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
                         raise
                     else:
-                        raise 
+                        raise
 
-            if region_option not in available_region_options: #This is just to make sure that we have checked everything
+            # This is just to make sure that we have checked everything
+            if region_option not in available_region_options:
                 print "WARNING: Undefined region option. Using the default option split+merge"
         else:
             re_dataset_list.append(currDS)
-    
-    #Return the list of conversion jobs
-    return re_dataset_list
 
+    # Return the list of conversion jobs
+    return re_dataset_list
 
 
 def suggest_chunkings_for_files(dataset_list):
     """Helper function used to suggest food chunking strategies for a given set of files.
-    
+
        :param datafiles: Python list of dictionaries describing the settings to be used for the file conversion
-       
+
        :returns: This function simply prints results to standard-out but does not return anything.
     """
     for i in dataset_list:
-        
+
         basefile = i["basename"]
         try:
             print "Suggested Chunkings: " + basefile
             currFormat = i["format"]
             if currFormat is "img":
                 img_file()
-                inputFile = img_file(hdrFile=basefile+".hdr", t2mFile=basefile+".t2m", imgFile=basefile+".img")
+                inputFile = img_file(
+                    hdrFile=basefile + ".hdr", t2mFile=basefile + ".t2m", imgFile=basefile + ".img")
             elif currFormat is "bruckerflex":
-                inputFile = bruckerflex_file(spotlist_filename=basefile, readall=False)
+                inputFile = bruckerflex_file(
+                    spotlist_filename=basefile, readall=False)
                 inputFile.set_region_selection(i["region"])
             else:
-                print "WARNING: Type of file could not be determined for: "+basefile
+                print "WARNING: Type of file could not be determined for: " + basefile
                 continue
-            print "In data shape: "+str(inputFile.shape)
-            suggest_chunking(xsize=inputFile.shape[0], ysize=inputFile.shape[1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
+            print "In data shape: " + str(inputFile.shape)
+            suggest_chunking(xsize=inputFile.shape[0], ysize=inputFile.shape[
+                             1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
         except:
-             print "Error while trying to generate chunking suggestion for "+basefile
+            print "Error while trying to generate chunking suggestion for " + basefile
 
 
 def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
-    """Helper function used to suggest god chunking strategies for a given data cube 
-    
+    """Helper function used to suggest god chunking strategies for a given data cube
+
        :param xsize: Size of the dataset in x.
        :param ysize: Size o the dataset in y.
        :param mzsize: Size of the dataset in mz.
-       :param print_results: Print the results to the console. 
-       
+       :param print_results: Print the results to the console.
+
        :returns: Three tupes:
-       
+
         * ``spectrumChunk`` : The chunking to be used to optimize selection of spectra.
         * ``sliceChunk`` : The chunking to be used to optimize selection of image slices.
         * ``balancedChunk`` : The chunking that would provide a good balance in performance for \
                             different selection strategies.
     """
-    #Make sure that all sizes are treated as 64bit int to avoid errors due to artificial cutoffs.
+    # Make sure that all sizes are treated as 64bit int to avoid errors due to
+    # artificial cutoffs.
     xsize = int(xsize)
     ysize = int(ysize)
     mzsize = int(mzsize)
     imageSize = xsize * ysize
-    
-    #Variable settings
-    numBytes = np.dtype(dtype).itemsize #Number of bytes per data value
-    suggestedNumValues = (1024*64) /  numBytes #Nober of values that fit into a 64Kb chunk
-    maxFactor = 4 #How much larger than the suggestNumValues should we allow a chunk to become
 
-    #Define the chunking that would be good for spectra
+    # Variable settings
+    numBytes = np.dtype(dtype).itemsize  # Number of bytes per data value
+    # Nober of values that fit into a 64Kb chunk
+    suggestedNumValues = (1024 * 64) / numBytes
+    # How much larger than the suggestNumValues should we allow a chunk to
+    # become
+    maxFactor = 4
+
+    # Define the chunking that would be good for spectra
     spectrumXChunk = 1
     spectrumYChunk = 1
-    factor1 = math.floor(mzsize/float(suggestedNumValues))
-    spectrumMzChunk1 = int(math.ceil(mzsize/ float(factor1)))
+    factor1 = math.floor(mzsize / float(suggestedNumValues))
+    spectrumMzChunk1 = int(math.ceil(mzsize / float(factor1)))
     factor1 = math.ceil(mzsize / float(spectrumMzChunk1))
-    overhead1 = ((factor1*spectrumMzChunk1) - mzsize) *  imageSize * numBytes
-    #overhead1 = ((spectrumMzChunk1 *  math.ceil (float(mzsize) / float(spectrumMzChunk1))) - \
+    overhead1 = ((factor1 * spectrumMzChunk1) - mzsize) * imageSize * numBytes
+    # overhead1 = ((spectrumMzChunk1 *  math.ceil (float(mzsize) / float(spectrumMzChunk1))) - \
     #              (spectrumMzChunk1 *  math.floor(float(mzsize) / float(spectrumMzChunk1)))) * \
     #            imageSize * numBytes
     #overhead1 = (spectrumMzChunk1 - math.ceil(float(mzsize) % float(spectrumMzChunk1))) * imageSize * numBytes
-    factor2 = math.ceil(mzsize/float(suggestedNumValues))
-    spectrumMzChunk2 = int(math.ceil(mzsize/ float(factor2)))
+    factor2 = math.ceil(mzsize / float(suggestedNumValues))
+    spectrumMzChunk2 = int(math.ceil(mzsize / float(factor2)))
     factor2 = math.ceil(mzsize / float(spectrumMzChunk2))
-    overhead2 = ((factor2*spectrumMzChunk2) - mzsize) *  imageSize * numBytes
+    overhead2 = ((factor2 * spectrumMzChunk2) - mzsize) * imageSize * numBytes
     #overhead2 = (spectrumMzChunk2 - math.ceil(float(mzsize) % float(spectrumMzChunk2))) * imageSize *numBytes
-    #overhead2 = ((spectrumMzChunk2 *  math.ceil (float(mzsize) / float(spectrumMzChunk2))) - \
+    # overhead2 = ((spectrumMzChunk2 *  math.ceil (float(mzsize) / float(spectrumMzChunk2))) - \
     #              (spectrumMzChunk2 *  math.floor(float(mzsize) / float(spectrumMzChunk2)))) * \
     #            imageSize * numBytes
-    if overhead1 < overhead2: 
+    if overhead1 < overhead2:
         spectrumMzChunk = spectrumMzChunk1
         spectrumChunkOverhead = overhead1
     else:
@@ -660,42 +714,47 @@ def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
         spectrumChunkOverhead = overhead2
     spectrumChunk = (spectrumXChunk, spectrumYChunk, spectrumMzChunk)
     if print_results:
-        
-        print "Spectrum selection chunking: "+str(spectrumChunk)
+
+        print "Spectrum selection chunking: " + str(spectrumChunk)
         print "     - Ideal for selection of full spectra."
-        print "     - Overhead: "+str(spectrumChunkOverhead)+" Byte ("+str(int(math.ceil(spectrumChunkOverhead / (1024.*1024.))))+" MB)"
-    
-    #Define a chunking that would be good for images
+        print "     - Overhead: " + str(spectrumChunkOverhead) + " Byte (" + str(int(math.ceil(spectrumChunkOverhead / (1024. * 1024.)))) + " MB)"
+
+    # Define a chunking that would be good for images
     sliceChunkX = xsize
     sliceChunkY = ysize
     sliceChunkMz = 1
-    chunkSize = sliceChunkX*sliceChunkY*sliceChunkMz
+    chunkSize = sliceChunkX * sliceChunkY * sliceChunkMz
     if math.ceil(float(chunkSize) / float(suggestedNumValues)) > maxFactor:
         sliceChunkX = int(math.ceil(xsize / 2.))
         sliceChunkY = int(math.ceil(ysize / 2.))
     sliceChunk = (sliceChunkX, sliceChunkY, sliceChunkMz)
-    sliceChunkOverheadX = (sliceChunkX * math.ceil(float(xsize) / float(sliceChunkX))) - xsize #math.ceil(float(xsize) % float(sliceChunkX))
-    sliceChunkOverheadY = (sliceChunkY * math.ceil(float(ysize) / float(sliceChunkY))) - ysize #math.ceil(float(ysize) % float(sliceChunkY))
-    sliceChunkOverhead = ((sliceChunkOverheadX*ysize) + (sliceChunkOverheadY*xsize) - (sliceChunkOverheadX*sliceChunkOverheadY)) * mzsize  * numBytes
-    if print_results: 
-    
-        print "Slice selection chunking: "+str(sliceChunk) 
+    # math.ceil(float(xsize) % float(sliceChunkX))
+    sliceChunkOverheadX = (
+        sliceChunkX * math.ceil(float(xsize) / float(sliceChunkX))) - xsize
+    # math.ceil(float(ysize) % float(sliceChunkY))
+    sliceChunkOverheadY = (
+        sliceChunkY * math.ceil(float(ysize) / float(sliceChunkY))) - ysize
+    sliceChunkOverhead = ((sliceChunkOverheadX * ysize) + (sliceChunkOverheadY * xsize)
+                          - (sliceChunkOverheadX * sliceChunkOverheadY)) * mzsize * numBytes
+    if print_results:
+
+        print "Slice selection chunking: " + str(sliceChunk)
         print "     - Ideal for selection of full image slices."
-        print "     - Overhead: "+str(sliceChunkOverhead)+" Byte ("+str(int(math.ceil(sliceChunkOverhead / (1024.*1024.))))+" MB)"
-    
-    #Define a balanced chunkgin 
+        print "     - Overhead: " + str(sliceChunkOverhead) + " Byte (" + str(int(math.ceil(sliceChunkOverhead / (1024. * 1024.)))) + " MB)"
+
+    # Define a balanced chunkgin
     balancedChunkX = 4
-    balancedChunkY = 4 
+    balancedChunkY = 4
     balancedChunkMz = 2048
     balancedChunk = (balancedChunkX, balancedChunkY, balancedChunkMz)
     if print_results:
-        
+
         print "Balanced chunking: " + str(balancedChunk)
         print "     - This chunking tries to compromise between selection of slices and spectra."
-        
+
     return spectrumChunk, sliceChunk, balancedChunk
-    
-    
+
+
 def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
     """Helper function used to implement different data write options.
 
@@ -703,7 +762,7 @@ def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
         :param data: The output dataset (either an h5py dataset or omsi_file_msidata object.
         :param io_option: String indicating the data write method to be used. One of:
 
-            * ``spectrum``: Write the data one spectrum at a time 
+            * ``spectrum``: Write the data one spectrum at a time
             * ``all`` : Write the complete dataset at once.
             * ``chunk`` : Write the data one chunk at a time.
 
@@ -712,10 +771,11 @@ def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
     """
     if io_option == "spectrum" or (io_option == "chunk" and (chunk_shape is None)):
         for xindex in xrange(0, inputFile.shape[0]):
-            sys.stdout.write("[" +str(int(100.* float(xindex)/float(inputFile.shape[0]))) +"%]"+ "\r")
+            sys.stdout.write(
+                "[" + str(int(100. * float(xindex) / float(inputFile.shape[0]))) + "%]" + "\r")
             sys.stdout.flush()
             for yindex in xrange(0, inputFile.shape[1]):
-                #Save the spectrum to the hdf5 file
+                # Save the spectrum to the hdf5 file
                 data[xindex, yindex, :] = inputFile[xindex, yindex, :]
     elif io_option == "all":
         data[:] = inputFile[:]
@@ -723,24 +783,27 @@ def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
         xdim = inputFile.shape[0]
         ydim = inputFile.shape[1]
         zdim = inputFile.shape[2]
-        numChunksX = int(math.ceil(float(xdim)/float(chunk_shape[0])))
-        numChunksY = int(math.ceil(float(ydim)/float(chunk_shape[1])))
-        numChunksZ = int(math.ceil(float(zdim)/float(chunk_shape[2])))
-        numChunks = numChunksX*numChunksY*numChunksZ
-        itertest = 0 
+        numChunksX = int(math.ceil(float(xdim) / float(chunk_shape[0])))
+        numChunksY = int(math.ceil(float(ydim) / float(chunk_shape[1])))
+        numChunksZ = int(math.ceil(float(zdim) / float(chunk_shape[2])))
+        numChunks = numChunksX * numChunksY * numChunksZ
+        itertest = 0
         for xChunkIndex in xrange(0, numChunksX):
-            xstart = xChunkIndex*chunk_shape[0]
-            xend = min(xstart+chunk_shape[0], xdim)
+            xstart = xChunkIndex * chunk_shape[0]
+            xend = min(xstart + chunk_shape[0], xdim)
             for yChunkIndex in xrange(0, numChunksY):
-                ystart = yChunkIndex*chunk_shape[1]
-                yend = min(ystart+chunk_shape[1], ydim)
+                ystart = yChunkIndex * chunk_shape[1]
+                yend = min(ystart + chunk_shape[1], ydim)
                 for zChunkIndex in xrange(0, numChunksZ):
-                    zstart = zChunkIndex*chunk_shape[2]
-                    zend = min(zstart+chunk_shape[2], zdim)
-                    #print "Write : "+str(xstart)+" "+str(xend)+" "+str(ystart)+" "+str(yend)+" "+str(zstart)+" "+str(zend)
-                    data[xstart:xend, ystart:yend, zstart:zend] = inputFile[xstart:xend, ystart:yend, zstart:zend]
+                    zstart = zChunkIndex * chunk_shape[2]
+                    zend = min(zstart + chunk_shape[2], zdim)
+                    # print "Write : "+str(xstart)+" "+str(xend)+"
+                    # "+str(ystart)+" "+str(yend)+" "+str(zstart)+" "+str(zend)
+                    data[xstart:xend, ystart:yend, zstart:zend] = inputFile[
+                        xstart:xend, ystart:yend, zstart:zend]
                     itertest += 1
-                    sys.stdout.write("[" +str(int(100.* float(itertest)/float(numChunks))) +"%]"+ "\r")
+                    sys.stdout.write(
+                        "[" + str(int(100. * float(itertest) / float(numChunks))) + "%]" + "\r")
                     sys.stdout.flush()
 
 """
@@ -769,20 +832,21 @@ def loginUser(requestPassword=False):
     print response
 """
 
+
 def register_file_with_db(filepath, db_server, file_owner_name):
     """ Function used to register a given file with the database
-        
+
         :param filepath: Path of the file to be added to the database
         :param db_server: The database server url
         :param file_owner_name: The owner to be used, or None if the owner should be determined based on the file URL.
-        
+
         :returns: Boolean indicating whether the operation was successful
-    
+
     """
     global default_db_server_url
     global check_add_nersc
-    
-    #Check if the 
+
+    # Check if the
     if db_server == default_db_server_url and check_add_nersc:
         if (not "/project/projectdirs/openmsi" in filepath) and (not filepath.startswith("/data/openmsi/")):
             print "WARNING: It appears that you want to add a file to openmsi.nersc.gov that is not in a default location."
@@ -791,20 +855,20 @@ def register_file_with_db(filepath, db_server, file_owner_name):
             for i in range(numTrys):
                 userInput = raw_input()
                 if userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
-                    break 
+                    break
                 elif userInput == "N" or userInput == "n" or userInput == "No" or userInput == "no" or userInput == "NO":
                     return False
                 else:
-                    if i == (numTrys-1):
+                    if i == (numTrys - 1):
                         print "Aborting adding file to the database."
                         return False
                     print "Unrecognized repsonse. Do you want to add the file? (Y/N): "
-    
-    #If we are at NERSC then set the NERSC Apache permissions
+
+    # If we are at NERSC then set the NERSC Apache permissions
     if 'nersc.gov' in db_server:
         set_apache_acl(filepath)
 
-    #Determine the owner
+    # Determine the owner
     currOwner = file_owner_name
     if not currOwner:
         currOwner = os.path.dirname(filepath).split("/")[-1]
@@ -812,24 +876,23 @@ def register_file_with_db(filepath, db_server, file_owner_name):
         print "ERROR: File could not be added to DB. Owner could not be determined."
         return False
 
-            
-
-    #Construct the db add-file url
+    # Construct the db add-file url
     addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
-    addFileURL = addFileURL+"?file="+os.path.abspath(filepath)+"&owner="+currOwner
+    addFileURL = addFileURL + "?file=" + \
+        os.path.abspath(filepath) + "&owner=" + currOwner
 
-    #Make the url request
+    # Make the url request
     try:
-        print "Registering file with DB: "+addFileURL
+        print "Registering file with DB: " + addFileURL
         urlResponse = urllib2.urlopen(url=addFileURL)
         if urlResponse.code == 200:
             return True
         else:
-            return False 
+            return False
     except urllib2.HTTPError as requestError:
         print "ERROR: File could not be added to DB:"
-        print "      Error-code:" +str(requestError.code)
-        print "      Error info:" +str(requestError.read())
+        print "      Error-code:" + str(requestError.code)
+        print "      Error info:" + str(requestError.read())
         return False
 
     return False
@@ -842,26 +905,26 @@ def set_apache_acl(filepath):
     """
     print "Setting NERSC ACL permssiosn for Apache"
     #command = "setfacl -R -m u:apache:rwx "+filepath
-    command = "setfacl -R -m u:48:rwx "+filepath
+    command = "setfacl -R -m u:48:rwx " + filepath
     os.system(command)
-    
+
 
 def parse_input_args(argv):
     """Process input parameters and define the script settings.
-    
-       :param argv: The list of input arguments 
-       
+
+       :param argv: The list of input arguments
+
        :returns: This function returns the following four values:
-       
+
             * 'inputError' : Boolean indicating whether an error has occured during the processing of the inputs
             * 'inputWarning' : Boolean indicating whether a warning has been raised during the processing of the inputs
             * 'outputFilename' : Name for the output HDF5 file
             * 'inputFilenames' : List of strings indicating the list of input filenames
     """
-    #Get the global variables
-    global available_formats        #Used but will not be changed
-    global available_region_options #Used but will not be changed
-    global available_error_options  #Used but will not be changed
+    # Get the global variables
+    global available_formats  # Used but will not be changed
+    global available_region_options  # Used but will not be changed
+    global available_error_options  # Used but will not be changed
     global io_option
     global format_option
     global region_option
@@ -870,7 +933,7 @@ def parse_input_args(argv):
     global user_additional_chunks
     global compression
     global compression_opts
-    global suggest_file_chunkings 
+    global suggest_file_chunkings
     global execute_nmf
     global execute_fpg
     global execute_fpl
@@ -886,13 +949,16 @@ def parse_input_args(argv):
     global error_handling
     global check_add_nersc
     #global require_login
-    
-    #Initalize the output values to be returned 
-    inputError = False          #Parameter used to track whether an error has occured while parsing the input parameters
-    inputWarning = False        #Parameter used to indicate conflicting input parameter options
-    outputFilename = None       #The output filename
-    inputFilenames = []         #The list of input filenames 
-    #Basic sanity check
+
+    # Initalize the output values to be returned
+    # Parameter used to track whether an error has occured while parsing the
+    # input parameters
+    inputError = False
+    # Parameter used to indicate conflicting input parameter options
+    inputWarning = False
+    outputFilename = None  # The output filename
+    inputFilenames = []  # The list of input filenames
+    # Basic sanity check
     if len(argv) < 3:
         lastArg = argv[-1]
         if lastArg == "--help" or \
@@ -904,14 +970,12 @@ def parse_input_args(argv):
         else:
             inputError = True
             return inputError, inputWarning, outputFilename, inputFilenames
-      
 
-
-    #Using the inputError and inputWarning paramter we try to keep parsing the input as long as possible to
-    #make sure we can inform the user of as many problems as possible 
+    # Using the inputError and inputWarning paramter we try to keep parsing the input as long as possible to
+    # make sure we can inform the user of as many problems as possible
     startIndex = 1
     i = startIndex
-    while i < (len(argv)-1):
+    while i < (len(argv) - 1):
         i = startIndex
         currentArg = argv[i]
         if currentArg == "--no-nmf":
@@ -924,27 +988,27 @@ def parse_input_args(argv):
             print "Enable NMF"
         elif currentArg == "--nmf-nc":
             startIndex += 2
-            nmf_num_components = int(argv[i+1])
-            print "Set nmf-nc="+str(nmf_num_components)
+            nmf_num_components = int(argv[i + 1])
+            print "Set nmf-nc=" + str(nmf_num_components)
         elif currentArg == "--nmf-timeout":
             startIndex += 2
-            nmf_timeout = int(argv[i+1])
-            print "Set nmf_timeout="+str(nmf_timeout)
+            nmf_timeout = int(argv[i + 1])
+            print "Set nmf_timeout=" + str(nmf_timeout)
         elif currentArg == "--nmf-niter":
             startIndex += 2
-            nmf_num_iter = int(argv[i+1])
+            nmf_num_iter = int(argv[i + 1])
             if nmf_num_iter < 2:
-                inputWarning = True 
+                inputWarning = True
                 print "WARNING: --nfm-niter must be 2 or larger"
-            print "Set nmf-niter="+str(nmf_num_iter)
+            print "Set nmf-niter=" + str(nmf_num_iter)
         elif currentArg == "--nmf-tolerance":
             startIndex += 2
-            nmf_tolerance = float(argv[i+1])
-            print "Set nmf-tolerance="+str(nmf_tolerance)
+            nmf_tolerance = float(argv[i + 1])
+            print "Set nmf-tolerance=" + str(nmf_tolerance)
         elif currentArg == "--nmf-raw":
             startIndex += 1
             nmf_use_raw_data = True
-            print "Set nmf-raw="+str(nmf_use_raw_data)
+            print "Set nmf-raw=" + str(nmf_use_raw_data)
         elif currentArg == "--fpg":
             startIndex += 1
             execute_fpg = True
@@ -953,8 +1017,8 @@ def parse_input_args(argv):
             startIndex += 1
             execute_fpg = False
             print "Disable find peaks global"
-            if "--fpg" in argv: 
-                inputWarning = True 
+            if "--fpg" in argv:
+                inputWarning = True
                 print "WARNING: --no-fpg and --fpg options are conflicting."
         elif currentArg == "--fpl":
             startIndex += 1
@@ -964,8 +1028,8 @@ def parse_input_args(argv):
             startIndex += 1
             execute_fpl = False
             print "Disable find peaks local"
-            if "--fpl" in argv: 
-                inputWarning = True 
+            if "--fpl" in argv:
+                inputWarning = True
                 print "WARNING: --no-fpl and --fpl options are conflicting."
         elif currentArg == "--auto-chunking":
             startIndex += 1
@@ -974,21 +1038,21 @@ def parse_input_args(argv):
                 inputWarning = True
                 print "WARNING: --chunking options will be ignored due to the use of --auto-chunking"
             if "--no-chunking" in argv:
-                inputWarning = True 
+                inputWarning = True
                 print "WARNING: --no-chunking and --auto-chunking options are conflicting"
-            if "--optimized-chunking"  in argv:
+            if "--optimized-chunking" in argv:
                 inputWarning = True
                 print "WARNING: --optimized-chunking and --auto-chunking options are conflicting"
         elif currentArg == "--chunking":
             startIndex += 4
-            try: 
-                chunks = (int(argv[i+1]), int(argv[i+2]), int(argv[i+3]))
+            try:
+                chunks = (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3]))
             except:
                 print "An error accured while parsing the --chunking command. Something may be wrong with the indicated chunk sizes for x y z."
                 inputError = True
             if "--auto-chunking" not in argv:
-                auto_chunk = False 
-            print "Enable chunking: "+str(chunks)
+                auto_chunk = False
+            print "Enable chunking: " + str(chunks)
         elif currentArg == "--no-chunking":
             startIndex += 1
             chunks = None
@@ -1000,27 +1064,28 @@ def parse_input_args(argv):
         elif currentArg == "--optimized-chunking":
             startIndex += 4
             try:
-                user_additional_chunks.append((int(argv[i+1]), int(argv[i+2]), int(argv[i+3])))
-            except: 
+                user_additional_chunks.append(
+                    (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3])))
+            except:
                 print "An error accured while parsing the --optimized-chunking command. Something may be wrong with the indicated chunk sizes for x y z."
                 inputError = True
         elif currentArg == "--compression":
             startIndex += 1
-            #This is already the default
+            # This is already the default
             print "Enable compression"
         elif currentArg == "--no-compression":
             startIndex += 1
             compression = None
             compression_opts = None
             print "Disable compression"
-            if "--compression" in argv: 
-                inputWarning = True 
+            if "--compression" in argv:
+                inputWarning = True
                 print "WARNING: --no-compression and --compression options are conflicting."
         elif currentArg == "--io":
             startIndex += 2
             try:
-                io_option = str(argv[i+1])
-                if io_option not in  available_io_options:
+                io_option = str(argv[i + 1])
+                if io_option not in available_io_options:
                     raise ValueError("Invalid io option")
             except:
                 print "An error accured while parsing the --io command. Something may be wrong with the indicated io-type."
@@ -1033,8 +1098,8 @@ def parse_input_args(argv):
             startIndex += 1
             generate_thumbnail = False
             print "Disable thumbnail"
-            if "--thumbnail" in argv: 
-                inputWarning = True 
+            if "--thumbnail" in argv:
+                inputWarning = True
                 print "WARNING: --no-thumbnail and --no-thumbnail options are conflicting."
         elif currentArg == "--help" or currentArg == "--h" or currentArg == "-help" or currentArg == "-h":
             print_help()
@@ -1044,17 +1109,17 @@ def parse_input_args(argv):
             suggest_file_chunkings = True
         elif currentArg == "--format":
             startIndex += 2
-            format_option = str(argv[i+1])
+            format_option = str(argv[i + 1])
             if format_option not in available_formats:
-                print "ERROR: The indicated --format option "+format_option+" is not supported. Available options are:"
-                print "     "+str(available_formats)
+                print "ERROR: The indicated --format option " + format_option + " is not supported. Available options are:"
+                print "     " + str(available_formats)
                 inputError = True
         elif currentArg == "--regions":
             startIndex += 2
-            region_option = str(argv[i+1])
+            region_option = str(argv[i + 1])
             if region_option not in available_region_options:
-                print "ERROR: The indicated --regions option "+region_option+" is not supported. Avaiable options are:"
-                print "       "+str(available_region_options)
+                print "ERROR: The indicated --regions option " + region_option + " is not supported. Avaiable options are:"
+                print "       " + str(available_region_options)
                 inputError = True
         elif currentArg == "--add-to-db":
             startIndex += 1
@@ -1065,48 +1130,57 @@ def parse_input_args(argv):
             add_file_to_db = False
         elif currentArg == "--db-server":
             startIndex += 2
-            db_server_url = str(argv[i+1])
+            db_server_url = str(argv[i + 1])
             check_add_nersc = False
         elif currentArg == "--owner":
             startIndex += 2
-            file_owner = str(argv[i+1])
-        #elif currentArg == "--login":
+            file_owner = str(argv[i + 1])
+        # elif currentArg == "--login":
         #    startIndex = startIndex+1
         #    require_login = True
         elif currentArg == "--error-handling":
             startIndex += 2
-            errorOption = str(argv[i+1])
+            errorOption = str(argv[i + 1])
             if errorOption in available_error_options:
                 error_handling = errorOption
             else:
-                print "ERROR: The indicated --error-handling option "+errorOption+" is not supported. Available options are:"
-                print "     "+str(available_error_options)
+                print "ERROR: The indicated --error-handling option " + errorOption + " is not supported. Available options are:"
+                print "     " + str(available_error_options)
                 inputError = True
         elif currentArg.startswith("--"):
             startIndex += 1
             inputError = True
-            print "Unrecognized input option: "+currentArg
+            print "Unrecognized input option: " + currentArg
         else:
-            #print "End of input parameters"
+            # print "End of input parameters"
             break
-    
 
-    #Determine the list of input filenames
-    inputFilenames = [name.replace('"', "") for name in argv[startIndex:(len(argv)-1)]] #remove " in case the user has entered file names with spaces using the "name" syntax
-    #Determine the output filename
-    if "--suggest-chunking" in argv:  
-        outputFilename = None  #Do not generate an output file if the user just wants to know which chunking to be used
-        inputFilenames.append(argv[-1].replace('"', "")) #Check chunking also for the last filename
-    else: 
-        outputFilename = argv[-1].replace('"', "")  #Remove " in case the user has entered file names with spaces using the "name" syntax
+    # Determine the list of input filenames
+    # remove " in case the user has entered file names with spaces using the
+    # "name" syntax
+    inputFilenames = [name.replace('"', "")
+                      for name in argv[startIndex:(len(argv) - 1)]]
+    # Determine the output filename
+    if "--suggest-chunking" in argv:
+        # Do not generate an output file if the user just wants to know which
+        # chunking to be used
+        outputFilename = None
+        # Check chunking also for the last filename
+        inputFilenames.append(argv[-1].replace('"', ""))
+    else:
+        # Remove " in case the user has entered file names with spaces using
+        # the "name" syntax
+        outputFilename = argv[-1].replace('"', "")
 
-    #Check whether all packages needed for generating thumbnails are available on the system
+    # Check whether all packages needed for generating thumbnails are
+    # available on the system
     if generate_thumbnail:
         if not pil_available:
             generate_thumbnail = False
             print "PIL not available. Generation of thumbnail images disabled"
-    
-    #Enable chunking if compression is requested and chunking has been disabled
+
+    # Enable chunking if compression is requested and chunking has been
+    # disabled
     if (chunks is None) and (compression is not None):
         print "WARNING: HDF5 compression is only available with chunking enabled. Do you want to enable chunking? (Y/N)"
         userInput = raw_input()
@@ -1119,26 +1193,26 @@ def parse_input_args(argv):
             print "Compression disabled"
         else:
             exit()
-    
-    print "Execute global peak finding (fpg): "+str(execute_fpg)
-    print "Execute local peak finding (fpl): "+str(execute_fpl)
-    print "Execute nmf: "+str(execute_nmf)
-    print "Number of MSI files: "+str(len(inputFilenames))
-    print "Output OMSI file: "+outputFilename
 
-    #Finish and return
+    print "Execute global peak finding (fpg): " + str(execute_fpg)
+    print "Execute local peak finding (fpl): " + str(execute_fpl)
+    print "Execute nmf: " + str(execute_nmf)
+    print "Number of MSI files: " + str(len(inputFilenames))
+    print "Output OMSI file: " + outputFilename
+
+    # Finish and return
     return inputError, inputWarning, outputFilename, inputFilenames
 
 
 def print_help():
     """Function used to print the help for this script"""
-    
-    #Load gloabl variables
+
+    # Load gloabl variables
     #global available_formats
     #global available_region_options
-    
-    #Print the help explaining the usage of convertToHDF5
-    
+
+    # Print the help explaining the usage of convertToHDF5
+
     print "USAGE: Call \"convertToOMSI [options] imgBaseFile1 imgBaseFile2 ... imgBaseFileN HDF5File\" "
     print ""
     print "This converter script takes the basename (i.e., path+basefilename) of a single"
@@ -1170,14 +1244,14 @@ def print_help():
     print "--format <option>: Define which file format is used as input. By default the program tries to"
     print "           automatically determine the input format. This option can be used to indicate"
     print "           the format explicitly to in case the auto option fails. Available options are:"
-    print "          "+str(available_formats)
+    print "          " + str(available_formats)
     print "--regions <option>: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored"
     print "           in a single file. This option allows one to specify how these regions should be"
     print "           treated during file conversion. E.g., one may want to store i) each region as a "
     print "           separate dataset in the output file (--regions split), ii) all regions combined "
     print "           in a single dataset (--regions merge), or both (--regions split+merge)"
     print "           Available options are:"
-    print "          "+str(available_region_options)
+    print "          " + str(available_region_options)
     print ""
     print "===FILE WRITE OPTIONS=== "
     print ""
@@ -1206,8 +1280,8 @@ def print_help():
     print "--no-compression: Disable the use of compression."
     print ""
     print "===I/O OPTIONS=== "
-    print "--io <option>: Available options are: "+str(available_io_options)
-    print "             i) all : Read the full data in memory and write it at once" 
+    print "--io <option>: Available options are: " + str(available_io_options)
+    print "             i) all : Read the full data in memory and write it at once"
     print "             ii) spectrum : Read one spectrum at a time and write it to the file. "
     print "             iii) chunk : Read one chunk at a time and write it to the file."
     print ""
@@ -1222,7 +1296,8 @@ def print_help():
     print "              http://openmsi.nersc.gov "
     print "--owner : Name of the user that should be assigned as owner. By default the owner is"
     print "          determined automatically based on the file path."
-    #print "--login : If set, then the script will ask for login information at the beginning of the script."
+    # print "--login : If set, then the script will ask for login information
+    # at the beginning of the script."
     print ""
     print "===ANALYSIS OPTIONS=== "
     print ""
@@ -1259,5 +1334,4 @@ def print_help():
     print "--no-thumbnail: Do not generate a thumbnail image."
 
 if __name__ == "__main__":
-    main() 
-
+    main()
