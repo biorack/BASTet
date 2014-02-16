@@ -9,7 +9,6 @@ from omsi.dataformat.omsi_file import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
-from omsi.analysis.omsi_analysis_data import *
 import time
 import numpy as np
 import math
@@ -29,7 +28,7 @@ try:
     import urllib2
     #import urllib
 except:
-    # This is to ensuer the script is usable without urllib2 when register to
+    # This is to ensure the script is usable without urllib2 when register to
     # DB is not requested
     pass
 
@@ -37,8 +36,8 @@ except:
 ####################################################################
 #  Variables used for internal storage                             #
 ####################################################################
-""" :param dataList: List of python dictionaries decribing specific conversion \
-             settings for each conversion task. Each dictionary contains the follwing keys:
+""" :param dataList: List of python dictionaries describing specific conversion \
+             settings for each conversion task. Each dictionary contains the following keys:
     
              * 'basename' : Name of the file to be converted 
              * 'format' : File format to be used (see available_formats) 
@@ -47,7 +46,7 @@ except:
                           * 'new' : Generate a new experiment for the dataset
                           * 'previous' : Use the same experiment as used for the previous dataset 
                           * 1, 2,3...   : Integer value indicating the index of the experiment to be used. 
-            * 'region' : Optional key, indicating the region index to be converted or None if all regions should be merged. 
+            * 'region' : Optional key with index of the region to be converted. None if all regions should be merged.
 """
 dataset_list = []
 omsi_output_file = None  # The openMSI output data file to be used.
@@ -59,8 +58,8 @@ omsi_output_file = None  # The openMSI output data file to be used.
 available_formats = ["img", "bruckerflex", "auto"]
 # List defining the different options available for handling regions
 available_region_options = ["split", "merge", "split+merge"]
-# Available options for the data write. One chunk at a time'chunk', one
-# spectrum at a time ('spectrum') or all at one once ('all')
+# Available options for the data write. One chunk at a time ('chunk'), one
+# spectrum at a time ('spectrum'), or all at one once ('all')
 available_io_options = ["chunk", "spectrum", "all"]
 available_error_options = ["terminate-and-cleanup",
                            "terminate-only", "continue-on-error"]
@@ -68,7 +67,7 @@ available_error_options = ["terminate-and-cleanup",
 ####################################################################
 #  Define the input parameters used during the conversion         ##
 ####################################################################
-# Define how the data should be written to file, one cunk at a time
+# Define how the data should be written to file, one chunk at a time
 # ('chunk'), one spectrum at a time ('spectrum') or all at one once
 # ('all')
 io_option = "chunk"
@@ -82,7 +81,7 @@ user_additional_chunks = []
 # We use gzip by default because szip is not as generally available and
 # LZF is usually only available with h5py.
 compression = 'gzip'
-# For gzip this a value between 0-9 (inclusive) indicating how agressive
+# For gzip this a value between 0-9 (inclusive) indicating how aggressive
 # the compression should be. 0=fastest speed, 9=best compression ratio.
 compression_opts = 4
 # Should we only suggest file chunkings and quit without converting any data
@@ -111,7 +110,7 @@ error_handling = "terminate-and-cleanup"
 ####################################################################
 execute_nmf = True  # Define whether NMF should be performed
 execute_fpg = True  # Define whether global peak finding should be executed
-execute_fpl = False  # Define whether local peak finding should be execuated
+execute_fpl = False  # Define whether local peak finding should be executed
 generate_thumbnail = True  # Should we generate thumbnail
 
 # Default NMF parameter settings
@@ -167,7 +166,7 @@ def main(argv=None):
     ####################################################################
     try:
         dataset_list = create_dataset_list(inputFilenames=inputFilenames,
-                                           format_type=format_option, region_option=region_option)
+                                           format_type=format_option, data_region_option=region_option)
         print "Number of conversion: " + str(len(dataset_list))
     except:
         print "ERROR: An error occured during the generation of the input filelist."
@@ -175,7 +174,6 @@ def main(argv=None):
         print "       -- No file has been added to the database."
         print "       -- Terminating"
         raise
-        exit(0)
 
     ####################################################################
     #  Suggest only chunking for the files if requested                #
@@ -299,8 +297,8 @@ def convert_files():
                 inputFile = bruckerflex_file(spotlist_filename=basefile)
                 inputFile.set_region_selection(region_index=i['region'])
             else:
-                print "ERROR: The following file will not be converted because the file type could not be determined: " + basefile
-                print "INFO: If you know the correct file format then try converting the file using the approbirate --format <formatname> option."
+                print "ERROR: The following file will not be converted. File type could not be determined: " + basefile
+                print "INFO: If you know the correct file format then try setting appropriate --format option."
                 if error_handling == "continue-on-error":
                     pass
                 elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
@@ -310,7 +308,7 @@ def convert_files():
         except:
             print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
             if error_handling == "continue-on-error":
-                print basefile + " failure during conversion. Skipping the file and continue conversion of the other files.\n"
+                print basefile + " failure during conversion. Skipping the file and continue conversion."
                 continue
             elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
                 raise
@@ -318,7 +316,11 @@ def convert_files():
         if auto_chunk:
 
             specChunks, imgChunks, tempChunks = suggest_chunking(
-                xsize=inputFile.shape[0], ysize=inputFile.shape[1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
+                xsize=inputFile.shape[0],
+                ysize=inputFile.shape[1],
+                mzsize=inputFile.shape[2],
+                dtype=inputFile.data_type,
+                print_results=True)
             chunks = specChunks
             additionalChunks = user_additional_chunks + [imgChunks]
             print "Converting data using the following chunking options:"
@@ -350,11 +352,15 @@ def convert_files():
 
         # Allocate space in the HDF5 file for the img data
         dataDataset, mzDataset, dataGroup = exp.create_msidata_full_cube(
-            data_shape=inputFile.shape, data_type=inputFile.data_type, chunks=chunks, compression=compression, compression_opts=compression_opts)
+            data_shape=inputFile.shape,
+            data_type=inputFile.data_type,
+            chunks=chunks,
+            compression=compression,
+            compression_opts=compression_opts)
         mzDataset[:] = mzdata
         data = omsi_file_msidata(
             data_group=dataGroup, preload_mz=False, preload_xy_index=False)
-        write_data(inputFile, data, io_option=io_option, chunk_shape=chunks)
+        write_data(inputFile, data, data_io_option=io_option, chunk_shape=chunks)
         omsi_output_file.flush()
 
         # Generate any additional data copies if requested
@@ -364,7 +370,7 @@ def convert_files():
                                                       compression=compression,
                                                       compression_opts=compression_opts,
                                                       copy_data=False, print_status=True)
-            write_data(inputFile, tempData, io_option=io_option,
+            write_data(inputFile, tempData, data_io_option=io_option,
                        chunk_shape=chunkSpec)
             omsi_output_file.flush()
 
@@ -565,15 +571,15 @@ def check_format(name, format_type):
         return None
 
 
-def create_dataset_list(inputFilenames, format_type='auto', region_option="split+merge"):
+def create_dataset_list(inputFilenames, format_type='auto', data_region_option="split+merge"):
     """Based on the list of inputFilenames, generate the dataset_list, which contains a dictionary describing
        each conversion job
 
        :param inputFilenames: List of names of files to be converted.
        :param format_type: Define which file-format should be used. Default value is 'auto' indicating the \
                    function should determine for each file the format to be used. See also available_formats parameter.
-       :param region_option: Define how different regions defined for a file should be handled. E.g., one may want \
-                    to split all regions into indiviudal datasets ('split'), merge all regions into a single \
+       :param data_region_option: Define how different regions defined for a file should be handled. E.g., one may \
+                    want to split all regions into indiviudal datasets ('split'), merge all regions into a single \
                     dataset ('merge'), or do both ('split+merge'). See also the available_region_options parameter \
                     for details. By default the function will do 'split+merge'.
 
@@ -592,11 +598,11 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
                                         format_type=format_type)
         currDS['exp'] = 'new'
         if currDS['format'] == 'bruckerflex':
-            if region_option == "merge" or region_option == "split+merge":
+            if data_region_option == "merge" or data_region_option == "split+merge":
                 currDS['region'] = None
                 re_dataset_list.append(currDS)
 
-            if region_option == 'split' or region_option == 'split+merge':
+            if data_region_option == 'split' or data_region_option == 'split+merge':
                 try:
                     tempFile = bruckerflex_file(
                         spotlist_filename=currDS['basename'], readall=False)
@@ -608,7 +614,7 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
                         re_dataset_list.append(nDS)
                 except:
                     print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
-                    print currDS['basename'] + " failure during converion. Skipping the file and continue conversion of the other files.\n"
+                    print currDS['basename'] + " failure during converion. Skipping the file and continue conversion."
                     if error_handling == "continue-on-error":
                         continue
                     elif error_handling == "terminate-and-cleanup" or error_handling == "terminate-only":
@@ -617,7 +623,7 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
                         raise
 
             # This is just to make sure that we have checked everything
-            if region_option not in available_region_options:
+            if data_region_option not in available_region_options:
                 print "WARNING: Undefined region option. Using the default option split+merge"
         else:
             re_dataset_list.append(currDS)
@@ -626,14 +632,14 @@ def create_dataset_list(inputFilenames, format_type='auto', region_option="split
     return re_dataset_list
 
 
-def suggest_chunkings_for_files(dataset_list):
+def suggest_chunkings_for_files(in_dataset_list):
     """Helper function used to suggest food chunking strategies for a given set of files.
 
-       :param datafiles: Python list of dictionaries describing the settings to be used for the file conversion
+       :param in_dataset_list: Python list of dictionaries describing the settings to be used for the file conversion
 
        :returns: This function simply prints results to standard-out but does not return anything.
     """
-    for i in dataset_list:
+    for i in in_dataset_list:
 
         basefile = i["basename"]
         try:
@@ -717,7 +723,8 @@ def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
 
         print "Spectrum selection chunking: " + str(spectrumChunk)
         print "     - Ideal for selection of full spectra."
-        print "     - Overhead: " + str(spectrumChunkOverhead) + " Byte (" + str(int(math.ceil(spectrumChunkOverhead / (1024. * 1024.)))) + " MB)"
+        print "     - Overhead: " + str(spectrumChunkOverhead) + \
+              " Byte (" + str(int(math.ceil(spectrumChunkOverhead / (1024. * 1024.)))) + " MB)"
 
     # Define a chunking that would be good for images
     sliceChunkX = xsize
@@ -740,7 +747,8 @@ def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
 
         print "Slice selection chunking: " + str(sliceChunk)
         print "     - Ideal for selection of full image slices."
-        print "     - Overhead: " + str(sliceChunkOverhead) + " Byte (" + str(int(math.ceil(sliceChunkOverhead / (1024. * 1024.)))) + " MB)"
+        print "     - Overhead: " + str(sliceChunkOverhead) + \
+              " Byte (" + str(int(math.ceil(sliceChunkOverhead / (1024. * 1024.)))) + " MB)"
 
     # Define a balanced chunkgin
     balancedChunkX = 4
@@ -755,21 +763,22 @@ def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
     return spectrumChunk, sliceChunk, balancedChunk
 
 
-def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
+def write_data(inputFile, data, data_io_option="spectrum", chunk_shape=None):
     """Helper function used to implement different data write options.
 
         :param inputFile: The input img data file
         :param data: The output dataset (either an h5py dataset or omsi_file_msidata object.
-        :param io_option: String indicating the data write method to be used. One of:
+        :param data_io_option: String indicating the data write method to be used. One of:
 
             * ``spectrum``: Write the data one spectrum at a time
             * ``all`` : Write the complete dataset at once.
             * ``chunk`` : Write the data one chunk at a time.
 
-        :param chunk_shape: The chunking used by the data. Needed to decide how the data should be written when a chunk-aligned write is requested.
+        :param chunk_shape: The chunking used by the data. Needed to decide how the data should \
+                            be written when a chunk-aligned write is requested.
 
     """
-    if io_option == "spectrum" or (io_option == "chunk" and (chunk_shape is None)):
+    if data_io_option == "spectrum" or (data_io_option == "chunk" and (chunk_shape is None)):
         for xindex in xrange(0, inputFile.shape[0]):
             sys.stdout.write(
                 "[" + str(int(100. * float(xindex) / float(inputFile.shape[0]))) + "%]" + "\r")
@@ -777,9 +786,9 @@ def write_data(inputFile, data, io_option="spectrum", chunk_shape=None):
             for yindex in xrange(0, inputFile.shape[1]):
                 # Save the spectrum to the hdf5 file
                 data[xindex, yindex, :] = inputFile[xindex, yindex, :]
-    elif io_option == "all":
+    elif data_io_option == "all":
         data[:] = inputFile[:]
-    elif io_option == "chunk":
+    elif data_io_option == "chunk":
         xdim = inputFile.shape[0]
         ydim = inputFile.shape[1]
         zdim = inputFile.shape[2]
@@ -849,14 +858,16 @@ def register_file_with_db(filepath, db_server, file_owner_name):
     # Check if the
     if db_server == default_db_server_url and check_add_nersc:
         if (not "/project/projectdirs/openmsi" in filepath) and (not filepath.startswith("/data/openmsi/")):
-            print "WARNING: It appears that you want to add a file to openmsi.nersc.gov that is not in a default location."
+            print "WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location."
             print "Do you want to add the file? (Y/N):"
             numTrys = 3
             for i in range(numTrys):
                 userInput = raw_input()
-                if userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
+                if userInput == "Y" or userInput == "y" or userInput == "Yes" or \
+                        userInput == "yes" or userInput == "YES":
                     break
-                elif userInput == "N" or userInput == "n" or userInput == "No" or userInput == "no" or userInput == "NO":
+                elif userInput == "N" or userInput == "n" or userInput == "No" or \
+                        userInput == "no" or userInput == "NO":
                     return False
                 else:
                     if i == (numTrys - 1):
@@ -887,13 +898,10 @@ def register_file_with_db(filepath, db_server, file_owner_name):
         urlResponse = urllib2.urlopen(url=addFileURL)
         if urlResponse.code == 200:
             return True
-        else:
-            return False
     except urllib2.HTTPError as requestError:
         print "ERROR: File could not be added to DB:"
         print "      Error-code:" + str(requestError.code)
         print "      Error info:" + str(requestError.read())
-        return False
 
     return False
 
@@ -1048,7 +1056,8 @@ def parse_input_args(argv):
             try:
                 chunks = (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3]))
             except:
-                print "An error accured while parsing the --chunking command. Something may be wrong with the indicated chunk sizes for x y z."
+                print "An error accured while parsing the --chunking command. " + \
+                      "Something may be wrong with the indicated chunk sizes for x y z."
                 inputError = True
             if "--auto-chunking" not in argv:
                 auto_chunk = False
@@ -1067,7 +1076,8 @@ def parse_input_args(argv):
                 user_additional_chunks.append(
                     (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3])))
             except:
-                print "An error accured while parsing the --optimized-chunking command. Something may be wrong with the indicated chunk sizes for x y z."
+                print "An error accured while parsing the --optimized-chunking command. " + \
+                      "Something may be wrong with the indicated chunk sizes for x y z."
                 inputError = True
         elif currentArg == "--compression":
             startIndex += 1
@@ -1088,7 +1098,7 @@ def parse_input_args(argv):
                 if io_option not in available_io_options:
                     raise ValueError("Invalid io option")
             except:
-                print "An error accured while parsing the --io command. Something may be wrong with the indicated io-type."
+                print "An error accured while parsing the --io command. Something may be wrong with the io-type."
                 inputError = True
         elif currentArg == "--thumbnail":
             startIndex += 1
@@ -1111,14 +1121,14 @@ def parse_input_args(argv):
             startIndex += 2
             format_option = str(argv[i + 1])
             if format_option not in available_formats:
-                print "ERROR: The indicated --format option " + format_option + " is not supported. Available options are:"
+                print "ERROR: Indicated --format option " + format_option + " not supported. Available options are:"
                 print "     " + str(available_formats)
                 inputError = True
         elif currentArg == "--regions":
             startIndex += 2
             region_option = str(argv[i + 1])
             if region_option not in available_region_options:
-                print "ERROR: The indicated --regions option " + region_option + " is not supported. Avaiable options are:"
+                print "ERROR: Indicated --regions option " + region_option + " not supported. Available options are:"
                 print "       " + str(available_region_options)
                 inputError = True
         elif currentArg == "--add-to-db":
@@ -1144,7 +1154,7 @@ def parse_input_args(argv):
             if errorOption in available_error_options:
                 error_handling = errorOption
             else:
-                print "ERROR: The indicated --error-handling option " + errorOption + " is not supported. Available options are:"
+                print "ERROR: Indicated --error-handling option " + errorOption + " not supported. Available options:"
                 print "     " + str(available_error_options)
                 inputError = True
         elif currentArg.startswith("--"):
