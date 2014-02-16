@@ -648,7 +648,7 @@ def suggest_chunkings_for_files(in_dataset_list):
             if currFormat is "img":
                 img_file()
                 inputFile = img_file(
-                    hdrFile=basefile + ".hdr", t2mFile=basefile + ".t2m", imgFile=basefile + ".img")
+                    hdr_filename=basefile + ".hdr", t2m_filename=basefile + ".t2m", img_filename=basefile + ".img")
             elif currFormat is "bruckerflex":
                 inputFile = bruckerflex_file(
                     spotlist_filename=basefile, readall=False)
