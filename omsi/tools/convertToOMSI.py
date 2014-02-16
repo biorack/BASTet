@@ -533,7 +533,7 @@ def convert_files():
     ####################################################################
     #  Generate the XDMF header file for the HDF5 file                ##
     ####################################################################
-    omsi_output_file.write_XDMF_header(
+    omsi_output_file.write_xdmf_header(
         omsi_output_file.get_filename() + ".xdmf")
 
 
