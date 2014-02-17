@@ -23,7 +23,7 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False):
     imgplot.set_interpolation('nearest')
     if show_plot:
         plt.show()
-    return imgplot
+    return imgplot, plt
 
 
 def compute_hilbert_spectrum(original_coords, original_intensities, left=0, right=0):
