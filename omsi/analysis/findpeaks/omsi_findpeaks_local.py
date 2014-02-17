@@ -132,7 +132,7 @@ class omsi_findpeaks_local(omsi_analysis_base) :
         """Define which viewerOptions are supported for qspectrum URL's"""
         return super(omsi_findpeaks_local,cls).v_qslice_viewerOptions(anaObj)
         
-    def execute_analysis(self, msidata , mzdata, integration_width=10, peakheight = 10, slwindow = 100, smoothwidth = 3 , printStatus=False) :
+    def execute_analysis(self) :
         """Execute the nmf for the given msidata
         
            Keyword Arguments:
@@ -146,12 +146,6 @@ class omsi_findpeaks_local(omsi_analysis_base) :
            :param printStatus: Print status messages during execution (Default=False)
            
         """
-        #Make sure needed imports are avaiable
-        from findpeaks import findpeaks
-        import numpy as np
-        if printStatus:
-            import sys
-        
         #Set default parameters if needed
         if not self['integration_width'] :
             self['integration_width'] = 10
@@ -167,16 +161,21 @@ class omsi_findpeaks_local(omsi_analysis_base) :
         #Assign paramters to local variables for convenience
         msidata = self['msidata']
         mzdata = self['mzdata']
-        integration_width = self['integration_width']
-        peakheight = self['peakheight']
-        slwindow = self['slwindow']
-        smoothwidth = self['smoothwidth']
-        printStatus = self['printStatus']
+        integration_width = self['integration_width'][0]
+        peakheight = self['peakheight'][0]
+        slwindow = self['slwindow'][0]
+        smoothwidth = self['smoothwidth'][0]
+        printStatus = self['printStatus'][0]
+
+        #Make sure needed imports are available
+        from findpeaks import findpeaks
+        import numpy as np
+        if printStatus:
+            import sys
         
         #Determine the data dimensions
         Nx=msidata.shape[0]
         Ny=msidata.shape[1]
-        print msidata.shape
         
         peak_MZ=[]       #The x values for all peaks, stored in a linear array
         peak_values=[]    #The y values for all peaks, stored in a linear array
