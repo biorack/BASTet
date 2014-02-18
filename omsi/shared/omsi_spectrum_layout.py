@@ -3,13 +3,15 @@ import numpy as np
 import math
 
 
-def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False):
+def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=False ):
     """Plot image with pixels colored according to hilbert_intensities.
 
        :param hilbert_intensities: 2D numpy array with the intensity values for the spectrum.
        :type hilbert_intensities: 2D numpy array.
        :param show_plot: Show the generated plot in a window.
        :type show_plot: Boolean
+       :param show_axis: Show x,y axis for the plot. Default is False.
+       :type show_axis: Boolean
 
        :returns: matplotlib image plot or None in case that the plotting failed. 
 
@@ -19,10 +21,13 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False):
     except:
         return None
     # Plot the hilber image
+    plt.clf()
     imgplot = plt.imshow(hilbert_intensities)
     imgplot.set_interpolation('nearest')
     if show_plot:
         plt.show()
+    if not show_axis:
+        plt.axis('off')
     return imgplot, plt
 
 
