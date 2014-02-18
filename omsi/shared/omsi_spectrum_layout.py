@@ -22,14 +22,22 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=Fa
         return None
     # Plot the hilber image
     plt.clf()
-    imgplot = plt.imshow(hilbert_intensities)
-    imgplot.set_interpolation('nearest')
-    if show_plot:
-        plt.show()
-    if not show_axis:
-        plt.axis('off')
-    return imgplot, plt
-
+    if show_axis:
+        imgplot = plt.imshow(hilbert_intensities)
+        imgplot.set_interpolation('nearest')
+        if show_plot:
+            plt.show()
+        return imgplot, plt
+    else :
+        dpi = 50
+        xsize = hilbert_intensities.shape[0] / float(dpi)
+        ysize = hilbert_intensities.shape[1] / float(dpi)
+        fig = plt.figure(frameon=False, figsize=(xsize,ysize), dpi=dpi )
+        ax = plt.Axes(fig, [0., 0., 1., 1.])
+        ax.set_axis_off()
+        fig.add_axes(ax)
+        ax.imshow(hilbert_intensities, aspect='normal', interpolation='nearest')
+        return ax, fig
 
 def compute_hilbert_spectrum(original_coords, original_intensities, left=0, right=0):
     """Given a 1D spectrum, interpolate the spectrum onto the closest 2D hilbert curve.
