@@ -17,7 +17,12 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=Fa
 
     """
     try:
+        if not show_plot:
+            import matplotlib
+            matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+        if not show_plot:
+            plt.ioff()
     except:
         return None
     # Plot the hilber image
@@ -37,6 +42,8 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=Fa
         ax.set_axis_off()
         fig.add_axes(ax)
         ax.imshow(np.log(hilbert_intensities+1), aspect='normal', interpolation='nearest')
+        if show_plot:
+            plot.show()
         return ax, fig
 
 def compute_hilbert_spectrum(original_coords, original_intensities, left=0, right=0):
