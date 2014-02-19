@@ -421,114 +421,121 @@ def convert_files():
         ####################################################################
         #  Generate the thumbnail image for the current file              ##
         ####################################################################
-        if generate_thumbnail:
-            print "Generating the thumbnail image"
-            if execute_nmf:
-                print "   Generating thumbnail from NMF data"
-                # Get the NMF data
-                ho = nmf['ho']
-                numX = ho.shape[0]
-                numY = ho.shape[1]
-                # Generate images for the first three NMF components
-                d1 = np.log(ho[:, :, 0].reshape((numX, numY)) + 1)
-                d1 = d1 / np.max(d1)
-                im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
-                d2 = np.log(ho[:, :, 1].reshape((numX, numY)) + 1)
-                d2 = d2 / np.max(d2)
-                im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
-                d3 = np.log(ho[:, :, 2].reshape((numX, numY)) + 1)
-                d3 = d3 / np.max(d3)
-                im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
-                # Generate thumbnail by merging the three gray-scale images as
-                # an RGB image
-                thumbnail = Image.merge('RGB', (im1, im2, im3))
-                expName = str(exp.get_h5py_experimentgroup().name)
-                expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsi_output_file.hdf_filename + \
-                    "_" + expIndex + ".png"
-                thumbnail.save(thumbnailFilename, 'PNG')
-            elif execute_fpg:
-                print "    Generating thumbnail from FPG data"
-                # Get the global peak finding data and compute the maximum peak
-                # values for each peak
-                fpgData = fpg['peak_cube'][:]
-                maxPeakValues = fpgData.max(axis=0).max(axis=0)
-                numX = fpgData.shape[0]
-                numY = fpgData.shape[1]
-                # Generate images for the three most intense peaks
-                s = np.argsort(maxPeakValues)
-                d1 = np.log(fpgData[:, :, s[-1]].reshape((numX, numY)) + 1)
-                d1 = d1 / np.max(d1)
-                im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
-                d2 = np.log(fpgData[:, :, s[-2]].reshape((numX, numY)) + 1)
-                d2 = d2 / np.max(d2)
-                im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
-                d3 = np.log(fpgData[:, :, s[-3]].reshape((numX, numY)) + 1)
-                d3 = d3 / np.max(d3)
-                im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
-                # Generate thumbnail by merging the three gray-scale images as
-                # an RGB image
-                thumbnail = Image.merge('RGB', (im1, im2, im3))
-                expName = str(exp.get_h5py_experimentgroup().name)
-                expIndex = expName[7:len(expName)]
-                thumbnailFilename = omsi_output_file.hdf_filename + \
-                    "_" + expIndex + ".png"
-                thumbnail.save(thumbnailFilename, 'PNG')
-            else:
-                print "Generation of thumbnail from raw data is not yet supported. No thumbnail has been generated."
-                print "Enable --nmf or --fpg in order to generate a thumbnail image."
-                # print "    Generating thumbnail from raw data"
-                # Find three most intense peaks that are at least 1% of the m/z range appart
-                #numX = data.shape[0]
-                #numY = data.shape[1]
-                #numZ = data.shape[2]
-                #minMzStep = numZ / 100
-                #mzImageRange = numZ/4000
-                #maxPeakValues = np.zeros(numZ)
-                #stepping = np.arange(0, numZ-5000, 5000)
-                # for i in stepping:
-                    #maxPeakValues[i:(i+5000)] = data[:, :, i:(i+5000)].std(axis=0).std(axis=0).reshape(5000)
-                #maxPeakValues[stepping[-1]:numZ] = data[:, :, stepping[-1]:numZ].std(axis=0).std(axis=0).reshape(numZ - stepping[-1])
-                # print maxPeakValues.shape
-                #s = np.argsort(maxPeakValues)
-                #i1 = s[-1]
-                #i2 = s[-2]
-                # for i in reversed(range(0, len(s))):
-                    # if abs(s[i] - i1) > minMzStep:
-                        #i2 = s[i]
-                        # break
-                #i3 = s[-3]
-                # for i in reversed(range(0, len(s))):
-                    # if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
-                        #i2 = s[i]
-                        # break
-                # print minMzStep
-                # print str(i1)+" "+str(i2)+" "+str(i3)
-                # print str(mzdata[i1])+" "+str(mzdata[i2])+" "+str(mzdata[i3])
-                #low = max(0, s[i1]-mzImageRange)
-                #hi = min(numZ, s[i1]+mzImageRange)
-                # print str(low) + " " + str(hi)
-                #d1 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
-                #d1 = d1 / np.max(d1)
-                #im1 = Image.fromarray(d1.astype('float')*255).convert('L')
-                #low = max(0, s[i2]-mzImageRange)
-                #hi = min(numZ, s[i2]+mzImageRange)
-                # print str(low) + " " + str(hi)
-                #d2 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
-                #d2 = d2 / np.max(d2)
-                #im2 = Image.fromarray(d2.astype('float')*255).convert('L')
-                #low = max(0, s[i3]-mzImageRange)
-                #hi = min(numZ, s[i3]+mzImageRange)
-                # print str(low) + " " + str(hi)
-                #d3 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
-                #d3 = d3 / np.max(d3)
-                #im3 = Image.fromarray(d3.astype('float')*255).convert('L')
-                # Generate thumbnail by merging the three gray-scale images as an RGB image
-                #thumbnail = Image.merge('RGB', (im1, im2, im3))
-                #expName = str(exp.get_h5py_experimentgroup().name)
-                #expIndex = expName[7:len(expName)]
-                #thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
-                #thumbnail.save(thumbnailFilename, 'PNG')
+        try :
+            if generate_thumbnail:
+                print "Generating the thumbnail image"
+                if execute_nmf:
+                    print "   Generating thumbnail from NMF data"
+                    # Get the NMF data
+                    ho = nmf['ho']
+                    numX = ho.shape[0]
+                    numY = ho.shape[1]
+                    # Generate images for the first three NMF components
+                    d1 = np.log(ho[:, :, 0].reshape((numX, numY)) + 1)
+                    d1 = d1 / np.max(d1)
+                    im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
+                    d2 = np.log(ho[:, :, 1].reshape((numX, numY)) + 1)
+                    d2 = d2 / np.max(d2)
+                    im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
+                    d3 = np.log(ho[:, :, 2].reshape((numX, numY)) + 1)
+                    d3 = d3 / np.max(d3)
+                    im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
+                    # Generate thumbnail by merging the three gray-scale images as
+                    # an RGB image
+                    thumbnail = Image.merge('RGB', (im1, im2, im3))
+                    expName = str(exp.get_h5py_experimentgroup().name)
+                    expIndex = expName[7:len(expName)]
+                    thumbnailFilename = omsi_output_file.hdf_filename + \
+                        "_" + expIndex + ".png"
+                    thumbnail.save(thumbnailFilename, 'PNG')
+                elif execute_fpg:
+                    print "    Generating thumbnail from FPG data"
+                    # Get the global peak finding data and compute the maximum peak
+                    # values for each peak
+                    fpgData = fpg['peak_cube'][:]
+                    maxPeakValues = fpgData.max(axis=0).max(axis=0)
+                    numX = fpgData.shape[0]
+                    numY = fpgData.shape[1]
+                    # Generate images for the three most intense peaks
+                    s = np.argsort(maxPeakValues)
+                    d1 = np.log(fpgData[:, :, s[-1]].reshape((numX, numY)) + 1)
+                    d1 = d1 / np.max(d1)
+                    im1 = Image.fromarray(d1.astype('float') * 255).convert('L')
+                    d2 = np.log(fpgData[:, :, s[-2]].reshape((numX, numY)) + 1)
+                    d2 = d2 / np.max(d2)
+                    im2 = Image.fromarray(d2.astype('float') * 255).convert('L')
+                    d3 = np.log(fpgData[:, :, s[-3]].reshape((numX, numY)) + 1)
+                    d3 = d3 / np.max(d3)
+                    im3 = Image.fromarray(d3.astype('float') * 255).convert('L')
+                    # Generate thumbnail by merging the three gray-scale images as
+                    # an RGB image
+                    thumbnail = Image.merge('RGB', (im1, im2, im3))
+                    expName = str(exp.get_h5py_experimentgroup().name)
+                    expIndex = expName[7:len(expName)]
+                    thumbnailFilename = omsi_output_file.hdf_filename + \
+                        "_" + expIndex + ".png"
+                    thumbnail.save(thumbnailFilename, 'PNG')
+                else:
+                    print "Generation of thumbnail from raw data is not yet supported. No thumbnail has been generated."
+                    print "Enable --nmf or --fpg in order to generate a thumbnail image."
+                    # print "    Generating thumbnail from raw data"
+                    # Find three most intense peaks that are at least 1% of the m/z range appart
+                    #numX = data.shape[0]
+                    #numY = data.shape[1]
+                    #numZ = data.shape[2]
+                    #minMzStep = numZ / 100
+                    #mzImageRange = numZ/4000
+                    #maxPeakValues = np.zeros(numZ)
+                    #stepping = np.arange(0, numZ-5000, 5000)
+                    # for i in stepping:
+                        #maxPeakValues[i:(i+5000)] = data[:, :, i:(i+5000)].std(axis=0).std(axis=0).reshape(5000)
+                    #maxPeakValues[stepping[-1]:numZ] = data[:, :, stepping[-1]:numZ].std(axis=0).std(axis=0).reshape(numZ - stepping[-1])
+                    # print maxPeakValues.shape
+                    #s = np.argsort(maxPeakValues)
+                    #i1 = s[-1]
+                    #i2 = s[-2]
+                    # for i in reversed(range(0, len(s))):
+                        # if abs(s[i] - i1) > minMzStep:
+                            #i2 = s[i]
+                            # break
+                    #i3 = s[-3]
+                    # for i in reversed(range(0, len(s))):
+                        # if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
+                            #i2 = s[i]
+                            # break
+                    # print minMzStep
+                    # print str(i1)+" "+str(i2)+" "+str(i3)
+                    # print str(mzdata[i1])+" "+str(mzdata[i2])+" "+str(mzdata[i3])
+                    #low = max(0, s[i1]-mzImageRange)
+                    #hi = min(numZ, s[i1]+mzImageRange)
+                    # print str(low) + " " + str(hi)
+                    #d1 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
+                    #d1 = d1 / np.max(d1)
+                    #im1 = Image.fromarray(d1.astype('float')*255).convert('L')
+                    #low = max(0, s[i2]-mzImageRange)
+                    #hi = min(numZ, s[i2]+mzImageRange)
+                    # print str(low) + " " + str(hi)
+                    #d2 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
+                    #d2 = d2 / np.max(d2)
+                    #im2 = Image.fromarray(d2.astype('float')*255).convert('L')
+                    #low = max(0, s[i3]-mzImageRange)
+                    #hi = min(numZ, s[i3]+mzImageRange)
+                    # print str(low) + " " + str(hi)
+                    #d3 = data[:, :,low:hi].max(axis=2).reshape((numX, numY))
+                    #d3 = d3 / np.max(d3)
+                    #im3 = Image.fromarray(d3.astype('float')*255).convert('L')
+                    # Generate thumbnail by merging the three gray-scale images as an RGB image
+                    #thumbnail = Image.merge('RGB', (im1, im2, im3))
+                    #expName = str(exp.get_h5py_experimentgroup().name)
+                    #expIndex = expName[7:len(expName)]
+                    #thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
+                    #thumbnail.save(thumbnailFilename, 'PNG')
+        except ImportError:
+            print "ERROR: Thumbnail generation failed. I/O error({0}): {1}".format(e.errno, e.strerror)
+            pass
+        except:
+            print "ERROR: Thumbnail generation failed. Unexpected error:", sys.exc_info()[0]
+            pass
 
     ####################################################################
     #  Generate the XDMF header file for the HDF5 file                ##
