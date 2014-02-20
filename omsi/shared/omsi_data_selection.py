@@ -165,7 +165,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
         return None
 
 
-def perform_reduction(data, reduction, axis, http_error=False):
+def perform_reduction(data, reduction, axis, http_error=False, **kwargs):
     """ Helper function used reduce the data of a given numpy array.
        
         :param data: The input numpy array that should be reduced
@@ -178,6 +178,7 @@ def perform_reduction(data, reduction, axis, http_error=False):
         :param axis: The axis along which the reduction should be applied
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
+        :param kwargs: Additional optional keyword arguments.
         
         :returns: Reduced numpy data array or in case of error None or HttpResonse with a
                   description of the error that occurred (see http_error option).
@@ -278,10 +279,6 @@ def transform_and_reduce_data(data,
             axes = -1
             if 'axes' in op:
                 axes = op.pop('axes')
-            print op
-            print len(op)
-            if len(op) == 0 :
-                op = {}
             # 3.2.3) Execute the current data op
             data = transform_data_single(data=data,
                                          transformation=currtransformation,
@@ -291,11 +288,11 @@ def transform_and_reduce_data(data,
         # 3.3 Perform data reduction
         elif 'reduction' in op:
             # 3.3.1 Get the data reduction operation
-            currreduction = op['reduction']
+            currreduction = op.pop('reduction')
             # 3.3.2 Get the axis along which the data reduction should be
             # applied
             if 'axis' in op:
-                axis = int(op['axis'])
+                axis = int(op.pop('axis'))
             else:
                 if http_error:
                     return HttpResponseBadRequest('Missing axis parameter for data reduction.')
@@ -305,7 +302,8 @@ def transform_and_reduce_data(data,
             data = perform_reduction(data=data,
                                      reduction=currreduction,
                                      axis=axis,
-                                     http_error=http_error)
+                                     http_error=http_error,
+                                     **op)
         else:
             if http_error:
                 return HttpResponseBadRequest('Invalid list of transformation/reduction operations. ' +
@@ -388,13 +386,12 @@ def transform_data_single(data,
             return None
 
     #1.4) Check the additional keyword arguments
-    if transform_kwargs == None:
+    if transform_kwargs is None:
         transform_kwargs = {}
 
     # 2) Normalize the data
     # 2.1) Normalize the complete data if no axes is specified
     if axes[0] == -1:
-        print transform_kwargs
         return transform_datachunk(data=data,
                                    transformation=transformation,
                                    **transform_kwargs)
@@ -412,7 +409,7 @@ def transform_data_single(data,
                 selection[axes[coordindex]] = slice(
                     chunk[coordindex],  chunk[coordindex] + 1)
             outdata[selection] = transform_datachunk(data=data[selection],
-                                                     transformation=transformation
+                                                     transformation=transformation,
                                                      **transform_kwargs)
         return outdata
 
@@ -505,7 +502,7 @@ def transform_datachunk(data,
 from omsi.shared.omsi_data_selection import *
 import numpy as np
 import json
-t = [ {'transformation':'threshold', 'threshold':114, 'test':10} ]
+t = [ {'transformation':'threshold', 'threshold':114} , {'reduction':'max', 'axis':0} ]
 tj = json.dumps(t)
 tj
 a = np.arange(1000).reshape((10,10,10))
