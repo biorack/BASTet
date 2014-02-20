@@ -1,3 +1,20 @@
+"""Module for defining and processing data selections. This includes the definition of
+   selections using strings and transformation and reduction of data.
+
+#Simple data transformation and reduction example
+from omsi.shared.omsi_data_selection import *
+import numpy as np
+import json
+t = [ {'transformation':'threshold', 'threshold':60} , {'reduction':'max', 'axis':2} ]
+tj = json.dumps(t)
+tj
+a = np.arange(125).reshape((5,5,5))
+apro = transform_and_reduce_data(data=a, operations=tj, http_error=True)
+apro
+
+"""
+
+
 import numpy as np
 import sys
 import itertools
@@ -385,7 +402,7 @@ def transform_data_single(data,
         else:
             return None
 
-    #1.4) Check the additional keyword arguments
+    # 1.4) Check the additional keyword arguments
     if transform_kwargs is None:
         transform_kwargs = {}
 
@@ -496,18 +513,3 @@ def transform_datachunk(data,
         return outdata
     else:
         return data
-
-
-"""
-from omsi.shared.omsi_data_selection import *
-import numpy as np
-import json
-t = [ {'transformation':'threshold', 'threshold':114} , {'reduction':'max', 'axis':0} ]
-tj = json.dumps(t)
-tj
-a = np.arange(1000).reshape((10,10,10))
-asel = a[1,1,:]
-asel
-apro = transform_and_reduce_data(data=asel, operations=tj, http_error=True)
-apro
-"""
