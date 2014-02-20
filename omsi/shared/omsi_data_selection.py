@@ -1,13 +1,14 @@
 import numpy as np
-import sys, os, time
+import sys
 import itertools
 
 
 #from omsi.dataformat.omsi_file import omsi_file, omsi_file_analysis
 #from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
-"""This an extended list of types indicated by the check_selection_string function. Indicies <0 are assumed to be invalid selections."""
-selection_type = {'invalid':-1, 'index':0, 'indexlist':2, 'all':3, 'range':4}
+"""This an extended list of types indicated by the check_selection_string function.
+   Indicies <0 are assumed to be invalid selections."""
+selection_type = {'invalid': -1, 'index': 0, 'indexlist': 2, 'all': 3, 'range': 4}
 
 
 """Dicitionary of available data transformation options. Available options are:
@@ -30,10 +31,11 @@ selection_type = {'invalid':-1, 'index':0, 'indexlist':2, 'all':3, 'range':4}
 
 
 """
-transformation_type = {'divideMax':'divideMax',
-                       'minusMinDivideMax':'minusMinDivideMax',
-                       'logScale':'logScale',
-                       'sqrtScale':'sqrtScale' }
+transformation_type = {'divideMax': 'divideMax',
+                       'minusMinDivideMax': 'minusMinDivideMax',
+                       'logScale': 'logScale',
+                       'sqrtScale': 'sqrtScale'}
+
 
 def check_selection_string(selection_string):
     """Check whether the given selection string is valid, and indicate which type of selection
@@ -71,6 +73,7 @@ def check_selection_string(selection_string):
     else:
         return selection_type['invalid']
 
+
 def selection_string_to_object(selection_string):
     """Convert the given selection string to a python selection object, i.e., either a slice, list or integer index.
     
@@ -83,68 +86,69 @@ def selection_string_to_object(selection_string):
             * A python slice opject if a slice opteration is specified by the string
             
     """
-    selectionType = check_selection_string(selection_string)
-    if selectionType == selection_type['indexlist']:
-        stringList = selection_string[1:-1].split(",")
+    selectiontype = check_selection_string(selection_string)
+    if selectiontype == selection_type['indexlist']:
+        stringlist = selection_string[1:-1].split(",")
         try:
-            parsedList = [int(i) for i in stringList]
+            parsedlist = [int(i) for i in stringlist]
         except:
             return None
-        return parsedList
-    elif selectionType == selection_type['index']:
+        return parsedlist
+    elif selectiontype == selection_type['index']:
         try: 
             return int(selection_string)
         except:
             return None
-    elif selectionType == selection_type['all']:
+    elif selectiontype == selection_type['all']:
         return slice(None, None, None)
-    elif selectionType == selection_type['range']:
-        splitString = selection_string.split(":")
-        if len(splitString) == 1:
-            return slice(int(splitString[0]), None, None)
-        elif len(splitString) == 2:
-            return slice(int(splitString[0]), int(splitString[1]), None)
-        elif len(splitString) == 3: 
-            return slice(int(splitString[0]), int(splitString[1]), int(splitString[2]))
+    elif selectiontype == selection_type['range']:
+        splitstring = selection_string.split(":")
+        if len(splitstring) == 1:
+            return slice(int(splitstring[0]), None, None)
+        elif len(splitstring) == 2:
+            return slice(int(splitstring[0]), int(splitstring[1]), None)
+        elif len(splitstring) == 3:
+            return slice(int(splitstring[0]), int(splitstring[1]), int(splitstring[2]))
         
         
-def selection_to_indexlist(selection_string, axisSize=0):
-    """Parse the indexlist selection string and return a python list of indicies
+def selection_to_indexlist(selection_string, axis_size=0):
+    """Parse the indexlist selection string and return a python list of indices
     
        :param selection_string: A selection string of the type indexlist
-       :param axisSize: Size of the dimensions for which the selection is defined. Only needed in case that a range selection is given.
-       
-       
+       :param axis_size: Size of the dimensions for which the selection is defined.
+              Only needed in case that a range selection is given.
+
        :returns:
             
-            * A python list of point indicies for the selection.
-            * None in case the list is empty or in case an error occured
+            * A python list of point indices for the selection.
+            * None in case the list is empty or in case an error occurred.
+
     """
 
     #Check if the given selection is in fact a indexlist
-    selectionType = check_selection_string(selection_string)
-    if selectionType == selection_type['indexlist']:
-        stringList = selection_string[1:-1].split(",")
+    selectiontype = check_selection_string(selection_string)
+    if selectiontype == selection_type['indexlist']:
+        stringlist = selection_string[1:-1].split(",")
         try:
-            parsedList = [int(i) for i in stringList]
+            parsedlist = [int(i) for i in stringlist]
         except:
             return None
-        return parsedList
-    elif selectionType == selection_type['index']:
+        return parsedlist
+    elif selectiontype == selection_type['index']:
         try:
             return [int(selection_string)]
         except:
             return None
-    elif selectionType == selection_type['all']:
+    elif selectiontype == selection_type['all']:
         try:
-            return range(0, axisSize)
+            return range(0, axis_size)
         except:
             return None
-    elif selectionType == selection_type['range']:
+    elif selectiontype == selection_type['range']:
         try:
-            parsedRanges = [int(i) for i in selection_string.split(":")]
-            if len(parsedRanges) == 2:
-                return range(parsedRanges[0], parsedRanges[1])
+            parsedranges = [int(i) for i in selection_string.split(":")]
+            if len(parsedranges) == 2:
+                return range(parsedranges[0], parsedranges[1])
             else:
                 return None
         except:
@@ -197,16 +201,82 @@ def perform_reduction(data, reduction, axis, http_error=False):
     except:
         if http_error:
             return HttpResponseNotFound("Requested data reduction "+str(reduction) +
-                                    " failed or not supported. Valid reduction" +
-                                    "operations are e.g.: min, max, mean, median, std, var."+" "+str(sys.exc_info()))
+                                        " failed or not supported. Valid reduction" +
+                                        "operations are e.g.: min, max, mean, median, std, var." +
+                                        " "+str(sys.exc_info()))
         else:
             return None
 
 
-def transform_data(data , transformation=transformation_type['minusMinDivideMax'], axes=-1, http_error=False) :
-    """ Helper function used to normalize data of a numpy array.
+def transform_data_multi(data, transformations, http_error=False):
+    """ Helper function used to apply a series of potentially multiple
+        transformations to a given numpy dataset. This function uses
+        the transform_data_single(...) function to apply each indicated
+        transformation to the data.
 
-        :param data: The input numpy array that should be reduced
+        :param data: The input numpy array that should be transformed.
+        :param http_error: Define which type of error message the function should return.
+               If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
+
+        :returns: Reduced numpy data array or HttpResonse with a description of the error that occurred.
+
+    """
+    try:
+        import json
+    except ImportError:
+        from django.utils import simplejson as json
+    from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+
+    #1) Load the JSON specification of data transformation if necessary
+    if isinstance(transformations, str) or isinstance(transformations, unicode):
+        try:
+            transformations = json.loads(transformations)
+        except:
+            HttpResponseBadRequest('Invalid list of data transformations.')
+
+    #2) Make sure that we have a list of transformation to iterate over
+    if isinstance(transformations, dict):
+        transformations = [transformations]
+
+    #3) Iterate over all transformations and apply them on after another.
+    for transform in transformations:
+        #3.1) Specify the axes for the data transforms
+        axes = -1
+        if 'axes' in transform:
+            axes = transform['axes']
+        if 'transformation' in transform:
+            currtransformation = transform['transformation']
+        else:
+            if http_error:
+                return HttpResponseBadRequest('Invalid list of transformation. ' +
+                                       'Missing transformation key in at least one item')
+            else:
+                return None
+        #3.2) Execute the current data transform
+        data = transform_data_single(data=data,
+                                     transformation=currtransformation,
+                                     axes=axes,
+                                     http_error=http_error)
+        #3.3) Check if an error occured during the data transformation
+        if data is None or isinstance(data, HttpResponse):
+            if http_error:
+                if isinstance(data, HttpResponse):
+                    return data
+                else:
+                    return HttpResponseNotFound("Unknown error during data transformation.")
+            return None
+
+    #4) Return the transformed data
+    return data
+
+
+def transform_data_single(data, transformation=transformation_type['minusMinDivideMax'], axes=-1, http_error=False):
+    """ Helper function used to transform data of a numpy array. The function
+        potentially splits the array into independent chunks that are
+        normalized separately (depending on how the axes parameter is defined).
+        The actual data transformations are implemented by transform_datachunk(...).
+
+        :param data: The input numpy array that should be transformed.
         :param transformation: Data transformation option to be used. Available options are:
                'minusMinDivideMax' ,...
         :param axes: List of data axis that should be split into chunks that are treated
@@ -223,13 +293,14 @@ def transform_data(data , transformation=transformation_type['minusMinDivideMax'
 
     """
     if http_error:
-        from django.http import HttpResponseNotFound
+        from django.http import HttpResponseNotFound, HttpResponseBadRequest
 
     #1) Perform basic error checking
     #1.1) Check input data
     if data is None:
         if http_error:
-            return HttpResponseNotFound("Data transformation "+str(transformation)+" failed. None data cannot be reduced.")
+            return HttpResponseNotFound("Data transformation "+str(transformation) +
+                                        " failed. None data cannot be reduced.")
         else:
             return None
 
@@ -248,8 +319,8 @@ def transform_data(data , transformation=transformation_type['minusMinDivideMax'
     #1.3) Check the transformation option
     if transformation not in transformation_type:
         if http_error:
-            return HttpResponseNotFound("Data normalizaton failed. Unsupported transformation option" +
-                                        " given as input. Supported options are: "+str(transformation_type))
+            return HttpResponseBadRequest("Data transformation failed. Unsupported transformation option" +
+                                          " given as input. Supported options are: "+str(transformation_type))
         else:
             return None
 
@@ -267,18 +338,19 @@ def transform_data(data , transformation=transformation_type['minusMinDivideMax'
         for chunk in chunks:
             selection = [slice(None)]*len(data.shape)
             for coordindex in range(len(axes)):
-                selection[axes[coordindex]] = slice( chunk[coordindex] ,  chunk[coordindex]+1 )
-            #print str(chunk) + "   " + str(selection) + "  "  + str(data[selection]) + "  " + str(transform_datachunk(data=data[selection], transformation=transformation))
+                selection[axes[coordindex]] = slice(chunk[coordindex],  chunk[coordindex]+1)
             outdata[selection] = transform_datachunk(data=data[selection], transformation=transformation)
         return outdata
 
 
-
-
 def transform_datachunk(data, transformation=transformation_type['minusMinDivideMax']):
-    """ Helper function used to normalize a given data chunk
+    """ Helper function used to transform a given data chunk.
+        In contrast to transform_data, this function applies the transformation
+        directly to the data provided, without consideration of axis information.
+        This function is used by transform_data(...) to implement the actual
+        normalization for independent data chunks that need to be normalized.
 
-        :param data: The input numpy array that should be reduced
+        :param data: The input numpy array that should be transformed.
         :param transformation: Data transformation option to be used. For available options
                     see the transformation_type dictionary.
 
@@ -289,27 +361,27 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
     """
     if transformation == transformation_type['divideMax']:
         maxvalue = float(np.max(np.abs(data)))
-        if maxvalue>0:
+        if maxvalue > 0:
             return data/float(np.max(data))
         else:
             return data
     elif transformation == transformation_type['minusMinDivideMax']:
         minvalue = np.min(data)
         maxvalue = float(np.max(data-minvalue))
-        if maxvalue>0:
-            return (data-minvalue)/(maxvalue)
+        if maxvalue > 0:
+            return (data-minvalue) / maxvalue
         else:
             return data
     elif transformation == transformation_type['logScale']:
         minvalue = np.min(data)
         if minvalue == 0:
             return np.log(data+1)
-        elif minvalue>0:
+        elif minvalue > 0:
             return np.log(data)
-        else: #minvalue<0
+        else:  # minvalue<0
             outdata = np.zeros(shape=data.shape, dtype=np.dtype('float'))
-            posvalues = data>0
-            negvalues = data<0
+            posvalues = data > 0
+            negvalues = data < 0
             outdata[posvalues] = np.log(data[posvalues])
             outdata[negvalues] = np.log(data[negvalues]*-1.)*-1.
             return outdata
@@ -317,12 +389,22 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
         minvalue = np.min(data)
         if minvalue >= 0:
             return np.sqrt(data)
-        else: #minvalue<0
+        else:  # minvalue<0
             outdata = np.zeros(shape=data.shape, dtype=np.dtype('float'))
-            posvalues = data>=0
-            negvalues = data<0
+            posvalues = data >= 0
+            negvalues = data < 0
             outdata[posvalues] = np.sqrt(data[posvalues])
             outdata[negvalues] = np.sqrt(data[negvalues]*-1.)*-1.
             return outdata
     else:
         return data
+
+
+"""
+from omsi.shared.omsi_data_selection import *
+import json
+t = [ {'transformation':'divideMax'} , {'transformation':'logScale', 'axes': [0,1]} ]
+tj = json.dumps(t)
+a = np.arange(1000).reshape((10,10,10))
+at = transform_data_multi(data=a, transformations=tj, http_error=True)
+"""
