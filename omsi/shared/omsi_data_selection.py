@@ -6,7 +6,8 @@ import itertools
 transformation_type = {'divideMax': 'divideMax',
                        'minusMinDivideMax': 'minusMinDivideMax',
                        'logScale': 'logScale',
-                       'sqrtScale': 'sqrtScale'}
+                       'sqrtScale': 'sqrtScale',
+                       'threshold': 'threshold'}
 """Dicitionary of available data transformation options. Available options are:
 
    * 'divideMax' : Divide the data by the current maximum value.
@@ -24,13 +25,16 @@ transformation_type = {'divideMax': 'divideMax',
     * 'sqrtScale' : Apply the square-root transformation to the data. The basic \
                   logic in terms of how negative values are treated is the same \
                   as for the logScale transformation.
-
+    * 'threshold' : Threshold the data. Set all values that are smaller than threshold \
+                  to 0. Additional parameters required for this option are: 'threshold'. \
+                  If threshold is missing, then the threshold will be set ot the 5%'ile \
+                  so that the bottom 5% of the data will be set to 0.
 
 """
 
 
 selection_type = {'invalid': -1,
-                  'index':0,
+                  'index': 0,
                   'indexlist': 2,
                   'all': 3,
                   'range': 4}
@@ -213,7 +217,9 @@ def perform_reduction(data, reduction, axis, http_error=False):
             return None
 
 
-def transform_and_reduce_data(data, operations, http_error=False):
+def transform_and_reduce_data(data,
+                              operations,
+                              http_error=False):
     """ Helper function used to apply a series of potentially multiple
         operations to a given numpy dataset. This function uses
         the transform_data_single(...) function to apply each indicated
@@ -267,16 +273,21 @@ def transform_and_reduce_data(data, operations, http_error=False):
         # 3.2) Perform data transformation
         if 'transformation' in op:
             # 3.2.1 Get the transformation
-            currtransformation = op['transformation']
+            currtransformation = op.pop('transformation')
             # 3.2.2 Get the axes for the transformations
             axes = -1
             if 'axes' in op:
-                axes = op['axes']
+                axes = op.pop('axes')
+            print op
+            print len(op)
+            if len(op) == 0 :
+                op = {}
             # 3.2.3) Execute the current data op
             data = transform_data_single(data=data,
                                          transformation=currtransformation,
                                          axes=axes,
-                                         http_error=http_error)
+                                         http_error=http_error,
+                                         transform_kwargs=op)
         # 3.3 Perform data reduction
         elif 'reduction' in op:
             # 3.3.1 Get the data reduction operation
@@ -316,7 +327,11 @@ def transform_and_reduce_data(data, operations, http_error=False):
     return data
 
 
-def transform_data_single(data, transformation=transformation_type['minusMinDivideMax'], axes=-1, http_error=False):
+def transform_data_single(data,
+                          transformation=transformation_type['minusMinDivideMax'],
+                          axes=-1,
+                          http_error=False,
+                          transform_kwargs=None):
     """ Helper function used to transform data of a numpy array. The function
         potentially splits the array into independent chunks that are
         normalized separately (depending on how the axes parameter is defined).
@@ -334,6 +349,8 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
                      image dimensions into chunks by setting axes=[0,1].
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
+        :param transform_kwargs: Dictionary of additional keyword arguments to be passed to the
+                       transform_datachunk(...) function.
 
         :returns: Reduced numpy data array or HttpResonse with a description of the error that occurred.
 
@@ -370,10 +387,18 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
         else:
             return None
 
+    #1.4) Check the additional keyword arguments
+    if transform_kwargs == None:
+        transform_kwargs = {}
+
     # 2) Normalize the data
     # 2.1) Normalize the complete data if no axes is specified
     if axes[0] == -1:
-        return transform_datachunk(data=data, transformation=transformation)
+        print transform_kwargs
+        return transform_datachunk(data=data,
+                                   transformation=transformation,
+                                   **transform_kwargs)
+
     # 2.2) Normalize the different chunks based on which axes are specified
     else:
         axislists = []
@@ -386,21 +411,41 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
             for coordindex in range(len(axes)):
                 selection[axes[coordindex]] = slice(
                     chunk[coordindex],  chunk[coordindex] + 1)
-            outdata[selection] = transform_datachunk(
-                data=data[selection], transformation=transformation)
+            outdata[selection] = transform_datachunk(data=data[selection],
+                                                     transformation=transformation
+                                                     **transform_kwargs)
         return outdata
 
 
-def transform_datachunk(data, transformation=transformation_type['minusMinDivideMax']):
+def transform_datachunk(data,
+                        transformation=transformation_type['minusMinDivideMax'],
+                        **kwargs):
     """ Helper function used to transform a given data chunk.
         In contrast to transform_data, this function applies the transformation
         directly to the data provided, without consideration of axis information.
         This function is used by transform_data(...) to implement the actual
         normalization for independent data chunks that need to be normalized.
 
+        Required keyword arguments:
+        ---------------------------
+
         :param data: The input numpy array that should be transformed.
         :param transformation: Data transformation option to be used. For available options
                     see the transformation_type dictionary.
+
+        Additional transformation-dependent keyword arguments:
+        ------------------------------------------------------
+
+        :param kwargs: Additional keyword arguments that are specific for different
+                       data transformation. Below a list of additional keyword arguments
+                       used for different transformation options
+
+                       * transformation: 'threshold'
+                            ** 'threshold' : The threshold parameter to be used for
+                                             the thresold operation. If threshold is
+                                             not specified, then the 5th %tile will
+                                             be used as threshold value instead, ie.,
+                                             the bottom 5% of the data are set to 0.
 
         :returns: This function returns the normalized data array. If an unsupported
                   transformation option is given, then the function simply return the
@@ -444,7 +489,28 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
             outdata[posvalues] = np.sqrt(data[posvalues])
             outdata[negvalues] = np.sqrt(data[negvalues] * -1.) * -1.
             return outdata
+    elif transformation == transformation_type['threshold']:
+        outdata = data
+        if 'threshold' in kwargs:
+            threshold = kwargs.pop('threshold')
+        else:
+            threshold = np.percentile(data, 0.05)
+        outdata[data < threshold] = 0
+        return outdata
     else:
         return data
 
 
+"""
+from omsi.shared.omsi_data_selection import *
+import numpy as np
+import json
+t = [ {'transformation':'threshold', 'threshold':114, 'test':10} ]
+tj = json.dumps(t)
+tj
+a = np.arange(1000).reshape((10,10,10))
+asel = a[1,1,:]
+asel
+apro = transform_and_reduce_data(data=asel, operations=tj, http_error=True)
+apro
+"""
