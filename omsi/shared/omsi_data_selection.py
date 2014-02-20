@@ -3,15 +3,10 @@ import sys
 import itertools
 
 
-#from omsi.dataformat.omsi_file import omsi_file, omsi_file_analysis
-#from omsi.analysis.omsi_analysis_base import omsi_analysis_base
-
-"""This an extended list of types indicated by the check_selection_string function.
-   Indicies <0 are assumed to be invalid selections."""
-selection_type = {'invalid': -1, 'index':
-                  0, 'indexlist': 2, 'all': 3, 'range': 4}
-
-
+transformation_type = {'divideMax': 'divideMax',
+                       'minusMinDivideMax': 'minusMinDivideMax',
+                       'logScale': 'logScale',
+                       'sqrtScale': 'sqrtScale'}
 """Dicitionary of available data transformation options. Available options are:
 
    * 'divideMax' : Divide the data by the current maximum value.
@@ -32,10 +27,17 @@ selection_type = {'invalid': -1, 'index':
 
 
 """
-transformation_type = {'divideMax': 'divideMax',
-                       'minusMinDivideMax': 'minusMinDivideMax',
-                       'logScale': 'logScale',
-                       'sqrtScale': 'sqrtScale'}
+
+
+selection_type = {'invalid': -1,
+                  'index':0,
+                  'indexlist': 2,
+                  'all': 3,
+                  'range': 4}
+"""This an extended list of types indicated by the check_selection_string function.
+   Indices <0 are assumed to be invalid selections.
+
+"""
 
 
 def check_selection_string(selection_string):
@@ -261,7 +263,6 @@ def transform_and_reduce_data(data, operations, http_error=False):
 
     # 3) Iterate over all operations and apply them on after another.
     for op in operations:
-        print op
         # 3.1) Check if we need to transform or reduce the data
         # 3.2) Perform data transformation
         if 'transformation' in op:
@@ -447,11 +448,3 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
         return data
 
 
-"""
-from omsi.shared.omsi_data_selection import *
-import json
-t = [ {'transformation':'logScale', 'axes':[2]},  {'transformation':'divideMax'} , {'reduction':'max', 'axis':2} ]
-tj = json.dumps(t)
-a = np.arange(1000).reshape((10,10,10))
-at = transform_and_reduce_data(data=a, operations=tj, http_error=True)
-"""
