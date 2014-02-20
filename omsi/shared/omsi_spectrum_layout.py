@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 
-def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=False ):
+def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=False):
     """Plot image with pixels colored according to hilbert_intensities.
 
        :param hilbert_intensities: 2D numpy array with the intensity values for the spectrum.
@@ -28,23 +28,25 @@ def plot_2d_spectrum_as_image(hilbert_intensities, show_plot=False, show_axis=Fa
     # Plot the hilber image
     plt.clf()
     if show_axis:
-        imgplot = plt.imshow(np.log(hilbert_intensities+1))
+        imgplot = plt.imshow(np.log(hilbert_intensities + 1))
         imgplot.set_interpolation('nearest')
         if show_plot:
             plt.show()
         return imgplot, plt
-    else :
+    else:
         dpi = 50
         xsize = hilbert_intensities.shape[0] / float(dpi)
         ysize = hilbert_intensities.shape[1] / float(dpi)
-        fig = plt.figure(frameon=False, figsize=(xsize,ysize), dpi=dpi )
+        fig = plt.figure(frameon=False, figsize=(xsize, ysize), dpi=dpi)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
         ax.set_axis_off()
         fig.add_axes(ax)
-        ax.imshow(np.log(hilbert_intensities+1), aspect='normal', interpolation='nearest')
+        ax.imshow(np.log(hilbert_intensities + 1),
+                  aspect='normal', interpolation='nearest')
         if show_plot:
             plot.show()
         return ax, fig
+
 
 def compute_hilbert_spectrum(original_coords, original_intensities, left=0, right=0):
     """Given a 1D spectrum, interpolate the spectrum onto the closest 2D hilbert curve.
@@ -147,4 +149,3 @@ def hilbert_curve(order=2):
                     order / 2 + y,
                     order / 2 - 1 - x]
         return xre.astype('int'), yre.astype('int')
-
