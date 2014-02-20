@@ -8,7 +8,8 @@ import itertools
 
 """This an extended list of types indicated by the check_selection_string function.
    Indicies <0 are assumed to be invalid selections."""
-selection_type = {'invalid': -1, 'index': 0, 'indexlist': 2, 'all': 3, 'range': 4}
+selection_type = {'invalid': -1, 'index':
+                  0, 'indexlist': 2, 'all': 3, 'range': 4}
 
 
 """Dicitionary of available data transformation options. Available options are:
@@ -54,22 +55,23 @@ def check_selection_string(selection_string):
                  
        """
     import re
-    #Check if we actually have a string
+    # Check if we actually have a string
     if selection_string is None:
         return selection_type['invalid']
-    #Check if the selection defined a list of indicies
+    # Check if the selection defined a list of indicies
     elif re.match('^\[([0-9]+,)*[0-9]+\]$', selection_string):
-        return selection_type['indexlist'] 
-    #Check if the selection defines and ":" all selection
+        return selection_type['indexlist']
+    # Check if the selection defines and ":" all selection
     elif re.match('^:$', selection_string):
         return selection_type['all']
-    #Check if the selection defines a range  a:b type selection
+    # Check if the selection defines a range  a:b type selection
     elif re.match('^[0-9]+:-?[0-9]+$', selection_string):
         return selection_type['range']
-    #Check if the selection defines a single index value type selection 
+    # Check if the selection defines a single index value type selection
     elif re.match('^-?[0-9]+$', selection_string):
         return selection_type['index']
-    #If none of the above selection types are given, then the selection is declared invalid 
+    # If none of the above selection types are given, then the selection is
+    # declared invalid
     else:
         return selection_type['invalid']
 
@@ -95,7 +97,7 @@ def selection_string_to_object(selection_string):
             return None
         return parsedlist
     elif selectiontype == selection_type['index']:
-        try: 
+        try:
             return int(selection_string)
         except:
             return None
@@ -109,8 +111,8 @@ def selection_string_to_object(selection_string):
             return slice(int(splitstring[0]), int(splitstring[1]), None)
         elif len(splitstring) == 3:
             return slice(int(splitstring[0]), int(splitstring[1]), int(splitstring[2]))
-        
-        
+
+
 def selection_to_indexlist(selection_string, axis_size=0):
     """Parse the indexlist selection string and return a python list of indices
     
@@ -125,7 +127,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
 
     """
 
-    #Check if the given selection is in fact a indexlist
+    # Check if the given selection is in fact a indexlist
     selectiontype = check_selection_string(selection_string)
     if selectiontype == selection_type['indexlist']:
         stringlist = selection_string[1:-1].split(",")
@@ -155,7 +157,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
             return None
     else:
         return None
-    
+
 
 def perform_reduction(data, reduction, axis, http_error=False):
     """ Helper function used reduce the data of a given numpy array.
@@ -166,6 +168,7 @@ def perform_reduction(data, reduction, axis, http_error=False):
                           the numpy function to be used for reduction. Valid
                           reduction operations include e.g.: mins, max, mean,
                           median, std, var etc.
+        :type reduction: String
         :param axis: The axis along which the reduction should be applied
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
@@ -175,46 +178,64 @@ def perform_reduction(data, reduction, axis, http_error=False):
     """
     if http_error:
         from django.http import HttpResponseNotFound
-    
+
     if data is None:
         if http_error:
-            return HttpResponseNotFound("Data reduction "+str(reduction)+" failed. None data cannot be reduced.")
+            return HttpResponseNotFound("Data reduction " + str(reduction) + " failed. None data cannot be reduced.")
         else:
             return None
-    
+
     axis = int(axis)
     if axis >= len(data.shape):
         if http_error:
-            return HttpResponseNotFound("Data reduction "+str(reduction)+" failed." +
+            return HttpResponseNotFound("Data reduction " + str(reduction) + " failed." +
                                         "The dimensionality of the data is lower than the axis" +
                                         "requested to be used for reduction")
         else:
             return None
-    
-    #Perform the data reduction operation. This can be a large range of
-    #numpy operations eg., min,max,mean,median,std,var
+
+    # Perform the data reduction operation. This can be a large range of
+    # numpy operations eg., min,max,mean,median,std,var
     try:
         op = getattr(np, reduction)
-        #if data.shape[axis] > 1:
+        # if data.shape[axis] > 1:
         data = op(data, axis=axis)
         return data
     except:
         if http_error:
-            return HttpResponseNotFound("Requested data reduction "+str(reduction) +
+            return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " failed or not supported. Valid reduction" +
                                         "operations are e.g.: min, max, mean, median, std, var." +
-                                        " "+str(sys.exc_info()))
+                                        " " + str(sys.exc_info()))
         else:
             return None
 
 
-def transform_data_multi(data, transformations, http_error=False):
+def transform_and_reduce_data(data, operations, http_error=False):
     """ Helper function used to apply a series of potentially multiple
-        transformations to a given numpy dataset. This function uses
+        operations to a given numpy dataset. This function uses
         the transform_data_single(...) function to apply each indicated
-        transformation to the data.
+        transformation to the data. This function uses the perform_reduction function to
+        perform data reduction operations.
 
         :param data: The input numpy array that should be transformed.
+        :param operations: JSON string with list of dictionaries or a python
+                           list of dictionaries. Each dict specifies a single data
+                           transformation or data reduction. The operations are applied
+                           in order, i.e., operations[0] is applied first, then operations[1]
+                           and so on. The dicts must be structured according to one of
+                           the following specifications:
+
+                           * `{'transformation':<op>}` : Single transformation applied to all data at once.
+                           * `{'transformation':<op>, 'axes':[..]}` : Apply a single transformation to \
+                             data chunks defined by the axes parameter. The data is split into chunks along \
+                             the dimensions defined by the axes parameter. E.g., if we have a 3D MSI dataset \
+                             and we want to op ion images independently, then we need to set axes=[2]. \
+                             Accordingly,  if we want to op spectra individually, then we need to split \
+                             the two image dimensions into chunks by setting axes=[0,1].
+                           * `{'reduction':<reduction>, 'axis':int}` : Define the reduction operations to be \
+                             applied and the axis along which the data should be reduced.
+
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
 
@@ -227,37 +248,61 @@ def transform_data_multi(data, transformations, http_error=False):
         from django.utils import simplejson as json
     from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 
-    #1) Load the JSON specification of data transformation if necessary
-    if isinstance(transformations, str) or isinstance(transformations, unicode):
+    # 1) Load the JSON specification of data transformation if necessary
+    if isinstance(operations, str) or isinstance(operations, unicode):
         try:
-            transformations = json.loads(transformations)
+            operations = json.loads(operations)
         except:
-            HttpResponseBadRequest('Invalid list of data transformations.')
+            HttpResponseBadRequest('Invalid list of data operations.')
 
-    #2) Make sure that we have a list of transformation to iterate over
-    if isinstance(transformations, dict):
-        transformations = [transformations]
+    # 2) Make sure that we have a list of transformation to iterate over
+    if isinstance(operations, dict):
+        operations = [operations]
 
-    #3) Iterate over all transformations and apply them on after another.
-    for transform in transformations:
-        #3.1) Specify the axes for the data transforms
-        axes = -1
-        if 'axes' in transform:
-            axes = transform['axes']
-        if 'transformation' in transform:
-            currtransformation = transform['transformation']
+    # 3) Iterate over all operations and apply them on after another.
+    for op in operations:
+        print op
+        # 3.1) Check if we need to transform or reduce the data
+        # 3.2) Perform data transformation
+        if 'transformation' in op:
+            # 3.2.1 Get the transformation
+            currtransformation = op['transformation']
+            # 3.2.2 Get the axes for the transformations
+            axes = -1
+            if 'axes' in op:
+                axes = op['axes']
+            # 3.2.3) Execute the current data op
+            data = transform_data_single(data=data,
+                                         transformation=currtransformation,
+                                         axes=axes,
+                                         http_error=http_error)
+        # 3.3 Perform data reduction
+        elif 'reduction' in op:
+            # 3.3.1 Get the data reduction operation
+            currreduction = op['reduction']
+            # 3.3.2 Get the axis along which the data reduction should be
+            # applied
+            if 'axis' in op:
+                axis = int(op['axis'])
+            else:
+                if http_error:
+                    return HttpResponseBadRequest('Missing axis parameter for data reduction.')
+                else:
+                    return None
+            # 3.3.3 Execute the data reduction operation
+            data = perform_reduction(data=data,
+                                     reduction=currreduction,
+                                     axis=axis,
+                                     http_error=http_error)
         else:
             if http_error:
-                return HttpResponseBadRequest('Invalid list of transformation. ' +
-                                       'Missing transformation key in at least one item')
+                return HttpResponseBadRequest('Invalid list of transformation/reduction operations. ' +
+                                              'Missing transformation or reduction key in at least one item')
             else:
                 return None
-        #3.2) Execute the current data transform
-        data = transform_data_single(data=data,
-                                     transformation=currtransformation,
-                                     axes=axes,
-                                     http_error=http_error)
-        #3.3) Check if an error occured during the data transformation
+
+        # 3.3) Check if an error occurred during the data transformation or
+        # reduction
         if data is None or isinstance(data, HttpResponse):
             if http_error:
                 if isinstance(data, HttpResponse):
@@ -266,7 +311,7 @@ def transform_data_multi(data, transformations, http_error=False):
                     return HttpResponseNotFound("Unknown error during data transformation.")
             return None
 
-    #4) Return the transformed data
+    # 4) Return the transformed data
     return data
 
 
@@ -284,7 +329,7 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
                      applied based on the full dataset (axes=-1). E.g, if transformation
                      should be performed on a per image basis, then we need to split the
                      m/z dimension into individual chunks and set axes=[2]. If we want
-                     to normalize spectra individually, then we need to split the two
+                     to transform spectra individually, then we need to split the two
                      image dimensions into chunks by setting axes=[0,1].
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
@@ -295,40 +340,40 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
     if http_error:
         from django.http import HttpResponseNotFound, HttpResponseBadRequest
 
-    #1) Perform basic error checking
-    #1.1) Check input data
+    # 1) Perform basic error checking
+    # 1.1) Check input data
     if data is None:
         if http_error:
-            return HttpResponseNotFound("Data transformation "+str(transformation) +
+            return HttpResponseNotFound("Data transformation " + str(transformation) +
                                         " failed. None data cannot be reduced.")
         else:
             return None
 
-    #1.2) Check the axes parameter
+    # 1.2) Check the axes parameter
     if not isinstance(axes, list):
         axes = [int(axes)]
     for axisindex in axes:
         if axisindex >= len(data.shape):
             if http_error:
-                return HttpResponseNotFound("Data transformation "+str(transformation)+" failed." +
+                return HttpResponseNotFound("Data transformation " + str(transformation) + " failed." +
                                             " The dimensionality of the data is lower than the axes " +
                                             "requested to be used for reduction")
             else:
                 return None
 
-    #1.3) Check the transformation option
+    # 1.3) Check the transformation option
     if transformation not in transformation_type:
         if http_error:
             return HttpResponseBadRequest("Data transformation failed. Unsupported transformation option" +
-                                          " given as input. Supported options are: "+str(transformation_type))
+                                          " given as input. Supported options are: " + str(transformation_type))
         else:
             return None
 
-    #2) Normalize the data
-    #2.1) Normalize the complete data if no axes is specified
+    # 2) Normalize the data
+    # 2.1) Normalize the complete data if no axes is specified
     if axes[0] == -1:
         return transform_datachunk(data=data, transformation=transformation)
-    #2.2) Normalize the different chunks based on which axes are specified
+    # 2.2) Normalize the different chunks based on which axes are specified
     else:
         axislists = []
         for axisindex in axes:
@@ -336,10 +381,12 @@ def transform_data_single(data, transformation=transformation_type['minusMinDivi
         chunks = itertools.product(*axislists)
         outdata = np.zeros(shape=data.shape, dtype=np.dtype('float'))
         for chunk in chunks:
-            selection = [slice(None)]*len(data.shape)
+            selection = [slice(None)] * len(data.shape)
             for coordindex in range(len(axes)):
-                selection[axes[coordindex]] = slice(chunk[coordindex],  chunk[coordindex]+1)
-            outdata[selection] = transform_datachunk(data=data[selection], transformation=transformation)
+                selection[axes[coordindex]] = slice(
+                    chunk[coordindex],  chunk[coordindex] + 1)
+            outdata[selection] = transform_datachunk(
+                data=data[selection], transformation=transformation)
         return outdata
 
 
@@ -362,20 +409,20 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
     if transformation == transformation_type['divideMax']:
         maxvalue = float(np.max(np.abs(data)))
         if maxvalue > 0:
-            return data/float(np.max(data))
+            return data / float(np.max(data))
         else:
             return data
     elif transformation == transformation_type['minusMinDivideMax']:
         minvalue = np.min(data)
-        maxvalue = float(np.max(data-minvalue))
+        maxvalue = float(np.max(data - minvalue))
         if maxvalue > 0:
-            return (data-minvalue) / maxvalue
+            return (data - minvalue) / maxvalue
         else:
             return data
     elif transformation == transformation_type['logScale']:
         minvalue = np.min(data)
         if minvalue == 0:
-            return np.log(data+1)
+            return np.log(data + 1)
         elif minvalue > 0:
             return np.log(data)
         else:  # minvalue<0
@@ -383,7 +430,7 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
             posvalues = data > 0
             negvalues = data < 0
             outdata[posvalues] = np.log(data[posvalues])
-            outdata[negvalues] = np.log(data[negvalues]*-1.)*-1.
+            outdata[negvalues] = np.log(data[negvalues] * -1.) * -1.
             return outdata
     elif transformation == transformation_type['sqrtScale']:
         minvalue = np.min(data)
@@ -394,7 +441,7 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
             posvalues = data >= 0
             negvalues = data < 0
             outdata[posvalues] = np.sqrt(data[posvalues])
-            outdata[negvalues] = np.sqrt(data[negvalues]*-1.)*-1.
+            outdata[negvalues] = np.sqrt(data[negvalues] * -1.) * -1.
             return outdata
     else:
         return data
@@ -403,8 +450,8 @@ def transform_datachunk(data, transformation=transformation_type['minusMinDivide
 """
 from omsi.shared.omsi_data_selection import *
 import json
-t = [ {'transformation':'divideMax'} , {'transformation':'logScale', 'axes': [0,1]} ]
+t = [ {'transformation':'logScale', 'axes':[2]},  {'transformation':'divideMax'} , {'reduction':'max', 'axis':2} ]
 tj = json.dumps(t)
 a = np.arange(1000).reshape((10,10,10))
-at = transform_data_multi(data=a, transformations=tj, http_error=True)
+at = transform_and_reduce_data(data=a, operations=tj, http_error=True)
 """
