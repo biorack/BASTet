@@ -504,7 +504,7 @@ def transform_datachunk(data,
             outdata[negvalues] = np.sqrt(data[negvalues] * -1.) * -1.
             return outdata
     elif transformation == transformation_type['threshold']:
-        outdata = data
+        outdata = np.copy(data)
         if 'threshold' in kwargs:
             threshold = kwargs.pop('threshold')
         else:
