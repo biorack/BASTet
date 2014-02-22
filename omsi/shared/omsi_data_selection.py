@@ -274,39 +274,46 @@ def transform_and_reduce_data(data,
         from django.utils import simplejson as json
     from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 
-    # 1) Load the JSON specification of data transformation if necessary
+    # 1) Check if there is anything to do. If not, then return the data.
+    if operations is None:
+        return data
+    if isinstance(operations, list):
+        if len(operations)==0:
+            return data
+
+    # 2) Load the JSON specification of data transformation if necessary
     if isinstance(operations, str) or isinstance(operations, unicode):
         try:
             operations = json.loads(operations)
         except:
             HttpResponseBadRequest('Invalid list of data operations.')
 
-    # 2) Make sure that we have a list of transformation to iterate over
+    # 3) Make sure that we have a list of transformation to iterate over
     if isinstance(operations, dict):
         operations = [operations]
 
-    # 3) Iterate over all operations and apply them on after another.
+    # 4) Iterate over all operations and apply them on after another.
     for op in operations:
-        # 3.1) Check if we need to transform or reduce the data
-        # 3.2) Perform data transformation
+        # 4.1) Check if we need to transform or reduce the data
+        # 4.2) Perform data transformation
         if 'transformation' in op:
-            # 3.2.1 Get the transformation
+            # 4.2.1 Get the transformation
             currtransformation = op.pop('transformation')
-            # 3.2.2 Get the axes for the transformations
+            # 4.2.2 Get the axes for the transformations
             axes = -1
             if 'axes' in op:
                 axes = op.pop('axes')
-            # 3.2.3) Execute the current data op
+            # 4.2.3) Execute the current data op
             data = transform_data_single(data=data,
                                          transformation=currtransformation,
                                          axes=axes,
                                          http_error=http_error,
                                          transform_kwargs=op)
-        # 3.3 Perform data reduction
+        # 4.3 Perform data reduction
         elif 'reduction' in op:
-            # 3.3.1 Get the data reduction operation
+            # 4.3.1 Get the data reduction operation
             currreduction = op.pop('reduction')
-            # 3.3.2 Get the axis along which the data reduction should be
+            # 4.3.2 Get the axis along which the data reduction should be
             # applied
             if 'axis' in op:
                 axis = int(op.pop('axis'))
@@ -315,7 +322,7 @@ def transform_and_reduce_data(data,
                     return HttpResponseBadRequest('Missing axis parameter for data reduction.')
                 else:
                     return None
-            # 3.3.3 Execute the data reduction operation
+            # 4.3.3 Execute the data reduction operation
             data = perform_reduction(data=data,
                                      reduction=currreduction,
                                      axis=axis,
@@ -328,7 +335,7 @@ def transform_and_reduce_data(data,
             else:
                 return None
 
-        # 3.3) Check if an error occurred during the data transformation or
+        # 4.3) Check if an error occurred during the data transformation or
         # reduction
         if data is None or isinstance(data, HttpResponse):
             if http_error:
@@ -338,7 +345,7 @@ def transform_and_reduce_data(data,
                     return HttpResponseNotFound("Unknown error during data transformation.")
             return None
 
-    # 4) Return the transformed data
+    # 5) Return the transformed data
     return data
 
 
@@ -513,3 +520,4 @@ def transform_datachunk(data,
         return outdata
     else:
         return data
+
