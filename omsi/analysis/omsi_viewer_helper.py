@@ -3,6 +3,7 @@ import numpy as np
 from omsi.dataformat.omsi_file import *
 from omsi.shared.omsi_data_selection import *
 from omsi.analysis import *
+from omsi.shared.omsi_data_selection import transform_and_reduce_data
 import types
 
 
@@ -15,16 +16,16 @@ class omsi_viewer_helper(object) :
     
     
     @classmethod
-    def get_slice(cls, anaObj , z ,  normalize=-1, reduction=None, axis=0 , reduction2=None, axis2=0, viewerOption=0) :
+    def get_slice(cls, anaObj , z ,  operations=None, viewerOption=0) :
         """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
         
            :param anaObj: The omsi_file_analysis object for which slicing should be performed 
            :param z: Selection string indicting which z values should be selected. 
-           :param normalize: Should the returned data be normalized by deviding by the max value
-           :param reduction: Reduction opteration to be performed for the slice
-           :param axis: Axis along which the reduction should be performed
-           :param reduction2: Secondary reduction to be applied to the data 
-           :param axis2: Axis along which the secondary reduction should be performed. (Note, remember that the dimensionality of the data has already been reduced by 1 by the first reduction operation)
+           :param operations: JSON string with list of dictionaries or a python
+                           list of dictionaries. Each dict specifies a single data
+                           transformation or data reduction that are applied in order.
+                           See omsi.shared.omsi_data_selection.transform_and_reduce_data(...)
+                           for details.
            :param viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them.
            
            :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be performed typically like [:,:,zmin:zmax].
@@ -41,33 +42,16 @@ class omsi_viewer_helper(object) :
         if len(data.shape) == 2 :
             data = data.reshape( (data.shape[0], data.shape[1] , 1 ) )
         
-        try:
-            #Perform the requested redution operation
-            if reduction is not None:
-                data = perform_reduction( data , reduction , axis )
-                
-            if (reduction2 is not None) and (data is not None) :
-                data = perform_reduction( data , reduction2 , axis2 )
-            
-            if data is None :
-                return None
-        except :
-            return None
-        
-        try:
-            #Normalize the data if requested
-            if int(normalize)>0 :
-                dm = float (np.max(data) )
-                if dm != 0 :
-                    data = data/dm
-        except:
-            return None
+        if operations:
+            data = transform_and_reduce_data(data=data,
+                                             operations=operations,
+                                             http_error=True)
 
         return data
         
         
     @classmethod
-    def get_spectra( cls, anaObj , x, y , normalize=-1, reduction=None, axis=0 , reduction2=None, axis2=0, viewerOption=0) :
+    def get_spectra( cls, anaObj , x, y , operations=None, viewerOption=0) :
         """Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
         
            Developer Note: h5py currently supports only a single index list. If the user provides an index-list for both
@@ -78,11 +62,11 @@ class omsi_viewer_helper(object) :
            :param anaObj: The omsi_file_analysis object for which slicing should be performed 
            :param x: x selection string
            :param y: y selection string
-           :param normalize: Should the returned data be normalized by deviding by the max value
-           :param reduction: Reduction opteration to be performed for the slice
-           :param axis: Axis along which the reduction should be performed
-           :param reduction2: Secondary reduction to be applied to the data 
-           :param axis2: Axis along which the secondary reduction should be performed. (Note, remember that the dimensionality of the data has already been reduced by 1 by the first reduction operation)
+           :param operations: JSON string with list of dictionaries or a python
+                           list of dictionaries. Each dict specifies a single data
+                           transformation or data reduction that are applied in order.
+                           See omsi.shared.omsi_data_selection.transform_and_reduce_data(...)
+                           for details.
            :param viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them.
            
            :returns: 2D or 3D numpy array of the requested spectra. The mass (m/z) axis must be the last axis.
@@ -96,27 +80,10 @@ class omsi_viewer_helper(object) :
         except :
             return None , None
         
-        try:
-            #Perform the requested redution operation
-            if reduction is not None and axis<len(data.shape):
-                data = perform_reduction( data , reduction , axis )
-            
-            if reduction2 is not None and axis<len(data.shape):
-                data = perform_reduction( data , reduction2 , axis2 )
-            
-            if data is None :
-                return None , None
-        except :
-            return None , None
-        
-        try:
-            #Normalize the data if requested
-            if int(normalize)>0 :
-                dm = float (np.max(data) )
-                if dm != 0 :
-                    data = data/dm
-        except:
-            return None , None
+        if operations:
+            data = transform_and_reduce_data(data=data,
+                                             operations=operations,
+                                             http_error=True)
 
         return data, customMZ 
         
