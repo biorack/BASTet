@@ -259,7 +259,8 @@ def perform_reduction(data, reduction, axis, http_error=False, **kwargs):
         else:
             return None
 
-    axis = int(axis)
+    if axis is not None:
+        axis = int(axis)
     if axis >= len(data.shape):
         if http_error:
             return HttpResponseNotFound("Data reduction " + str(reduction) + " failed." +
@@ -310,7 +311,8 @@ def transform_and_reduce_data(data,
                              Accordingly,  if we want to op spectra individually, then we need to split \
                              the two image dimensions into chunks by setting axes=[0,1].
                            * `{'reduction':<reduction>, 'axis':int}` : Define the reduction operations to be \
-                             applied and the axis along which the data should be reduced.
+                             applied and the axis along which the data should be reduced. If reduction along \
+                             all axis should be done then set axis ot None (in python) or null in JSON.
 
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
@@ -366,9 +368,9 @@ def transform_and_reduce_data(data,
             # 4.3.2 Get the axis along which the data reduction should be
             # applied
             if 'axis' in op:
-                axis = int(op.pop('axis'))
+                axis = op.pop('axis')
             else:
-                axis = data.ndim-1
+                axis = None  # data.ndim-1
             # 4.3.3 Execute the data reduction operation
             data = perform_reduction(data=data,
                                      reduction=currreduction,
