@@ -31,9 +31,9 @@ t = [{'transformation':'arithmetic' , 'operation':'subtract', 'x1':'data', 'x2':
                                                                     {'transformation':'astype', 'dtype':'float'} ]}]
 b = transform_and_reduce_data(data=a, operations=t)
 print b
-t = [{'transformation':'arithmetic' , 'operation':'subtract', 'x1':[{'reduction':'min'}] , 'x2':'data'}]
-b = transform_and_reduce_data(data=a, operations=t)
-print b
+t = [{'transformation':'threshold' , 'threshold':[{'reduction':'median'}]}]
+c = transform_and_reduce_data(data=a, operations=t)
+print c
 
 """
 
@@ -602,7 +602,9 @@ def transform_datachunk(data,
     elif transformation == transformation_type['threshold']:
         outdata = np.copy(data)
         if 'threshold' in kwargs:
-            threshold = kwargs.pop('threshold')
+            threshold = evaluate_transform_parameter(parameter=kwargs.pop('threshold'),
+                                                     data=data)
+
         else:
             threshold = np.percentile(data, 0.05)
         outdata[data < threshold] = 0
