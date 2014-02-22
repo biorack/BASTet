@@ -12,6 +12,29 @@ a = np.arange(125).reshape((5,5,5))
 apro = transform_and_reduce_data(data=a, operations=tj, http_error=True)
 apro
 
+
+#Another simple example
+from omsi.shared.omsi_data_selection import *
+import numpy as np
+import json
+a = np.arange(10)+5
+print a
+# 1) substract minimum
+# 2) divide by the maximum value with the maximum value converted to float
+# NOTE: The conversion to float is to avoid division of integers, i.e.,
+#       5/10 = 0, whereas 5/float(10) = 0.5
+# NOTE: The specification of 'x1':'data' can be omitted as this is the default.
+#       'x1':'data' simply explicitly specifies that the input data should be
+#       assigned to the first operand of the arithmetic operation.
+t = [{'transformation':'arithmetic' , 'operation':'subtract', 'x1':'data', 'x2':[{'reduction':'min'}]} ,
+     {'transformation':'arithmetic' , 'operation':'divide'  , 'x1':'data', 'x2':[{'reduction':'max'} ,
+                                                                    {'transformation':'astype', 'dtype':'float'} ]}]
+b = transform_and_reduce_data(data=a, operations=t)
+print b
+t = [{'transformation':'arithmetic' , 'operation':'subtract', 'x1':[{'reduction':'min'}] , 'x2':'data'}]
+b = transform_and_reduce_data(data=a, operations=t)
+print b
+
 """
 
 
@@ -19,18 +42,41 @@ import numpy as np
 import sys
 import itertools
 
+transformation_allowed_arithmetic = ['add',
+                                     'divide',
+                                     'greater',
+                                     'greater_equal',
+                                     'multiply',
+                                     'subtract']
 
 transformation_type = {'divideMax': 'divideMax',
                        'minusMinDivideMax': 'minusMinDivideMax',
+                       'arithmetic': 'arithmetic',
                        'logScale': 'logScale',
                        'sqrtScale': 'sqrtScale',
-                       'threshold': 'threshold'}
+                       'threshold': 'threshold',
+                       'astype': 'astype'}
 """Dicitionary of available data transformation options. Available options are:
 
    * 'divideMax' : Divide the data by the current maximum value.
    * 'minusMinDivideMax' : Substract the minimum value from the data and \
                    then divide the data by maximum of the data (with the \
                    minimum already substracted.
+   * 'arithmetic' : Apply arbitrary arithmetic operation to the data. Additional parameter \
+                  required for this options are:
+                    * `operation` : String defining the arithmetic operations to \
+                      be applied. Supported operations are: \
+                      'add', 'divide', 'greater', 'greater_equal', \
+                      'multiply', 'subtract'
+                    * 'x1' : The first data operand of the arithmetic operation. \
+                             The input data will be used by default if x1 is not specified. \
+                             You may also specify 'data' to explicitly indicate that the \
+                             input data should be assigned to x1.
+                    * 'x2' : The second data operand of the arithmetic operation. \
+                             The input data will be used by default if x2 is not specified. \
+                             You may also specify 'data' to explicitly indicate that the \
+                             input data should be assigned to x2.
+                    * ... any additional parameters needed for the numpy function.
    * 'logScale' : Apply a log-scale. If the minimum value is 0, then 1 \
                   is added to the data prior to the log scale , ie., np.log(data+1).\
                   If the minimum value is larger then 0, then the log-scale is \
@@ -43,9 +89,13 @@ transformation_type = {'divideMax': 'divideMax',
                   logic in terms of how negative values are treated is the same \
                   as for the logScale transformation.
     * 'threshold' : Threshold the data. Set all values that are smaller than threshold \
-                  to 0. Additional parameters required for this option are: 'threshold'. \
-                  If threshold is missing, then the threshold will be set ot the 5%'ile \
-                  so that the bottom 5% of the data will be set to 0.
+                  to 0. Additional parameters required for this option are: \
+
+                    * 'threshold'. If threshold is missing, then the threshold will be \
+                     set ot the 5%'ile so that the bottom 5% of the data will be set to 0.
+    * 'astype' : Change the type of the data. Additional required parameters are: \
+
+                    * 'dtype' : The numpy data type to be used. Default dtype='float'.
 
 """
 
@@ -278,7 +328,7 @@ def transform_and_reduce_data(data,
     if operations is None:
         return data
     if isinstance(operations, list):
-        if len(operations)==0:
+        if len(operations) == 0:
             return data
 
     # 2) Load the JSON specification of data transformation if necessary
@@ -318,10 +368,7 @@ def transform_and_reduce_data(data,
             if 'axis' in op:
                 axis = int(op.pop('axis'))
             else:
-                if http_error:
-                    return HttpResponseBadRequest('Missing axis parameter for data reduction.')
-                else:
-                    return None
+                axis = data.ndim-1
             # 4.3.3 Execute the data reduction operation
             data = perform_reduction(data=data,
                                      reduction=currreduction,
@@ -473,12 +520,18 @@ def transform_datachunk(data,
                   unmodified input array.
 
     """
+    ############################################
+    #   Divide by max                          #
+    ############################################
     if transformation == transformation_type['divideMax']:
         maxvalue = float(np.max(np.abs(data)))
         if maxvalue > 0:
             return data / float(np.max(data))
         else:
             return data
+    ############################################
+    #   minus min divide by max                #
+    ############################################
     elif transformation == transformation_type['minusMinDivideMax']:
         minvalue = np.min(data)
         maxvalue = float(np.max(data - minvalue))
@@ -486,6 +539,36 @@ def transform_datachunk(data,
             return (data - minvalue) / maxvalue
         else:
             return data
+    ############################################
+    #   arithmetic                             #
+    ############################################
+    elif transformation == transformation_type['arithmetic']:
+        #Retrieve the requested operation
+        if 'operation' in kwargs:
+            if kwargs['operation'] not in transformation_allowed_arithmetic:
+                raise AttributeError('Requested data operations not supported.')
+            try:
+                operation = getattr(np, kwargs.pop('operation'))
+            except AttributeError:
+                raise AttributeError('Requested data operations not supported.')
+        else:
+            raise KeyError("Missing operation key for arithmetic data transformation.")
+        #Evalute the parameters x1 and x2
+        if 'x1' in kwargs:
+            x1 = evaluate_transform_parameter(parameter=kwargs.pop('x1'),
+                                              data=data)
+        else:
+            x1 = data
+        if 'x2' in kwargs:
+            x2 = evaluate_transform_parameter(parameter=kwargs.pop('x2'),
+                                              data=data)
+        else:
+            x2 = data
+        #Execute the requested data operation
+        return operation(x1, x2, **kwargs)
+    ############################################
+    #   logscale                               #
+    ############################################
     elif transformation == transformation_type['logScale']:
         minvalue = np.min(data)
         if minvalue == 0:
@@ -499,6 +582,9 @@ def transform_datachunk(data,
             outdata[posvalues] = np.log(data[posvalues])
             outdata[negvalues] = np.log(data[negvalues] * -1.) * -1.
             return outdata
+    ############################################
+    #   sqrt scale                             #
+    ############################################
     elif transformation == transformation_type['sqrtScale']:
         minvalue = np.min(data)
         if minvalue >= 0:
@@ -510,6 +596,9 @@ def transform_datachunk(data,
             outdata[posvalues] = np.sqrt(data[posvalues])
             outdata[negvalues] = np.sqrt(data[negvalues] * -1.) * -1.
             return outdata
+    ############################################
+    #   Threshold                              #
+    ############################################
     elif transformation == transformation_type['threshold']:
         outdata = np.copy(data)
         if 'threshold' in kwargs:
@@ -518,6 +607,98 @@ def transform_datachunk(data,
             threshold = np.percentile(data, 0.05)
         outdata[data < threshold] = 0
         return outdata
+    ############################################
+    #   astype                                 #
+    ############################################
+    elif transformation == transformation_type['astype']:
+        if 'dtype' in kwargs:
+            dtype = np.dtype(kwargs.pop('dtype'))
+        else:
+            dtype = np.dtype('float')
+        return data.astype(dtype)
     else:
         return data
+
+
+def evaluate_transform_parameter(parameter, data=None):
+    """Evaluate the given query parameter. This function is used to
+       enable the use of data transformation and reductions as part
+       of transformation parameters. E.g., a user may want to substract
+       the minimum, or divide by the maximum etc.
+
+       :param parameter: The parameter to be evaluated. This may be
+              a JSON string or list/dictionary-based description of a
+              data transformation. Or any other valid data parameter.
+              If the parameter describes as data reduction or transformation
+              then the transformation will be evaluated and the result
+              is returned, otherwise the parameter itself is returned.
+       :param data: The input numpy array that should be transformed.
+
+       :returns: The evaluated parameter result.
+    """
+    pass
+
+    if is_transform_or_reduction(parameter):
+        return transform_and_reduce_data(data=data,
+                                         operations=parameter,
+                                         http_error=False)
+    else:
+        if isinstance(parameter, str) or isinstance(parameter, unicode):
+            if parameter == 'data':
+                return data
+        else:
+            return parameter
+
+
+def is_transform_or_reduction(parameter):
+    """Check if the given parameter defines a description of a
+       data transformation or data reduction
+
+       :param parameter: The parameter to be checked.
+       :type parameter: JSON string, dict or list of dicts with transformation parameter.
+
+       :returns: Boolean
+    """
+    try:
+        import json
+    except ImportError:
+        from django.utils import simplejson as json
+
+    #1) If the parameter is a built in type, then return the parameter
+    if isinstance(parameter, int) or \
+       isinstance(parameter, float) or \
+       isinstance(parameter, long) or \
+       isinstance(parameter, complex) or \
+       isinstance(parameter, bool):
+        return False
+
+    #2) Try to convert the parameter to the list of dict based description
+    evalparam = parameter
+    if isinstance(parameter, str) or isinstance(parameter, unicode):
+        if parameter == 'data':
+            return False
+        try:
+            evalparam = json.loads(parameter)
+        except ValueError:
+            pass
+        except TypeError:
+            pass
+    if isinstance(evalparam, dict):
+        evalparam = [evalparam]
+
+    #3) Check if we have a valid description
+    if isinstance(evalparam, list):
+        #Check if each element has the minimum set of parameters in the dicts
+        for paramelement in evalparam:
+            if isinstance(paramelement, dict):
+                if 'transformation' in paramelement or \
+                   'reduction' in paramelement:
+                    pass
+                else:
+                    return False
+            else:
+                return False
+            return True
+    else:
+        return False
 
