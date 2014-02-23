@@ -35,12 +35,34 @@ t = [{'transformation':'threshold' , 'threshold':[{'reduction':'median'}]}]
 c = transform_and_reduce_data(data=a, operations=t)
 print c
 
+
+#Construct a JSON description of a transformation/reduction
+from omsi.shared.omsi_data_selection import *
+#Construct the different pieces of the transformation and reduction pipeline
+#1) Compute the maximum data value and convert it to float
+#1.1) Compute the maximum value
+max_value = construct_reduce_dict( reduction_type='max' , axis=None)
+#1.2) Convert data to float
+value_as_float = construct_transform_dict( trans_type='astype' , dtype='float' )
+#1.3) Merge the two steps to compute the maximum data value as float
+max_value_as_float = construct_transform_reduce_list( max_value, value_as_float )
+#2) Normalize the data by dividing by the maximum value
+divide_by_max_value = construct_transform_dict( trans_type='arithmetic', operation='divide' , axes=None , x2=max_value_as_float)
+#3) Project along the last axis (i.e., the mz axis) to compute a maximum project image
+max_projection = construct_reduce_dict( reduction_type='max' , axis=-1)
+#4) Merge the different steps and construct the json string
+json_string = transform_reduce_description_to_json( divide_by_max_value , max_projection )
+#Just copy the result of the following print statement as your JSON description
+print json_string
+
+
 """
 
 
 import numpy as np
 import sys
 import itertools
+import warnings
 
 transformation_allowed_arithmetic = ['add',
                                      'divide',
@@ -352,7 +374,7 @@ def transform_and_reduce_data(data,
             # 4.2.1 Get the transformation
             currtransformation = op.pop('transformation')
             # 4.2.2 Get the axes for the transformations
-            axes = -1
+            axes = None
             if 'axes' in op:
                 axes = op.pop('axes')
             # 4.2.3) Execute the current data op
@@ -400,7 +422,7 @@ def transform_and_reduce_data(data,
 
 def transform_data_single(data,
                           transformation=transformation_type['minusMinDivideMax'],
-                          axes=-1,
+                          axes=None,
                           http_error=False,
                           transform_kwargs=None):
     """ Helper function used to transform data of a numpy array. The function
@@ -413,7 +435,7 @@ def transform_data_single(data,
                'minusMinDivideMax' ,...
         :param axes: List of data axis that should be split into chunks that are treated
                      independently during the transformation. By default transformation is
-                     applied based on the full dataset (axes=-1). E.g, if transformation
+                     applied based on the full dataset (axes=None). E.g, if transformation
                      should be performed on a per image basis, then we need to split the
                      m/z dimension into individual chunks and set axes=[2]. If we want
                      to transform spectra individually, then we need to split the two
@@ -439,16 +461,17 @@ def transform_data_single(data,
             return None
 
     # 1.2) Check the axes parameter
-    if not isinstance(axes, list):
+    if not isinstance(axes, list) and axes is not None:
         axes = [int(axes)]
-    for axisindex in axes:
-        if axisindex >= len(data.shape):
-            if http_error:
-                return HttpResponseNotFound("Data transformation " + str(transformation) + " failed." +
-                                            " The dimensionality of the data is lower than the axes " +
-                                            "requested to be used for reduction")
-            else:
-                return None
+    if axes is not None:
+        for axisindex in axes:
+            if axisindex >= len(data.shape):
+                if http_error:
+                    return HttpResponseNotFound("Data transformation " + str(transformation) + " failed." +
+                                                " The dimensionality of the data is lower than the axes " +
+                                                "requested to be used for reduction")
+                else:
+                    return None
 
     # 1.3) Check the transformation option
     if transformation not in transformation_type:
@@ -462,14 +485,14 @@ def transform_data_single(data,
     if transform_kwargs is None:
         transform_kwargs = {}
 
-    # 2) Normalize the data
-    # 2.1) Normalize the complete data if no axes is specified
-    if axes[0] == -1:
+    # 2) Transform the data
+    # 2.1) Transform the complete data if no axes is specified
+    if axes is None:
         return transform_datachunk(data=data,
                                    transformation=transformation,
                                    **transform_kwargs)
 
-    # 2.2) Normalize the different chunks based on which axes are specified
+    # 2.2) Transform the different chunks based on which axes are specified
     else:
         axislists = []
         for axisindex in axes:
@@ -642,7 +665,7 @@ def evaluate_transform_parameter(parameter, data=None):
     """
     pass
 
-    if is_transform_or_reduction(parameter):
+    if is_transform_or_reduce(parameter):
         return transform_and_reduce_data(data=data,
                                          operations=parameter,
                                          http_error=False)
@@ -654,7 +677,7 @@ def evaluate_transform_parameter(parameter, data=None):
             return parameter
 
 
-def is_transform_or_reduction(parameter):
+def is_transform_or_reduce(parameter):
     """Check if the given parameter defines a description of a
        data transformation or data reduction
 
@@ -706,3 +729,120 @@ def is_transform_or_reduction(parameter):
     else:
         return False
 
+def construct_transform_reduce_list(*args):
+    """Merge a series of transformations and reductions into a single
+       list describing a pipeline of transformation and reduction
+       operations to be performed.
+
+       :args: Ordered series of dictionaries describing transformation
+              and reduction operations.
+
+       :returns: List of all transformation and reduction operations
+    """
+    #Check if all elements are valid
+    for element in args:
+        if not is_transform_or_reduce(element):
+            warnings.warn("Transformation/Reduction "+str(count)+" may be invalid.")
+    #Convert the arguments to a list and return
+    return list(args)
+
+
+def construct_transform_dict(trans_type, axes=None, **kwargs):
+    """Helper function used to construct a dictionary describing a data transformation.
+
+       :param trans_type: The transformation type to be used. See transformation_type dict.
+       :param axes: The axes along which the data should be split. Default is None.
+       :param kwargs: Additional keyword parameters for the transformation functions.
+
+       :returns: Dictionary with the description of the transformation.
+
+       :raises: KeyError is raised in case that a parameter is missing.
+                ValueError is raised in case that a given parameter value
+                is invalid.
+
+    """
+    #1) Validate input parameters
+    #1.1) Do we have a valid transformation type
+    if not trans_type in transformation_type:
+        raise ValueError('Invalid transformation type given. Valid trans_type are:' +
+                         str(transformation_allowed_arithmetic))
+    #1.1) Do we have a valid operation specified for arithmetic opertions
+    if trans_type == transformation_type['arithmetic']:
+        if 'operation' in kwargs:
+            if not kwargs['operation'] in transformation_allowed_arithmetic:
+                return ValueError(unicode("Requested arithmetic operation not supported. Allowed operations are") +
+                                  unicode(transformation_allowed_arithmetic))
+        else:
+            raise KeyError("Missing parameter operations for arithmetic data transformation.")
+    #1.2) Check if we have threshold parameter for the threshold operation
+    if trans_type == transformation_type['threshold']:
+        if not 'threshold' in kwargs:
+            warnings.warn('No threshold parameter specified. The 5th percentile will be used as default')
+    #1.3) Check whether we have a dtype for the astype function
+    if trans_type == transformation_type['astype']:
+        if not 'dtype' in kwargs:
+            raise KeyError("Missing parameter dtype for astype transformation")
+
+    transdict = {'transformation': unicode(trans_type), 'axes':axes}
+    for key, value in kwargs.items():
+        transdict[unicode(key)] = value
+    return transdict
+
+
+def construct_reduce_dict(reduction_type, axis=None, **kwargs):
+    """Helper function used to construct reduction dictionary.
+
+       :param reduction_type: The reduction type to be used.
+       :param axis: The axis along which the reduction should be performed.
+
+       :returns: Dictionary with the description of the reduction operation.
+
+    """
+    reducdict = {'reduction': unicode(reduction_type), 'axis': axis}
+    for key, value in kwargs.items():
+        reducdict[unicode(key)] = value
+    return reducdict
+
+
+def transform_reduce_description_to_json(*args):
+    """Convert the dictionary describing the transformation/reduction operations
+       to a JSON string.
+
+       :param args: The list or dictionaries with the description of the transformation
+                     and reduction operations.
+
+       :returns: JSON string
+    """
+    try:
+        import json
+    except ImportError:
+        from django.utils import simplejson as json
+    if len(args)==1 and isinstance(args[0], list):
+        return json.dumps(args[0])
+    else:
+        return json.dumps(construct_transform_reduce_list(*args))
+
+
+def json_to_transform_reduce_description(json_string):
+    """Convert the json string to the transformation/reduction dict.
+
+       :param json_string: The json string to be converted.
+
+       :returns: Python list or dict with the description
+    """
+    try:
+        import json
+    except ImportError:
+        from django.utils import simplejson as json
+    checkstring = is_transform_or_reduce(json_string)
+    if not checkstring:
+        warnings.warn("The given JSON string may not define a valid transformation/reduction description.")
+    transreduce = json.loads(json_string)
+    if isinstance(transreduce, dict):
+        return [transreduce]
+    elif isinstance(transreduce, list):
+        return transreduce
+    else:
+        if checkstring:
+            warnings.warn('The given JSON string may not define a valid transformation/reduction description')
+        return transreduce
