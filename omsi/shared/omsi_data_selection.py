@@ -1,5 +1,5 @@
 """Module for defining and processing data selections. This includes the definition of
-   selections using strings and transformation and reduction of data.
+   selections using strings as well as transformation and reduction of data.
 
 #Simple data transformation and reduction example
 from omsi.shared.omsi_data_selection import *
@@ -58,12 +58,15 @@ print json_string
 
 """
 
-
 import numpy as np
 import sys
 import itertools
 import warnings
 
+
+#################################################################
+#  Basic specifications                                         #
+#################################################################
 transformation_allowed_arithmetic = ['add',
                                      'divide',
                                      'greater',
@@ -133,6 +136,9 @@ selection_type = {'invalid': -1,
 """
 
 
+#################################################################
+#  Process data selection strings                               #
+#################################################################
 def check_selection_string(selection_string):
     """Check whether the given selection string is valid, and indicate which type of selection
        the string defined. Checking the selection string is meant as a safeguard to prevent 
@@ -254,6 +260,9 @@ def selection_to_indexlist(selection_string, axis_size=0):
         return None
 
 
+#################################################################
+#  Evaluate data reductions and transformations                #
+#################################################################
 def perform_reduction(data, reduction, axis, http_error=False, **kwargs):
     """ Helper function used reduce the data of a given numpy array.
        
@@ -677,6 +686,11 @@ def evaluate_transform_parameter(parameter, data=None):
             return parameter
 
 
+#################################################################
+#   Helper functions to assist with the construction and        #
+#   validation of data operation descriptions for data          #
+#   transformation and reduction.                               #
+#################################################################
 def is_transform_or_reduce(parameter):
     """Check if the given parameter defines a description of a
        data transformation or data reduction
@@ -728,6 +742,7 @@ def is_transform_or_reduce(parameter):
             return True
     else:
         return False
+
 
 def construct_transform_reduce_list(*args):
     """Merge a series of transformations and reductions into a single
@@ -783,7 +798,7 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
         if not 'dtype' in kwargs:
             raise KeyError("Missing parameter dtype for astype transformation")
 
-    transdict = {'transformation': unicode(trans_type), 'axes':axes}
+    transdict = {'transformation': unicode(trans_type), 'axes': axes}
     for key, value in kwargs.items():
         transdict[unicode(key)] = value
     return transdict
@@ -817,7 +832,7 @@ def transform_reduce_description_to_json(*args):
         import json
     except ImportError:
         from django.utils import simplejson as json
-    if len(args)==1 and isinstance(args[0], list):
+    if len(args) == 1 and isinstance(args[0], list):
         return json.dumps(args[0])
     else:
         return json.dumps(construct_transform_reduce_list(*args))
