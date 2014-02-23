@@ -305,7 +305,7 @@ def perform_reduction(data, reduction, axis, http_error=False, **kwargs):
     try:
         op = getattr(np, reduction)
         # if data.shape[axis] > 1:
-        data = op(data, axis=axis)
+        data = op(data, axis=axis, **kwargs)
         return data
     except:
         if http_error:
@@ -638,7 +638,6 @@ def transform_datachunk(data,
         if 'threshold' in kwargs:
             threshold = evaluate_transform_parameter(parameter=kwargs.pop('threshold'),
                                                      data=data)
-
         else:
             threshold = np.percentile(data, 0.05)
         outdata[data < threshold] = 0
