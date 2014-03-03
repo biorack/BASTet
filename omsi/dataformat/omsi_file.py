@@ -7,7 +7,7 @@
     -- The __getitem__ function for the partial_spectra case is not fully implemented yet
     -- The estimates in def __best_dataset__(self,keys) are fairly crude at this point
     -- The __setitem__ function should be implemented for the different cases as well (AHHHH).
-        --- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable."""
+    -- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable."""
 
 import h5py
 import numpy as np
@@ -22,7 +22,7 @@ except:
 
 ##########################################################################
 ##########################################################################
-#   The main class for omsi data files
+##   The main class for omsi data files                                  ##
 ##########################################################################
 ##########################################################################
 class omsi_file(object):

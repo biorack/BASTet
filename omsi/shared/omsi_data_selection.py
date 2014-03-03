@@ -140,10 +140,8 @@ reduction_allowed_numpy_function = ['all',
 """List of allowed numpy data reduction operations.
    Reduction operations are any single data operations that
    may change the shape of the data.
-   NOTE: Some operations may have additional optional or
-         required keyword arguments.
-   HELP: For full documentation of the different functions
-         see the numpy documentation.
+   NOTE: Some operations may have additional optional or required keyword arguments.
+   HELP: For full documentation of the different functions see the numpy documentation.
 
     * 'all'       : out = numpy.all(data, axis)
     * 'amax'      : out = numpy.amax(data, axis)
@@ -220,10 +218,8 @@ transformation_allowed_numpy_single_data = ['abs',
 """List of allowed single data transformations. Single data transformation,
    are operations that operate on a single data input and which do not change
    the shape of the data. Below a list of available numpy options.
-   NOTE: Some operations may have additional optional or
-         required keyword arguments.
-   HELP: For full documentation of the different functions
-         see the numpy documentation.
+   NOTE: Some operations may have additional optional or required keyword arguments.
+   HELP: For full documentation of the different functions see the numpy documentation.
 
    * 'abs'    : out = numpy.abs(x1)
    * 'arccos' : out = numpy.arccos(x1)
@@ -302,10 +298,8 @@ transformation_allowed_numpy_dual_data = ['add',
 """List of allowed dual data transformations. Dual data transformation,
    are operation that operate on a two data input datasets but which do not change
    the shape of the data. Below a list of available numpy function options.
-   NOTE: Some operations may have additional optional or
-         required keyword arguments.
-   HELP: For full documentation of the different functions
-         see the numpy documentation..
+   NOTE: Some operations may have additional optional or required keyword arguments.
+   HELP: For full documentation of the different functions see the numpy documentation.
 
    * 'add'           : out = x1 + x2 = numpy.add(x1,x2)
    * 'arctan2'       : out = numpy.arctan2(x1,x2)
@@ -387,7 +381,6 @@ transformation_type = {'arithmetic': 'arithmetic',
                       See the transformation_allowed_numpy_single_data list for a complete list
                       of allowed scaling operations. Some of the more commonly used scaling\
                       operations include: 'abs', 'log', 'sqrt', 'around' etc.
-
                     * 'x1' : The first data operand for the scaling.
                              The input data will be used by default if x1 is not specified. \
                              You may also specify 'data' to explicitly indicate that the \
@@ -404,13 +397,15 @@ transformation_type = {'arithmetic': 'arithmetic',
 
     * 'scale' : Same as 'singleDataTransform'. See 'singleDataTransform' for details.
     * 'threshold' : Threshold the data. Set all values that are smaller than threshold \
-                  to 0. Additional parameters required for this option are: \
+                  to 0. Additional parameters required for this option are:
 
                     * 'threshold'. If threshold is missing, then the threshold will be \
                      set ot the 5%'ile so that the bottom 5% of the data will be set to 0.
+
     * 'astype' : Change the type of the data. Additional required parameters are: \
 
                     * 'dtype' : The numpy data type to be used. Default dtype='float'.
+
 
 """
 
@@ -836,14 +831,12 @@ def transform_datachunk(data,
         normalization for independent data chunks that need to be normalized.
 
         Required keyword arguments:
-        ---------------------------
 
         :param data: The input numpy array that should be transformed.
         :param transformation: Data transformation option to be used. For available options
                     see the transformation_type dictionary.
 
         Additional transformation-dependent keyword arguments:
-        ------------------------------------------------------
 
         :param kwargs: Additional keyword arguments that are specific for different
                        data transformation. Below a list of additional keyword arguments

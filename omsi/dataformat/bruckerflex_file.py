@@ -4,26 +4,26 @@ Limitations:
 
 1) Currently the reader assumes a single global m/z axis for all spectra.
 2) The read of acqu files does not convert <..> entries to python values but leaves them as strings.
-3) __read_spotlist__ converts the regions to start with a 0 index. This is somewhat inconsistent in the spot list file.
+3) __read_spotlist__ converts the regions to start with a 0 index. This is somewhat inconsistent in the spot list file. \
   The spotname seems to number regions starting with 0 while the region list numbers them starting with 1.
-4) __read_spotlist__ computes the folder where the spots are located based on the filename of the spotlist.
-   The question is whether this is always the case??? The advantage is that we do not rely on the regions.xml
-   file which contains absolute paths which are in most cases invalid as the data has been copied between different
+4) __read_spotlist__ computes the folder where the spots are located based on the filename of the spotlist. \
+   The question is whether this is always the case??? The advantage is that we do not rely on the regions.xml \
+   file which contains absolute paths which are in most cases invalid as the data has been copied between different \
    machines in many cases and is stored in different locations on each of the machines.
 5) __read_spotlist__ currenly assumes that there is only one fid file per spot
-6) __read_spotlist__ currenlty only looks at where the acqu and fid file is located for the spot. Other files
+6) __read_spotlist__ currenlty only looks at where the acqu and fid file is located for the spot. Other files \
   are currently ignored.
 7) __read_spotlist__ (and hence the reader at large) currently assumes that we have 2D images only.
-8) __read_spotlist__ currently generates maps for the image that assume that x and y pixel indices start at
-   0. Not all images may record data until the border, so that this strategy may add empty spectra rather than
+8) __read_spotlist__ currently generates maps for the image that assume that x and y pixel indices start at \
+   0. Not all images may record data until the border, so that this strategy may add empty spectra rather than \
    generating a new bounding box for the image.
-9) __read_spotlist__ assumes in the variable spotname_encoding a maximum of 24 characters in the spotname
-   R01X080Y013. This should in general be more than sufficient as this allows for 7 characters for each R, X,
+9) __read_spotlist__ assumes in the variable spotname_encoding a maximum of 24 characters in the spotname \
+   R01X080Y013. This should in general be more than sufficient as this allows for 7 characters for each R, X, \
    Y entry, however, if this is not enough then this behaviour needs ot be changed.
-10) __getitem__ currently only works if we have read the full data into memory. An on-demand load should be supported
+10) __getitem__ currently only works if we have read the full data into memory. An on-demand load should be supported \
     as well.
-11) We can currently only selected either a single region or the full data but we cannot selected multiple regions
-    at once. E.g. if a dataset contains 3 regions then we can either select all regions at once or region 1,2, or 3
+11) We can currently only selected either a single region or the full data but we cannot selected multiple regions \
+    at once. E.g. if a dataset contains 3 regions then we can either select all regions at once or region 1,2, or 3 \
     but one cannot selected region 1+2, 1+3, or 2+3.
    
 import bruckerflex_file
@@ -53,7 +53,6 @@ import math
 
 
 class bruckerflex_file:
-
     """Interface for reading a single bruker flex image file.
 
        The reader supports standard array slicing for data read. I.e., to read a
@@ -69,6 +68,7 @@ class bruckerflex_file:
        shape variable is addjusted to fit the selected region and the __get_item__
        method (which is used to implement array-like slicing (e.g., [1,1,:])) behaves
        as if the selected region where the full data.
+
     """
 
     def __init__(self, spotlist_filename, fid_encoding='int32', readall=True):
