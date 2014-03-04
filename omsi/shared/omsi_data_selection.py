@@ -578,7 +578,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
 #################################################################
 #  Evaluate data reductions and transformations                #
 #################################################################
-def perform_reduction(data, reduction, secondary_data, http_error=False, **kwargs):
+def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=False, **kwargs):
     """ Helper function used reduce the data of a given numpy array.
        
         :param data: The input numpy array that should be reduced
@@ -592,6 +592,7 @@ def perform_reduction(data, reduction, secondary_data, http_error=False, **kwarg
         :param secondary_data: Other data from previous data iterations a user may reference.
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
+        :param min_dim: Minimum number of dimensions the input data should have in order for the reduction to be applied.
         :param kwargs: Additional optional keyword arguments.
 
         :returns: Reduced numpy data array or in case of error None or HttpResonse with a
@@ -640,9 +641,10 @@ def perform_reduction(data, reduction, secondary_data, http_error=False, **kwarg
     else:
         x1 = data
 
-    #print secondary_data
-    #print reduction
-    #print x1
+    # 1.4) Determine whether we should apply the reduction or not
+    if min_dim:
+        if data.ndim < min_dim:
+            return data
 
     # 1.5 ) Perform the data reduction operation. This can be a large range of
     #       numpy operations defined in omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
@@ -778,11 +780,16 @@ def transform_and_reduce_data(data,
                     axis = op.pop('axis')
                 else:
                     axis = None  # data.ndim-1
+                if 'min_dim' in op:
+                    min_dim = op.pop('min_dim')
+                else:
+                    min_dim = None
                 # 4.2.3.3 Execute the data reduction operation
                 currdata = perform_reduction(data=currdata,
                                          reduction=currreduction,
                                          secondary_data=secondary_data,
                                          axis=axis,
+                                         min_dim=min_dim,
                                          http_error=http_error,
                                          **op)
             #4.2.4 Invalid operation specification. We have neither a transformation nor a reduction

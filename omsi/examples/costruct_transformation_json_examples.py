@@ -15,7 +15,7 @@ def main(argv=None):
     print "#################################################################"
     print "##   Generating test data                                      ##"
     print "#################################################################"
-    data0 = np.arange(25).reshape(5,5)
+    data0 = np.arange(50).reshape(5,5,2)
     print "Test data:"
     print data0
     print "#################################################################"
@@ -38,6 +38,7 @@ def main(argv=None):
         print npV2_result
     #printDict(npV2_secondary)
 
+
 def printDict(d):
     """Helper function used to print dicts in a more readable way"""
     print "____________________________________________"
@@ -45,7 +46,6 @@ def printDict(d):
         print key
         print value
     print "____________________________________________"
-
 
 
 def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
@@ -58,6 +58,9 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
 
        :returns: JSON string with the description of the procedure
     """
+    reduce_max = construct_reduce_dict(reduction_type='max',
+                                       axis=-1,
+                                       min_dim=2)
 
     #1.1) Compute the lower percentile
     plow = construct_reduce_dict( reduction_type='percentile' ,
@@ -65,13 +68,12 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
     #1.2) Substract the lower percentile
     minus_p5 = construct_transform_dict( trans_type='arithmetic' ,
                                          operation='subtract',
-                                         x1='data',
                                          x2=plow )
     #2.1) Compute the upper percentile
     phigh = construct_reduce_dict( reduction_type='percentile',
                                    q=upper_percentile )
     #2.2) Convert phigh to float
-    phigh_as_float = construct_transform_dict( trans_type='astype' , dtype='float', x1=phigh, variable='phigh_as_float')
+    phigh_as_float = construct_transform_dict( trans_type='astype' , dtype='float', x1=phigh)
     #2.2) Divide by the upper percentile
     divide_by_p95 = construct_transform_dict( trans_type='arithmetic',
                                               operation='divide',
@@ -81,7 +83,7 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
                                      operation='clip',
                                      a_min=0,
                                      a_max=1 )
-    operations_json = transform_reduce_description_to_json( minus_p5, divide_by_p95 , clip )
+    operations_json = transform_reduce_description_to_json(reduce_max, minus_p5, divide_by_p95 , clip)
 
     print "#################################################################"
     print "##   Normalize by percentiles: Version 1                       ##"
@@ -94,9 +96,9 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
     print ""
     print "2) Illustration of the calculation performed:"
     print ""
-    print "     /-->percentile(5)--\        /-->percentile(95)-->astype('float')--\ "
-    print "    /                    \      /                                       \ "
-    print "data------------->minus( -- )-->------------------------------->divide( -- )-->clip(0,1)-->output"
+    print "                /-->percentile(5)--\        /-->percentile(95)-->astype('float')--\ "
+    print "               /                    \      /                                       \ "
+    print "data-->reduce(max)---------->minus( -- )-->------------------------------>divide( -- )-->clip(0,1)-->output"
     print ""
     print "3) JSON description of the above calculation:"
     print ""
@@ -115,16 +117,21 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
 
        :returns: JSON string with the description of the procedure
     """
+    reduce_max = construct_reduce_dict(reduction_type='max',
+                                       x1='data',
+                                       axis=-1,
+                                       min_dim=3,
+                                       variable='reduce_max')
 
     #1) Compute the lower percentile from the input data
     plow = construct_reduce_dict( reduction_type='percentile' ,
                                   q=lower_percentile ,
-                                  x1='data',
+                                  x1='reduce_max',
                                   variable='plow')
     #2) Compute the upper percentile from the input data
     phigh = construct_reduce_dict( reduction_type='percentile',
                                    q=upper_percentile,
-                                   x1='data')
+                                   x1='reduce_max')
     phigh_minus_plow = construct_transform_dict( trans_type='arithmetic',
                                                  operation='subtract',
                                                  x2 = 'plow')
@@ -135,7 +142,7 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
     #3) Substract the lower percentile --> Generates data3
     minus_plow = construct_transform_dict( trans_type='arithmetic' ,
                                          operation='subtract',
-                                         x1='data',
+                                         x1='reduce_max',
                                          x2='plow')
 
     #4) Divide by the upper percentile --> Generates data4
@@ -148,12 +155,14 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
                                      operation='clip',
                                      a_min=0,
                                      a_max=1)
-    operations_json = transform_reduce_description_to_json( plow, phigh,
+    operations_json = transform_reduce_description_to_json( reduce_max,
+                                                            plow, phigh,
                                                             phigh_minus_plow,
                                                             phigh_as_float,
                                                             minus_plow,
                                                             divide_by_phigh ,
-                                                            clip )
+                                                            clip,
+                                                            )
 
     print "######################################################################"
     print "##   Normalize by percentiles: Version 2 (explicit data references) ##"
@@ -168,12 +177,12 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
     print ""
     print "2) Illustration of the calculation performed:"
     print ""
-    print "         /-->percentile(data,95)-->minus(..,plow)-->astype(..,'float')-->phigh_as_float-->\                                          \ "
-    print "        /                                    /                                             \ "
-    print "       /                             /------/                                               \ "
-    print "      /-->percentile(data,5)-->plow--\                                                       \ "
-    print "     /                                \                                                       \ "
-    print "data--------------------->minus(data,plow)------------------------------->divide( .. , phigh_as_float )-->clip(0,1)-->output"
+    print "         percentile(reduce_max,95)-->minus(..,plow)-->astype(..,'float')-->phigh_as_float-->| "
+    print "                        |                       /                                           | "
+    print "                        |                 /----/                                            | "
+    print "         percentile(reduce_max,5)-->plow--\                                                 | "
+    print "                        |                  \                                                | "
+    print "data-->reduce(max)-->reduce_max-->minus(..,plow)------------------->divide( .. , phigh_as_float )-->clip(0,1)-->output"
     print ""
     print "3) JSON description of the above calculation:"
     print ""
