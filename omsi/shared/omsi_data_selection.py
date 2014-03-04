@@ -592,7 +592,7 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         :param secondary_data: Other data from previous data iterations a user may reference.
         :param http_error: Define which type of error message the function should return.
                If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.
-        :param min_dim: Minimum number of dimensions the input data should have in order for the reduction to be applied.
+        :param min_dim: Minimum number of dimensions the input data must have in order for the reduction to be applied.
         :param kwargs: Additional optional keyword arguments.
 
         :returns: Reduced numpy data array or in case of error None or HttpResonse with a
@@ -614,8 +614,8 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
                                         str(reduction_allowed_numpy_function))
         else:
             raise ValueError("Requested data reduction " + str(reduction) +
-                                        " not supported. Valid reduction operations are:" +
-                                        str(reduction_allowed_numpy_function))
+                             " not supported. Valid reduction operations are:" +
+                             str(reduction_allowed_numpy_function))
 
     # 1.3) Check if we have a valid axis parameter
     axis_specified = 'axis' in kwargs
@@ -630,8 +630,8 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
                                             "requested to be used for reduction")
             else:
                 raise IndexError("Data reduction " + str(reduction) + " failed." +
-                                            "The dimensionality of the data is lower than the axis" +
-                                            "requested to be used for reduction")
+                                 "The dimensionality of the data is lower than the axis" +
+                                 "requested to be used for reduction")
 
     # 1.4) Determine the data we need to perform the reduction for
     if 'x1' in kwargs:
@@ -647,8 +647,9 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
             return data
 
     # 1.5 ) Perform the data reduction operation. This can be a large range of
-    #       numpy operations defined in omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
-    if True: #try:
+    # numpy operations defined in
+    # omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
+    if True:  # try:
         op = getattr(np, reduction)
         # if data.shape[axis] > 1:
         if axis_specified:
@@ -656,7 +657,7 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         else:
             data = op(x1, **kwargs)
         return data
-    else: #except:
+    else:  # except:
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " failed or not supported. Valid reduction" +
@@ -673,7 +674,7 @@ def transform_and_reduce_data(data,
                               operations,
                               secondary_data=None,
                               http_error=False
-                             ):
+                              ):
     """ Helper function used to apply a series of potentially multiple
         operations to a given numpy dataset. This function uses
         the transform_data_single(...) function to apply each indicated
@@ -740,20 +741,21 @@ def transform_and_reduce_data(data,
     # 4) Iterate over all operations and apply them on after another.
     currdata = data
     for op in operations:
-        #print "---------------------------"
-        #print op
+        # print "---------------------------"
+        # print op
         if 'variable' in op:
             secondaryvar = op.pop('variable')
         else:
             secondaryvar = None
-        #4.1) Evaluate a data transformation that consists of multiple operations
-        if isinstance(op,list):
+        # 4.1) Evaluate a data transformation that consists of multiple
+        # operations
+        if isinstance(op, list):
             transform_and_reduce_data(data=currdata,
                                       operations=op,
                                       secondary_data=secondary_data,
                                       http_error=http_error)
-        #4.2) Evaluate single data operation
-        elif isinstance(op,dict):
+        # 4.2) Evaluate single data operation
+        elif isinstance(op, dict):
             # 4.2.1) Check if we need to transform or reduce the data
             # 4.2.2) Perform data transformation
             if 'transformation' in op:
@@ -765,11 +767,11 @@ def transform_and_reduce_data(data,
                     axes = op.pop('axes')
                 # 4.2.3) Execute the current data op
                 currdata = transform_data_single(data=currdata,
-                                             transformation=currtransformation,
-                                             axes=axes,
-                                             secondary_data=secondary_data,
-                                             http_error=http_error,
-                                             transform_kwargs=op)
+                                                 transformation=currtransformation,
+                                                 axes=axes,
+                                                 secondary_data=secondary_data,
+                                                 http_error=http_error,
+                                                 transform_kwargs=op)
             # 4.2.3 Perform data reduction
             elif 'reduction' in op:
                 # 4.2.3.1 Get the data reduction operation
@@ -786,20 +788,21 @@ def transform_and_reduce_data(data,
                     min_dim = None
                 # 4.2.3.3 Execute the data reduction operation
                 currdata = perform_reduction(data=currdata,
-                                         reduction=currreduction,
-                                         secondary_data=secondary_data,
-                                         axis=axis,
-                                         min_dim=min_dim,
-                                         http_error=http_error,
-                                         **op)
-            #4.2.4 Invalid operation specification. We have neither a transformation nor a reduction
+                                             reduction=currreduction,
+                                             secondary_data=secondary_data,
+                                             axis=axis,
+                                             min_dim=min_dim,
+                                             http_error=http_error,
+                                             **op)
+            # 4.2.4 Invalid operation specification. We have neither a
+            # transformation nor a reduction
             else:
                 if http_error:
                     return HttpResponseBadRequest('Invalid list of transformation/reduction operations. ' +
                                                   'Missing transformation or reduction key in at least one item')
                 else:
-                    raise KeyError( 'Invalid list of transformation/reduction operations. ' +
-                                    'Missing transformation or reduction key in at least one item')
+                    raise KeyError('Invalid list of transformation/reduction operations. ' +
+                                   'Missing transformation or reduction key in at least one item')
 
         # 4.3) Check if an error occurred during the data transformation or
         # reduction
@@ -811,11 +814,11 @@ def transform_and_reduce_data(data,
                     return HttpResponseNotFound("Unknown error during data transformation.")
             return currdata
 
-        #4.4) Track the secondary data if needed
+        # 4.4) Track the secondary data if needed
         if secondaryvar:
             secondary_data[secondaryvar] = currdata
 
-        #print "---------------------------"
+        # print "---------------------------"
 
     # 5) Return the transformed data
     return currdata
@@ -877,8 +880,8 @@ def transform_data_single(data,
                                                 "requested to be used for reduction")
                 else:
                     raise IndexError("Data transformation " + str(transformation) + " failed." +
-                                                " The dimensionality of the data is lower than the axes " +
-                                                "requested to be used for reduction")
+                                     " The dimensionality of the data is lower than the axes " +
+                                     "requested to be used for reduction")
 
     # 1.3) Check the transformation option
     if transformation not in transformation_type:
@@ -923,7 +926,7 @@ def transform_data_single(data,
 def transform_datachunk(data,
                         transformation=transformation_type[
                             'minusMinDivideMax'],
-                        secondary_data = None,
+                        secondary_data=None,
                         **kwargs):
     """ Helper function used to transform a given data chunk.
         In contrast to transform_data, this function applies the transformation
@@ -978,7 +981,8 @@ def transform_datachunk(data,
     ############################################
     #   arithmetic                             #
     ############################################
-    elif transformation == transformation_type['dualDataTransform'] or transformation == transformation_type['arithmetic']:
+    elif transformation == transformation_type['dualDataTransform'] or \
+                    transformation == transformation_type['arithmetic']:
         # Retrieve the requested operation
         if 'operation' in kwargs:
             if kwargs['operation'] not in transformation_allowed_numpy_dual_data:
@@ -1369,3 +1373,39 @@ def json_to_transform_reduce_description(json_string):
             warnings.warn(
                 'The given JSON string may not define a valid transformation/reduction description')
         return transreduce
+
+# def plot_transform_reduce_description(description):
+#
+#     import networkx as nx
+#     import matplotlib.pyplot as plt
+#
+#     if isinstance(description,str) or isinstance(description,unicode):
+#         alloperations = json_to_transform_reduce_description(description)
+#     else:
+#         alloperations = description
+#
+#     G = nx.Graph()
+#     G.add_node('data')
+#
+#     def add_graph_node( operation, graph ):
+#         if isinstance(operation, list):
+#             nodenames = []
+#             for co in operation:
+#                 nodenames.append( add_graph_node(co, graph) )
+#
+#         elif isinstance(operation,dict):
+#             try:
+#                 ci = graph.add_node(operation['transformation'] , operation)
+#             except:
+#                 ci = graph.add_node(operation['reduction'] , operation)
+#             for key, value in operation.items():
+#                 if is_transform_or_reduce(value):
+#                     cj = add_graph_node(value, graph)
+#                     graph.add_edge(ci,cj)
+#             return ci
+#
+#
+#     add_graph_node( alloperations , G )
+#     graph_pos = nx.spring_layout(G)
+#     nx.draw(G, graph_pos)
+#     plt.show()
