@@ -133,6 +133,7 @@ reduction_allowed_numpy_function = ['all',
                                     'product',
                                     'prod',
                                     'ptp',
+                                    'select_values',
                                     'squeeze',
                                     'std',
                                     'var',
@@ -159,6 +160,8 @@ reduction_allowed_numpy_function = ['all',
              of the corresponding numpy function. However, in most cases (if not all cases) \
              the data operation will be applied to the full input data if no axis \
              is specified.
+    * 'min_dim' : Integer specifying the minimum number of data dimensions the input data \
+             must have in order for the reduction operation to be applied.
 
    Here the list of allowed data reduction operations.
 
@@ -197,6 +200,10 @@ reduction_allowed_numpy_function = ['all',
     * 'swapaxes: out = numpy.swapaxes(x1, axis1, axis2)
     * 'var'       : out = numpy.var(data, axis)
     * 'transpose' : out = numpy.transpose(data)
+
+    None-numpy data reduction operations:
+
+    * 'select_values' : out = data[ selection ]
 
 """
 
@@ -641,15 +648,29 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
     else:
         x1 = data
 
-    # 1.4) Determine whether we should apply the reduction or not
+    # 1.5) Determine whether we should apply the reduction or not
     if min_dim:
-        if data.ndim < min_dim:
-            return data
+        if x1.ndim < min_dim:
+            return x1
 
-    # 1.5 ) Perform the data reduction operation. This can be a large range of
+    # 1.6) Check if we have a data selection reduction
+    if reduction == 'select_values':
+        if 'selection' in kwargs:
+            selection = kwargs.pop('selection')
+            if is_transform_or_reduce(selection):
+                selection = evaluate_transform_parameter(parameter=selection,
+                                                         data = x1,
+                                                         secondary_data=secondary_data)
+            if isinstance(selection,str) or isinstance(selection,unicode):
+                selection = selection_string_to_object(selection)
+        else:
+            selection = slice(None)
+        return data[selection]
+
+    # 1.7 ) Perform the data reduction operation. This can be a large range of
     # numpy operations defined in
     # omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
-    if True:  # try:
+    try:
         op = getattr(np, reduction)
         # if data.shape[axis] > 1:
         if axis_specified:
@@ -657,7 +678,7 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         else:
             data = op(x1, **kwargs)
         return data
-    else:  # except:
+    except:
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " failed or not supported. Valid reduction" +

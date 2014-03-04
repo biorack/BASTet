@@ -12,10 +12,15 @@ def main(argv=None):
     print ""
     print ""
 
+    npV3 = normalize_by_percentiles_V3()
+    print ""
+    print ""
+
     print "#################################################################"
     print "##   Generating test data                                      ##"
     print "#################################################################"
     data0 = np.arange(50).reshape(5,5,2)
+    data0[ data0<15 ] = 0
     print "Test data:"
     print data0
     print "#################################################################"
@@ -36,7 +41,13 @@ def main(argv=None):
     else :
         print "Result: Normalize by percentile; Version 2:"
         print npV2_result
-    #printDict(npV2_secondary)
+    print "#################################################################"
+    print "##   Testing Normalize by percentile; Version 3                ##"
+    print "#################################################################"
+    npV3_secondary = {}
+    npV3_result = transform_and_reduce_data(data=data0, operations=npV3, secondary_data=npV3_secondary)
+    print "Result: Normalize by percentile; Version 3:"
+    print npV3_result
 
 
 def printDict(d):
@@ -58,6 +69,7 @@ def normalize_by_percentiles_V1( lower_percentile=5. , upper_percentile=95. ):
 
        :returns: JSON string with the description of the procedure
     """
+    #1) Reduce by max
     reduce_max = construct_reduce_dict(reduction_type='max',
                                        axis=-1,
                                        min_dim=2)
@@ -191,6 +203,75 @@ def normalize_by_percentiles_V2( lower_percentile=5. , upper_percentile=95. ):
     return operations_json
 
 
+def normalize_by_percentiles_V3( lower_percentile=5. , upper_percentile=95. ):
+    """Define JSON string for normalization by: i) substracting a lower percentile,
+       ii) dividing by an upper percentile, and iii) clipping the data so that
+       values are in the range of 0 to 1. The difference between V1 and V3 is that the
+       percentiles are computed from data>= only.
+
+       :param lower_percentile: The lower percentile to substract from the data (default=5)
+       :param upper_percentile: The upper percentile the data should be divided by (default=95)
+
+       :returns: JSON string with the description of the procedure
+    """
+    #1) Reduce by max
+    reduce_max = construct_reduce_dict(reduction_type='max',
+                                       axis=-1,
+                                       min_dim=2)
+
+    #1.1) Compute the lower percentile
+    select_larger_0 = construct_reduce_dict( reduction_type='select_values',
+                                             selection = construct_transform_dict( trans_type='arithmetic',
+                                                                            operation = 'greater',
+                                                                            x2=0))
+    plow = construct_reduce_dict( reduction_type='percentile' ,
+                                  q=lower_percentile,
+                                  x1=select_larger_0)
+    #1.2) Substract the lower percentile
+    minus_p5 = construct_transform_dict( trans_type='arithmetic' ,
+                                         operation='subtract',
+                                         x2=plow )
+    #2.1) Compute the upper percentile
+    phigh = construct_reduce_dict( reduction_type='percentile',
+                                   q=upper_percentile,
+                                   x1=select_larger_0)
+    #2.2) Convert phigh to float
+    phigh_as_float = construct_transform_dict( trans_type='astype' , dtype='float', x1=phigh)
+    #2.2) Divide by the upper percentile
+    divide_by_p95 = construct_transform_dict( trans_type='arithmetic',
+                                              operation='divide',
+                                              x2=phigh_as_float )
+    #3) Clip the data so that all values >1 are set to 1 and all values smaller than 0 are set to 0
+    clip = construct_transform_dict( trans_type='scale',
+                                     operation='clip',
+                                     a_min=0,
+                                     a_max=1 )
+    operations_json = transform_reduce_description_to_json(reduce_max, minus_p5, divide_by_p95 , clip)
+
+    print "#################################################################"
+    print "##   Normalize by percentiles: Version 3                       ##"
+    print "#################################################################"
+    print "1) Purpose:"
+    print ""
+    print "Normalize the data by: i) subtracting by the "+str(lower_percentile)+"'tile,"
+    print "                       ii) divide by the "+str(upper_percentile)+"%'tile computed from the data after subtraction,"
+    print "                       iii) clip the data so that all values are in the range of [0,1]."
+    print ""
+    print "2) Illustration of the calculation performed:"
+    print ""
+    print "               |--select_values( .. , greater(..,0))--|              |--select_values( .. , greater(..,0))--| "
+    print "               |                                      |              |                                      | "
+    print "               |----------------------->percentile(x1=|, q=5)--|     |----------------------->percentile(x1=|, q=95)-->astype('float')--| "
+    print "               |                                               |     |                                                                  | "
+    print "data-->reduce(max)---------------------------------->minus(.., | )-->--------------------------------------------------------------|    | "
+    print "                                                                                                                                   |    | "
+    print "                                                                                                       output<--clip(0,1)<--divide(|  , |)"
+    print ""
+    print "3) JSON description of the above calculation:"
+    print ""
+    print operations_json
+
+    return operations_json
 
 
 if __name__ == "__main__":
