@@ -1310,6 +1310,8 @@ def construct_reduce_dict(reduction_type, **kwargs):
                   of, e.g., the fifth data operation by setting x1='data5'. x1
                   itself may also specify a separate data transformation and
                   reduction pipeline that operates on 'data'.
+       :param min_dim: Minimum number of dimensions the input data should have in
+                  order for the reduction should be applied.
 
        :returns: Dictionary with the description of the reduction operation.
 
