@@ -1,11 +1,10 @@
 """This module provides functionality for reading img mass spectrometry image files"""
-
-import sys
 import os
 import numpy as np
+import warnings
 
 
-class img_file:
+class img_file(object):
 
     """Interface for reading a single 2D img file
 
@@ -63,8 +62,8 @@ class img_file:
         elif hdr_filename and t2m_filename and img_filename:
             pass  # Nothing to be done
         else:
-            raise ValueError(
-                "Missing input parameter. Either provide: i) basename or ii) hdr_filename, t2m_filename, img_filename")
+            raise ValueError("Missing input parameter. Either provide: " +
+                             " i) basename or ii) hdr_filename, t2m_filename, img_filename")
 
         # Initialize the z length
         try:
@@ -72,17 +71,17 @@ class img_file:
             self.mz = np.fromfile(file=t2m, dtype='float32', count=-1)
             self.shape[2] = self.mz.shape[0]
             t2m.close()
-        except:
+        finally:
             self.mz = np.empty(0)
 
-        # Initialize th x and y length
+        # Initialize the x and y length
         try:
             hdr = open(hdr_filename, 'rb')
             hdrdata = np.fromfile(file=hdr_filename, dtype='int16', count=-1)
             self.shape[0] = hdrdata[23]
             self.shape[1] = hdrdata[22]
             hdr.close()
-        except:
+        finally:
             pass
 
         self.shape = tuple(self.shape)
@@ -91,11 +90,34 @@ class img_file:
         self.img_filename = img_filename
         self.file_opened = False
         try:
-            # open( img_filename , 'rb' )
-            self.m_img_file = np.memmap(
-                filename=self.img_filename, dtype=self.data_type, shape=self.shape, mode='r', order='C')
+            self.m_img_file = np.memmap(filename=self.img_filename,
+                                        dtype=self.data_type,
+                                        shape=self.shape,
+                                        mode='r',
+                                        order='C')
             self.file_opened = True
-        except:
+        except ValueError:
+            # Check if the size of the file matches what we expect
+            imgsize = os.stat(self.img_filename).st_size
+            itemsize = np.dtype(self.data_type).itemsize
+            expectedsize = self.shape[0] * \
+                self.shape[1] * self.shape[2] * itemsize
+            if imgsize < expectedsize:
+                warnings.warn("WARNING: Missing bytes in img file. Completing last spectra with 0's.")
+                numvalues = imgsize / itemsize
+                self.m_img_file = np.memmap(filename=self.img_filename,
+                                            dtype=self.data_type,
+                                            shape=(numvalues,),
+                                            mode='r',
+                                            order='C')
+                # Extend the memmap to the expected size
+                self.m_img_file.resize((expectedsize,))
+                # Reshape the memmap to the expected shape
+                self.m_img_file.reshape(self.shape)
+            else:
+                print "Error while opening the img file: " + img_filename
+                raise
+        finally:
             print "Error while opening the img file: " + img_filename
             raise
 
