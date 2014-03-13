@@ -34,7 +34,7 @@ class img_file(object):
         """
 
         self.data_type = 'uint16'
-        self.shape = [0, 0, 0]  # Number of pixels in x,y, and z. NOTE: Will be changed to tuble. List used for assignment.
+        self.shape = [0, 0, 0]  # Number of pixels in x,y, and z. NOTE: Type changed to tuple later on.
         self.mz = 0  # A numpy vector with the m/z values of the instrument
 
         if basename and hdr_filename and t2m_filename and img_filename:
@@ -98,22 +98,21 @@ class img_file(object):
             expectednumvalues = int(self.shape[0]) * int(self.shape[1]) * int(self.shape[2]) 
             expectedsize = expectednumvalues * int(itemsize)
             sizedifference = expectedsize - imgsize
-            print "IMG size: "+str(imgsize)+" Expected size: "+str(expectedsize)+"  (difference="+str(sizedifference)+")"
-	    if imgsize < expectedsize:
+            print "IMG size: " + str(imgsize) + " Expected size: " + \
+                  str(expectedsize) + "  (difference="+str(sizedifference) + ")"
+            if imgsize < expectedsize:
                 percentmissing = float(sizedifference)/float(expectedsize)
                 valuesmissing = float(sizedifference) / itemsize 
                 warnings.warn("WARNING: Missing "+str(sizedifference) +
                               " bytes in img file (missing " + str(valuesmissing) +
                               " intensity values; "+str(percentmissing)+"%)." + 
                               " Completing last spectra with 0's.")
-		numvalues = imgsize / itemsize
-		tempmap = np.require(np.memmap(filename=self.img_filename,
-                                                  dtype=self.data_type,
-                                                  #shape=(expectednumvalues,)
-                                                  mode='r',
-                                                  order='C'),
-                                        requirements=['O', 'C'])
-                
+                # TODO np.require create an in-memory copy of the full data. Provide option to use memmap'ed tempfile.
+                tempmap = np.require(np.memmap(filename=self.img_filename,
+                                               dtype=self.data_type,
+                                               mode='r',
+                                               order='C'),
+                                     requirements=['O', 'C'])
                 #Extend the memmap to the expected size
                 tempmap.resize((expectednumvalues, ))
                 # Reshape the memmap to the expected shape
