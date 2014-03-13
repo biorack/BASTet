@@ -137,6 +137,7 @@ def main(argv=None):
     global file_owner
     global error_handling
     global available_error_options
+    global recorded_warnings
     #global require_login
 
     ####################################################################
