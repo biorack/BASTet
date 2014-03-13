@@ -101,23 +101,47 @@ class img_file(object):
             print "IMG size: " + str(imgsize) + " Expected size: " + \
                   str(expectedsize) + "  (difference="+str(sizedifference) + ")"
             if imgsize < expectedsize:
+                #Check whether the missing data aligns with images or spectra
+                slicesize = int(self.shape[0]) * int(self.shape[1]) * itemsize
+                spectrumsize = int(self.shape[2]) * itemsize
                 percentmissing = float(sizedifference)/float(expectedsize)
-                valuesmissing = float(sizedifference) / itemsize 
+                valuesmissing = float(sizedifference) / itemsize
                 warnings.warn("WARNING: Missing "+str(sizedifference) +
                               " bytes in img file (missing " + str(valuesmissing) +
-                              " intensity values; "+str(percentmissing)+"%)." + 
-                              " Completing last spectra with 0's.")
-                # TODO np.require create an in-memory copy of the full data. Provide option to use memmap'ed tempfile.
-                tempmap = np.require(np.memmap(filename=self.img_filename,
-                                               dtype=self.data_type,
-                                               mode='r',
-                                               order='C'),
-                                     requirements=['O', 'C'])
-                #Extend the memmap to the expected size
-                tempmap.resize((expectednumvalues, ))
-                # Reshape the memmap to the expected shape
-                self.m_img_file = tempmap.reshape(self.shape, order='C')
-                self.file_opened = True
+                              " intensity values; "+str(percentmissing)+"%).")
+                if (sizedifference % spectrumsize) == 0:
+                    percentmissing = float(sizedifference)/float(expectedsize)
+                    valuesmissing = float(sizedifference) / itemsize
+                    warnings.warn("Dealing with missing data in img file by completing last spectra with 0's.")
+                    # TODO np.require create an in-memory copy of the full data. Provide option to use memmap'ed tempfile.
+                    tempmap = np.require(np.memmap(filename=self.img_filename,
+                                                   dtype=self.data_type,
+                                                   mode='r',
+                                                   order='C'),
+                                         requirements=['O', 'C'])
+                    #Extend the memmap to the expected size
+                    tempmap.resize((expectednumvalues, ))
+                    # Reshape the memmap to the expected shape
+                    self.m_img_file = tempmap.reshape(self.shape, order='C')
+                    self.file_opened = True
+                elif (sizedifference % slicesize) == 0:
+                    slicesmissing = sizedifference / slicesize
+                    self.mz = self.mz[:(-slicesmissing)]
+                    warnings.warn("Dealing with missing data in img file by updating he m/z axis.." +
+                                  " It looks like the m/z axis data may be inconsistent" +
+                                  " with the binary data. Removing "+str(slicesmissing) +
+                                  " bins from the m/z axis.")
+                    self.shape = list(self.shape)
+                    self.shape[2] = self.mz.shape[0]
+                    self.shape = tuple(self.shape)
+                    self.m_img_file = np.memmap(filename=self.img_filename,
+                                        dtype=self.data_type,
+                                        shape=self.shape,
+                                        mode='r',
+                                        order='C')
+                    self.file_opened = True
+                else:
+                    raise
             else:
                 raise
         except:
