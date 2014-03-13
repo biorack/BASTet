@@ -34,7 +34,7 @@ class img_file(object):
         """
 
         self.data_type = 'uint16'
-        self.shape = [0, 0, 0]  # Number of pixels in x,y, and z
+        self.shape = [0, 0, 0]  # Number of pixels in x,y, and z. NOTE: Will be changed to tuble. List used for assignment.
         self.mz = 0  # A numpy vector with the m/z values of the instrument
 
         if basename and hdr_filename and t2m_filename and img_filename:
@@ -64,26 +64,21 @@ class img_file(object):
         else:
             raise ValueError("Missing input parameter. Either provide: " +
                              " i) basename or ii) hdr_filename, t2m_filename, img_filename")
+        
+        # Initialize the x and y length
+        hdr = open(hdr_filename, 'rb')
+        hdrdata = np.fromfile(file=hdr_filename, dtype='int16', count=-1)
+        self.shape[0] = hdrdata[23]
+        self.shape[1] = hdrdata[22]
+        hdr.close()
 
         # Initialize the z length
-        try:
-            t2m = open(t2m_filename, 'rb')
-            self.mz = np.fromfile(file=t2m, dtype='float32', count=-1)
-            self.shape[2] = self.mz.shape[0]
-            t2m.close()
-        finally:
-            self.mz = np.empty(0)
+        t2m = open(t2m_filename, 'rb')
+        self.mz = np.fromfile(file=t2m, dtype='float32', count=-1)
+        self.shape[2] = self.mz.shape[0]
+        t2m.close()
 
-        # Initialize the x and y length
-        try:
-            hdr = open(hdr_filename, 'rb')
-            hdrdata = np.fromfile(file=hdr_filename, dtype='int16', count=-1)
-            self.shape[0] = hdrdata[23]
-            self.shape[1] = hdrdata[22]
-            hdr.close()
-        finally:
-            pass
-
+        #Convert the shape variable to the expected tuple
         self.shape = tuple(self.shape)
 
         # Open the img file with the spectrum data
@@ -100,24 +95,33 @@ class img_file(object):
             # Check if the size of the file matches what we expect
             imgsize = os.stat(self.img_filename).st_size
             itemsize = np.dtype(self.data_type).itemsize
-            expectedsize = self.shape[0] * \
-                self.shape[1] * self.shape[2] * itemsize
-            if imgsize < expectedsize:
-                warnings.warn("WARNING: Missing bytes in img file. Completing last spectra with 0's.")
-                numvalues = imgsize / itemsize
-                self.m_img_file = np.memmap(filename=self.img_filename,
-                                            dtype=self.data_type,
-                                            shape=(numvalues,),
-                                            mode='r',
-                                            order='C')
-                # Extend the memmap to the expected size
-                self.m_img_file.resize((expectedsize,))
+            expectednumvalues = int(self.shape[0]) * int(self.shape[1]) * int(self.shape[2]) 
+            expectedsize = expectednumvalues * int(itemsize)
+            sizedifference = expectedsize - imgsize
+            print "IMG size: "+str(imgsize)+" Expected size: "+str(expectedsize)+"  (difference="+str(sizedifference)+")"
+	    if imgsize < expectedsize:
+                percentmissing = float(sizedifference)/float(expectedsize)
+                valuesmissing = float(sizedifference) / itemsize 
+                warnings.warn("WARNING: Missing "+str(sizedifference) +
+                              " bytes in img file (missing " + str(valuesmissing) +
+                              " intensity values; "+str(percentmissing)+"%)." + 
+                              " Completing last spectra with 0's.")
+		numvalues = imgsize / itemsize
+		tempmap = np.require(np.memmap(filename=self.img_filename,
+                                                  dtype=self.data_type,
+                                                  #shape=(expectednumvalues,)
+                                                  mode='r',
+                                                  order='C'),
+                                        requirements=['O', 'C'])
+                
+                #Extend the memmap to the expected size
+                tempmap.resize((expectednumvalues, ))
                 # Reshape the memmap to the expected shape
-                self.m_img_file.reshape(self.shape)
+                self.m_img_file = tempmap.reshape(self.shape, order='C')
+                self.file_opened = True
             else:
-                print "Error while opening the img file: " + img_filename
                 raise
-        finally:
+        except:
             print "Error while opening the img file: " + img_filename
             raise
 
