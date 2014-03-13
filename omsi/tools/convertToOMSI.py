@@ -14,6 +14,7 @@ import numpy as np
 import math
 import sys
 import os
+import warnings
 #from sys import exit
 try:
     from PIL import Image
@@ -104,6 +105,7 @@ file_owner = None  # Specify for which owner the file should be registered
 #  Define error-handling options                                  ##
 ####################################################################
 error_handling = "terminate-and-cleanup"
+recorded_warnings = []
 
 ####################################################################
 #  Define analysis options and parameter settings                 ##
@@ -196,7 +198,11 @@ def main(argv=None):
     # Convert all files                                                #
     ####################################################################
     try:
-        convert_files()
+        #Convert all files and record warnings for reporting purposes
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            convert_files()
+            recorded_warnings += w
     except:
         print "ERROR: An error occured during the file conversion."
         # Try to close the output file
@@ -230,6 +236,14 @@ def main(argv=None):
         status = register_file_with_db(
             filepath=omsiOutFile, db_server=db_server_url, file_owner_name=file_owner)
         print "Registered file with DB: " + str(status)
+
+    ####################################################################
+    #  Report all recorded warnings if any                             #
+    ####################################################################
+    if len(recorded_warnings) > 0:
+        print "WARNING: The following warnings occured during the conversion process"
+        for warn in recorded_warnings:
+            print warn.message
 
     ####################################################################
     #  Exit                                                            #
@@ -421,7 +435,7 @@ def convert_files():
         ####################################################################
         #  Generate the thumbnail image for the current file              ##
         ####################################################################
-        try :
+        try:
             if generate_thumbnail:
                 print "Generating the thumbnail image"
                 if execute_nmf:
