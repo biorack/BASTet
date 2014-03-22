@@ -1,6 +1,8 @@
 """Tool used to convert img files to OpenMSI HDF5 files.
 
   For usage information execute: python convertToOMSI --help
+
+  #TODO Register all print-outs with the email message
 """
 
 from omsi.dataformat.bruckerflex_file import bruckerflex_file
@@ -131,7 +133,7 @@ nmf_tolerance = 0.0001  # Tolerance level for the nmf
 # finding data
 nmf_use_raw_data = False
 
-#TODO Register all print-outs with the email message
+
 def main(argv=None):
     """The main function defining the control flow for the conversion"""
     # Get the global variables
@@ -181,9 +183,9 @@ def main(argv=None):
         print "Number of conversion: " + str(len(dataset_list))
     except:
         emailmsg =  "ERROR: An error occurred during the generation of the input filelist. \n"
-        emailmsg +=  "       -- No HDF5 output file has been generated. \n"
-        emailmsg +=  "       -- No file has been added to the database. \n"
-        emailmsg +=  "       -- Terminating \n"
+        emailmsg += "       -- No HDF5 output file has been generated. \n"
+        emailmsg += "       -- No file has been added to the database. \n"
+        emailmsg += "       -- Terminating \n"
         emailmsg += str(sys.exc_info())
         send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                    body=emailmsg,
@@ -222,36 +224,36 @@ def main(argv=None):
             convert_files()
             recorded_warnings += w
     except:
-        emailmsg =  "ERROR: An error occured during the file conversion. \n"
+        emailmsg = "ERROR: An error occured during the file conversion. \n"
         print "ERROR: An error occured during the file conversion."
         # Try to close the output file
         try:
             omsi_output_file.close_file()
-            emailmsg += "  - Successfully closed output file"+ " \n"
+            emailmsg += "  - Successfully closed output file" + " \n"
         except:
             emailmsg += "  - Closing of output HDF5 file failed" + str(sys.exc_info()) + " \n"
             pass
         if error_handling == "terminate-and-cleanup":
-            emailmsg += "  -The generated HDF5 will not be added to the database."+ " \n"
+            emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
-            emailmsg += "  -Attempting to delete the generated HDF5 file."+ " \n"
+            emailmsg += "  -Attempting to delete the generated HDF5 file." + " \n"
             print "--Attempting to delete the generated HDF5 file."
             os.remove(omsiOutFile)
-            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile)+ " \n"
+            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile) + " \n"
             print "--Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
         if error_handling == "terminate-only" or error_handling == "continue-on-error":
-            emailmsg += "  -The generated HDF5 will not be added to the database."+ " \n"
+            emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
-            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile)+ " \n"
-            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile))+ " \n"
+            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile) + " \n"
+            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile)) + " \n"
             print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
             print "  Output file found: " + str(os.path.exists(omsiOutFile))
 
         #Add warnings to the email message
         emailmsg += "\n"
-        emailmsg += "---------------------------------------------"+ " \n"
+        emailmsg += "---------------------------------------------" + " \n"
         emailmsg += "\n"
         for warn in recorded_warnings:
             emailmsg += warn.message + "\n"
@@ -290,14 +292,14 @@ def main(argv=None):
     ####################################################################
     #  Send email notification if requested                            #
     ####################################################################
-    if len(recorded_warnings) == 0 :
-        send_email( subject='Conversion complete: '+str(omsiOutFile)  ,
-                    body='Success',
-                    email_type='success')
+    if len(recorded_warnings) == 0:
+        send_email(subject='Conversion complete: '+str(omsiOutFile),
+                   body='Success',
+                   email_type='success')
     elif len(email_error_recipients) > 0:
-        send_email( subject='Conversion completed with warnings: '+str(omsiOutFile)  ,
-                    body=warningmsg,
-                    email_type='warning')
+        send_email(subject='Conversion completed with warnings: '+str(omsiOutFile),
+                   body=warningmsg,
+                   email_type='warning')
 
     ####################################################################
     #  Exit                                                            #
@@ -340,7 +342,6 @@ def convert_files():
     ####################################################################
     # Iterate over all img files
     for i in dataset_list:  # xrange(startIndex,len(argv)-1):
-
         ####################################################################
         #  Convert the raw data to HDF5                                   ##
         ####################################################################
@@ -1065,7 +1066,6 @@ def send_email(subject, body, sender='convert@openmsi.nersc.gov', email_type='su
         Warnings.warn('Email could not be sent' + str(sys.exc_info()))
 
 
-
 def parse_input_args(argv):
     """Process input parameters and define the script settings.
 
@@ -1298,8 +1298,8 @@ def parse_input_args(argv):
             file_owner = str(argv[i + 1])
         elif currentArg == "--email":
             #Consume all email addresses that follow
-            for ni in range((i+1),len(argv)):
-                if not argv[ni].startswith("--"):
+            for ni in range((i+1), len(argv)):
+                if not argv[ni].startswith("--") and "@" in argv[ni]:
                     email_success_recipients.append(str(argv[ni]))
                     email_error_recipients.append(str(argv[ni]))
                     startIndex = ni+1
@@ -1307,16 +1307,16 @@ def parse_input_args(argv):
                     break
         elif currentArg == "--email-success":
             #Consume all email addresses that follow
-            for ni in range((i+1),len(argv)):
-                if not argv[ni].startswith("--"):
+            for ni in range((i+1), len(argv)):
+                if not argv[ni].startswith("--") and "@" in argv[ni]:
                     email_success_recipients.append(str(argv[ni]))
                     startIndex = ni+1
                 else:
                     break
         elif currentArg == "--email-error":
             #Consume all email addresses that follow
-            for ni in range((i+1),len(argv)):
-                if not argv[ni].startswith("--"):
+            for ni in range((i+1), len(argv)):
+                if not argv[ni].startswith("--") and "@" in argv[ni]:
                     email_error_recipients.append(str(argv[ni]))
                     startIndex = ni+1
                 else:
