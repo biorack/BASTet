@@ -291,13 +291,11 @@ def main(argv=None):
     #  Send email notification if requested                            #
     ####################################################################
     if len(recorded_warnings) == 0 :
-        send_email( recipients=email_success_recipients,
-                    subject='Conversion complete: '+str(omsiOutFile)  ,
+        send_email( subject='Conversion complete: '+str(omsiOutFile)  ,
                     body='Success',
                     email_type='success')
     elif len(email_error_recipients) > 0:
-        send_email( recipients=email_success_recipients,
-                    subject='Conversion completed with warnings: '+str(omsiOutFile)  ,
+        send_email( subject='Conversion completed with warnings: '+str(omsiOutFile)  ,
                     body=warningmsg,
                     email_type='warning')
 
