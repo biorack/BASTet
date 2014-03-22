@@ -250,6 +250,8 @@ def main(argv=None):
             emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile)) + " \n"
             print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
             print "  Output file found: " + str(os.path.exists(omsiOutFile))
+        emailmsg += "\n"
+        emailmsg += str(sys.exc_info())
 
         #Add warnings to the email message
         emailmsg += "\n"
