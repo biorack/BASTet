@@ -108,6 +108,13 @@ error_handling = "terminate-and-cleanup"
 recorded_warnings = []
 
 ####################################################################
+# Define error email notification options                         ##
+####################################################################
+email_success_recipients = []
+email_error_recipients = []
+
+
+####################################################################
 #  Define analysis options and parameter settings                 ##
 ####################################################################
 execute_nmf = True  # Define whether NMF should be performed
@@ -124,7 +131,7 @@ nmf_tolerance = 0.0001  # Tolerance level for the nmf
 # finding data
 nmf_use_raw_data = False
 
-
+#TODO Register all print-outs with the email message
 def main(argv=None):
     """The main function defining the control flow for the conversion"""
     # Get the global variables
@@ -138,6 +145,8 @@ def main(argv=None):
     global error_handling
     global available_error_options
     global recorded_warnings
+    global email_error_recipients
+    global email_success_recipients
     #global require_login
 
     ####################################################################
@@ -147,22 +156,21 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     # Parse the input arguments
-    inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(
-        argv)
+    inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(argv)
     # Terminate in case an error or warning has occured while processing the
     # user input parameters.
     if inputError:
-        print "Terminated. One or more error occured while parsing the command line inputs."
+        emailmsg = "One or more error occurred while parsing the command line inputs."
+        send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
+                   body=emailmsg,
+                   email_type='error')
+        raise ValueError(emailmsg)
     if inputWarning:
-        print "Terminated. Conflicting input parameters found. See WARNINGS above for details."
-    if inputWarning or inputError:
-        exit()
-
-    ####################################################################
-    #   Reuqire login if requested                                     #
-    ####################################################################
-    # if require_login:
-    #    loginUser()
+        emailmsg = "Conflicting input parameters found. See WARNINGS above for details."
+        send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
+                   body=emailmsg,
+                   email_type='error')
+        raise ValueError(emailmsg)
 
     ####################################################################
     # Generate the list of datasets to be converted                    #
@@ -172,10 +180,15 @@ def main(argv=None):
                                            format_type=format_option, data_region_option=region_option)
         print "Number of conversion: " + str(len(dataset_list))
     except:
-        print "ERROR: An error occured during the generation of the input filelist."
-        print "       -- Not HDF5 output file has been generated."
-        print "       -- No file has been added to the database."
-        print "       -- Terminating"
+        emailmsg =  "ERROR: An error occurred during the generation of the input filelist.\n"
+        emailmsg +=  "       -- No HDF5 output file has been generated."
+        emailmsg +=  "       -- No file has been added to the database."
+        emailmsg +=  "       -- Terminating"
+        emailmsg += str(sys.exc_info())
+        send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
+                   body=emailmsg,
+                   email_type='error')
+        print emailmsg
         raise
 
     ####################################################################
@@ -192,8 +205,12 @@ def main(argv=None):
         if omsiOutFile is not None:
             omsi_output_file = omsi_file(omsiOutFile)
     except:
-        print "Unexpected error creating the output file:", sys.exc_info()[0]
-        exit(0)
+        emailmsg = "Unexpected error creating the output file:", sys.exc_info()[0]
+        send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
+                   body=emailmsg,
+                   email_type='error')
+        print emailmsg
+        raise
 
     ####################################################################
     # Convert all files                                                #
@@ -205,24 +222,46 @@ def main(argv=None):
             convert_files()
             recorded_warnings += w
     except:
+        emailmsg =  "ERROR: An error occured during the file conversion."
         print "ERROR: An error occured during the file conversion."
         # Try to close the output file
         try:
             omsi_output_file.close_file()
+            emailmsg += "  - Successfully closed output file"
         except:
+            emailmsg += "  - Closing of output HDF5 file failed" + str(sys.exc_info())
             pass
         if error_handling == "terminate-and-cleanup":
+            emailmsg += "  -The generated HDF5 will not be added to the database."
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
+            emailmsg += "  -Attempting to delete the generated HDF5 file."
             print "--Attempting to delete the generated HDF5 file."
             os.remove(omsiOutFile)
+            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
             print "--Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
         if error_handling == "terminate-only" or error_handling == "continue-on-error":
+            emailmsg += "  -The generated HDF5 will not be added to the database."
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
+            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
+            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile))
             print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
             print "  Output file found: " + str(os.path.exists(omsiOutFile))
-        # Pass on which-ever error has occured
+
+        #Add warnings to the email message
+        emailmsg += "\n"
+        emailmsg += "---------------------------------------------"
+        emailmsg += "\n"
+        for warn in recorded_warnings:
+            emailmsg += warn.message + "\n"
+
+        #Send email notification if needed
+        send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
+                   body=emailmsg,
+                   email_type='error')
+
+        # Pass on which-ever error has occurred
         raise
 
     ####################################################################
@@ -239,17 +278,33 @@ def main(argv=None):
         print "Registered file with DB: " + str(status)
 
     ####################################################################
-    #  Report all recorded warnings if any                             #
+    #  Report all recorded warnings on the command line                #
     ####################################################################
+    warningmsg = ""
     if len(recorded_warnings) > 0:
-        print "WARNING: The following warnings occured during the conversion process"
+        warningmsg += "WARNING: The following warnings occurred during the conversion process"
         for warn in recorded_warnings:
-            print warn.message
+            warningmsg += warn.message + "\n"
+        print warningmsg
+
+    ####################################################################
+    #  Send email notification if requested                            #
+    ####################################################################
+    if len(recorded_warnings) == 0 :
+        send_email( recipients=email_success_recipients,
+                    subject='Conversion complete: '+str(omsiOutFile)  ,
+                    body='Success',
+                    email_type='success')
+    elif len(email_error_recipients) > 0:
+        send_email( recipients=email_success_recipients,
+                    subject='Conversion completed with warnings: '+str(omsiOutFile)  ,
+                    body=warningmsg,
+                    email_type='warning')
 
     ####################################################################
     #  Exit                                                            #
     ####################################################################
-    exit(0)
+    #exit(0)
 
 
 def convert_files():
@@ -280,6 +335,7 @@ def convert_files():
     global omsi_output_file
     global error_handling
     global available_error_options
+
 
     ####################################################################
     #  Convert the MSI files and compute the requested analyses       ##
@@ -939,6 +995,79 @@ def set_apache_acl(filepath):
     os.system(command)
 
 
+def send_email(subject, body, sender='convert@openmsi.nersc.gov', email_type='success'):
+    """Send email notification to users.
+
+       :param subject: Subject line of the email
+       :param body: Body text of the email.
+       :param sender: The originating email address
+       :param email_type: One of 'success, 'error', 'warning'. Error messages are sent
+                 tp email_error_recipients, success messages to email_success_recipients and
+                 warning messages are sent to both lists.
+
+    """
+
+    global email_success_recipients
+    global email_error_recipients
+
+    #Define the list of recipients
+    if email_type == 'success':
+        recipients = email_success_recipients
+    elif email_type == 'error':
+        recipients = email_error_recipients
+    else:
+        recipients = email_error_recipients + email_success_recipients
+    #Remove duplicates from the list of recipients
+    recipients = list(set(recipients))
+    #Check if we have any recipients
+    if len(recipients) == 0:
+        return
+
+    from smtplib import SMTP
+    from email.MIMEText import MIMEText
+    from email.Header import Header
+    from email.Utils import parseaddr, formataddr
+
+    header_charset = 'ISO-8859-1'
+    for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+        try:
+            body.encode(body_charset)
+        except UnicodeError:
+            pass
+        else:
+            break
+
+    # Define the sender and recipients
+    sender_name, sender_addr = parseaddr(sender)
+    sender_name = str(Header(unicode(sender_name), header_charset))
+    sender_addr = sender_addr.encode('ascii')
+
+    tostr = ""
+    for ri in range(len(recipients)):
+        rec = recipients[ri]
+        recname, recaddr = parseaddr(rec)
+        recname = str(Header(unicode(recname), header_charset))
+        recaddr = recaddr.encode('ascii')
+        tostr += formataddr((recname, recaddr))
+        if ri < (len(recipients)-1):
+            tostr += ", "
+
+    # Construct the message
+    msg = MIMEText(body.encode(body_charset), 'plain', body_charset)
+    msg['From'] = formataddr((sender_name, sender_addr))
+    msg['To'] = tostr
+    msg['Subject'] = Header(unicode(subject), header_charset)
+
+    # Send the message using sendmail
+    try:
+        smtp = SMTP("localhost")
+        smtp.sendmail(sender, recipients, msg.as_string())
+        smtp.quit()
+    except:
+        Warnings.warn('Email could not be sent' + str(sys.exc_info()))
+
+
+
 def parse_input_args(argv):
     """Process input parameters and define the script settings.
 
@@ -978,6 +1107,8 @@ def parse_input_args(argv):
     global file_owner
     global error_handling
     global check_add_nersc
+    global email_error_recipients
+    global email_success_recipients
     #global require_login
 
     # Initalize the output values to be returned
@@ -1167,9 +1298,25 @@ def parse_input_args(argv):
         elif currentArg == "--owner":
             startIndex += 2
             file_owner = str(argv[i + 1])
-        # elif currentArg == "--login":
-        #    startIndex = startIndex+1
-        #    require_login = True
+        elif currentArg == "--email":
+            #Consume all email addresses that follow
+            for ni in range((i+1),len(argv)):
+                if not argv[ni].startswith("--"):
+                    email_success_recipients.append(str(argv[ni]))
+                    email_error_recipients.append(str(argv[ni]))
+                    startIndex = ni+1
+        elif currentArg == "--email-success":
+            #Consume all email addresses that follow
+            for ni in range((i+1),len(argv)):
+                if not argv[ni].startswith("--"):
+                    email_success_recipients.append(str(argv[ni]))
+                    startIndex = ni+1
+        elif currentArg == "--email-error":
+            #Consume all email addresses that follow
+            for ni in range((i+1),len(argv)):
+                if not argv[ni].startswith("--"):
+                    email_error_recipients.append(str(argv[ni]))
+                    startIndex = ni+1
         elif currentArg == "--error-handling":
             startIndex += 2
             errorOption = str(argv[i + 1])
@@ -1269,6 +1416,9 @@ def print_help():
     print "                            add the file to the database."
     print "                   iii) continue-on-error: Ignore errors if possible and continue, even if this"
     print "                            means that some data may be missing from the output."
+    print "--email <email1 email2 ...>: Send notification in case of both error or success to the given email address."
+    print "--email-success <email1 email2 ...>>: Send notification in case of success to the given email address."
+    print "--email-error <email1 email2 ...>>: Send notification in case of error to the given email address."
     print ""
     print "===INPUT DATA OPTIONS=== "
     print ""
