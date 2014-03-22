@@ -180,10 +180,10 @@ def main(argv=None):
                                            format_type=format_option, data_region_option=region_option)
         print "Number of conversion: " + str(len(dataset_list))
     except:
-        emailmsg =  "ERROR: An error occurred during the generation of the input filelist.\n"
-        emailmsg +=  "       -- No HDF5 output file has been generated."
-        emailmsg +=  "       -- No file has been added to the database."
-        emailmsg +=  "       -- Terminating"
+        emailmsg =  "ERROR: An error occurred during the generation of the input filelist. \n"
+        emailmsg +=  "       -- No HDF5 output file has been generated. \n"
+        emailmsg +=  "       -- No file has been added to the database. \n"
+        emailmsg +=  "       -- Terminating \n"
         emailmsg += str(sys.exc_info())
         send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                    body=emailmsg,
@@ -222,36 +222,36 @@ def main(argv=None):
             convert_files()
             recorded_warnings += w
     except:
-        emailmsg =  "ERROR: An error occured during the file conversion."
+        emailmsg =  "ERROR: An error occured during the file conversion. \n"
         print "ERROR: An error occured during the file conversion."
         # Try to close the output file
         try:
             omsi_output_file.close_file()
-            emailmsg += "  - Successfully closed output file"
+            emailmsg += "  - Successfully closed output file"+ " \n"
         except:
-            emailmsg += "  - Closing of output HDF5 file failed" + str(sys.exc_info())
+            emailmsg += "  - Closing of output HDF5 file failed" + str(sys.exc_info()) + " \n"
             pass
         if error_handling == "terminate-and-cleanup":
-            emailmsg += "  -The generated HDF5 will not be added to the database."
+            emailmsg += "  -The generated HDF5 will not be added to the database."+ " \n"
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
-            emailmsg += "  -Attempting to delete the generated HDF5 file."
+            emailmsg += "  -Attempting to delete the generated HDF5 file."+ " \n"
             print "--Attempting to delete the generated HDF5 file."
             os.remove(omsiOutFile)
-            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
+            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile)+ " \n"
             print "--Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
         if error_handling == "terminate-only" or error_handling == "continue-on-error":
-            emailmsg += "  -The generated HDF5 will not be added to the database."
+            emailmsg += "  -The generated HDF5 will not be added to the database."+ " \n"
             print "--The generated HDF5 will not be added to the database."
             add_file_to_db = False
-            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
-            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile))
+            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile)+ " \n"
+            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile))+ " \n"
             print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
             print "  Output file found: " + str(os.path.exists(omsiOutFile))
 
         #Add warnings to the email message
         emailmsg += "\n"
-        emailmsg += "---------------------------------------------"
+        emailmsg += "---------------------------------------------"+ " \n"
         emailmsg += "\n"
         for warn in recorded_warnings:
             emailmsg += warn.message + "\n"
