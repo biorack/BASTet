@@ -1305,18 +1305,24 @@ def parse_input_args(argv):
                     email_success_recipients.append(str(argv[ni]))
                     email_error_recipients.append(str(argv[ni]))
                     startIndex = ni+1
+                else:
+                    break
         elif currentArg == "--email-success":
             #Consume all email addresses that follow
             for ni in range((i+1),len(argv)):
                 if not argv[ni].startswith("--"):
                     email_success_recipients.append(str(argv[ni]))
                     startIndex = ni+1
+                else:
+                    break
         elif currentArg == "--email-error":
             #Consume all email addresses that follow
             for ni in range((i+1),len(argv)):
                 if not argv[ni].startswith("--"):
                     email_error_recipients.append(str(argv[ni]))
                     startIndex = ni+1
+                else:
+                    break
         elif currentArg == "--error-handling":
             startIndex += 2
             errorOption = str(argv[i + 1])
