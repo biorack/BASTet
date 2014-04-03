@@ -29,7 +29,7 @@ except:
         pil_available = False
 try:
     import urllib2
-    #import urllib
+    import urllib
 except:
     # This is to ensure the script is usable without urllib2 when register to
     # DB is not requested
@@ -969,8 +969,10 @@ def register_file_with_db(filepath, db_server, file_owner_name):
 
     # Construct the db add-file url
     addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
-    addFileURL = addFileURL + "?file=" + \
-        os.path.abspath(filepath) + "&owner=" + currOwner
+    queryParams = {'file':os.path.abspath(filepath), 'owner':currOwner }
+    addFileURL += urllib.urlencode(queryParams)
+    #addFileURL = addFileURL + "?file=" + \
+    #    os.path.abspath(filepath) + "&owner=" + currOwner
 
     # Make the url request
     try:
