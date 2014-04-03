@@ -119,7 +119,8 @@ class omsi_analysis_base(object) :
         
         #Record basic excution provenance information
         self.run_info = {}
-        try : 
+        try :
+            #Record run information
             self.run_info['architecture'] = unicode( platform.architecture() )
             self.run_info['java_ver'] = unicode( platform.java_ver() )
             self.run_info['libc_ver'] = unicode( platform.libc_ver() )
@@ -154,6 +155,14 @@ class omsi_analysis_base(object) :
         #Finalize recording of post execution provenance
         self.run_info['execution_time'] = unicode( time.time() - startTime )
         self.run_info['end_time'] = unicode(datetime.datetime.now())
+
+        #Remove empty items from the run_info dict
+        try:
+            for k, v in self.run_info.items():
+                if len(v) == 0:
+                    self.run_info.pop(k)
+        except:
+            pass
 
         #Return the output of the analysis
         return re
