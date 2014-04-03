@@ -277,8 +277,9 @@ def main(argv=None):
     #  Register the file with the database                             #
     ####################################################################
     if add_file_to_db:
-        status = register_file_with_db(
-            filepath=omsiOutFile, db_server=db_server_url, file_owner_name=file_owner)
+        status = register_file_with_db(filepath=omsiOutFile,
+                                       db_server=db_server_url,
+                                       file_owner_name=file_owner)
         print "Registered file with DB: " + str(status)
 
     ####################################################################
@@ -990,7 +991,7 @@ def set_apache_acl(filepath):
        to Apache at NERSC. This necessary to make the file readable for adding it to the
        database.
     """
-    print "Setting NERSC ACL permssiosn for Apache"
+    print "Setting NERSC ACL permissions for Apache"
     #command = "setfacl -R -m u:apache:rwx "+filepath
     command = "setfacl -R -m u:48:rwx " + filepath
     os.system(command)
