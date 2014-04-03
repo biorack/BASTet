@@ -391,7 +391,8 @@ class bruckerflex_file:
             for f in files:
                 # ToDo: We are only interested in fid and acqu files right now
                 # but that may need to change
-                if f.endswith("fid") or f.endswith("acqu"):
+                if f.endswith("fid") or f.endswith("acqu") and \
+                   not (f.endswith("_fid") or f.endswith("_acqu")):
                     # Compute the pixelindex for the file
                     pindex = path.lstrip(spotfolder).lstrip(
                         "/").split("/")[0].split("X")[1].split("Y")
