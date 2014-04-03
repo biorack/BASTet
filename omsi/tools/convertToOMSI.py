@@ -17,7 +17,17 @@ import math
 import sys
 import os
 import warnings
-#from sys import exit
+
+# Imports for user input with timeout
+from select import select
+import platform
+try:
+    if platform.system() == "Windows":
+        import msvcrt
+except:
+    pass
+
+# Imports for thumbnail image rendering
 try:
     from PIL import Image
     pil_available = True
@@ -27,6 +37,8 @@ except:
         pil_available = True
     except:
         pil_available = False
+
+# Imports for registering files with the database
 try:
     import urllib2
     import urllib
@@ -39,19 +51,19 @@ except:
 ####################################################################
 #  Variables used for internal storage                             #
 ####################################################################
+dataset_list = []
 """ :param dataList: List of python dictionaries describing specific conversion \
              settings for each conversion task. Each dictionary contains the following keys:
-    
-             * 'basename' : Name of the file to be converted 
-             * 'format' : File format to be used (see available_formats) 
+
+             * 'basename' : Name of the file to be converted
+             * 'format' : File format to be used (see available_formats)
              * 'exp' : Indicate the experiment the dataset should be stored with. Valid values are \
-                       
+
                           * 'new' : Generate a new experiment for the dataset
-                          * 'previous' : Use the same experiment as used for the previous dataset 
-                          * 1, 2,3...   : Integer value indicating the index of the experiment to be used. 
+                          * 'previous' : Use the same experiment as used for the previous dataset
+                          * 1, 2,3...   : Integer value indicating the index of the experiment to be used.
             * 'region' : Optional key with index of the region to be converted. None if all regions should be merged.
 """
-dataset_list = []
 omsi_output_file = None  # The openMSI output data file to be used.
 
 ####################################################################
@@ -158,17 +170,25 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     # Parse the input arguments
-    inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(argv)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        inputError, inputWarning, omsiOutFile, inputFilenames = parse_input_args(argv)
+        recorded_warnings += w
+
     # Terminate in case an error or warning has occured while processing the
     # user input parameters.
     if inputError:
-        emailmsg = "One or more error occurred while parsing the command line inputs."
+        emailmsg = "One or more errors occurred while parsing the command line inputs."
+        for warn in recorded_warnings:
+            emailmsg += warn.message + "\n"
         send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                    body=emailmsg,
                    email_type='error')
         raise ValueError(emailmsg)
     if inputWarning:
-        emailmsg = "Conflicting input parameters found. See WARNINGS above for details."
+        emailmsg = "Conflicting input parameters found. See WARNINGS for detail:."
+        for warn in recorded_warnings:
+            emailmsg += warn.message + "\n"
         send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                    body=emailmsg,
                    email_type='error')
@@ -182,7 +202,7 @@ def main(argv=None):
                                            format_type=format_option, data_region_option=region_option)
         print "Number of conversion: " + str(len(dataset_list))
     except:
-        emailmsg =  "ERROR: An error occurred during the generation of the input filelist. \n"
+        emailmsg = "ERROR: An error occurred during the generation of the input filelist. \n"
         emailmsg += "       -- No HDF5 output file has been generated. \n"
         emailmsg += "       -- No file has been added to the database. \n"
         emailmsg += "       -- Terminating \n"
@@ -277,9 +297,15 @@ def main(argv=None):
     #  Register the file with the database                             #
     ####################################################################
     if add_file_to_db:
-        status = register_file_with_db(filepath=omsiOutFile,
-                                       db_server=db_server_url,
-                                       file_owner_name=file_owner)
+        try:
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                status = register_file_with_db(filepath=omsiOutFile,
+                                               db_server=db_server_url,
+                                               file_owner_name=file_owner)
+                recorded_warnings += w
+        except ValueError:
+            recorded_warnings += [sys.exc_info()]
         print "Registered file with DB: " + str(status)
 
     ####################################################################
@@ -604,10 +630,12 @@ def convert_files():
                     #thumbnailFilename = omsi_output_file.hdf_filename+"_"+expIndex+".png"
                     #thumbnail.save(thumbnailFilename, 'PNG')
         except ImportError:
-            print "ERROR: Thumbnail generation failed. I/O error({0}): {1}".format(e.errno, e.strerror)
+            print "ERROR: Thumbnail generation failed. I/O error.", sys.exc_info()[0]
+            warnings.warn("ERROR: Thumbnail generation failed. I/O error. " + str(sys.exc_info()))
             pass
         except:
             print "ERROR: Thumbnail generation failed. Unexpected error:", sys.exc_info()[0]
+            warnings.warn("ERROR: Thumbnail generation failed. Unexpected error. " + str(sys.exc_info()))
             pass
 
     ####################################################################
@@ -704,7 +732,7 @@ def create_dataset_list(inputFilenames, format_type='auto', data_region_option="
 
             # This is just to make sure that we have checked everything
             if data_region_option not in available_region_options:
-                print "WARNING: Undefined region option. Using the default option split+merge"
+                warnings.warn("WARNING: Undefined region option. Using the default option split+merge")
         else:
             re_dataset_list.append(currDS)
 
@@ -734,13 +762,14 @@ def suggest_chunkings_for_files(in_dataset_list):
                     spotlist_filename=basefile, readall=False)
                 inputFile.set_region_selection(i["region"])
             else:
-                print "WARNING: Type of file could not be determined for: " + basefile
+                warnings.warn("WARNING: Type of file could not be determined for: " + basefile)
                 continue
             print "In data shape: " + str(inputFile.shape)
             suggest_chunking(xsize=inputFile.shape[0], ysize=inputFile.shape[
                              1], mzsize=inputFile.shape[2], dtype=inputFile.data_type, print_results=True)
         except:
-            print "Error while trying to generate chunking suggestion for " + basefile
+            warnings.warn("Error while trying to generate chunking suggestion for " +
+                          basefile + " " + str(sys.exc_info()))
 
 
 def suggest_chunking(xsize, ysize, mzsize, dtype, print_results=False):
@@ -941,8 +970,15 @@ def register_file_with_db(filepath, db_server, file_owner_name):
             print "WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location."
             print "Do you want to add the file? (Y/N):"
             numTrys = 3
+            timeout = 5*60  # Timeout after 5 minutes
             for i in range(numTrys):
-                userInput = raw_input()
+                #userInput = raw_input()
+                userInput = userinput_with_timeout(timeout=timeout, default=None)
+                if userInput is None:
+                    warnings.warn("WARNING: Attempt to add a file to openmsi.nersc.gov that," +
+                                  " is not in a default location. Timeout occurred before" +
+                                  " user confirmed. Aborted adding the file to the DB.")
+                    return False
                 if userInput == "Y" or userInput == "y" or userInput == "Yes" or \
                         userInput == "yes" or userInput == "YES":
                     break
@@ -951,9 +987,11 @@ def register_file_with_db(filepath, db_server, file_owner_name):
                     return False
                 else:
                     if i == (numTrys - 1):
-                        print "Aborting adding file to the database."
+                        warnings.warn("WARNING: Attempt to add a file to openmsi.nersc.gov that," +
+                                      " is not in a default location. User input unrecognized." +
+                                      " Aborted adding the file to the DB.")
                         return False
-                    print "Unrecognized repsonse. Do you want to add the file? (Y/N): "
+                    print "Unrecognized response. Do you want to add the file? (Y/N): "
 
     # If we are at NERSC then set the NERSC Apache permissions
     if 'nersc.gov' in db_server:
@@ -964,12 +1002,11 @@ def register_file_with_db(filepath, db_server, file_owner_name):
     if not currOwner:
         currOwner = os.path.dirname(filepath).split("/")[-1]
     if not currOwner:
-        print "ERROR: File could not be added to DB. Owner could not be determined."
-        return False
+        raise ValueError("ERROR: File could not be added to DB. Owner could not be determined.")
 
     # Construct the db add-file url
     addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
-    queryParams = {'file':os.path.abspath(filepath), 'owner':currOwner }
+    queryParams = {'file': os.path.abspath(filepath), 'owner': currOwner}
     addFileURL += urllib.urlencode(queryParams)
     #addFileURL = addFileURL + "?file=" + \
     #    os.path.abspath(filepath) + "&owner=" + currOwner
@@ -981,9 +1018,9 @@ def register_file_with_db(filepath, db_server, file_owner_name):
         if urlResponse.code == 200:
             return True
     except urllib2.HTTPError as requestError:
-        print "ERROR: File could not be added to DB:"
-        print "      Error-code:" + str(requestError.code)
-        print "      Error info:" + str(requestError.read())
+        raise ValueError("ERROR: File could not be added to DB: \n" +
+                         "      Error-code:" + str(requestError.code) + "\n" +
+                         "      Error info:" + str(requestError.read()))
 
     return False
 
@@ -994,7 +1031,9 @@ def set_apache_acl(filepath):
        database.
     """
     print "Setting NERSC ACL permissions for Apache"
-    #command = "setfacl -R -m u:apache:rwx "+filepath
+    # Note u:48 is a replacement for u:apache to ensure that
+    # that the command works properly on edison.nersc.gov which
+    # does not have the apache user. However u:48 is equivalent.
     command = "setfacl -R -m u:48:rwx " + filepath
     os.system(command)
 
@@ -1033,8 +1072,10 @@ def send_email(subject, body, sender='convert@openmsi.nersc.gov', email_type='su
     from email.Utils import parseaddr, formataddr
 
     header_charset = 'ISO-8859-1'
-    for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+    body_charset = 'US-ASCII'
+    for bc in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
         try:
+            body_charset = bc
             body.encode(body_charset)
         except UnicodeError:
             pass
@@ -1068,7 +1109,7 @@ def send_email(subject, body, sender='convert@openmsi.nersc.gov', email_type='su
         smtp.sendmail(sender, recipients, msg.as_string())
         smtp.quit()
     except:
-        Warnings.warn('Email could not be sent' + str(sys.exc_info()))
+        warnings.warn('Email could not be sent' + str(sys.exc_info()))
 
 
 def parse_input_args(argv):
@@ -1114,12 +1155,8 @@ def parse_input_args(argv):
     global email_success_recipients
     #global require_login
 
-    # Initalize the output values to be returned
-    # Parameter used to track whether an error has occured while parsing the
-    # input parameters
-    inputError = False
-    # Parameter used to indicate conflicting input parameter options
-    inputWarning = False
+    inputError = False    # Parameter used to track whether an error has occured while parsing the
+    inputWarning = False  # Parameter used to indicate conflicting input parameter options
     outputFilename = None  # The output filename
     inputFilenames = []  # The list of input filenames
     # Basic sanity check
@@ -1163,7 +1200,7 @@ def parse_input_args(argv):
             nmf_num_iter = int(argv[i + 1])
             if nmf_num_iter < 2:
                 inputWarning = True
-                print "WARNING: --nfm-niter must be 2 or larger"
+                warnings.warn("WARNING: --nfm-niter must be 2 or larger")
             print "Set nmf-niter=" + str(nmf_num_iter)
         elif currentArg == "--nmf-tolerance":
             startIndex += 2
@@ -1183,7 +1220,7 @@ def parse_input_args(argv):
             print "Disable find peaks global"
             if "--fpg" in argv:
                 inputWarning = True
-                print "WARNING: --no-fpg and --fpg options are conflicting."
+                warnings.warn("WARNING: --no-fpg and --fpg options are conflicting.")
         elif currentArg == "--fpl":
             startIndex += 1
             execute_fpl = True
@@ -1194,19 +1231,19 @@ def parse_input_args(argv):
             print "Disable find peaks local"
             if "--fpl" in argv:
                 inputWarning = True
-                print "WARNING: --no-fpl and --fpl options are conflicting."
+                warnings.warn("WARNING: --no-fpl and --fpl options are conflicting.")
         elif currentArg == "--auto-chunking":
             startIndex += 1
             auto_chunk = True
             if "--chunking" in argv:
                 inputWarning = True
-                print "WARNING: --chunking options will be ignored due to the use of --auto-chunking"
+                warnings.warn("WARNING: --chunking options will be ignored due to the use of --auto-chunking")
             if "--no-chunking" in argv:
                 inputWarning = True
-                print "WARNING: --no-chunking and --auto-chunking options are conflicting"
+                warnings.warn("WARNING: --no-chunking and --auto-chunking options are conflicting")
             if "--optimized-chunking" in argv:
                 inputWarning = True
-                print "WARNING: --optimized-chunking and --auto-chunking options are conflicting"
+                warnings.warn("WARNING: --optimized-chunking and --auto-chunking options are conflicting")
         elif currentArg == "--chunking":
             startIndex += 4
             try:
@@ -1225,7 +1262,7 @@ def parse_input_args(argv):
             print "Disable chunking"
             if "--auto-chunking" in argv or "--chunking" in argv:
                 inputWarning = True
-                print "WARNGING: --no-chunking option is conflicting with another chunking option"
+                warnings.warn("WARNGING: --no-chunking option is conflicting with another chunking option")
         elif currentArg == "--optimized-chunking":
             startIndex += 4
             try:
@@ -1246,7 +1283,7 @@ def parse_input_args(argv):
             print "Disable compression"
             if "--compression" in argv:
                 inputWarning = True
-                print "WARNING: --no-compression and --compression options are conflicting."
+                warnings.warn("WARNING: --no-compression and --compression options are conflicting.")
         elif currentArg == "--io":
             startIndex += 2
             try:
@@ -1266,7 +1303,7 @@ def parse_input_args(argv):
             print "Disable thumbnail"
             if "--thumbnail" in argv:
                 inputWarning = True
-                print "WARNING: --no-thumbnail and --no-thumbnail options are conflicting."
+                warnings.warn("WARNING: --no-thumbnail and --no-thumbnail options are conflicting.")
         elif currentArg == "--help" or currentArg == "--h" or currentArg == "-help" or currentArg == "-h":
             print_help()
             exit(0)
@@ -1370,8 +1407,17 @@ def parse_input_args(argv):
     # Enable chunking if compression is requested and chunking has been
     # disabled
     if (chunks is None) and (compression is not None):
-        print "WARNING: HDF5 compression is only available with chunking enabled. Do you want to enable chunking? (Y/N)"
-        userInput = raw_input()
+        timeout = 5*60  # User input timeput after 5 minutes
+        numIter = 3     # Number of tries
+        for i in range(numIter):
+            print "WARNING: HDF5 compression is only available with chunking enabled. Do you want to enable chunking? (Y/N)"
+            #userInput = raw_input()
+            userInput = userinput_with_timeout(timeout=timeout, default=None)
+            if userInput is None:
+                inputError = True
+                warnings.warn("WARNING: HDF5 compression is only available with chunking enabled." +
+                              " User did not respond to resolve the conflict. Aborting the conversion.")
+
         if userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
             chunks = (4, 4, 2048)
             print "Chunking enabled with (4,4, 2048)"
@@ -1379,14 +1425,16 @@ def parse_input_args(argv):
             compression = None
             compression_opts = None
             print "Compression disabled"
-        else:
-            exit()
+        elif i == (numIter-1):
+            print "User did not respond to resolve the conflict. Aborting the conversion"
+            inputError = True
 
-    print "Execute global peak finding (fpg): " + str(execute_fpg)
-    print "Execute local peak finding (fpl): " + str(execute_fpl)
-    print "Execute nmf: " + str(execute_nmf)
-    print "Number of MSI files: " + str(len(inputFilenames))
-    print "Output OMSI file: " + outputFilename
+    if not inputError:
+        print "Execute global peak finding (fpg): " + str(execute_fpg)
+        print "Execute local peak finding (fpl): " + str(execute_fpl)
+        print "Execute nmf: " + str(execute_nmf)
+        print "Number of MSI files: " + str(len(inputFilenames))
+        print "Output OMSI file: " + outputFilename
 
     # Finish and return
     return inputError, inputWarning, outputFilename, inputFilenames
@@ -1523,6 +1571,75 @@ def print_help():
     print "             * The three most intense peaks in the raw data that are at least 1 percent"
     print "               of the total m/z range apart."
     print "--no-thumbnail: Do not generate a thumbnail image."
+
+
+#########################################################
+#  Helper functions used to get user input with timeout #
+#########################################################
+def userinput_with_timeout_default(timeout, default=''):
+    """Read user input. Return default value given after timeout.
+
+      :param timeout: Number of seconds till timeout
+      :param default: Default string to be returned after timeout
+      :type default: String
+
+      :returns: String
+
+    """
+    sys.stdout.flush()
+    rlist, _, _ = select([sys.stdin], [], [], timeout)
+    if rlist:
+        userinput = sys.stdin.readline().replace('\n', '')
+    else:
+        userinput = default
+    return userinput
+
+
+def userinput_with_timeout_windows(timeout, default=''):
+    """Read user input. Return default value given after timeout.
+       This function is used when running on windows-based systems.
+
+      :param timeout: Number of seconds till timeout
+      :param default: Default string to be returned after timeout
+      :type default: String
+
+      :returns: String
+
+    """
+    start_time = time.time()
+    sys.stdout.flush()
+    userinput = ''
+    while True:
+        if msvcrt.kbhit():
+            readchar = msvcrt.getche()
+            if ord(readchar) == 13:  # enter_key
+                break
+            elif ord(readchar) >= 32:  # space_char
+                userinput += readchar
+        if len(userinput) == 0 and (time.time() - start_time) > timeout:
+            break
+    if len(userinput) > 0:
+        return userinput
+    else:
+        return default
+
+
+def userinput_with_timeout(timeout, default=''):
+    """Read user input. Return default value given after timeout.
+       This function decides which platform-dependent version should
+       be used to retrieve the user input.
+
+      :param timeout: Number of seconds till timeout
+      :param default: Default string to be returned after timeout
+      :type default: String
+
+      :returns: String
+    """
+    if platform.system() == "Windows":
+        return userinput_with_timeout_windows(timeout, default)
+    else:
+        return userinput_with_timeout_default(timeout, default)
+
 
 if __name__ == "__main__":
     main()
