@@ -306,6 +306,7 @@ def main(argv=None):
                 recorded_warnings += w
         except ValueError:
             recorded_warnings += [sys.exc_info()]
+            status = False
         print "Registered file with DB: " + str(status)
 
     ####################################################################
@@ -1007,6 +1008,7 @@ def register_file_with_db(filepath, db_server, file_owner_name):
     # Construct the db add-file url
     addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
     queryParams = {'file': os.path.abspath(filepath), 'owner': currOwner}
+    addFileURL += "?"
     addFileURL += urllib.urlencode(queryParams)
     #addFileURL = addFileURL + "?file=" + \
     #    os.path.abspath(filepath) + "&owner=" + currOwner
