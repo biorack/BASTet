@@ -15,31 +15,32 @@ To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format,
     source setupEnvironment.csh
     python convertToOMSI.py <infile1> <output HDF5File>
 
-Note if you use the bash shell then use ``setupEnvironment.bash`` instead. 
+Note if you use the bash shell then use ``setupEnvironment.bash`` instead.
 
-Below some additional notes on relevant file-related modules: 
+Note, if you want to use the output file from openmsi.nersc.gov then the output file path should be:
 
-* ``omsi.tools.convertToOMSI`` : This python script, which is available via the OMSI software toolkit, provides functionality for converting img files to HDF5. The script takes a single or multiple img files as input and writes them to a single HDF5 file. The data of each img file is stored in a separate ``/entry_#/data_#`` object. The script also supports execution of a number of different analysis, such as, peak finding or nmf, directly during the data conversion. For up-to-date information about the usage of the script see ``python imgToHDF5 --help``. A summary of the main command-line options of the tool are available below.
-* ``omsi.dataformat.omsi_file`` : Module containing a set of python class for reading and writing HDF5 data files for the proposed OMSI HDF5 data layout. 
-* ``omsi.dataformat.img_file`` : Simple python class for reading img data files.
-* ``omsi.dataformat.bruckerflex_file`` : Simple python class for reading bruckerflex files.
+.. code-block:: none
 
+    /project/projectdirs/openmsi/omsi_data/private/<username>/<filename>
 
-Making a converted file accesilbe to OpenMSI (Private)
+where username is the name of the primary user that owns the file.
+
+Making a converted file accessible to OpenMSI (Private)
 ------------------------------------------------------
 
-By default, the conversion script will automatically register new files with the OpenMSI site and
-assign them private to a single user if the output file placed in the OpenMSI private data location:
+The conversion script will by default automatically try to register new files with the OpenMSI site and
+assign them private to a single user if the output file is placed in the OpenMSI private data location:
 
-/project/projectdirs/openmsi/omsi_data/private/<username>/<filename>
-
-The username in the path will determine the user the file is assigned to. The filename will also be
-the name used in the listing on the site. E.g.:
 
 .. code-block:: none
 
     python convertToOMSI.py <infile1> /project/projectdirs/openmsi/omsi_data/private/<username>/<filename>
-    
+
+The username in the path will determine the user the file is assigned to. E.g: The filename will also be
+the name used in the listing on the site. In order to generate the HDF5 file without adding to the
+database, use the ``--no-add-to-db`` command line option, e.g,:
+
+
 Changing file permissions:
 --------------------------
 
@@ -60,7 +61,8 @@ NOTE: In order to view a current, complete list of conversions options use:
 
 .. code-block:: none
 
-    USAGE: Call "convertToOMSI [options] imgBaseFile1 imgBaseFile2 ... imgBaseFileN HDF5File" 
+    python convertToOMSI.py --help
+    USAGE: Call "convertToOMSI [options] imgBaseFile1 imgBaseFile2 ... imgBaseFileN HDF5File"
 
     This converter script takes the basename (i.e., path+basefilename) of a single
     or multiple MSI files as input and converts them to HDF5. Each MSI file is
@@ -80,10 +82,13 @@ NOTE: In order to view a current, complete list of conversions options use:
     --error-handling <options>: Define how errors should be handled. Options are:
                        i)   terminate-and-cleanup (default) : Terminate the conversion, delete the
                                the HDF5 file and do not add the file to the database.
-                       ii)  terminate-only,: Leave the generated HDF5 output file in place but  do not
+                       ii)  terminate-only, : Leave the generated HDF5 output file in place but  do not
                                 add the file to the database.
                        iii) continue-on-error: Ignore errors if possible and continue, even if this
                                 means that some data may be missing from the output.
+    --email <email1 email2 ...>: Send notification in case of both error or success to the given email address.
+    --email-success <email1 email2 ...>>: Send notification in case of success to the given email address.
+    --email-error <email1 email2 ...>>: Send notification in case of error to the given email address.
 
     ===INPUT DATA OPTIONS===
 
@@ -94,8 +99,8 @@ NOTE: In order to view a current, complete list of conversions options use:
               ['img', 'bruckerflex', 'auto']
     --regions <option>: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored
                in a single file. This option allows one to specify how these regions should be
-               treated during file conversion. E.g., one may want to store i) each region as a 
-               separate dataset in the output file (--regions split), ii) all regions combined 
+               treated during file conversion. E.g., one may want to store i) each region as a
+               separate dataset in the output file (--regions split), ii) all regions combined
                in a single dataset (--regions merge), or both (--regions split+merge)
                Available options are:
               ['split', 'merge', 'split+merge']
@@ -107,7 +112,7 @@ NOTE: In order to view a current, complete list of conversions options use:
     Default HDF5 Chunking options: Enabled by default using --auto-chunking :
     --auto-chunking : Automatically decide which chunking should be used. This option
                     automatically generates two copies of the data, one with a chunking
-                    optimized for selection of spectra and another one optimized for 
+                    optimized for selection of spectra and another one optimized for
                     selection of ion image slices. All --chunking, --no-chunking, and
                     --optimized-chunking options are ignored if this paramter is given
     --chunking <x y z> : Use chunking when writing the HDF5 file. (DEFAULT, x=4,y=4,z=2048)
@@ -116,20 +121,20 @@ NOTE: In order to view a current, complete list of conversions options use:
                     it if compression is used.
     --optimized-chunking <x y z> : Use this option to generate additional copies of the data
                     with different chunked data layouts. Generating multiple copies of the
-                    data with different chunked data layouts can be help accelerate selective 
+                    data with different chunked data layouts can be help accelerate selective
                     data read opeations. (DEFAULT OFF). We recommend a spectra-aligned chunking
                     for the raw data, e.g., '--chunking 1 1 32768' and an image-aligned chunked
                     secondary copy of the data, e.g., '--optimzied-chunking 20 20 100'.
 
     ---FILE WRITE OPTIONS: Compression---
-    HDF5 Compression: Default ON using (gzip , 4):
+    HDF5 Compression: Default ON using (gzip, 4):
     --compression: Enable compression using (gzip,4). NOTE: Compression requires the use of chunking.
     --no-compression: Disable the use of compression.
 
     ===I/O OPTIONS===
-    --io <option>: Available options are: 
+    --io <option>: Available options are: ['chunk', 'spectrum', 'all']
                  i) all : Read the full data in memory and write it at once
-                 ii) spectrum : Read one spectrum at a time and write it to the file. 
+                 ii) spectrum : Read one spectrum at a time and write it to the file.
                  iii) chunk : Read one chunk at a time and write it to the file.
 
     ===DATABSE OPTIONS===
@@ -140,7 +145,7 @@ NOTE: In order to view a current, complete list of conversions options use:
     --add-to-db : Add the output HDF5 file to the database.
     --no-add-to-db : Disable adding the file to the database.
     --db-server : Specify the online server where the file should be registers. Default is
-                  http://openmsi.nersc.gov 
+                  http://openmsi.nersc.gov
     --owner : Name of the user that should be assigned as owner. By default the owner is
               determined automatically based on the file path.
 
@@ -151,7 +156,7 @@ NOTE: In order to view a current, complete list of conversions options use:
             HDF5 file. NOTE: If global peak-finding (fpg) is performed, then
             nmf will be performed on the peak-cube, otherwise on the raw data
     --no-nmf: Disable the execution of nmf
-    --nmf-nc <nummber>: Number of components to be computed by the NMF. (default nc=20)
+    --nmf-nc <number>: Number of components to be computed by the NMF. (default nc=20)
     --nmf-timeout <number>: Maximum time in seconds to be used for computing the NMF. (default timeout=600)
     --nmf-niter <number>: Number of iterations (minimum is 2)(default niter=2000)
     --nmf-tolerance <number>: Tolerance value for a relative stopping condition. (default tolerance=0.0001)
@@ -170,8 +175,8 @@ NOTE: In order to view a current, complete list of conversions options use:
 
     ---OTHER OPTIONS---
 
-    Generate Thunmbnail image: Default ON:
-    --thumbnail: Generate thumbnail image for the file based on, in order of avalability:
+    Generate Thumbnail image: Default ON:
+    --thumbnail: Generate thumbnail image for the file based on, in order of availability:
                  * The frist three components of the NMF
                  * The three most intense peaks from the global peak finding (fpg)
                  * The three most intense peaks in the raw data that are at least 1 percent
