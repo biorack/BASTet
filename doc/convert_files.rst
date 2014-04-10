@@ -21,7 +21,7 @@ Note, if you want to use the output file from openmsi.nersc.gov then the output 
 
 .. code-block:: none
 
-    /project/projectdirs/openmsi/omsi_data/private/<username>/<filename>
+    /project/projectdirs/openmsi/omsi_data_private/<username>/<filename>
 
 where username is the name of the primary user that owns the file.
 
@@ -34,7 +34,7 @@ assign them private to a single user if the output file is placed in the OpenMSI
 
 .. code-block:: none
 
-    python convertToOMSI.py <infile1> /project/projectdirs/openmsi/omsi_data/private/<username>/<filename>
+    python convertToOMSI.py <infile1> /project/projectdirs/openmsi/omsi_data_private/<username>/<filename>
 
 The username in the path will determine the user the file is assigned to. E.g: The filename will also be
 the name used in the listing on the site. In order to generate the HDF5 file without adding to the
