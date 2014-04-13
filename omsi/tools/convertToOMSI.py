@@ -1429,9 +1429,11 @@ class ConvertWebHelper:
                                           " Aborted adding the file to the DB.")
                             return False
                         print "Unrecognized response. Do you want to add the file? (Y/N): "
-            else:
+            elif not allowedpath:
                 warnings.warn("Adding file to the OpenMSI database in unconventional location not permitted for user.")
                 return False
+            else:
+                pass #Adding the file to the db is allowed
 
         # If we are at NERSC then set the NERSC Apache permissions
         if 'nersc.gov' in db_server:
