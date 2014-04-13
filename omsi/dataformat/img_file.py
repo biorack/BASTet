@@ -108,7 +108,8 @@ class img_file(object):
                 valuesmissing = float(sizedifference) / itemsize
                 warnings.warn("WARNING: Missing "+str(sizedifference) +
                               " bytes in img file (missing " + str(valuesmissing) +
-                              " intensity values; "+str(percentmissing)+"%).")
+                              " intensity values; "+str(percentmissing)+"%)." + 
+                              " Expected shape: "+str(self.shape)) 
                 if (sizedifference % spectrumsize) == 0:
                     percentmissing = float(sizedifference)/float(expectedsize)
                     valuesmissing = float(sizedifference) / itemsize
