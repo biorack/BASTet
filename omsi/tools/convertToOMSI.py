@@ -331,7 +331,8 @@ class ConvertSettings(object):
     execute_nmf = True  # Define whether NMF should be performed
     execute_fpg = True  # Define whether global peak finding should be executed
     execute_fpl = False  # Define whether local peak finding should be executed
-    generate_thumbnail = True  # Should we generate thumbnail
+    generate_thumbnail = False  # Should we generate thumbnail
+    generate_xdmf = False # Should we generate an xdmf header file for the file
     
     # Default NMF parameter settings
     nmf_num_component = 20  # Number of components for the NMF
@@ -504,7 +505,18 @@ class ConvertSettings(object):
                 print "Disable thumbnail"
                 if "--thumbnail" in argv:
                     inputWarning = True
-                    warnings.warn("WARNING: --no-thumbnail and --no-thumbnail options are conflicting.")
+                    warnings.warn("WARNING: --no-thumbnail and --thumbnail options are conflicting.")
+            elif currentArg == "--xdmf":
+                startIndex += 1
+                ConvertSettings.generate_xdmf = True
+                print "Enable xdmf"
+            elif currentArg == "--no-xdmf":
+                startIndex += 1
+                ConvertSettings.generate_xdmf = False
+                print "Disable xdmf"
+                if "--xdmf" in argv:
+                    inputWarning = True
+                    warnings.warn("WARNING: --no-xdmf and --xdmf options are conflicting.")
             elif currentArg == "--help" or currentArg == "--h" or currentArg == "-help" or currentArg == "-h":
                 cls.print_help()
                 exit(0)
@@ -765,13 +777,17 @@ class ConvertSettings(object):
         print ""
         print "---OTHER OPTIONS---"
         print ""
-        print "Generate Thumbnail image: Default ON:"
+        print "Generate Thumbnail image: Default OFF:"
         print "--thumbnail: Generate thumbnail image for the file based on, in order of availability:"
         print "             * The frist three components of the NMF"
         print "             * The three most intense peaks from the global peak finding (fpg)"
         print "             * The three most intense peaks in the raw data that are at least 1 percent"
         print "               of the total m/z range apart."
         print "--no-thumbnail: Do not generate a thumbnail image."
+        print ""
+        print "Generate XDMF header file for output file: Default OFF:"
+        print "--xdmf: Write XDMF XML-based header-file for the output HDF5 file."
+        print "--no-xdmf: Do not generate a XDMF XML-based header for the HDF5 file."
 
 
 ####################################################################
@@ -1077,8 +1093,9 @@ class ConvertFiles(object):
         ####################################################################
         #  Generate the XDMF header file for the HDF5 file                ##
         ####################################################################
-        ConvertSettings.omsi_output_file.write_xdmf_header(
-            ConvertSettings.omsi_output_file.get_filename() + ".xdmf")
+        if ConvertSettings.generate_xdmf:
+            ConvertSettings.omsi_output_file.write_xdmf_header(
+                ConvertSettings.omsi_output_file.get_filename() + ".xdmf")
 
 
     @staticmethod
