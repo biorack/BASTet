@@ -101,7 +101,7 @@ class img_file(object):
             print "IMG size: " + str(imgsize) + " Expected size: " + \
                   str(expectedsize) + "  (difference="+str(sizedifference) + ")"
             if imgsize < expectedsize:
-                #Check whether the missing data aligns with images or spectra
+                # Check whether the missing data aligns with images or spectra
                 slicesize = int(self.shape[0]) * int(self.shape[1]) * itemsize
                 spectrumsize = int(self.shape[2]) * itemsize
                 percentmissing = float(sizedifference)/float(expectedsize)
@@ -110,9 +110,13 @@ class img_file(object):
                               " bytes in img file (missing " + str(valuesmissing) +
                               " intensity values; "+str(percentmissing)+"%)." + 
                               " Expected shape: "+str(self.shape)) 
-                if (sizedifference % spectrumsize) == 0:
-                    percentmissing = float(sizedifference)/float(expectedsize)
-                    valuesmissing = float(sizedifference) / itemsize
+                # Define how we should deal with the error
+                expandslice = (sizedifference % slicesize) == 0
+                expandspectra = (sizedifference % spectrumsize) == 0
+                if not expandslice:
+                    expandspectra = True
+                # Complete missing spectra
+                if expandspectra:
                     warnings.warn("Dealing with missing data in img file by completing last spectra with 0's.")
                     # TODO np.require create an in-memory copy of the full data. Provide option to use memmap'ed tempfile.
                     tempmap = np.require(np.memmap(filename=self.img_filename,
@@ -125,7 +129,8 @@ class img_file(object):
                     # Reshape the memmap to the expected shape
                     self.m_img_file = tempmap.reshape(self.shape, order='C')
                     self.file_opened = True
-                elif (sizedifference % slicesize) == 0:
+                # Complete missing slices
+                elif expandslice:
                     slicesmissing = sizedifference / slicesize
                     self.mz = self.mz[:(-slicesmissing)]
                     warnings.warn("Dealing with missing data in img file by updating he m/z axis.." +
@@ -136,10 +141,10 @@ class img_file(object):
                     self.shape[2] = self.mz.shape[0]
                     self.shape = tuple(self.shape)
                     self.m_img_file = np.memmap(filename=self.img_filename,
-                                        dtype=self.data_type,
-                                        shape=self.shape,
-                                        mode='r',
-                                        order='C')
+                                                dtype=self.data_type,
+                                                shape=self.shape,
+                                                mode='r',
+                                                order='C')
                     self.file_opened = True
                 else:
                     raise
