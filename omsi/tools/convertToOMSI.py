@@ -1269,6 +1269,7 @@ class ConvertFiles(object):
         spectrumXChunk = 1
         spectrumYChunk = 1
         factor1 = math.floor(mzsize / float(suggestedNumValues))
+        if factor1 == 0: factor1 = 1
         spectrumMzChunk1 = int(math.ceil(mzsize / float(factor1)))
         factor1 = math.ceil(mzsize / float(spectrumMzChunk1))
         overhead1 = ((factor1 * spectrumMzChunk1) - mzsize) * imageSize * numBytes
@@ -1277,6 +1278,7 @@ class ConvertFiles(object):
         #            imageSize * numBytes
         #overhead1 = (spectrumMzChunk1 - math.ceil(float(mzsize) % float(spectrumMzChunk1))) * imageSize * numBytes
         factor2 = math.ceil(mzsize / float(suggestedNumValues))
+        if factor2 == 0: factor2 = 1
         spectrumMzChunk2 = int(math.ceil(mzsize / float(factor2)))
         factor2 = math.ceil(mzsize / float(spectrumMzChunk2))
         overhead2 = ((factor2 * spectrumMzChunk2) - mzsize) * imageSize * numBytes
