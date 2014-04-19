@@ -330,7 +330,7 @@ class bruckerflex_file(file_reader_base):
 
         # Check if we need to generate anything else
         if spot_folder_only:
-            spotfolderList
+            return spotfolderList
 
         # Check if we have any files at all
         if len(spotfolderList) == 0:
