@@ -187,7 +187,6 @@ class img_file(file_reader_base):
         # If we point to a director, check if the dir contains an img file
         elif os.path.isdir(name):
             filelist = cls.get_files_from_dir(name)
-            print filelist
             if len(filelist) > 0:
                 return True
 
