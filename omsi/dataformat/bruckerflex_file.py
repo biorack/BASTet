@@ -50,9 +50,9 @@ a = bruckerflex_file( dirname )
 import os
 import numpy as np
 import math
+from omsi.dataformat.file_reader_base import file_reader_base
 
-
-class bruckerflex_file:
+class bruckerflex_file(file_reader_base):
     """Interface for reading a single bruker flex image file.
 
        The reader supports standard array slicing for data read. I.e., to read a
@@ -71,19 +71,19 @@ class bruckerflex_file:
 
     """
 
-    def __init__(self, spotlist_filename, fid_encoding='int32', readall=True):
+    def __init__(self, basename, fid_encoding='int32', readdata=True):
         """Open an img file for data reading.
 
-            :param spotlist_filename: Name of the textfile with the spotlist. Alternatively this may also be the \
+            :param basename: Name of the textfile with the spotlist. Alternatively this may also be the \
                                       folder with the spots.
-            :type spotlist_filename: string
-            :param readall: Should the complete data be read into memory (this makes slicing easier). (default is True)
-            :type readall: bool
+            :type basename: string
+            :param readdata: Should the complete data be read into memory (this makes slicing easier). (default is True)
+            :type readdata: bool
             :param fid_encoding: String indicating in which binary format the intensity values (fid files) are stored. \
                                  (default value is 'int32')
             :type fid_encoding: string
 
-            :var self.spotlist_filename: Name of the file with the spotlist
+            :var self.basename: Name of the file with the spotlist
             :var self.pixel_dict: dictionary with the pixel array metadata (see also s_read_spotlist(...)). Some of \
                  the main keys of the dictionary are, e.g. (see also s_read_spotlist(...)) :
 
@@ -103,17 +103,18 @@ class bruckerflex_file:
             :var self.full_shape: Shape of the full 3D MSI dataset including all regions imaged.
             :var self.metadata: Dictionary with metadata from the acqu file
             :var self.mz: The 1D numpy array with the m/z axis information
-            :var self.data: If readall is set to true then this 3D array includes the complete data of the MSI data \
+            :var self.data: If readdata is set to true then this 3D array includes the complete data of the MSI data \
                   cube. Missing data values (e.g., from regions not imaged during the aquistion processes) are \
                   completed with zero values.
-            :var self.regions_dicts: Dictionary with description of the imaging regions
+            :var self.region_dicts: Dictionary with description of the imaging regions
 
             :raises ValueError: In case that no valid data is found.
         """
-        self.spotlist_filename = spotlist_filename
+        super(bruckerflex_file, self).__init__(basename, readdata)
+        self.spotlist_filename = basename
         if os.path.isdir(self.spotlist_filename):
             self.spotlist_filename = None
-            self.pixel_dict = self.s_spot_from_dir(spotlist_filename)
+            self.pixel_dict = self.s_spot_from_dir(basename)
             if not self.pixel_dict:
                 raise ValueError(
                     "Invalid bruckerflex file. No valid spots found in the given directory")
@@ -139,12 +140,12 @@ class bruckerflex_file:
         self.mz = self.s_mz_from_acqu(self.metadata)
 
         # Compute the region bouding boxes
-        self.regions_dicts = self.__compute_regions_extends___(self.pixel_dict)
+        self.region_dicts = self.__compute_regions_extends___(self.pixel_dict)
         self.select_region = None
 
         # Should we read all the intensity values into memory. If so, allocate
         # space.
-        if readall:
+        if readdata:
             self.data = np.zeros(self.shape)
             dmask = self.pixel_dict['fid'].mask
             for xindex in range(0, self.shape[0]):
@@ -159,7 +160,7 @@ class bruckerflex_file:
         self.instrument_mz = 0
 
     @classmethod
-    def is_bruckerflex(cls, name):
+    def is_valid_dataset(cls, name):
         """Determine whether the given file or name specifies a bruckerflex file
 
            :param name: name of the file or dir
@@ -175,16 +176,6 @@ class bruckerflex_file:
                 return True
         return False
 
-    def get_regions(self):
-        """ Get list of all region dictionaries defining for each region the origin
-            and extend of the region. See also self.regions_dicts.
-        """
-        return self.regions_dicts
-
-    def get_number_of_regions(self):
-        """Get the number of available regions"""
-        return len(self.regions_dicts)
-
     def set_region_selection(self, region_index=None):
         """Define which region should be selected for local data reads.
 
@@ -197,12 +188,9 @@ class bruckerflex_file:
             self.select_region = None
         elif region_index < self.get_number_of_regions():
             self.select_region = region_index
-            self.shape = [self.regions_dicts[self.select_region]["extend"][0],
-                          self.regions_dicts[self.select_region]["extend"][1], self.full_shape[2]]
+            self.shape = [self.region_dicts[self.select_region]["extend"][0],
+                          self.region_dicts[self.select_region]["extend"][1], self.full_shape[2]]
 
-    def get_region_selection(self):
-        """Get the index of the selected region"""
-        return self.select_region
 
     def __getitem__(self, key):
         """Enable slicing of bruker files"""
@@ -211,8 +199,8 @@ class bruckerflex_file:
             # Select the region of interest, i.e., the reader acts as if the
             # selected region where the complete image of interest.
             if self.select_region is not None:
-                rdOrigin = self.regions_dicts[self.select_region]["origin"]
-                rdExtend = self.regions_dicts[self.select_region]["extend"]
+                rdOrigin = self.region_dicts[self.select_region]["origin"]
+                rdExtend = self.region_dicts[self.select_region]["extend"]
                 lowX = rdOrigin[0]
                 lowY = rdOrigin[1]
                 highX = lowX + rdExtend[0] + 1
@@ -226,7 +214,7 @@ class bruckerflex_file:
         else:
             raise ValueError(
                 "Slicing is only supported when the object has been initialized with readall")
-        pass
+
 
     def close_file(self):
         """Close the img file"""
@@ -511,6 +499,8 @@ class bruckerflex_file:
         spotfolder = spotlist_dir + "/" + \
             spotlist_name.rstrip(" Spot List.txt")
         spotfolder = os.path.abspath(spotfolder)
+        if not os.path.isdir(spotfolder):
+            raise ValueError("Could not find spotfolder: "+spotfolder)
         # Get a list of all files and compute and image map to indicate where the fid and acqu files
         # for each pixel are located
         #filelist = bruckerflex_file.get_all_files(spotfolder)
@@ -569,7 +559,7 @@ class bruckerflex_file:
         #minRegionIndex = np.min( unique_regions )
         #unique_regions = unique_regions - minRegionIndex
         #region = region - np.min(region) - minRegionIndex
-        #regions_dicts = {}
+        #region_dicts = {}
         # for i in unique_regions :
         #    regionSelect = (region == i)
         #    rd = {}

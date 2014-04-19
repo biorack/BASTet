@@ -2,9 +2,10 @@
 import os
 import numpy as np
 import warnings
+from omsi.dataformat.file_reader_base import file_reader_base
 
 
-class img_file(object):
+class img_file(file_reader_base):
 
     """Interface for reading a single 2D img file
 
@@ -13,7 +14,7 @@ class img_file(object):
        iii) img data file.
     """
 
-    def __init__(self, hdr_filename=None, t2m_filename=None, img_filename=None, basename=None):
+    def __init__(self, hdr_filename=None, t2m_filename=None, img_filename=None, basename=None, readdata=True):
         """Open an img file for data reading.
 
             :param hdr_filename: The name of the hdr header file
@@ -30,9 +31,12 @@ class img_file(object):
                              to load the data.
             :type basename: string
 
+            :param readdata: Unused here. Included as this is a required parameter for the base API.
+            :type readdata: Boolean
+
             :raises ValueError: In case that basename and hdr_filename, t2m_filename, and img_filename are specified.
         """
-
+        super(img_file, self).__init__(basename, readdata)
         self.data_type = 'uint16'
         self.shape = [0, 0, 0]  # Number of pixels in x,y, and z. NOTE: Type changed to tuple later on.
         self.mz = 0  # A numpy vector with the m/z values of the instrument
@@ -169,7 +173,7 @@ class img_file(object):
             self.file_opened = False
 
     @classmethod
-    def is_img(cls, name):
+    def is_valid_dataset(cls, name):
         """Check whether the given file or directory points to a img file.
 
            :param name: Name of the dir or file.
@@ -189,6 +193,7 @@ class img_file(object):
 
         return False
 
+
     @classmethod
     def get_files_from_dir(cls, dirname):
         """Get a list of all basenames of all img files in a given directory"""
@@ -203,6 +208,7 @@ class img_file(object):
                         os.path.exists(basename + ".img"):
                     filelist.append(basename)
         return filelist
+
 
     def __del__(self):
         """Close the file before garbage collection"""
