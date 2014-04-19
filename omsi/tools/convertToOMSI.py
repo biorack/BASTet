@@ -5,9 +5,7 @@
   #TODO Register all print-outs with the email message
 """
 
-from omsi.dataformat.bruckerflex_file import bruckerflex_file
-from omsi.dataformat.img_file import img_file
-from omsi.dataformat.omsi_file import *
+from omsi.dataformat import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
@@ -120,7 +118,7 @@ def main(argv=None):
     ####################################################################
     try:
         if omsiOutFile is not None:
-            ConvertSettings.omsi_output_file = omsi_file(omsiOutFile)
+            ConvertSettings.omsi_output_file = omsi_file.omsi_file(omsiOutFile)
     except:
         emailmsg = "Unexpected error creating the output file:", sys.exc_info()[0]
         ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
@@ -260,9 +258,8 @@ class ConvertSettings(object):
     #  Define available options for different parameters              ##
     ####################################################################
     # List of available data formats
-    available_formats = ["img", 
-                         "bruckerflex", 
-                         "auto"]
+    available_formats = file_reader_base.file_reader_base.available_formats()
+
     # List defining the different options available for handling regions
     available_region_options = ["split", 
                                 "merge", 
@@ -281,7 +278,7 @@ class ConvertSettings(object):
     # ('chunk'), one spectrum at a time ('spectrum') or all at one once
     # ('all')
     io_option = "chunk"
-    format_option = "auto"  # Define which file format reader should be used
+    format_option = None  # Define which file format reader should be used. None=determine automatically
     region_option = "split+merge"  # Define the region option to be used
     auto_chunk = True  # Automatically decide which chunking should be used
     chunks = (4, 4, 2048)  # Define the main chunking for the data
@@ -304,7 +301,9 @@ class ConvertSettings(object):
     # This option is to ensure that when the script is run elsewhere that we
     # do not just call add file without actually saving the file at NERSC
     check_add_nersc = True
-    allowed_nersc_locations = ["/project/projectdirs/openmsi", "/project/projectdirs/openmsi", "/data/openmsi/"]
+    allowed_nersc_locations = ["/project/projectdirs/openmsi/omsi_data_private",
+                               "/global/project/projectdirs/openmsi/omsi_data_private",
+                               "/data/openmsi/omsi_data"]
     default_db_server_url = "https://openmsi.nersc.gov/"
     # Specify the server where the database is registered
     db_server_url = default_db_server_url
@@ -526,11 +525,11 @@ class ConvertSettings(object):
             elif currentArg == "--format":
                 startIndex += 2
                 ConvertSettings.format_option = str(argv[i + 1])
-                if ConvertSettings.format_option not in ConvertSettings.available_formats:
+                if ConvertSettings.format_option not in ConvertSettings.available_formats.keys():
                     print "ERROR: Indicated --format option " + \
                           ConvertSettings.format_option + \
                           " not supported. Available options are:"
-                    print "     " + str(ConvertSettings.available_formats)
+                    print "     " + str(ConvertSettings.available_formats.keys())
                     inputError = True
             elif currentArg == "--regions":
                 startIndex += 2
@@ -635,17 +634,18 @@ class ConvertSettings(object):
                     inputError = True
                     warnings.warn("WARNING: HDF5 compression is only available with chunking enabled." +
                                   " User did not respond to resolve the conflict. Aborting the conversion.")
-
-            if userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
-                ConvertSettings.chunks = (4, 4, 2048)
-                print "Chunking enabled with (4,4, 2048)"
-            elif userInput == "N" or userInput == "n" or userInput == "No" or userInput == "no" or userInput == "NO":
-                ConvertSettings.compression = None
-                ConvertSettings.compression_opts = None
-                print "Compression disabled"
-            elif i == (numIter-1):
-                print "User did not respond to resolve the conflict. Aborting the conversion"
-                inputError = True
+                elif  userInput == "Y" or userInput == "y" or userInput == "Yes" or userInput == "yes" or userInput == "YES":
+                    ConvertSettings.chunks = (4, 4, 2048)
+                    print "Chunking enabled with (4,4, 2048)"
+                    break
+                elif userInput == "N" or userInput == "n" or userInput == "No" or userInput == "no" or userInput == "NO":
+                    ConvertSettings.compression = None
+                    ConvertSettings.compression_opts = None
+                    print "Compression disabled"
+                    break
+                elif i == (numIter-1):
+                    warnings.warn("User did not respond to resolve the conflict. Aborting the conversion")
+                    inputError = True
 
         if not inputError and not ConvertSettings.suggest_file_chunkings:
             print "Execute global peak finding (fpg): " + str(ConvertSettings.execute_fpg)
@@ -827,13 +827,10 @@ class ConvertFiles(object):
             try:
                 currFormat = i['format']
                 print "Input file format: " + str(currFormat)
-                if currFormat == "img":
-                    # hdrFile=basefile+".hdr", t2mFile=basefile+".t2m",
-                    # imgFile=basefile+".img")
-                    inputFile = img_file(basename=basefile)
-                elif currFormat == "bruckerflex":
-                    inputFile = bruckerflex_file(spotlist_filename=basefile)
-                    inputFile.set_region_selection(region_index=i['region'])
+                if currFormat is not None:
+                    inputFile =  ConvertSettings.available_formats[currFormat](basename=basefile, readdata=True)
+                    if inputFile.supports_regions():
+                        inputFile.set_region_selection(region_index=i['region'])
                 else:
                     print "ERROR: The following file will not be converted. File type could not be determined: " + basefile
                     print "INFO: If you know the correct file format then try setting appropriate --format option."
@@ -898,8 +895,9 @@ class ConvertFiles(object):
                 compression=ConvertSettings.compression,
                 compression_opts=ConvertSettings.compression_opts)
             mzDataset[:] = mzdata
-            data = omsi_file_msidata(
-                data_group=dataGroup, preload_mz=False, preload_xy_index=False)
+            data = omsi_file.omsi_file_msidata(data_group=dataGroup,
+                                               preload_mz=False,
+                                               preload_xy_index=False)
             ConvertFiles.write_data(inputFile=inputFile,
                                     data=data,
                                     data_io_option=ConvertSettings.io_option,
@@ -1111,29 +1109,22 @@ class ConvertFiles(object):
            :returns: String indicating the approbriate format. Returns None in case no valid option was found.
         """
         # Option 1: The user told us the format we should use
-        if format_type is not "auto":
-            if format_type in ConvertSettings.available_formats:
+        if format_type is not None:
+            if format_type in ConvertSettings.available_formats.keys():
                 return format_type
             else:
                 return None
         # Option 2: We need to determine the format ourselves
         # if os.path.exists(name+".hdr") and os.path.exists(name+".t2m") and os.path.exists(name+".img"):
         #    return "img"
-        if img_file.is_img(name):
-            return "img"
-        elif bruckerflex_file.is_bruckerflex(name):
-            return "bruckerflex"
-
-        # elif name.endswith("Spot List.txt"):
-        #    return "bruckerflex"
-        # elif os.path.isdir(name):
-        #    return "bruckerflex"
-        else:
-            return None
+        for formatname, formatclass in ConvertSettings.available_formats.items():
+            if formatclass.is_valid_dataset(name):
+                return formatname
+        return None
 
 
     @staticmethod
-    def create_dataset_list(inputFilenames, format_type='auto', data_region_option="split+merge"):
+    def create_dataset_list(inputFilenames, format_type=None, data_region_option="split+merge"):
         """Based on the list of inputFilenames, generate the ConvertSettings.dataset_list, which contains a dictionary describing
            each conversion job
 
@@ -1149,7 +1140,6 @@ class ConvertFiles(object):
 
            :returns: List of dictionaries describing the various conversion jobs
         """
-
         re_dataset_list = []
         for i in inputFilenames:
             currDS = {}
@@ -1159,15 +1149,19 @@ class ConvertFiles(object):
             currDS['format'] = ConvertFiles.check_format(name=currDS['basename'],
                                                          format_type=format_type)
             currDS['exp'] = 'new'
-            if currDS['format'] == 'bruckerflex':
+            supportsregions = False
+            if currDS['format'] is not None:
+                supportsregions = ConvertSettings.available_formats[currDS['format']].supports_regions()
+            if supportsregions:
                 if data_region_option == "merge" or data_region_option == "split+merge":
                     currDS['region'] = None
                     re_dataset_list.append(currDS)
 
                 if data_region_option == 'split' or data_region_option == 'split+merge':
                     try:
-                        tempFile = bruckerflex_file(
-                            spotlist_filename=currDS['basename'], readall=False)
+                        tempFile = ConvertSettings.available_formats[currDS['format']](
+                            basename=currDS['basename'],
+                            readdata=False)
                         for ri in xrange(0, tempFile.get_number_of_regions()):
                             nDS = {'basename': currDS['basename'],
                                    'format': currDS['format'],
@@ -1213,11 +1207,8 @@ class ConvertFiles(object):
             try:
                 print "Suggested Chunkings: " + basefile
                 currFormat = currdataset["format"]
-                if currFormat is "img":
-                    inputFile = img_file(basename=basefile)
-                elif currFormat is "bruckerflex":
-                    inputFile = bruckerflex_file(spotlist_filename=basefile,
-                                                 readall=False)
+                inputFile = ConvertSettings.available_formats[currFormat](basename=basefile, readdata=False)
+                if inputFile.supports_regions():
                     inputFile.set_region_selection(currdataset["region"])
                 else:
                     warnings.warn("WARNING: Type of file could not be determined for: " + basefile)
