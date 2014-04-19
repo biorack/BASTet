@@ -172,8 +172,10 @@ class bruckerflex_file(file_reader_base):
             return True
         elif os.path.isdir(name):
             # Check if there are any spots in the directory
-            if cls.s_spot_from_dir(name):
-                return True
+            spotlist = cls.s_spot_from_dir(name, spot_folder_only=True)
+            if spotlist is not None :
+                if len(spotlist) > 0:
+                    return True
         return False
 
     def set_region_selection(self, region_index=None):
@@ -274,14 +276,18 @@ class bruckerflex_file(file_reader_base):
         return regions
 
     @staticmethod
-    def s_spot_from_dir(in_dir):
+    def s_spot_from_dir(in_dir, spot_folder_only=False):
         """Similar to  s_read_spotlist but instead of using a spotlist file the structure of the data is parsed
            directly from the structure of the direcory containint all spots.
 
             :param in_dir: Name of the directory with all spots
             :type in_dir: string
+            :param spot_folder_only: If set to True, then the function only constructs the spot folders but
+                                     does not check for acqu files etc. If set to True, only the spotfolder
+                                     list will be returned.
 
-            :returns: The function returns None in case that no valid spots were found. The function returns a
+            :returns: The function returns None in case that no valid spots were found. Returns a list of strings
+                      with the spotfolders if spot_folder_only is set to True. Otherwise, the function returns a
                       number of different items in from of a python dictionary. Most data is stored as 2D spatial
                       maps, indicting for each (x,y) location the corresponding data. Most data is stored as 2D
                       masked numpy arrays. The masked of the array indicated whether data has been recorded for
@@ -321,6 +327,10 @@ class bruckerflex_file(file_reader_base):
                     spotnameList.append(l)
             except:
                 pass
+
+        # Check if we need to generate anything else
+        if spot_folder_only:
+            spotfolderList
 
         # Check if we have any files at all
         if len(spotfolderList) == 0:
