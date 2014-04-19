@@ -202,6 +202,17 @@ class omsi_file(object):
         else:
             return None
 
+    @classmethod
+    def is_valid_dataset(cls, name):
+        try:
+            checkfile = omsi_file(filename=name, mode='r')
+            valid = checkfile.get_num_exp() > 0
+            checkfile.close_file()
+            del checkfile
+            return valid
+        except:
+            return False
+
     def __init__(self, filename, mode='a', **kwargs):
         """Open the given file or create it if does not exit.
 
@@ -2730,8 +2741,7 @@ class omsi_file_msidata(object):
             :returns: Boolean indicating whether instrument info is available.
         """
         try:
-            self._data_group[
-                unicode(omsi_format_instrument.instrument_groupname)]
+            self._data_group[unicode(omsi_format_instrument.instrument_groupname)]
             return True
         except:
             if check_parent:
