@@ -211,7 +211,10 @@ def main(argv=None):
         warningindex = 0
         for warn in ConvertSettings.recorded_warnings:
             warningmsg += u"=========== "+ unicode(warningindex) + u" =========== \n"
-            warningmsg += unicode(warn.message) + u"\n"
+            try:
+                warningmsg += unicode(warn.message) + u"\n"
+            except AttributeError:
+                warningmsg += unicode(warn) + u"\n"
             warningindex += 1
         print warningmsg
 
