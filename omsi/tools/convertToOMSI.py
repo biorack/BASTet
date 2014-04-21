@@ -367,10 +367,8 @@ class ConvertSettings(object):
         # Basic sanity check
         if len(argv) < 3:
             lastArg = argv[-1]
-            if lastArg == "--help" or \
-                lastArg == "--h" or \
-                lastArg == "-help" or \
-                lastArg == "-h":
+            helpargs = ["--help", "--h", "-help", "-h"]
+            if lastArg in helpargs:
                 cls.print_help()
                 exit(0)
             else:
@@ -1453,7 +1451,11 @@ class ConvertWebHelper:
 
         # Construct the db add-file url
         addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
-        queryParams = {'file': os.path.abspath(filepath), 'owner': currOwner}
+        addfilepath = filepath
+        # Correct the filepath if we are on openmsi.nersc.gov, as /global is not mounted but only /project.
+        if db_server == ConvertSettings.default_db_server and addfilepath.startswith("/global/project/projectdirs"):
+            addfilepath = filepath.lstrip("/global")
+        queryParams = {'file': os.path.abspath(addfilepath), 'owner': currOwner}
         addFileURL += "?"
         addFileURL += urllib.urlencode(queryParams)
         #addFileURL = addFileURL + "?file=" + \
