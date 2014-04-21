@@ -92,8 +92,8 @@ class file_reader_base(object):
         """
         return cls.__name__
 
-    @classmethod
-    def available_formats(cls):
+    @staticmethod
+    def available_formats():
         """
         Get dictionary of all available file formats that implement the file_format_base API.
 
@@ -101,7 +101,8 @@ class file_reader_base(object):
                   the corresponding file reader classes.
         """
         # Create list of all derived formats
-        formatReaders = {sub.format_name(): sub for sub in cls.__subclasses__()}
+        formatReaders =  {sub.format_name(): sub for sub in file_reader_base.__subclasses__()}
+        formatReaders.update({sub.format_name(): sub for sub in file_reader_base_with_regions.__subclasses__()})
         # Remove extended interface classes which do not implement an actual format
         formatReaders.pop('file_reader_base_with_regions')
         # Retrun the list of formats

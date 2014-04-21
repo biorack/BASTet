@@ -50,9 +50,9 @@ a = bruckerflex_file( dirname )
 import os
 import numpy as np
 import math
-from omsi.dataformat.file_reader_base import file_reader_base
+from omsi.dataformat.file_reader_base import file_reader_base_with_regions
 
-class bruckerflex_file(file_reader_base):
+class bruckerflex_file(file_reader_base_with_regions):
     """Interface for reading a single bruker flex image file.
 
        The reader supports standard array slicing for data read. I.e., to read a
