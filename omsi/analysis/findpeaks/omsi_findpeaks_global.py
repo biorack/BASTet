@@ -168,7 +168,11 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         xp = np.array(xp)
         for i in range(-integration_width,integration_width):
             idx = xp+i
-            im = im + data[:,:,idx]
+            try:
+                im = im + data[:,:,idx]
+            except IndexError:
+                pass
+
         
         #Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
         #We here convert the single scalars to 1D numpy arrays to ensure consistency. The data write function can
