@@ -11,6 +11,7 @@ Documentation of the OpenMSI Toolkit:
 
    introduction
    convert_files
+   custom_filereader
    custom_analysis
    HDF5_format
    HDF5_format_performance
