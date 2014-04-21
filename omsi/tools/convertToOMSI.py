@@ -63,7 +63,8 @@ def main(argv=None):
     # Parse the input arguments
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-        inputError, inputWarning, omsiOutFile, inputFilenames = ConvertSettings.parse_input_args(argv)
+        inputError, omsiOutFile, inputFilenames = ConvertSettings.parse_input_args(argv)
+        inputWarning = len(w)>0 # Check if warning occurred
         ConvertSettings.recorded_warnings += w
 
     # Terminate in case an error or warning has occured while processing the
@@ -71,15 +72,16 @@ def main(argv=None):
     if inputError:
         emailmsg = "One or more errors occurred while parsing the command line inputs."
         for warn in ConvertSettings.recorded_warnings:
-            emailmsg += warn.message + "\n"
+            emailmsg += unicode(warn.message) + u"\n"
         ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                                     body=emailmsg,
                                     email_type='error')
         raise ValueError(emailmsg)
     if inputWarning:
-        emailmsg = "Conflicting input parameters found. See WARNINGS for detail:."
+        emailmsg = "WARNINGS occured while parsing command line inputs (e.g., conflicting options). \n"
+        emailmsg += "See WARNING messages below for details:\n"
         for warn in ConvertSettings.recorded_warnings:
-            emailmsg += warn.message + "\n"
+            emailmsg += unicode(warn.message) + u"\n"
         ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                                     body=emailmsg,
                                     email_type='error')
@@ -99,7 +101,7 @@ def main(argv=None):
         emailmsg += "       -- No HDF5 output file has been generated. \n"
         emailmsg += "       -- No file has been added to the database. \n"
         emailmsg += "       -- Terminating \n"
-        emailmsg += str(sys.exc_info())
+        emailmsg += unicode(sys.exc_info())
         ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsiOutFile,
                                     body=emailmsg,
                                     email_type='error')
@@ -144,7 +146,7 @@ def main(argv=None):
             ConvertSettings.omsi_output_file.close_file()
             emailmsg += "  - Successfully closed output file" + " \n"
         except:
-            emailmsg += "  - Closing of output HDF5 file failed" + str(sys.exc_info()) + " \n"
+            emailmsg += "  - Closing of output HDF5 file failed" + unicode(sys.exc_info()) + " \n"
             pass
         if ConvertSettings.error_handling == "terminate-and-cleanup":
             emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
@@ -153,18 +155,18 @@ def main(argv=None):
             emailmsg += "  -Attempting to delete the generated HDF5 file." + " \n"
             print "--Attempting to delete the generated HDF5 file."
             os.remove(omsiOutFile)
-            emailmsg += "  -Successfully deleted the generated HDF5 file: " + str(omsiOutFile) + " \n"
-            print "--Successfully deleted the generated HDF5 file: " + str(omsiOutFile)
+            emailmsg += "  -Successfully deleted the generated HDF5 file: " + unicode(omsiOutFile) + " \n"
+            print "--Successfully deleted the generated HDF5 file: " + unicode(omsiOutFile)
         if ConvertSettings.error_handling == "terminate-only" or ConvertSettings.error_handling == "continue-on-error":
             emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
             print "--The generated HDF5 will not be added to the database."
             ConvertSettings.add_file_to_db = False
-            emailmsg += "  -The output HDF5 file (if generate) remains at: " + str(omsiOutFile) + " \n"
-            emailmsg += "  -Output file found: " + str(os.path.exists(omsiOutFile)) + " \n"
+            emailmsg += "  -The output HDF5 file (if generate) remains at: " + unicode(omsiOutFile) + " \n"
+            emailmsg += "  -Output file found: " + unicode(os.path.exists(omsiOutFile)) + " \n"
             print "--The output HDF5 file (if generate) remains at: " + str(omsiOutFile)
-            print "  Output file found: " + str(os.path.exists(omsiOutFile))
+            print "  Output file found: " + unicode(os.path.exists(omsiOutFile))
         emailmsg += "\n"
-        emailmsg += str(sys.exc_info())
+        emailmsg += unicode(sys.exc_info())
 
         #Add warnings to the email message
         emailmsg += "\n"
@@ -360,23 +362,23 @@ class ConvertSettings(object):
                 * 'inputFilenames' : List of strings indicating the list of input filenames
         """
         inputError = False    # Parameter used to track whether an error has occured while parsing the
-        inputWarning = False  # Parameter used to indicate conflicting input parameter options
-        outputFilename = None  # The output filename
+        outputFilename = ""  # The output filename
         inputFilenames = []  # The list of input filenames
         # Basic sanity check
         if len(argv) < 3:
             lastArg = argv[-1]
             if lastArg == "--help" or \
-               lastArg == "--h" or \
-               lastArg == "-help" or \
-               lastArg == "-h":
+                lastArg == "--h" or \
+                lastArg == "-help" or \
+                lastArg == "-h":
                 cls.print_help()
                 exit(0)
             else:
-                inputError = True
-                return inputError, inputWarning, outputFilename, inputFilenames
+                warnings.warn("No command-line options provided. Printing help.")
+                cls.print_help()
+                return inputError, outputFilename, inputFilenames
 
-        # Using the inputError and inputWarning paramter we try to keep parsing the input as long as possible to
+        # Using the inputError and inputWarning parameter we try to keep parsing the input as long as possible to
         # make sure we can inform the user of as many problems as possible
         startIndex = 1
         i = startIndex
@@ -403,7 +405,6 @@ class ConvertSettings(object):
                 startIndex += 2
                 ConvertSettings.nmf_num_iter = int(argv[i + 1])
                 if ConvertSettings.nmf_num_iter < 2:
-                    inputWarning = True
                     warnings.warn("WARNING: --nfm-niter must be 2 or larger")
                 print "Set nmf-niter=" + str(ConvertSettings.nmf_num_iter)
             elif currentArg == "--nmf-tolerance":
@@ -423,7 +424,6 @@ class ConvertSettings(object):
                 ConvertSettings.execute_fpg = False
                 print "Disable find peaks global"
                 if "--fpg" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-fpg and --fpg options are conflicting.")
             elif currentArg == "--fpl":
                 startIndex += 1
@@ -434,19 +434,15 @@ class ConvertSettings(object):
                 ConvertSettings.execute_fpl = False
                 print "Disable find peaks local"
                 if "--fpl" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-fpl and --fpl options are conflicting.")
             elif currentArg == "--auto-chunking":
                 startIndex += 1
                 ConvertSettings.auto_chunk = True
                 if "--chunking" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --chunking options will be ignored due to the use of --auto-chunking")
                 if "--no-chunking" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-chunking and --auto-chunking options are conflicting")
                 if "--optimized-chunking" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --optimized-chunking and --auto-chunking options are conflicting")
             elif currentArg == "--chunking":
                 startIndex += 4
@@ -465,7 +461,6 @@ class ConvertSettings(object):
                 ConvertSettings.auto_chunk = False
                 print "Disable chunking"
                 if "--auto-chunking" in argv or "--chunking" in argv:
-                    inputWarning = True
                     warnings.warn("WARNGING: --no-chunking option is conflicting with another chunking option")
             elif currentArg == "--optimized-chunking":
                 startIndex += 4
@@ -486,7 +481,6 @@ class ConvertSettings(object):
                 ConvertSettings.compression_opts = None
                 print "Disable compression"
                 if "--compression" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-compression and --compression options are conflicting.")
             elif currentArg == "--io":
                 startIndex += 2
@@ -506,7 +500,6 @@ class ConvertSettings(object):
                 ConvertSettings.generate_thumbnail = False
                 print "Disable thumbnail"
                 if "--thumbnail" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-thumbnail and --thumbnail options are conflicting.")
             elif currentArg == "--xdmf":
                 startIndex += 1
@@ -517,7 +510,6 @@ class ConvertSettings(object):
                 ConvertSettings.generate_xdmf = False
                 print "Disable xdmf"
                 if "--xdmf" in argv:
-                    inputWarning = True
                     warnings.warn("WARNING: --no-xdmf and --xdmf options are conflicting.")
             elif currentArg == "--help" or currentArg == "--h" or currentArg == "-help" or currentArg == "-h":
                 cls.print_help()
@@ -658,7 +650,7 @@ class ConvertSettings(object):
             print "Output OMSI file: " + outputFilename
 
         # Finish and return
-        return inputError, inputWarning, outputFilename, inputFilenames
+        return inputError, outputFilename, inputFilenames
 
 
     @classmethod
