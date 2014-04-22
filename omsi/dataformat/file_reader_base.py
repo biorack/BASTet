@@ -22,6 +22,7 @@ class file_reader_base(object):
 
        :ivar data_type: String indicating the data type to be used (e.g., uint16)
        :ivar shape: Tuple indicating the shape of the data
+       :ivar mz: Numpy array with the m/z axis data
        :ivar basename: The basename provided for opening the file.
 
        Required Interface Functions:
@@ -44,6 +45,7 @@ class file_reader_base(object):
         """
         self.data_type = ''
         self.shape = ()
+        self.mz = None
         self.basename = basename
         self.readdata = readdata
 
@@ -138,6 +140,15 @@ class file_reader_base_with_regions(file_reader_base):
         super(file_reader_base_with_regions, self).__init__(basename, readdata)
         self.select_region = None
         self.region_dicts = []
+
+    def set_region_selection(self, region_index=None):
+        """Define which region should be selected for local data reads.
+
+           :param region_index: The index of the region that should be read. The shape of the
+                    data will be adjusted accordingly. Set to None to select all regions and treat
+                    the data as a single full 3D image.
+        """
+        raise NotImplementedError('set_region_selection function not implemented')
 
     def get_region_selection(self):
         """Get the index of the selected region"""

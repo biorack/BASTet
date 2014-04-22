@@ -135,8 +135,7 @@ class bruckerflex_file(file_reader_base_with_regions):
         # ToDo this reads a single acqu metadata file to figure out the m/z
         # axis. This obviously means that we assume a single m/z axis for all
         # spectra
-        self.metadata = self.s_read_acqu(
-            self.pixel_dict['acqu'].compressed()[0])
+        self.metadata = self.s_read_acqu( self.pixel_dict['acqu'].compressed()[0])
         self.mz = self.s_mz_from_acqu(self.metadata)
 
         # Compute the region bouding boxes
