@@ -1453,7 +1453,7 @@ class ConvertWebHelper:
         addFileURL = os.path.join(db_server, "openmsi/resources/addfile")
         addfilepath = filepath
         # Correct the filepath if we are on openmsi.nersc.gov, as /global is not mounted but only /project.
-        if db_server == ConvertSettings.default_db_server and addfilepath.startswith("/global/project/projectdirs"):
+        if db_server == ConvertSettings.default_db_server_url and addfilepath.startswith("/global/project/projectdirs"):
             addfilepath = filepath.lstrip("/global")
         queryParams = {'file': os.path.abspath(addfilepath), 'owner': currOwner}
         addFileURL += "?"
