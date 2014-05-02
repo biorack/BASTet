@@ -81,6 +81,21 @@ class file_reader_base(object):
         """
         return False
 
+    @classmethod
+    def supports_multidata(cls):
+        """
+        Define whether the file format support multiple independent datasets.
+        """
+        return False
+
+    @classmethod
+    def supports_multiexperiment(cls):
+        """
+        Define whether the file format supports multiple independent experiments,
+        each of which may contain multiple datasets.
+        """
+        return False
+
     def __del__(self):
         """Close the file before garbage collection"""
         self.close_file()
@@ -103,12 +118,12 @@ class file_reader_base(object):
                   the corresponding file reader classes.
         """
         # Create list of all derived formats
-        formatReaders =  {sub.format_name(): sub for sub in file_reader_base.__subclasses__()}
-        formatReaders.update({sub.format_name(): sub for sub in file_reader_base_with_regions.__subclasses__()})
+        formatreaders = {sub.format_name(): sub for sub in file_reader_base.__subclasses__()}
+        formatreaders.update({sub.format_name(): sub for sub in file_reader_base_with_regions.__subclasses__()})
         # Remove extended interface classes which do not implement an actual format
-        formatReaders.pop('file_reader_base_with_regions')
+        formatreaders.pop('file_reader_base_with_regions')
         # Retrun the list of formats
-        return  formatReaders
+        return formatreaders
 
 
 class file_reader_base_with_regions(file_reader_base):
