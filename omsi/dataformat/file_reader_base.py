@@ -74,6 +74,22 @@ class file_reader_base(object):
         """
         raise NotImplementedError('is_valid_dataset function not implemented')
 
+    def get_number_of_regions(self):
+        """
+        File readers with multi region support must overwrite this function
+        to retrieve the true number of regions in the file.
+        Default implementation returns 1.
+        """
+        return 1
+
+    def get_number_of_datasets(self):
+        """
+        File readers with multi dataset support must overwrite this function
+        to retrieve the true number of raw datasets in the file.
+        Default implementation returns 1.
+        """
+        return 1
+
     @classmethod
     def supports_regions(cls):
         """
