@@ -56,7 +56,7 @@ class omsi_ticNorm(omsi_analysis_base) :
             self['mzTol']=0.1
         if not self['infIons'] :
             useTIC = 1
-        else
+        else:
             useTIC = 0
         # if not self['objectiveDim'] :
         #     self['objectiveDim']=self.dimension_index['imageDim']
