@@ -70,8 +70,8 @@ class omsi_ticNorm(omsi_analysis_base) :
 
         if useTIC == 0:
             idx = []
-            for ion in infIons:
-                temp =  np.where( abs(mz-ion)<=mzTol)
+            for ion in self['infIons']:
+                temp =  np.where( abs(mzdata-ion)<=self['mzTol'])
                 idx = np.concatenate([idx,temp[0]])
             temp = msidata[:,:,idx.astype(int32)]
             imTIC = np.sum(temp,2)
