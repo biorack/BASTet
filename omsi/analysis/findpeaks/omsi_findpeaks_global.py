@@ -147,10 +147,14 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         #Compute the average spectrum
         y = np.mean(y,axis=0)
         #Find peaks in the average spectrum
+
+        # REMOVED 20140429
         A = findpeaks(mzdata[:], y, smoothwidth, slwindow, peakheight)
         y = A.smoothListGaussian()
     
         # from the smoothed spectra subtract a sliding minima 
+
+        # REMOVED 20140429
         A = findpeaks(mzdata[:],y, smoothwidth, slwindow, peakheight)
         slmin = [ x for x in A.sliding_window_minimum()]
         y = y - slmin
@@ -164,14 +168,14 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         # integrate peaks +/- integration_width bins around each of the peaks found in the total spectra
         # TODO : THIS LOOP NEEDS TO BE CONVERTED TO A MAX INSTEAD OF A SUM
         im = data[:,:,xp]
-        im = im*0.0;
-        xp = np.array(xp)
-        for i in range(-integration_width,integration_width):
-            idx = xp+i
-            try:
-                im = im + data[:,:,idx]
-            except IndexError:
-                pass
+        # im = im*0.0;
+        # xp = np.array(xp)
+        # for i in range(-integration_width,integration_width):
+        #     idx = xp+i
+        #     try:
+        #         im = im + data[:,:,idx]
+        #     except IndexError:
+        #         pass
 
         
         #Add the analysis results and parameters to the anlaysis data so that it can be accessed and written to file
