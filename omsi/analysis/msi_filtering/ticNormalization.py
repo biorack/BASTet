@@ -62,7 +62,7 @@ class omsi_ticNorm(omsi_analysis_base) :
         #     self['objectiveDim']=self.dimension_index['imageDim']
         
         #getting the values into local variables            
-        msidata = self['msidata'][:]
+        msidata = np.asarray(self['msidata'][:])
         mzdata = self['mzdata'][:]
         # integration_width = self['maxCount'][0]
         # peakheight = self['mzTol'][0]
@@ -83,7 +83,7 @@ class omsi_ticNorm(omsi_analysis_base) :
         ticMask[idx] = 1
 
         # the numbers are so small that double precision is necessary
-        imNorm = np.divide(np.multiply(imCube.astype(float64),ticMask[:,:,np.newaxis]).astype(float64),imTIC.astype(float64)[:,:,np.newaxis])
+        imNorm = np.divide(np.multiply(msidata.astype(float),ticMask[:,:,np.newaxis]).astype(float),imTIC.astype(float)[:,:,np.newaxis])
 
         self['msidata'] = imNorm
         self['mzdata'] = mzdata
