@@ -84,9 +84,9 @@ class omsi_ticNorm(omsi_analysis_base) :
         ticMask[idx] = 1
 
         # the numbers are so small that double precision is necessary
-        imNorm = np.divide(np.multiply(msidata,ticMask[:,:,np.newaxis]).astype(float),imTIC.astype(float)[:,:,np.newaxis])
+        self['msidata'] = np.divide(np.multiply(msidata,ticMask[:,:,np.newaxis]).astype(float),imTIC.astype(float)[:,:,np.newaxis])
 
-        self['msidata'] = imNorm
+
         self['mzdata'] = mzdata
 
     ###############################################################
