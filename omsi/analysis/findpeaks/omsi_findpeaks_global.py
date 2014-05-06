@@ -120,7 +120,7 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         
         #Set default parameter values if needed
         if not self['integration_width'] :
-            self['integration_width']=10
+            self['integration_width']=0.1
         if not self['peakheight'] :
             self['peakheight']=2
         if not self['slwindow'] :
@@ -164,10 +164,18 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         [pkmax,pkmin]=A.peakdet()
         xp = [ x[0] for x in pkmax  ]
         yp = [ x[1] for x in pkmax  ]
-        
+        pks = np.asarray(pkmax)
+        mz_peaks =  mzdata[pks[:, 0].astype(int)]
+        flatData = data.reshape(Nx*Ny,Nz)
+        peak_cube = np.zeros((Nx*Ny,mz_peaks.shape[0]))
+        for i in range(len(mz_peaks)):
+            xx = np.where(np.abs(mzdata - mz_peaks[i])<integration_width)
+            temp = np.amax(flatData[:,xx[0]],1)
+            peak_cube[:,i] = temp
+        peak_cube = peak_cube.reshape(Nx,Ny,len(mz_peaks))
         # integrate peaks +/- integration_width bins around each of the peaks found in the total spectra
         # TODO : THIS LOOP NEEDS TO BE CONVERTED TO A MAX INSTEAD OF A SUM
-        im = data[:,:,xp]
+        # im = data[:,:,xp]
         # im = im*0.0;
         # xp = np.array(xp)
         # for i in range(-integration_width,integration_width):
@@ -184,8 +192,8 @@ class omsi_findpeaks_global(omsi_analysis_base) :
         #to ensure a consitent behavior we convert the values directly here
             
         #Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
-        self['peak_cube'] = im
-        self['peak_mz'] = mzdata[xp]
+        self['peak_cube'] = peak_cube
+        self['peak_mz'] = mz_peaks
         
 
 def main(argv=None):
