@@ -70,13 +70,12 @@ class omsi_ticNorm(omsi_analysis_base) :
         # peakheight = self['mzTol'][0]
         # slwindow = self['infIons'][0]
 
-        if useTIC == 0:
+        if ionList is not None:
             idx = []
-            for ion in self['infIons']:
+            for ion in ionList:
                 temp =  np.where( abs(mzdata-ion)<=self['mzTol'])
                 idx = np.concatenate([idx,temp[0]])
-            temp = msidata[:,:,idx.astype(int32)]
-            imTIC = np.sum(temp,2)
+            imTIC = np.sum(msidata[:,:,idx.astype(long)],2)
         else:
             imTIC = np.sum(msidata,2)
 
@@ -85,11 +84,10 @@ class omsi_ticNorm(omsi_analysis_base) :
         ticMask[idx] = 1
 
         # the numbers are so small that double precision is necessary
-        imNorm = np.divide(np.multiply(msidata.astype(float),ticMask[:,:,np.newaxis]).astype(float),imTIC.astype(float)[:,:,np.newaxis])
+        imNorm = np.divide(np.multiply(msidata,ticMask[:,:,np.newaxis]).astype(float),imTIC.astype(float)[:,:,np.newaxis])
 
         self['msidata'] = imNorm
         self['mzdata'] = mzdata
-    
 
     ###############################################################
     #  2) Integrating your analysis with the OpenMSI              #
