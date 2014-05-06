@@ -1,3 +1,15 @@
+"""
+Module for base classes for implementation and integration of thrid-party file readers.
+
+ToDo:
+
+* get_number_of_regions(...) should be updated to return a lost of regions, one per dataset
+* Need to add base class for multi dataset formats
+* Need to add base class for multi dataset+region formats
+* Need to implement new file format for combined raw data file (ie., multiple raw files in one folder).
+
+"""
+
 class file_reader_base(object):
     """Base-class used to define the basic interface that file-readers
        for a new format need to implement.
