@@ -69,7 +69,7 @@ class omsi_analysis_base(object) :
         """This class supports basic slicing to access data stored in the main member variables. 
            By default the data is retrieved from __data_list and the __getitem__(key) function.
            which implemtent the [..] operator, returns __data_list[key]['data']. The key is 
-           a string indicating the name of the paramter to be retrieved. If the key is not 
+           a string indicating the name of the parameter to be retrieved. If the key is not
            found in the __data_list then the function will try to retrieve the data from 
            __parameter_list and __dependency_list instead. 
         """
