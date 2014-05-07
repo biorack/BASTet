@@ -88,11 +88,12 @@ class omsi_dependency(dict):
     def get_data(self):
         """Get the data associated with the dependency.
         
-           :returns: For dependencies that support data load (e.g., h5py.Dataset, omsi_file_msidata) 
-                     the associate data is loaded and the numpy data array is returned.
+           :returns: If a selection is applied and the dependency object supports
+                     array data load (e.g., h5py.Dataset, omsi_file_msidata), then
+                     the selected data will be loaded and returned as numpy array.
                      Otherwise the ['omsi_object'] is returned. 
         """
-        if self['_data']:
+        if self['_data'] is not None:
             return self['_data']
         else:
             if self['dataname']:
@@ -101,8 +102,9 @@ class omsi_dependency(dict):
                 dataObj = self['omsi_object']
             try:
                 if not self['selection']:
-                    data = dataObj[:]
-                    self['_data'] = data
+                    #data = dataObj[:]
+                    #self['_data'] = dataObj
+                    return dataObj
                 else:
                     from omsi.shared.omsi_data_selection import check_selection_string
                     selectionStr = self['selection']
