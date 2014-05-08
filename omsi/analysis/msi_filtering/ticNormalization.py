@@ -95,7 +95,6 @@ class omsi_ticNorm(omsi_analysis_base) :
         # inputFilename = TemporaryFile()
         # ifp = np.memmap(inputFilename, dtype='float', mode='w+', shape=(Nx,Ny,Nz))
         outputFilename = TemporaryFile()
-        ofp = np.memmap(outputFilename, dtype='float', mode='w+', shape=(Nx,Ny,Nz))
 
         # ifp = np.asarray(self['msidata'][:])
         # ifp = ifp.reshape(Nx*Ny,Nz)
@@ -105,20 +104,21 @@ class omsi_ticNorm(omsi_analysis_base) :
         # ofp = ofp.reshape(Nx,Ny,Nz)
 
         for i in range(len(idx)-1):
-            # dummyVar = self['msidata'][idx[i]:idx[i+1],:,:]
-            # temp = dummyVar[:]
-            # tip = np.sum(temp[:,:,idx_mz],2)
-            # mip = np.amax(temp[:,:,idx_mz],2)
-            tip = np.sum(self['msidata'][idx[i]:idx[i+1],:,idx_mz],2)
-            mip = np.amax(self['msidata'][idx[i]:idx[i+1],:,idx_mz],2)
+            temp = self['msidata'][idx[i]:idx[i+1],:,:]
+            tip = np.sum(temp[:,:,idx_mz],2)
+            mip = np.amax(temp[:,:,idx_mz],2)
+
+
 
             ticMask = np.zeros( (mip.shape) )
             idx_thresh = np.where ( mip >= self['maxCount'] )
             ticMask[idx_thresh] = 1
+            temp = np.multiply(temp,ticMask[:,:,np.newaxis])
+            ofp = np.memmap(outputFilename, dtype='float', mode='w+', shape=(Nx,Ny,Nz))
+            ofp[idx[i]:idx[i+1],:,:] = np.divide(temp.astype(float),tip.astype(float)[:,:,np.newaxis])
+            del ofp
 
-
-            ofp[idx[i]:idx[i+1],:,:] = np.divide(np.multiply(self['msidata'].astype(float)[idx[i]:idx[i+1],:,:],ticMask[:,:,np.newaxis]),tip.astype(float)[:,:,np.newaxis])
-
+        ofp = np.memmap(outputFilename, dtype='float', mode='w+', shape=(Nx,Ny,Nz))
         #np.max(fp) #do in chunks
         self['norm_msidata'] = ofp #.reshape(Nx,Ny,Nz)
         self['norm_mz'] = mzdata
