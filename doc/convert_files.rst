@@ -26,7 +26,7 @@ Note, if you want to use the output file from openmsi.nersc.gov then the output 
 where username is the name of the primary user that owns the file.
 
 Making a converted file accessible to OpenMSI (Private)
-------------------------------------------------------
+-------------------------------------------------------
 
 The conversion script will by default automatically try to register new files with the OpenMSI site and
 assign them private to a single user if the output file is placed in the OpenMSI private data location:
@@ -71,7 +71,7 @@ NOTE: In order to view a current, complete list of conversions options use:
     datasets of the same experiment and/or merged to a single MSI dataset.
     Using the various paramter settings described below, one can define how the
     conversion should be performed, how the data should be stored in HDF5, and
-    indicate which analyses should be exectued.
+    indicate which analyses should be executed.
 
     ===HELPER OPTIONS===
     --suggest-chunking : Iterate over all given input files and suggest a chunking strategy.
@@ -96,7 +96,7 @@ NOTE: In order to view a current, complete list of conversions options use:
     --format <option>: Define which file format is used as input. By default the program tries to
                automatically determine the input format. This option can be used to indicate
                the format explicitly to in case the auto option fails. Available options are:
-              ['img', 'bruckerflex', 'auto']
+              {'bruckerflex_file': <class 'omsi.dataformat.bruckerflex_file.bruckerflex_file'>, 'img_file': <class 'omsi.dataformat.img_file.img_file'>}
     --regions <option>: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored
                in a single file. This option allows one to specify how these regions should be
                treated during file conversion. E.g., one may want to store i) each region as a
@@ -151,7 +151,7 @@ NOTE: In order to view a current, complete list of conversions options use:
 
     ===ANALYSIS OPTIONS===
 
-    NMF: Default ON: (nc=20, timout=600, niter=2000, tolerance=0.0001, raw=False)
+    NMF: Default ON: (nc=20, timeout=600, niter=2000, tolerance=0.0001, raw=False)
     --nmf : Compute the nmf for all the input data files and store the results in the
             HDF5 file. NOTE: If global peak-finding (fpg) is performed, then
             nmf will be performed on the peak-cube, otherwise on the raw data
@@ -168,17 +168,21 @@ NOTE: In order to view a current, complete list of conversions options use:
                in the HDF5 file (DEFAULT)
     --no-fpg: Disable the global peak finding
 
-    Global Peak Finding: Default OFF:
+    Local Peak Finding: Default OFF:
     --fpl : Compute the local peak finding for all input data files and save results
             in the HDF5 file
     --no-fpl: Disable the local peak finding (DEFAULT)
 
     ---OTHER OPTIONS---
 
-    Generate Thumbnail image: Default ON:
+    Generate Thumbnail image: Default OFF:
     --thumbnail: Generate thumbnail image for the file based on, in order of availability:
-                 * The frist three components of the NMF
+                 * The first three components of the NMF
                  * The three most intense peaks from the global peak finding (fpg)
                  * The three most intense peaks in the raw data that are at least 1 percent
                    of the total m/z range apart.
     --no-thumbnail: Do not generate a thumbnail image.
+
+    Generate XDMF header file for output file: Default OFF:
+    --xdmf: Write XDMF XML-based header-file for the output HDF5 file.
+    --no-xdmf: Do not generate a XDMF XML-based header for the HDF5 file.
