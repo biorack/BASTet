@@ -763,7 +763,7 @@ class ConvertSettings(object):
         print "           in the HDF5 file (DEFAULT)"
         print "--no-fpg: Disable the global peak finding"
         print ""
-        print "Global Peak Finding: Default OFF:"
+        print "Local Peak Finding: Default OFF:"
         print "--fpl : Compute the local peak finding for all input data files and save results"
         print "        in the HDF5 file"
         print "--no-fpl: Disable the local peak finding (DEFAULT)"
