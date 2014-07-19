@@ -3480,12 +3480,9 @@ class omsi_file_msidata(object):
         if self.format_type == omsi_format_msidata.format_types['full_cube']:
 
             chunks = destination.chunks
-            numchunksx = int(
-                math.ceil(float(source.shape[0]) / float(chunks[0])))
-            numchunksy = int(
-                math.ceil(float(source.shape[1]) / float(chunks[1])))
-            numchunksz = int(
-                math.ceil(float(source.shape[2]) / float(chunks[2])))
+            numchunksx = int(math.ceil(float(source.shape[0]) / float(chunks[0])))
+            numchunksy = int(math.ceil(float(source.shape[1]) / float(chunks[1])))
+            numchunksz = int(math.ceil(float(source.shape[2]) / float(chunks[2])))
             numchunks = numchunksx * numchunksy * numchunksz
             itertest = 0
             for xt in xrange(0, numchunksx):
@@ -3497,8 +3494,7 @@ class omsi_file_msidata(object):
                     for zt in xrange(0, numchunksz):
                         zstart = zt * chunks[2]
                         zend = min(zstart + chunks[2], source.shape[2])
-                        destination[xstart:xend, ystart:yend, zstart:zend] = source[
-                            xstart:xend, ystart:yend, zstart:zend]
+                        destination[xstart:xend, ystart:yend, zstart:zend] = source[xstart:xend, ystart:yend, zstart:zend]
                         itertest += 1
                         if print_status:
                             sys.stdout.write(
