@@ -36,7 +36,7 @@ class mzml_file(file_reader_base):
         super(mzml_file, self).__init__(basename=basename, readdata=readdata)
         self.mzml_type = self.__compute_filetype()
         self.mz = self.__compute_mz_axis()
-        self.data_type = 'uint16'  # TODO What data type should we use for the interpolated data?
+        self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans()
         self.coordinates = self.__compute_coordinates()
 
