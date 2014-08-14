@@ -49,11 +49,12 @@ class img_file(file_reader_base):
             basefile = basename
             if os.path.isdir(basename):
                 filelist = self.get_files_from_dir(basename)
+                print filelist
                 if len(filelist) > 0:
-                    basefile = os.path.join(basename, filelist[0])
+                    basefile = filelist[0]
                 else:
-                    raise ValueError(
-                        "No valid img file found in the given directory.")
+                    raise ValueError("No valid img file found in the given directory.")
+            print basefile
             if os.path.exists(basefile + ".hdr") and \
                     os.path.exists(basefile + ".t2m") and \
                     os.path.exists(basefile + ".img"):
@@ -61,8 +62,7 @@ class img_file(file_reader_base):
                 t2m_filename = basefile + ".t2m"
                 img_filename = basefile + ".img"
             else:
-                raise ValueError(
-                    "No valid img file found for the given basename.")
+                raise ValueError("No valid img file found for the given basename.")
         elif hdr_filename and t2m_filename and img_filename:
             pass  # Nothing to be done
         else:
@@ -195,7 +195,10 @@ class img_file(file_reader_base):
 
     @classmethod
     def get_files_from_dir(cls, dirname):
-        """Get a list of all basenames of all img files in a given directory"""
+        """
+        Get a list of all basenames of all img files in a given directory.
+        Note: The basenames include the dirname.
+        """
         filelist = []
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l)
