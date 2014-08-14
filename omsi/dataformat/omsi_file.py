@@ -1,13 +1,17 @@
-"""This module defines the API for reading and writing HDF5 files for storing
-   mass spectrometry imaging data, metadata, and analysis results according to
-   the format defined by the OpenMSI project
+"""
+This module defines the API for reading and writing HDF5 files for storing
+mass spectrometry imaging data, metadata, and analysis results according to
+the format defined by the OpenMSI project
 
-   TODO: omsi_file_msidata
+TODO: omsi_file_msidata
     -- The partial spectra case is untested and needs attention
     -- The __getitem__ function for the partial_spectra case is not fully implemented yet
     -- The estimates in def __best_dataset__(self,keys) are fairly crude at this point
     -- The __setitem__ function should be implemented for the different cases as well (AHHHH).
-    -- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable."""
+    -- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable.
+
+"""
+# TODO Rename omsi_file_sample to omsi_file_methods and rename the group from sample to methods in a backward compatible way
 
 import h5py
 import numpy as np
@@ -2614,14 +2618,10 @@ class omsi_file_msidata(object):
 
            :returns: h5py object of the newly created sample group.
         """
-        sample_group = self._data_group.require_group(
-            omsi_format_sample.sample_groupname)
-        sample_group.attrs[
-            omsi_format_common.type_attribute] = "omsi_file_sample"
-        sample_group.attrs[
-            omsi_format_common.version_attribute] = omsi_format_sample.current_version
-        sample_group.attrs[
-            omsi_format_common.timestamp_attribute] = str(time.ctime())
+        sample_group = self._data_group.require_group(omsi_format_sample.sample_groupname)
+        sample_group.attrs[omsi_format_common.type_attribute] = "omsi_file_sample"
+        sample_group.attrs[omsi_format_common.version_attribute] = omsi_format_sample.current_version
+        sample_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         if flush_io:
             self._data_group.file.flush()
         return omsi_file_sample.__create_sample_info__(sample_group=sample_group, sample_name=sample_name)
@@ -2639,14 +2639,10 @@ class omsi_file_msidata(object):
 
         """
         # Create the group for instrument specific data
-        instrument_group = self._data_group.require_group(
-            omsi_format_instrument.instrument_groupname)
-        instrument_group.attrs[
-            omsi_format_common.type_attribute] = "omsi_file_instrument"
-        instrument_group.attrs[
-            omsi_format_common.version_attribute] = omsi_format_instrument.current_version
-        instrument_group.attrs[
-            omsi_format_common.timestamp_attribute] = str(time.ctime())
+        instrument_group = self._data_group.require_group(omsi_format_instrument.instrument_groupname)
+        instrument_group.attrs[omsi_format_common.type_attribute] = "omsi_file_instrument"
+        instrument_group.attrs[omsi_format_common.version_attribute] = omsi_format_instrument.current_version
+        instrument_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         if flush_io:
             self._data_group.file.flush()
         return omsi_file_instrument.__create_instrument_info__(instrument_group=instrument_group, instrument_name=instrument_name, mzdata=mzdata)
