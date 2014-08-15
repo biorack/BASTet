@@ -954,8 +954,8 @@ class ConvertFiles(object):
             # identifer string
             if curr_dataset['exp'] == 'new':  # Create a new experiment for this dataset
                 exp = ConvertSettings.omsi_output_file.create_exp(exp_identifier=basefile)
-                # Create an empty sample descrition
-                sample = exp.create_sample_info()
+                # Create an empty method descrition
+                sample = exp.create_method_info()
                 # Create an empty instrument description
                 instrument = exp.create_instrument_info(
                     instrument_name="undefined", mzdata=mzdata)
@@ -1006,10 +1006,10 @@ class ConvertFiles(object):
             notes_meta_key = '--notes'+str(curr_index)
             instrument_meta_key = '--instrument'+str(curr_index)
             if method_meta_key in ConvertSettings.metadata or notes_meta_key in ConvertSettings.metadata:
-                if not data.has_sample_info():
-                    sample_info = data.create_sample_info()
+                if not data.has_method_info():
+                    sample_info = data.create_method_info()
                 else:
-                    sample_info = data.get_sample_info()
+                    sample_info = data.get_method_info()
                 if method_meta_key in ConvertSettings.metadata:
                     sample_info['methods'] = ConvertSettings.metadata[method_meta_key]
                 if notes_meta_key in ConvertSettings.metadata:

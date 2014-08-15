@@ -43,20 +43,23 @@ class omsi_format_experiment(omsi_format_common):
     current_version = "0.1"
 
 
-class omsi_format_sample(omsi_format_common):
+class omsi_format_methods(omsi_format_common):
 
-    """Specification of the basic format for storing sample-related information
+    """Specification of the basic format for storing method-related information
 
-       :var sample_groupname: `sample` : The group storing all the information about the sample
-       :var sample_name: `name` : The dataset with the name of the sample
+       :var methods_groupname: `methods` : The group storing all the information about the method
+       :var methods_old_groupname: `method` : The group object was refactored to methods. To ensure that old
+            files can still be read, this variable was added and is checked as well if needed.
+       :var methods_name: `name` : The dataset with the name of the method
     """
 
     def __init__(self):
-        super(omsi_format_sample, self).__init__()
+        super(omsi_format_methods, self).__init__()
 
-    sample_groupname = "sample"
-    sample_name = "name"
-    current_version = "0.1"
+    methods_groupname = "methods"
+    methods_old_groupname = "method"
+    methods_name = "name"
+    current_version = "0.2"
 
 
 class omsi_format_instrument(omsi_format_common):

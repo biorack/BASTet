@@ -11,7 +11,7 @@ TODO: omsi_file_msidata
     -- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable.
 
 """
-# TODO Rename omsi_file_sample to omsi_file_methods and rename the group from sample to methods in a backward compatible way
+# TODO Rename omsi_file_methods to omsi_file_methods and rename the group from method to methods in a backward compatible way
 
 import h5py
 import numpy as np
@@ -43,7 +43,7 @@ class omsi_file(object):
         managed_object = omsi_file.get_omsi_object(in_object)
         if isinstance(managed_object, omsi_file) or \
            isinstance(managed_object, omsi_file_experiment) or \
-           isinstance(managed_object, omsi_file_sample) or\
+           isinstance(managed_object, omsi_file_methods) or\
            isinstance(managed_object, omsi_file_instrument) or \
            isinstance(managed_object, omsi_file_analysis) or \
            isinstance(managed_object, omsi_file_msidata) or \
@@ -74,8 +74,8 @@ class omsi_file(object):
             h5pyobject = omsi_object.get_h5py_file()
         elif isinstance(omsi_object, omsi_file_experiment):
             h5pyobject = omsi_object.get_h5py_experimentgroup()
-        elif isinstance(omsi_object, omsi_file_sample):
-            h5pyobject = omsi_object.get_h5py_samplegroup()
+        elif isinstance(omsi_object, omsi_file_methods):
+            h5pyobject = omsi_object.get_h5py_methodgroup()
         elif isinstance(omsi_object, omsi_file_instrument):
             h5pyobject = omsi_object.get_h5py_instrumentgroup()
         elif isinstance(omsi_object, omsi_file_analysis):
@@ -114,7 +114,7 @@ class omsi_file(object):
 
                 * omsi_file : If the given object is a h5py.File object
                 * omsi_file_experiment : If the given object is an experiment groupt
-                * omsi_file_sample : If the given object is a sample group
+                * omsi_file_methods : If the given object is a method group
                 * omsi_file_instrument : If the given object is an instrument group
                 * omsi_file_analysis : If the given object is an analysis group
                 * omsi_file_msidata : If the given object is a MSI data group
@@ -129,7 +129,7 @@ class omsi_file(object):
         # is
         if isinstance(h5py_object, omsi_file) or \
            isinstance(h5py_object, omsi_file_experiment) or \
-           isinstance(h5py_object, omsi_file_sample) or\
+           isinstance(h5py_object, omsi_file_methods) or\
            isinstance(h5py_object, omsi_file_instrument) or \
            isinstance(h5py_object, omsi_file_analysis) or \
            isinstance(h5py_object, omsi_file_msidata) or \
@@ -148,8 +148,8 @@ class omsi_file(object):
                     omsi_format_common.type_attribute]
                 if type_attribute == "omsi_file_experiment":
                     return omsi_file_experiment(h5py_object)
-                elif type_attribute == "omsi_file_sample":
-                    return omsi_file_sample(h5py_object)
+                elif type_attribute == "omsi_file_methods" or type_attribute == "omsi_file_methods":
+                    return omsi_file_methods(h5py_object)
                 elif type_attribute == "omsi_file_instrument":
                     return omsi_file_instrument(h5py_object)
                 elif type_attribute == "omsi_file_analysis":
@@ -178,8 +178,9 @@ class omsi_file(object):
                 parentgroupname = h5py_object.parent.name.split("/")[-1]
                 if groupname.startswith(omsi_format_experiment.exp_groupname):
                     return omsi_file_experiment(h5py_object)
-                elif groupname.startswith(omsi_format_sample.sample_groupname):
-                    return omsi_file_sample(h5py_object)
+                elif groupname.startswith(omsi_format_methods.methods_groupname) or \
+                        groupname.startswith(omsi_format_methods.methods_old_groupname):
+                    return omsi_file_methods(h5py_object)
                 elif groupname.startswith(omsi_format_instrument.instrument_groupname):
                     return omsi_file_instrument(h5py_object)
                 elif groupname.startswith(omsi_format_analysis.analysis_groupname):
@@ -570,18 +571,18 @@ class omsi_file(object):
         print "Checking for number of msidata for the experiment"
         print exp.get_num_msidata()
 
-        print "Adding sample information"
-        sampleinfo = exp.create_sample_info()
+        print "Adding method information"
+        methodinfo = exp.create_method_info()
 
-        print "Getting the sample information group"
-        print exp.get_sample_info()
+        print "Getting the method information group"
+        print exp.get_method_info()
 
-        print "Getting the sample name"
-        samplename = sampleinfo.get_sample_name()
-        print samplename[0]
-        print "Modifing sample name"
-        sampleinfo.set_sample_name("Mouse")
-        print sampleinfo.get_sample_name()[0]
+        print "Getting the method name"
+        methodname = methodinfo.get_method_name()
+        print methodname[0]
+        print "Modifing method name"
+        methodinfo.set_method_name("Mouse")
+        print methodinfo.get_method_name()[0]
 
         print "Adding instrument information"
         mzdata = np.arange(10, dtype='float32')
@@ -792,17 +793,19 @@ class omsi_file_experiment(object):
     ###########################################################
     # Get sub-group object associated with the experiment
     ###########################################################
-    def get_sample_info(self):
-        """Get the omsi_file_sample object with the sample information.
+    def get_method_info(self):
+        """Get the omsi_file_methods object with the method information.
 
-           :returns: omsi_file_sample object for the requested sample info. The function returns \
-                     None in case no sample information was found for the experiment
+           :returns: omsi_file_methods object for the requested method info. The function returns \
+                     None in case no method information was found for the experiment
         """
         try:
-            return omsi_file_sample(
-                self.experiment[unicode(omsi_format_sample.sample_groupname)])
+            return omsi_file_methods(self.experiment[unicode(omsi_format_methods.methods_groupname)])
         except:
-            return None
+            try:
+                return omsi_file_methods(self.experiment[unicode(omsi_format_methods.methods_old_groupname)])
+            except:
+                return None
 
     def get_instrument_info(self):
         """Get the HDF5 group opbject with the instrument information.
@@ -1031,26 +1034,22 @@ class omsi_file_experiment(object):
             self.experiment.file.flush()
         return data_dataset, mz_index_dataset, mz_dataset, xy_index_start_dataset, xy_index_end_dataset, data_group
 
-    def create_sample_info(self, sample_name=None, flush_io=True):
-        """Add information about the sample imaged to the experiment
+    def create_method_info(self, method_name=None, flush_io=True):
+        """Add information about the method imaged to the experiment
 
-           :param sample_name: Optional name of the sample
-           :type sample_name: string, None
+           :param method_name: Optional name of the method
+           :type method_name: string, None
            :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
 
-           :returns: h5py object of the newly created sample group.
+           :returns: h5py object of the newly created method group.
         """
-        sample_group = self.experiment.require_group(
-            omsi_format_sample.sample_groupname)
-        sample_group.attrs[
-            omsi_format_common.type_attribute] = "omsi_file_sample"
-        sample_group.attrs[
-            omsi_format_common.version_attribute] = omsi_format_sample.current_version
-        sample_group.attrs[
-            omsi_format_common.timestamp_attribute] = str(time.ctime())
+        method_group = self.experiment.require_group(omsi_format_methods.methods_groupname)
+        method_group.attrs[omsi_format_common.type_attribute] = "omsi_file_methods"
+        method_group.attrs[omsi_format_common.version_attribute] = omsi_format_methods.current_version
+        method_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         if flush_io:
             self.experiment.file.flush()
-        return omsi_file_sample.__create_sample_info__(sample_group=sample_group, sample_name=sample_name)
+        return omsi_file_methods.__create_method_info__(method_group=method_group, method_name=method_name)
 
     def create_instrument_info(self, instrument_name=None, mzdata=None, flush_io=True):
         """Add information about the instrument used for creating the images for this experiment.
@@ -1114,54 +1113,54 @@ class omsi_file_experiment(object):
 
 ##########################################################################
 ##########################################################################
-#   The main class for sample information within omsi data files
+#   The main class for method information within omsi data files
 ##########################################################################
 ##########################################################################
-class omsi_file_sample(object):
+class omsi_file_methods(object):
 
-    """Class for managing sample specific data"""
+    """Class for managing method specific data"""
 
     @classmethod
-    def __create_sample_info__(cls, sample_group, sample_name=None):
-        """Add information about the sample imaged to the experiment
+    def __create_method_info__(cls, method_group, method_name=None):
+        """Add information about the method  imaged to the experiment
 
            NOTE: This is a private helper function used to populate the given group for the \
-           sample data. Use the corresponding omsi_file_experiment.create_sample_info(...) \
-           to create a new sample group and populate it with data.
+           method data. Use the corresponding omsi_file_experiment.create_method_info(...) \
+           to create a new method group and populate it with data.
 
-           :param sample_group: h5py group object that should be populated with the sample data.
-           :param sample_name: Optional name of the sample
-           :type sample_name: string, None
+           :param method_group: h5py group object that should be populated with the method data.
+           :param method_name: Optional name of the method
+           :type method_name: string, None
 
-           :returns: h5py object of the newly created sample group.
+           :returns: h5py object of the newly created method group.
         """
-        samplenamedata = sample_group.require_dataset(name=unicode(
-            omsi_format_sample.sample_name), shape=(1,), dtype=omsi_format_common.str_type)
-        if sample_name is None:
-            if len(samplenamedata[0]) == 0:
-                samplenamedata[0] = "undefined"
+        methodnamedata = method_group.require_dataset(name=unicode(
+            omsi_format_methods.methods_name), shape=(1,), dtype=omsi_format_common.str_type)
+        if method_name is None:
+            if len(methodnamedata[0]) == 0:
+                methodnamedata[0] = "undefined"
         else:
             if omsi_format_common.str_type_unicode:
-                samplenamedata[0] = sample_name
+                methodnamedata[0] = method_name
             else:
-                samplenamedata[0] = str(sample_name)
-        return omsi_file_sample(sample_group)
+                methodnamedata[0] = str(method_name)
+        return omsi_file_methods(method_group)
 
-    def __init__(self, sample_group):
-        """Initalize the sample object given the h5py object of the sample group
+    def __init__(self, methods_group):
+        """Initialize the method object given the h5py object of the method group
 
-           :param sample_group: The h5py object with the sample group of the omsi hdf5 file.
+           :param methods_group: The h5py object with the method group of the omsi hdf5 file.
         """
-        self.sample = sample_group
-        self.name = self.sample.name
+        self.method = methods_group
+        self.name = self.method.name
 
     def __getitem__(self, key):
-        """Support direct read interaction with the sample h5py group"""
-        return self.sample[key]
+        """Support direct read interaction with the method h5py group"""
+        return self.method[key]
 
     def __setitem__(self, key, value):
-        """Support direct write interaction with the sample h5py group"""
-        self.sample[key] = value
+        """Support direct write interaction with the method h5py group"""
+        self.method[key] = value
 
     def __eq__(self, value):
         """Check whether the two objects have the same h5py name"""
@@ -1177,17 +1176,17 @@ class omsi_file_sample(object):
 
     def items(self):
         """Get the list of items associdated with the h5py.Group object managed by this object"""
-        return self.sample.items()
+        return self.method.items()
 
     def get_version(self):
         """Get the omsi version for the representation of this object in the HDF5 file"""
         try:
-            return self.sample.attrs[omsi_format_common.version_attribute]
+            return self.method.attrs[omsi_format_common.version_attribute]
         except:
             return None
 
     def get_timestamp(self):
-        """Get the timestamp when the sample group was created in the HDF5 file.
+        """Get the timestamp when the method group was created in the HDF5 file.
 
            :returns: Python timestamp string generated using time.ctime().
                      None may be returned in case that the timestamp does not exists
@@ -1195,47 +1194,47 @@ class omsi_file_sample(object):
 
         """
         try:
-            return self.sample.attrs[omsi_format_common.timestamp_attribute]
+            return self.method.attrs[omsi_format_common.timestamp_attribute]
         except:
             return None
 
-    def get_h5py_samplegroup(self):
-        """Get the h5py object for the HDF5 group of the sample data
+    def get_h5py_methodgroup(self):
+        """Get the h5py object for the HDF5 group of the method data
 
-           :returns: h5py reference for the sample group.
+           :returns: h5py reference for the method group.
         """
-        return self.sample
+        return self.method
 
-    def get_sample_name(self):
-        """Get the HDF5 dataset with the name of the sample.
+    def get_method_name(self):
+        """Get the HDF5 dataset with the name of the method.
 
-           To retrieve the name string use get_sample_name()[...]
+           To retrieve the name string use get_method_name()[...]
 
-           :returns: h5py object where the sample name is stored.
-                     Returns None in case no sample name is found.
+           :returns: h5py object where the method name is stored.
+                     Returns None in case no method name is found.
         """
-        sample_name = None
-        if self.sample is None:
+        method_name = None
+        if self.method is None:
             return None
         try:
-            sample_name = self.sample[unicode(omsi_format_sample.sample_name)]
+            method_name = self.method[unicode(omsi_format_methods.methods_name)]
         except:
-            sample_name = None
-        return sample_name
+            method_name = None
+        return method_name
 
-    def set_sample_name(self, name_string):
-        """Overwrite the name string for the sample with the given name string
+    def set_method_name(self, name_string):
+        """Overwrite the name string for the method with the given name string
 
-           :param name_string: The new sample name.
+           :param name_string: The new method name.
            :type name_string: string
         """
 
         # Get the name of the intrument
-        name = self.get_sample_name()
+        name = self.get_method_name()
         # Create the dataset for the instrument name if it does not exist
         if name is None:
-            name = self.sample.require_dataset(name=unicode(
-                omsi_format_sample.sample_name), shape=(1,), dtype=omsi_format_common.str_type)
+            name = self.method.require_dataset(name=unicode(
+                omsi_format_methods.methods_name), shape=(1,), dtype=omsi_format_common.str_type)
 
         if omsi_format_common.str_type_unicode:
             name[0] = name_string
@@ -1349,7 +1348,7 @@ class omsi_file_instrument(object):
            get_instrument_name()[...]
 
            :returns: h5py object to the dataset with the instrument name.
-                     Returns None in case no sample name is found.
+                     Returns None in case no method name is found.
         """
         instrument_name = None
         if self.instrument is None:
@@ -2609,22 +2608,22 @@ class omsi_file_msidata(object):
             self._data_group.file.flush()
         return dep
 
-    def create_sample_info(self, sample_name=None, flush_io=True):
-        """Add information about the sample imaged to the experiment
+    def create_method_info(self, method_name=None, flush_io=True):
+        """Add information about the method imaged to the experiment
 
-           :param sampleName: Optional name of the sample
-           :type sampleName: string, None
-           :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed so that all data has been written to file
+           :param method_name: Optional name of the method
+           :type method_name: str, None
+           :param flush_io: Call flush on the HDF5 file to ensure all HDF5 buffers are flushed so that all data has been written to file
 
-           :returns: h5py object of the newly created sample group.
+           :returns: h5py object of the newly created method group.
         """
-        sample_group = self._data_group.require_group(omsi_format_sample.sample_groupname)
-        sample_group.attrs[omsi_format_common.type_attribute] = "omsi_file_sample"
-        sample_group.attrs[omsi_format_common.version_attribute] = omsi_format_sample.current_version
-        sample_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
+        method_group = self._data_group.require_group(omsi_format_methods.methods_groupname)
+        method_group.attrs[omsi_format_common.type_attribute] = "omsi_file_methods"
+        method_group.attrs[omsi_format_common.version_attribute] = omsi_format_methods.current_version
+        method_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         if flush_io:
             self._data_group.file.flush()
-        return omsi_file_sample.__create_sample_info__(sample_group=sample_group, sample_name=sample_name)
+        return omsi_file_methods.__create_method_info__(method_group=method_group, method_name=method_name)
 
     def create_instrument_info(self, instrument_name=None, mzdata=None, flush_io=True):
         """Add information about the instrument used for creating the images for this experiment.
@@ -2647,37 +2646,52 @@ class omsi_file_msidata(object):
             self._data_group.file.flush()
         return omsi_file_instrument.__create_instrument_info__(instrument_group=instrument_group, instrument_name=instrument_name, mzdata=mzdata)
 
-    def get_sample_info(self):
-        """Get the omsi_file_sample object with the sample information.
+    def get_method_info(self, check_parent=True):
+        """
+        Get the omsi_file_methods object with the method information.
 
-           :returns: omsi_file_sample object for the requested sample info. The function returns \
-                     None in case no sample information was found for the experiment
+        :param check_parent: If no method group is available for this dataset should we check
+                             whether the parent object (i.e., the experiment group containing the dataset)
+                             has information about the method. (default=True)
+
+        :returns: omsi_file_methods object for the requested method info. The function returns
+                  None in case no method information was found for the experiment
+
         """
         try:
-            return omsi_file_sample(self._data_group[unicode(omsi_format_sample.sample_groupname)])
+            return omsi_file_methods(self._data_group[unicode(omsi_format_methods.methods_groupname)])
         except:
-            # Check whether the parent group has information about the
-            # instrument
             try:
-                return omsi_file.get_omsi_object(self._data_group.parent).get_sample_info()
+                return omsi_file_methods(self._data_group[unicode(omsi_format_methods.methods_old_groupname)])
             except:
-                return None
+                if check_parent:
+                    try:
+                        return omsi_file.get_omsi_object(self._data_group.parent).get_method_info()
+                    except:
+                        pass
+        return None
 
-    def get_instrument_info(self):
-        """Get the HDF5 group opbject with the instrument information.
+    def get_instrument_info(self, check_parent=True):
+        """
+        Get the HDF5 group opbject with the instrument information.
 
-           :returns:  omsi_file_instrument object for the requested instrument info. The function returns \
-                      None in case no instrument information was found for the experiment
+        :param check_parent: If no method group is available for this dataset should we check
+                             whether the parent object (i.e., the experiment group containing the dataset)
+                             has information about the method. (default=True)
+
+        :returns:  omsi_file_instrument object for the requested instrument info. The function returns \
+                   None in case no instrument information was found for the experiment
         """
         try:
             return omsi_file_instrument(self._data_group[unicode(omsi_format_instrument.instrument_groupname)])
         except:
-            # Check whether the parent group has information about the
-            # instrument
-            try:
-                return omsi_file.get_omsi_object(self._data_group.parent).get_instrument_info()
-            except:
-                return None
+            # Check whether the parent group has information about the instrument
+            if check_parent:
+                try:
+                    return omsi_file.get_omsi_object(self._data_group.parent).get_instrument_info()
+                except:
+                    pass
+        return None
 
     def get_all_dependency_data(self, omsi_dependency_format=True):
         """Get all direct dependencies associdated with the analysis.
@@ -2705,27 +2719,15 @@ class omsi_file_msidata(object):
         else:
             return []
 
-    def has_sample_info(self, check_parent=False):
-        """Check whether custom sample information is available for this dataset.
+    def has_method_info(self, check_parent=False):
+        """Check whether custom method information is available for this dataset.
 
-           :param check_parent: If no sample group is available for this dataset should we check \
+           :param check_parent: If no method group is available for this dataset should we check \
                                 whether the parent object (i.e., the experiment group containing the dataset)\
-                                has information about the sample. (default=False)
-           :returns: Boolean indicating whether sample info is available.
+                                has information about the method. (default=False)
+           :returns: Boolean indicating whether method info is available.
         """
-        try:
-            self._data_group[unicode(omsi_format_sample.sample_groupname)]
-            return True
-        except:
-            if check_parent:
-                try:
-                    if omsi_file.get_omsi_object(self._data_group.parent).get_sample_info() is not None:
-                        return True
-                    else:
-                        return False
-                except:
-                    pass
-        return False
+        return (self.get_method_info(check_parent=check_parent) is not None)
 
     def has_instrument_info(self, check_parent=False):
         """Check whether custom instrument information is available for this dataset.
@@ -2736,19 +2738,7 @@ class omsi_file_msidata(object):
 
             :returns: Boolean indicating whether instrument info is available.
         """
-        try:
-            self._data_group[unicode(omsi_format_instrument.instrument_groupname)]
-            return True
-        except:
-            if check_parent:
-                try:
-                    if omsi_file.get_omsi_object(self._data_group.parent).get_instrument_info() is not None:
-                        return True
-                    else:
-                        return False
-                except:
-                    pass
-        return False
+        return (self.get_instrument_info(check_parent=check_parent) is not None)
 
     def has_dependencies(self):
         """Check whether any dependencies exisits for this datasets"""
@@ -3032,12 +3022,9 @@ class omsi_file_msidata(object):
         """
         dependencies_group = data_group.require_group(
             omsi_format_dependencies.dependencies_groupname)
-        dependencies_group.attrs[
-            omsi_format_common.type_attribute] = "omsi_file_dependencies"
-        dependencies_group.attrs[
-            omsi_format_common.version_attribute] = omsi_format_dependencies.current_version
-        dependencies_group.attrs[
-            omsi_format_common.timestamp_attribute] = str(time.ctime())
+        dependencies_group.attrs[omsi_format_common.type_attribute] = "omsi_file_dependencies"
+        dependencies_group.attrs[omsi_format_common.version_attribute] = omsi_format_dependencies.current_version
+        dependencies_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         omsidep = omsi_file_dependencies.__create_dependencies__(
             dependencies_group=dependencies_group,
             dependencies_data_list=dependencies_data_list)

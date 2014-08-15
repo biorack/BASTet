@@ -185,8 +185,8 @@ def generateTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , zchunk )
         exit(0)
         
     exp = omsiFile.create_exp( exp_identifier = "test" ) 
-    #Create an empty sample descrition
-    sample = exp.create_sample_info()
+    #Create an empty method descrition
+    sample = exp.create_method_info()
     #Create an empty instrument description
     mzdata = np.ones( zdim )
     instrument = exp.create_instrument_info(instrumentname="undefined" , mzdata=mzdata )

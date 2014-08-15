@@ -170,8 +170,8 @@ def generateBaseTestFile( omsiOutFile , xdim , ydim, zdim ) :
         exit(0)
         
     exp = omsiFile.create_exp( exp_identifier = "test" ) 
-    #Create an empty sample descrition
-    sample = exp.create_sample_info()
+    #Create an empty method descrition
+    sample = exp.create_method_info()
     #Create an empty instrument description
     mzdata = np.ones( zdim )
     instrument = exp.create_instrument_info(instrument_name="undefined" , mzdata=mzdata )
@@ -213,8 +213,8 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
         exit(0)
         
     exp = omsiFile.create_exp( exp_identifier = "test" ) 
-    #Create an empty sample descrition
-    sample = exp.create_sample_info()
+    #Create an empty method descrition
+    sample = exp.create_method_info()
     #Create an empty instrument description
     mzdata = np.ones( zdim )
     instrument = exp.create_instrument_info(instrument_name="undefined" , mzdata=mzdata )
