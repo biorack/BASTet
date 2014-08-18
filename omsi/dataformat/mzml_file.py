@@ -168,4 +168,3 @@ class mzml_file(file_reader_base):
             return True
         except:
             return False
-

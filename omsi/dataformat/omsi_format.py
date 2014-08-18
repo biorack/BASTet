@@ -57,7 +57,7 @@ class omsi_format_methods(omsi_format_common):
         super(omsi_format_methods, self).__init__()
 
     methods_groupname = "methods"
-    methods_old_groupname = "method"
+    methods_old_groupname = "sample"
     methods_name = "name"
     current_version = "0.2"
 
