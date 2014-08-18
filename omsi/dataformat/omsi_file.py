@@ -793,6 +793,23 @@ class omsi_file_experiment(object):
     ###########################################################
     # Get sub-group object associated with the experiment
     ###########################################################
+    def has_method_info(self):
+        """
+        Check whether the experiment has a method info object.
+
+        :returns: Bool indicating whether the experiment has a method info object.
+        """
+        return (self.get_method_info() is not None)
+
+    def has_method_info(self):
+        """
+        Check whether the experiment has an instrument info object.
+
+        :returns: Bool indicating whether the experiment has an instrument info object.
+        """
+        return (self.get_instrument_info() is not None)
+
+
     def get_method_info(self):
         """Get the omsi_file_methods object with the method information.
 
