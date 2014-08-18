@@ -801,7 +801,7 @@ class omsi_file_experiment(object):
         """
         return (self.get_method_info() is not None)
 
-    def has_method_info(self):
+    def has_instrument_info(self):
         """
         Check whether the experiment has an instrument info object.
 
