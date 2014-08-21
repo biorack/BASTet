@@ -438,7 +438,7 @@ class ConvertSettings(object):
             if current_arg.startswith("--") and current_arg not in allargs:
                 if not (current_arg.startswith("method") or
                         current_arg.startswith("instrument") or
-                        current_arg("notes")):
+                        current_arg.startswith("notes")):
                     warnings.warn("Argument "+current_arg+" missing in list of all arguments.")
             # Process the argument
             if current_arg == "--no-nmf":
