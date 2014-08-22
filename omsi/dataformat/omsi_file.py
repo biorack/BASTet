@@ -1176,14 +1176,12 @@ class omsi_file_methods(object):
 
     def __setitem__(self, key, value):
         """Support direct write interaction with the method h5py group"""
-        if isinstance(value, unicode) or isinstance(value, str):
+        # If the version of h5py does not support automatic storage of strings and we have a string then do-it-yourself
+        if (isinstance(value, unicode) or isinstance(value, str)) and not omsi_format_common.str_type_unicode:
             d = self.method.require_dataset(name=unicode(key),
-                                        shape=(1,),
-                                        dtype=omsi_format_common.str_type)
-            if omsi_format_common.str_type_unicode:
-                d[0] = unicode(value)
-            else:
-                d[0] = str(value)
+                                                shape=(1,),
+                                                dtype=omsi_format_common.str_type)
+            d[0] = str(value)
         else:
             self.method[key] = value
 
@@ -1321,14 +1319,12 @@ class omsi_file_instrument(object):
 
     def __setitem__(self, key, value):
         """Support direct write interaction with the instrument h5py group"""
-        if isinstance(value, unicode) or isinstance(value, str):
+        # If the version of h5py does not support automatic storage of strings and we have a string then do-it-yourself
+        if (isinstance(value, unicode) or isinstance(value, str)) and not omsi_format_common.str_type_unicode:
             d = self.instrument.require_dataset(name=unicode(key),
                                                 shape=(1,),
                                                 dtype=omsi_format_common.str_type)
-            if omsi_format_common.str_type_unicode:
-                d[0] = unicode(value)
-            else:
-                d[0] = str(value)
+            d[0] = str(value)
         else:
             self.instrument[key] = value
 
