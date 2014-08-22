@@ -1011,15 +1011,15 @@ class ConvertFiles(object):
                 else:
                     sample_info = data.get_method_info()
                 if method_meta_key in ConvertSettings.metadata:
-                    sample_info['methods'] = ConvertSettings.metadata[method_meta_key]
+                    sample_info['methods'] = unicode(ConvertSettings.metadata[method_meta_key])
                 if notes_meta_key in ConvertSettings.metadata:
-                    sample_info['notes'] = ConvertSettings.metadata[notes_meta_key]
+                    sample_info['notes'] = unicode(ConvertSettings.metadata[notes_meta_key])
             if instrument_meta_key in ConvertSettings.metadata:
                 if not data.has_instrument_info():
                     instrument_info = data.create_instrument_info()
                 else:
                     instrument_info = data.get_instrument_info()
-                instrument_info['description'] = ConvertSettings.metadata[instrument_meta_key]
+                instrument_info['description'] = unicode(ConvertSettings.metadata[instrument_meta_key])
 
             ####################################################################
             #  Execute the requested analyses                                 ##
