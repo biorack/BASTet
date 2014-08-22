@@ -220,7 +220,7 @@ def main(argv=None):
     ####################################################################
     #  Register the file with the database                             #
     ####################################################################
-    if ConvertSettings.add_file_to_db and ConvertSettings.job_id is not None:
+    if ConvertSettings.add_file_to_db and ConvertSettings.job_id is None:
         try:
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
@@ -249,6 +249,18 @@ def main(argv=None):
             warningindex += 1
         print warningmsg
 
+    #####################################################################
+    #  Update the status of the job (including registration of the file #
+    #####################################################################
+    if ConvertSettings.job_id is not None:
+        try:
+            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
+                                               db_server=ConvertSettings.db_server_url,
+                                               jobid=ConvertSettings.job_id,
+                                               status='complete')
+        except ValueError as e:
+            ConvertSettings.recorded_warnings += ["Update of job status failed: "+e.message]
+
     ####################################################################
     #  Send email notification if requested                            #
     ####################################################################
@@ -260,15 +272,6 @@ def main(argv=None):
         ConvertWebHelper.send_email(subject='Conversion completed with warnings: '+str(omsi_outfile),
                                     body=warningmsg,
                                     email_type='warning')
-
-    #####################################################################
-    #  Update the status of the job (including registration of the file #
-    #####################################################################
-    if ConvertSettings.job_id is not None:
-        ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                           db_server=ConvertSettings.db_server_url,
-                                           jobid=ConvertSettings.job_id,
-                                           status='complete')
 
 
 ####################################################################
@@ -421,7 +424,7 @@ class ConvertSettings(object):
             last_arg = argv[-1]
             if last_arg in helpargs:
                 cls.print_help()
-                exit(0)
+                clea(0)
             else:
                 warnings.warn("No command-line options provided. Printing help.")
                 cls.print_help()
