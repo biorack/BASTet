@@ -409,13 +409,13 @@ class ConvertSettings(object):
         output_filename = ""  # The output filename
         input_filenames = []  # The list of input filenames
         helpargs = ["--help", "--h", "-help", "-h"]
-        allargs = ["--no-nmf", "--nmf", "--nmf-nc", "--nmf-timeout",  "--nmf-niter", "--nmf-tolerance",
-                   "--nmf-raw", "--fpg", "--no-fpg", "--fpl", "--no-fpl", "--auto-chunking", "--chunking",
-                   "--no-chunking", "--optimized-chunking", "--compression", "--no-compression",
-                   "--io", "--thumbnail", "--no-thumbnail", "--xdmf", "--no-xdmf",  "--suggest-chunking",
-                   "--format", "--regions", "--add-to-db", "--no-add-to-db", "--db-server", "--user",
-                   "--email", "--email-success", "--email-error", "--error-handling", "--methods",
-                   "--instrument", "--notes", "jobid"] + helpargs
+        # allargs = ["--no-nmf", "--nmf", "--nmf-nc", "--nmf-timeout",  "--nmf-niter", "--nmf-tolerance",
+        #            "--nmf-raw", "--fpg", "--no-fpg", "--fpl", "--no-fpl", "--auto-chunking", "--chunking",
+        #            "--no-chunking", "--optimized-chunking", "--compression", "--no-compression",
+        #            "--io", "--thumbnail", "--no-thumbnail", "--xdmf", "--no-xdmf",  "--suggest-chunking",
+        #            "--format", "--regions", "--add-to-db", "--no-add-to-db", "--db-server", "--user",
+        #            "--email", "--email-success", "--email-error", "--error-handling", "--methods",
+        #            "--instrument", "--notes", "--jobid"] + helpargs
         # Basic sanity check
         if len(argv) < 3:
             last_arg = argv[-1]
@@ -435,11 +435,11 @@ class ConvertSettings(object):
             i = start_index
             current_arg = argv[i]
             # Check if the argument is listed
-            if current_arg.startswith("--") and current_arg not in allargs:
-                if not (current_arg.startswith("method") or
-                        current_arg.startswith("instrument") or
-                        current_arg.startswith("notes")):
-                    warnings.warn("Argument "+current_arg+" missing in list of all arguments.")
+            # if current_arg.startswith("--") and current_arg not in allargs:
+            #     if not (current_arg.startswith("--method") or
+            #             current_arg.startswith("--instrument") or
+            #             current_arg.startswith("--notes")):
+            #         warnings.warn("Argument "+current_arg+" missing in list of all arguments.")
             # Process the argument
             if current_arg == "--no-nmf":
                 start_index += 1
