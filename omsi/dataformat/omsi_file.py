@@ -368,8 +368,7 @@ class omsi_file(object):
         # already exists
         exp = self.hdf_file.get("/").require_group(expname)
         exp.attrs[omsi_format_common.type_attribute] = "omsi_file_experiment"
-        exp.attrs[
-            omsi_format_common.version_attribute] = omsi_format_experiment.current_version
+        exp.attrs[omsi_format_common.version_attribute] = omsi_format_experiment.current_version
         exp.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         exp_identifier_dataset = exp.require_dataset(name=unicode(
             omsi_format_experiment.exp_identifier_name), shape=(1,), dtype=omsi_format_common.str_type)
@@ -1177,7 +1176,16 @@ class omsi_file_methods(object):
 
     def __setitem__(self, key, value):
         """Support direct write interaction with the method h5py group"""
-        self.method[key] = value
+        if isinstance(value, unicode) or isinstance(value, str):
+            d = self.method.require_dataset(name=unicode(key),
+                                        shape=(1,),
+                                        dtype=omsi_format_common.str_type)
+            if omsi_format_common.str_type_unicode:
+                d[0] = unicode(value)
+            else:
+                d[0] = str(value)
+        else:
+            self.method[key] = value
 
     def __eq__(self, value):
         """Check whether the two objects have the same h5py name"""
@@ -1313,7 +1321,16 @@ class omsi_file_instrument(object):
 
     def __setitem__(self, key, value):
         """Support direct write interaction with the instrument h5py group"""
-        self.instrument[key] = value
+        if isinstance(value, unicode) or isinstance(value, str):
+            d = self.instrument.require_dataset(name=unicode(key),
+                                                shape=(1,),
+                                                dtype=omsi_format_common.str_type)
+            if omsi_format_common.str_type_unicode:
+                d[0] = unicode(value)
+            else:
+                d[0] = str(value)
+        else:
+            self.instrument[key] = value
 
     def __eq__(self, value):
         """Check whether the two objects have the same h5py name"""
@@ -1475,14 +1492,16 @@ class omsi_file_analysis(object):
             # Generate an omsi_analysis_data object in order to use the
             # __write_omsi_analysis_data function to write the data
             if isinstance(v, unicode) or isinstance(v, str):
-                anadata = omsi_analysis_data(
-                    name=unicode(k), data=v, dtype=omsi_format_common.str_type)
+                anadata = omsi_analysis_data(name=unicode(k),
+                                             data=v,
+                                             dtype=omsi_format_common.str_type)
             else:
                 dat = np.asarray(v)
                 if len(dat.shape) == 0:
                     dat = np.asarray([v])
-                anadata = omsi_analysis_data(
-                    name=unicode(k), data=dat, dtype=dat.dtype)
+                anadata = omsi_analysis_data(name=unicode(k),
+                                             data=dat,
+                                             dtype=dat.dtype)
             cls.__write_omsi_analysis_data__(runinfo_group, anadata)
 
         # Write all data dependencies
@@ -1532,8 +1551,9 @@ class omsi_file_analysis(object):
                         omsi_format_common.type_attribute] = omsiobjtype
         # Create a new string-type dataset
         elif (ana_data['dtype'] == omsi_format_common.str_type) or (ana_data['dtype'] == h5py.special_dtype(vlen=str)):
-            tempdata = data_group.require_dataset(
-                name=unicode(ana_data['name']), shape=(1,), dtype=omsi_format_common.str_type)
+            tempdata = data_group.require_dataset(name=unicode(ana_data['name']),
+                                                  shape=(1,),
+                                                  dtype=omsi_format_common.str_type)
             if len(unicode(ana_data['data'])) > 0:
                 if omsi_format_common.str_type_unicode:
                     tempdata[0] = ana_data['data']
