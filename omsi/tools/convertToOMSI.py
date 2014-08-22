@@ -259,6 +259,7 @@ def main(argv=None):
                                                jobid=ConvertSettings.job_id,
                                                status='complete')
         except ValueError as e:
+            print "ERROR: Update of job status failed: " + e.message
             ConvertSettings.recorded_warnings += ["Update of job status failed: "+e.message]
 
     ####################################################################
