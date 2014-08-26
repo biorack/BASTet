@@ -10,6 +10,7 @@ from omsi.dataformat import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
+from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
 import time
 import numpy as np
 import math
@@ -378,6 +379,7 @@ class ConvertSettings(object):
     execute_nmf = True  # Define whether NMF should be performed
     execute_fpg = True  # Define whether global peak finding should be executed
     execute_fpl = False  # Define whether local peak finding should be executed
+    execute_ticnorm = False  # Define whether tic normalization should be executed
     generate_thumbnail = False  # Should we generate thumbnail
     generate_xdmf = False  # Should we generate an xdmf header file for the file
     
@@ -419,7 +421,7 @@ class ConvertSettings(object):
         #            "--io", "--thumbnail", "--no-thumbnail", "--xdmf", "--no-xdmf",  "--suggest-chunking",
         #            "--format", "--regions", "--add-to-db", "--no-add-to-db", "--db-server", "--user",
         #            "--email", "--email-success", "--email-error", "--error-handling", "--methods",
-        #            "--instrument", "--notes", "--jobid"] + helpargs
+        #            "--instrument", "--notes", "--jobid", "--ticnorm"] + helpargs
         # Basic sanity check
         if len(argv) < 3:
             last_arg = argv[-1]
@@ -495,6 +497,16 @@ class ConvertSettings(object):
                 print "Disable find peaks local"
                 if "--fpl" in argv:
                     warnings.warn("WARNING: --no-fpl and --fpl options are conflicting.")
+            elif current_arg == "--ticnorm":
+                start_index += 1
+                ConvertSettings.execute_ticnorm = True
+                print "Enable tic normalization"
+            elif current_arg == "--no-ticnorm":
+                start_index += 1
+                ConvertSettings.execute_ticnorm = False
+                print "Disable tic normalization"
+                if "--ticnorm" in argv:
+                    warnings.warn("WARNING: --no-ticnorm and --ticnorm options are conflicting")
             elif current_arg == "--auto-chunking":
                 start_index += 1
                 ConvertSettings.auto_chunk = True
@@ -847,6 +859,11 @@ class ConvertSettings(object):
         print "        in the HDF5 file"
         print "--no-fpl: Disable the local peak finding (DEFAULT)"
         print ""
+        print ""
+        print "TIC normalization:"
+        print "--ticnorm : Compute tic normalization"
+        print "--no-ticnorm : Disable computation of tic normaltization (DEFAULT)"
+        print ""
         print "---OTHER OPTIONS---"
         print ""
         print "Generate Thumbnail image: Default OFF:"
@@ -1032,8 +1049,7 @@ class ConvertFiles(object):
             if ConvertSettings.execute_fpl:
                 print "Executing local peak finding"
                 # Execute the peak finding
-                fpl = omsi_findpeaks_local(
-                    nameKey="omsi_findpeaks_local_" + str(time.ctime()))
+                fpl = omsi_findpeaks_local(nameKey="omsi_findpeaks_local_" + str(time.ctime()))
                 fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
                 # Save the peak-finding to file
                 ana, anaindex = exp.create_analysis(fpl)
@@ -1042,8 +1058,7 @@ class ConvertFiles(object):
             if ConvertSettings.execute_fpg:
                 print "Executing global peak finding"
                 # Execute the peak finding
-                fpg = omsi_findpeaks_global(
-                    nameKey="omsi_findpeaks_global_" + str(time.ctime()))
+                fpg = omsi_findpeaks_global(nameKey="omsi_findpeaks_global_" + str(time.ctime()))
                 fpg.execute(msidata=data, mzdata=mzdata)
                 # Save the peak-finding to file
                 ana, anaindex = exp.create_analysis(fpg)
@@ -1071,6 +1086,12 @@ class ConvertFiles(object):
                                 tolerance=ConvertSettings.nmf_tolerance)
                 # Save the nmf results to file
                 ana, anaindex = exp.create_analysis(nmf)
+            # Compute the tic normalization
+            if ConvertSettings.execute_ticnorm:
+                print "Executing tic normalization"
+                tic = omsi_tic_norm(nameKey="tic_norm_"+ str(time.ctime()))
+                tic.execute(msidata=data, mzdata=mzdata)
+                ana, anaindex = exp.create_analysis(tic)
 
             ####################################################################
             #  Generate the thumbnail image for the current file              ##

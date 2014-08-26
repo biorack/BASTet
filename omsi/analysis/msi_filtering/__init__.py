@@ -1,2 +1,2 @@
-all__ = ["omsi_ticNorm"]
-from ticNormalization import *
+all__ = ["omsi_tic_norm"]
+from omsi.analysis.msi_filtering.omsi_tic_norm import *

@@ -30,12 +30,12 @@ class omsi_viewer_helper(object) :
            
            :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be performed typically like [:,:,zmin:zmax].
         """
-        try :
+        try:
             analysisType = anaObj.get_analysis_type()[0]
             data = cls.__string_to_class__( analysisType ).v_qslice(anaObj, z, viewerOption)
             if data is None :
                 return None
-        except :
+        except:
             return None
         
         #We expect a 3D dataset (x,y,m/z) so if only a single 2D slice is returned then we reshape the data first
@@ -188,6 +188,7 @@ class omsi_viewer_helper(object) :
                 return classObj
         except AttributeError:
             raise NameError(className+" doesn't exist or is not a class.")
+
 
 
 

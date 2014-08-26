@@ -3688,7 +3688,7 @@ class omsi_file_msidata(object):
         """
         if isinstance(key, int):
             return 1
-        elif isinstance(key, list):
+        elif isinstance(key, list) or isinstance(key, np.ndarray):
             return len(key)
         elif isinstance(key, slice):
             start = key.start
@@ -3702,4 +3702,4 @@ class omsi_file_msidata(object):
                 step = 1
             return math.ceil(float(end - start) / float(step))
         else:
-            raise ValueError("Unexpected key value " + str(key))
+            raise ValueError("Unexpected key value " + str(key) + " " +str(type(key)))
