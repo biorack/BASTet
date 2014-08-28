@@ -6,7 +6,8 @@ import time
 import datetime
 import sys
 
-class omsi_analysis_base(object) :
+
+class omsi_analysis_base(object):
     """Base class for omsi analysis functionality. The class provides a large set of functionality designed
        to facilitate storage of analysis data in the omsi HDF5 file format. The class also provides a set
        of functions to enable easy intergration of new analysis with the OpenMSI web-based viewer (see
@@ -65,7 +66,7 @@ class omsi_analysis_base(object) :
         self.data_names = []
         self.run_info = {}
     
-    def __getitem__(self, key) :
+    def __getitem__(self, key):
         """This class supports basic slicing to access data stored in the main member variables. 
            By default the data is retrieved from __data_list and the __getitem__(key) function.
            which implemtent the [..] operator, returns __data_list[key]['data']. The key is 
@@ -73,40 +74,42 @@ class omsi_analysis_base(object) :
            found in the __data_list then the function will try to retrieve the data from 
            __parameter_list and __dependency_list instead. 
         """
-        if isinstance( key , str ) or isinstance( key, unicode ) :
-            for i in self.__data_list :
-                if i['name'] == key :
+        if isinstance(key, str) or isinstance(key, unicode):
+            for i in self.__data_list:
+                if i['name'] == key:
                     return i['data']
-            for i in self.__parameter_list :
-                if i['name'] == key :
+            for i in self.__parameter_list:
+                if i['name'] == key:
                     return i['data']
-            for i in self.__dependency_list :
-                if i['param_name'] == unicode(key) :
+            for i in self.__dependency_list:
+                if i['param_name'] == unicode(key):
                     return i.get_data()
             return None
-        else :
+        else:
             return None
 
-
-    def __setitem__(self, key , value ) :
+    def __setitem__(self, key, value):
         """Set values in the __data, __parameter and __dependencies dicts. 
            If the given key is found in the parameter_names list then it is assigned
            to the paramerters/dependencies, otherwise the key is assumed to be a 
            an output that needs to be added to the __data_list
         """
-        if key in self.parameter_names :
-            self.set_parameters( **{key:value} )
-        elif key in self.data_names :
-            if not 'numpy' in str(type( value ) ) :
-                tempVal = np.asarray( value )
-                self.__data_list.append( omsi_analysis_data(name=key, data=tempVal, dtype=tempVal.dtype) )
-            else :
-                self.__data_list.append( omsi_analysis_data(name=key, data=value, dtype=value.dtype) )
-        else :
-            raise KeyError( 'Invalid key. The given key was not found as part of the analysis paramters not analysis output.')
+        if key in self.parameter_names:
+            self.set_parameters(**{key: value})
+        elif key in self.data_names:
+            if not 'numpy' in str(type(value)):
+                tempVal = np.asarray(value)
+                self.__data_list.append(omsi_analysis_data(name=key,
+                                                           data=tempVal, 
+                                                           dtype=tempVal.dtype))
+            else:
+                self.__data_list.append(omsi_analysis_data(name=key,
+                                                           data=value, 
+                                                           dtype=value.dtype))
+        else:
+            raise KeyError('Invalid key. The given key was not found as part of the analysis parameters nor output.')
 
-
-    def execute(self, **kwargs) :
+    def execute(self, **kwargs):
         """ Use this function to run the analysis. 
         
             :param **kwargs: Parameters to be used for the analysis. Parameters may also be set using
@@ -115,34 +118,34 @@ class omsi_analysis_base(object) :
             :returns: This function returns the output of the execute analysis function. 
         """
         #Set any parameters that are given to the execute function
-        self.set_parameters( **kwargs )
+        self.set_parameters(**kwargs)
         
         #Record basic excution provenance information
         self.run_info = {}
-        try :
+        try:
             #Record run information
-            self.run_info['architecture'] = unicode( platform.architecture() )
-            self.run_info['java_ver'] = unicode( platform.java_ver() )
-            self.run_info['libc_ver'] = unicode( platform.libc_ver() )
-            self.run_info['linux_distribution'] = unicode( platform.linux_distribution() )
-            self.run_info['mac_ver'] = unicode( platform.mac_ver() )
-            self.run_info['machine'] = unicode( platform.machine() )
-            self.run_info['node'] = unicode( platform.node() )
-            self.run_info['platform'] = unicode( platform.platform() )
-            self.run_info['processor'] = unicode( platform.processor() )
-            self.run_info['python_branch'] = unicode( platform.python_branch() )
-            self.run_info['python_build'] = unicode( platform.python_build() )
-            self.run_info['python_compiler'] = unicode( platform.python_compiler() )
-            self.run_info['python_implementation'] = unicode( platform.python_implementation() )
-            self.run_info['python_revision'] = unicode( platform.python_revision() )
-            self.run_info['python_version'] = unicode( platform.python_version() )
-            self.run_info['release'] = unicode( platform.release() )
-            self.run_info['system'] = unicode( platform.system() )
-            self.run_info['uname'] = unicode( platform.uname() )
-            self.run_info['version'] = unicode( platform.version() )
-            self.run_info['win32_ver'] = unicode( platform.win32_ver() )
-        except :
-            print "WARNING: Recording of execution provenance failed: "+str( sys.exc_info() )
+            self.run_info['architecture'] = unicode(platform.architecture())
+            self.run_info['java_ver'] = unicode(platform.java_ver())
+            self.run_info['libc_ver'] = unicode(platform.libc_ver())
+            self.run_info['linux_distribution'] = unicode(platform.linux_distribution())
+            self.run_info['mac_ver'] = unicode(platform.mac_ver())
+            self.run_info['machine'] = unicode(platform.machine())
+            self.run_info['node'] = unicode(platform.node())
+            self.run_info['platform'] = unicode(platform.platform())
+            self.run_info['processor'] = unicode(platform.processor())
+            self.run_info['python_branch'] = unicode(platform.python_branch())
+            self.run_info['python_build'] = unicode(platform.python_build())
+            self.run_info['python_compiler'] = unicode(platform.python_compiler())
+            self.run_info['python_implementation'] = unicode(platform.python_implementation())
+            self.run_info['python_revision'] = unicode(platform.python_revision())
+            self.run_info['python_version'] = unicode(platform.python_version())
+            self.run_info['release'] = unicode(platform.release())
+            self.run_info['system'] = unicode(platform.system())
+            self.run_info['uname'] = unicode(platform.uname())
+            self.run_info['version'] = unicode(platform.version())
+            self.run_info['win32_ver'] = unicode(platform.win32_ver())
+        except:
+            print "WARNING: Recording of execution provenance failed: " + str(sys.exc_info())
             pass
 
         #Execute the analysis
@@ -153,7 +156,7 @@ class omsi_analysis_base(object) :
         re = self.execute_analysis()
 
         #Finalize recording of post execution provenance
-        self.run_info['execution_time'] = unicode( time.time() - startTime )
+        self.run_info['execution_time'] = unicode(time.time() - startTime)
         self.run_info['end_time'] = unicode(datetime.datetime.now())
 
         #Remove empty items from the run_info dict
@@ -167,7 +170,7 @@ class omsi_analysis_base(object) :
         #Return the output of the analysis
         return re
         
-    def execute_analysis(self) :
+    def execute_analysis(self):
         """Implement this function to implement the execution of the actual analysis.
         
            This function may not require any input parameters. All input parameters are
@@ -179,49 +182,45 @@ class omsi_analysis_base(object) :
         
         """
         raise NotImplementedError("Implement execute_analysis in order to be able to run the analysis.")
-        
 
     @classmethod
-    def v_qslice(cls , anaObj , z , viewerOption=0) :
+    def v_qslice(cls, anaObj, z, viewerOption=0):
         """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
         
            :param anaObj: The omsi_file_analysis object for which slicing should be performed 
            :param z: Selection string indicting which z values should be selected.
-           :param viewerOption: If multiple default viewer behaviors are available for a given analysis then this option is used to switch between them.
+           :param viewerOption: If multiple default viewer behaviors are available for a given analysis
+                                then this option is used to switch between them.
            
-           :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be performed typically like [:,:,zmin:zmax].
+           :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be
+                     performed typically like [:,:,zmin:zmax].
            
-           :raises: NotImplementedError in case that v_qslice is not supported by the analsis.
+           :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         #Check whether the given selection is valid
         zType = check_selection_string(z)
-        if zType == selection_type['invalid'] :
+        if zType == selection_type['invalid']:
             return None 
-        if isinstance( re_slicedata[viewerOption] , omsi_file_msidata ) :
-            
-            try :
-                data = eval("re_slicedata[viewerOption][:,:, %s]" %(z,))
+        if isinstance(re_slicedata[viewerOption], omsi_file_msidata):
+            try:
+                data = eval("re_slicedata[viewerOption][:,:, %s]" % (z,))
                 return data 
-            except :
+            except:
                 return None 
         
-        elif isinstance( re_slicedata[viewerOption] , omsi_file_analysis ) : 
-        
+        elif isinstance(re_slicedata[viewerOption], omsi_file_analysis):
             analysisType = str(re_slicedata[viewerOption].get_analysis_type()[0])
-            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qslice(anaObj=re_slicedata[viewerOption], z=z, viewerOption=re_slice_optionIndex[viewerOption])
-            
+            return omsi_viewer_helper.__string_to_class__(analysisType).v_qslice(anaObj=re_slicedata[viewerOption],
+                                                                                 z=z,
+                                                                                 viewerOption=re_slice_optionIndex[viewerOption])
         else:
             return None
-        
-        
-        #raise NotImplementedError( "Implement me: The v_qslice function should return a numpy array with the requested image slice data" )
-    
    
     @classmethod
-    def v_qspectrum( cls, anaObj , x, y , viewerOption=0) :
+    def v_qspectrum(cls, anaObj, x, y, viewerOption=0):
         """Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
         
            Developer Note: h5py currently supports only a single index list. If the user provides an index-list for both
@@ -246,52 +245,42 @@ class omsi_analysis_base(object) :
         #Check whether the given selection is valid
         xType = check_selection_string(x)
         yType = check_selection_string(y)
-        xSel = selection_string_to_object( x )
-        ySel = selection_string_to_object( y )
+        xSel = selection_string_to_object(x)
+        ySel = selection_string_to_object(y)
         
-        if (xType == selection_type['invalid']) or (yType == selection_type['invalid']) :
-            return None , None
-        if isinstance( re_spectrumdata[viewerOption] , omsi_file_msidata ) :
-            if xType == selection_type['invalid'] or yType == selection_type['invalid'] :
-                return None , None
-            if xType == selection_type['indexlist'] and yType == selection_type['indexlist'] :
+        if (xType == selection_type['invalid']) or (yType == selection_type['invalid']):
+            return None, None
+        if isinstance(re_spectrumdata[viewerOption], omsi_file_msidata):
+            if xType == selection_type['invalid'] or yType == selection_type['invalid']:
+                return None, None
+            if xType == selection_type['indexlist'] and yType == selection_type['indexlist']:
                 #We now need to match up the index lists and load all the individial values
                 #ToDo: This is can be very inefficient for large lists
                 xSize = len(xSel)
                 ySize = len(ySel)
-                if xSize != ySize :
-                    raise KeyError( "Selection lists don't match" )
+                if xSize != ySize:
+                    raise KeyError("Selection lists don't match")
                 dataSet = re_spectrumdata[viewerOption]
                 zSize = dataSet.shape[2]
                 #Allocate the required memory
-                data = np.zeros( (xSize, zSize) , dtype=dataSet.dtype )
-                for i in xrange(0,xSize) :
-                    data[i,:] = dataSet[ xSel[i] , ySel[i] , : ]
-            else :
-                data = re_spectrumdata[viewerOption][ xSel , ySel, : ]
+                data = np.zeros((xSize, zSize), dtype=dataSet.dtype)
+                for i in xrange(0, xSize):
+                    data[i, :] = dataSet[xSel[i], ySel[i], :]
+            else:
+                data = re_spectrumdata[viewerOption][xSel, ySel, :]
             
-            return data ,None
-            
-            #try :
-            #    data = eval("re_spectrumdata[viewerOption][%s,%s, :]" %(x,y))
-            #    return data , None
-            #except :
-            #    import sys
-            #    print str(sys.exc_info())
-            #    return None , None
-        
-        elif isinstance( re_spectrumdata[viewerOption] , omsi_file_analysis ) : 
-        
+            return data, None
+        elif isinstance(re_spectrumdata[viewerOption], omsi_file_analysis):
             analysisType = str(re_spectrumdata[viewerOption].get_analysis_type()[0])
-            return omsi_viewer_helper.__string_to_class__( analysisType ).v_qspectrum(anaObj=re_spectrumdata[viewerOption], x=x, y=y, viewerOption=re_spectrum_optionIndex[viewerOption])
-        
+            return omsi_viewer_helper.__string_to_class__(analysisType).v_qspectrum(anaObj=re_spectrumdata[viewerOption],
+                                                                                    x=x,
+                                                                                    y=y,
+                                                                                    viewerOption=re_spectrum_optionIndex[viewerOption])
         else:
-            return None , None
-        
-        #raise NotImplementedError( "Implement me: The v_spectrum function should return: i) a numpy array with the requested spectrum data and ii) information about the m/z axis for the spectrum")  
-    
+            return None, None
+
     @classmethod
-    def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
+    def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0):
         """ Get the mz axes for the analysis
         
             :param anaObj: The omsi_file_analysis object for which slicing should be performed
@@ -307,38 +296,41 @@ class omsi_analysis_base(object) :
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
-        mzSpectra=None
-        labelSpectra=None
-        mzSlice=None 
+        mzSpectra = None
+        labelSpectra = None
+        mzSlice = None
         labelSlice = None
         #Determine the spectra mz axis
-        if len(re_spectrum) > 0 :
-            if isinstance( re_spectrumdata[qspectrum_viewerOption] , omsi_file_msidata ) :
+        if len(re_spectrum) > 0:
+            if isinstance(re_spectrumdata[qspectrum_viewerOption], omsi_file_msidata):
                 mzSpectra = re_spectrumdata[qspectrum_viewerOption].mz[:]
                 labelSpectra = "m/z"
-            elif isinstance( re_spectrumdata[qspectrum_viewerOption]  , omsi_file_analysis ) :
-                mzSpectra, labelSpectra, tempA, tempB = omsi_viewer_helper.get_axes( re_spectrumdata[qspectrum_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption])
-            else :
+            elif isinstance(re_spectrumdata[qspectrum_viewerOption], omsi_file_analysis):
+                mzSpectra, labelSpectra, tempA, tempB = omsi_viewer_helper.get_axes(
+                    re_spectrumdata[qspectrum_viewerOption],
+                    qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption],
+                    qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption])
+            else:
                 mzSpectra = None
                 labelSpectra = None
         #Determine the slice mz axis
-        if len(re_slice) > 0 :
+        if len(re_slice) > 0:
             #if re_spectrumdata[qspectrum_viewerOption] != re_slicedata[qslice_viewerOption] :
-            if isinstance( re_slicedata[qslice_viewerOption] , omsi_file_msidata ) :
+            if isinstance(re_slicedata[qslice_viewerOption], omsi_file_msidata):
                 mzSlice = re_slicedata[qslice_viewerOption].mz[:]
-                labelSlice= "m/z"
-            elif isinstance( re_slicedata[qslice_viewerOption]  , omsi_file_analysis ) :
-                tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes( re_slicedata[qslice_viewerOption], qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption], qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption] )
-            else :
-                mzSlice=None
+                labelSlice = "m/z"
+            elif isinstance(re_slicedata[qslice_viewerOption], omsi_file_analysis):
+                tempA, tempB, mzSlice, labelSlice = omsi_viewer_helper.get_axes(re_slicedata[qslice_viewerOption],
+                                                                                qslice_viewerOption=re_slice_optionIndex[qslice_viewerOption],
+                                                                                qspectrum_viewerOption=re_spectrum_optionIndex[qspectrum_viewerOption])
+            else:
+                mzSlice = None
                 labelSlice = None
                 
         return mzSpectra, labelSpectra, mzSlice, labelSlice
-        #raise NotImplementedError( "Implement me: The v_qmz function should return i) array with the statix mz values for the spectra, ii) the lable to be used for the spectra and iii) array with the static mz values for the slices (or None if the same as the spectra), and iv) the lable to be used to the slices (or None if the same as for the spectra)" )  
-        #return None, None, None, None
     
     @classmethod
-    def v_qspectrum_viewerOptions(cls , anaObj ) :
+    def v_qspectrum_viewerOptions(cls, anaObj):
         """Get a list of strings describing the different default viewer options for the analysis for qspectrum. 
            The default implementation tries to take care of handling the spectra retrieval for all the depencies
            but can naturally not decide how the qspectrum should be handled by a derived class. However, this
@@ -351,10 +343,9 @@ class omsi_analysis_base(object) :
         """
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         return re_spectrum
-        #raise NotImplementedError( "Implement me: The v_qspectrum_viewerOptions function should return i) an empty list of v_qspectrum is not available, ii) a list of strings indicating the different types of data for which spectra can be retrieved for this analysis" )  
         
     @classmethod
-    def v_qslice_viewerOptions(cls , anaObj ) :
+    def v_qslice_viewerOptions(cls, anaObj):
         """Get a list of strings describing the different default viewer options for the analysis for qslice.
            The default implementation tries to take care of handling the spectra retrieval for all the depencies
            but can naturally not decide how the qspectrum should be handled by a derived class. However, this
@@ -367,11 +358,9 @@ class omsi_analysis_base(object) :
         """
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex = cls.__construct_dependent_viewer_options__(anaObj)
         return re_slice
-        
-        #raise NotImplementedError( "Implement me: The v_qslice_viewerOptions function should return i) an empty list of v_qslice is not available, ii) a list of strings indicating the different types of data for which image slices can be retrieved for this analysis" )  
-       
+
     @classmethod
-    def __construct_dependent_viewer_options__(cls, anaObj) :
+    def __construct_dependent_viewer_options__(cls, anaObj):
         """Internal helper function to construc the viewer options for analysis depencies.
         
           :returns: The following 4 lists:
@@ -393,26 +382,26 @@ class omsi_analysis_base(object) :
         re_spectrum_optionIndex = []
         
         dependencies = anaObj.get_all_dependency_data_recursive()
-        for di in dependencies :
+        for di in dependencies:
             #Check if we can slice the data
-            if isinstance( di['omsi_object'] , omsi_file_msidata ) :
-                re_spectrum.append( "Raw Data: "+di['link_name'] )
-                re_slice.append( "Raw Data: "+di['link_name'] )
+            if isinstance(di['omsi_object'], omsi_file_msidata):
+                re_spectrum.append("Raw Data: " + di['link_name'])
+                re_slice.append("Raw Data: " + di['link_name'])
                 re_slice_optionIndex.append(0)
-                re_spectrumdata.append( di['omsi_object'])
-                re_slicedata.append( di['omsi_object'] )
+                re_spectrumdata.append(di['omsi_object'])
+                re_slicedata.append(di['omsi_object'])
                 re_spectrum_optionIndex.append(0)
-            elif isinstance( di['omsi_object'] , omsi_file_analysis ) :
-                slice_options    = omsi_viewer_helper.get_qslice_viewerOptions( di['omsi_object'] )
-                spectrum_options = omsi_viewer_helper.get_qspectrum_viewerOptions( di['omsi_object'] )
-                for si in range(0,len(slice_options) ) :
-                    re_slice.append( slice_options[si] )
-                    re_slicedata.append( di['omsi_object'] )
-                    re_slice_optionIndex.append( si )
-                for si in range(0,len(spectrum_options) ) :
-                    re_spectrum.append( spectrum_options[si] )
-                    re_spectrumdata.append( di['omsi_object'] )
-                    re_spectrum_optionIndex.append( si )    
+            elif isinstance(di['omsi_object'], omsi_file_analysis):
+                slice_options = omsi_viewer_helper.get_qslice_viewerOptions(di['omsi_object'])
+                spectrum_options = omsi_viewer_helper.get_qspectrum_viewerOptions(di['omsi_object'])
+                for si in range(0, len(slice_options)):
+                    re_slice.append(slice_options[si])
+                    re_slicedata.append(di['omsi_object'])
+                    re_slice_optionIndex.append(si)
+                for si in range(0, len(spectrum_options)):
+                    re_spectrum.append(spectrum_options[si])
+                    re_spectrumdata.append(di['omsi_object'])
+                    re_spectrum_optionIndex.append(si)
                 #analysisType = str(anaObj.get_analysis_type()[0])
                 #if omsi_viewer_helper.supports_slice( di['omsi_object']) :
                 #    re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
@@ -420,25 +409,21 @@ class omsi_analysis_base(object) :
                 #if omsi_viewer_helper.supports_spectra( di['omsi_object'] ) :
                 #    re_spectrum.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
                 #    re_spectrumdata.append( di['omsi_object'] )
-            else :
+            else:
                 print "Unknown dependency"
         return re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_optionIndex, re_spectrum_optionIndex
-        
-        
-    def get_analysis_type(self) :
+
+    def get_analysis_type(self):
         """Return a string indicating the type of analysis performed"""
-        return self.__module__ #self.__class__.__name__
-        #raise NotImplementedError( "Implement me: The get_analysis_type function should return a string indicating the analysis type" )    
-    
-    def get_analysis_data_names(self) :
+        return self.__module__  # self.__class__.__name__
+
+    def get_analysis_data_names(self):
         """Get a list of all analysis dataset names."""
-        
         return self.data_names
     
-    def get_parameter_names(self) :
+    def get_parameter_names(self):
         """Get a list of all parameter dataset names (including those that may define 
            dependencies."""
-        
         return self.parameter_names
     
     def get_analysis_data(self, index):
@@ -462,46 +447,46 @@ class omsi_analysis_base(object) :
         """
         return self.__dependency_list[index]
         
-    def get_analysis_data_by_name(self, dataname) :
+    def get_analysis_data_by_name(self, dataname):
         """Given the key name of the data return the associated omsi_analysis_data object.
 
           :param dataname: Name of the analysis data requested from the private __data_list member.
         """
-        for i in self.__data_list :
-            if i['name'] == dataname : 
+        for i in self.__data_list:
+            if i['name'] == dataname:
                 return i
                 
-    def get_parameter_data_by_name(self, dataname) :
+    def get_parameter_data_by_name(self, dataname):
         """Given the key name of the data return the associated omsi_analysis_data object.
 
           :param dataname: Name of the parameter requested from the private __parameter_list member.
         """
-        for i in self.__parameter_list :
-            if i['name'] == dataname : 
+        for i in self.__parameter_list:
+            if i['name'] == dataname:
                 return i
                 
-    def get_dependency_data_by_name(self, dataname) :
+    def get_dependency_data_by_name(self, dataname):
         """Given the key name of the data return the associated omsi_analysis_data object.
 
           :param dataname: Name of the dependency requested from the private __dependency_list member.
         """
-        for i in self.__dependency_list :
-            if i['name'] == dataname : 
+        for i in self.__dependency_list:
+            if i['name'] == dataname:
                 return i
                 
-    def get_all_run_info(self) :
+    def get_all_run_info(self):
         """Get the dict with the complete info about the last run of the analysis"""
         return self.run_info
         
-    def get_all_analysis_data(self) :
+    def get_all_analysis_data(self):
         """Get the complete list of all analysis datasets to be written to the HDF5 file"""
         return self.__data_list
         
-    def get_all_parameter_data(self) :
+    def get_all_parameter_data(self):
         """Get the complete list of all parameter datasets to be written to the HDF5 file"""
         return self.__parameter_list
         
-    def get_all_dependency_data(self) :
+    def get_all_dependency_data(self):
         """Get the complete list of all direct dependencies to be written to the HDF5 file
         
            NOTE: These are only the direct dependencies as sepecified by the analysis itself. \
@@ -510,15 +495,15 @@ class omsi_analysis_base(object) :
         """
         return self.__dependency_list
         
-    def get_num_analysis_data(self) :
+    def get_num_analysis_data(self):
         """Retrun the number of analysis datasets to be wirtten to the HDF5 file"""
         return len(self.__data_list)
         
-    def get_num_parameter_data(self) :
+    def get_num_parameter_data(self):
         """Retrun the number of parameter datasets to be wirtten to the HDF5 file"""
         return len(self.__parameter_list)
         
-    def get_num_dependency_data(self) :
+    def get_num_dependency_data(self):
         """Retrun the number of dependencies to be wirtten to the HDF5 file"""
         return len(self.__dependency_list)
         
@@ -526,21 +511,21 @@ class omsi_analysis_base(object) :
         """Clear the list of analysis data"""
         self.__data_list = []
         
-    def clear_parameter_data(self) : 
+    def clear_parameter_data(self):
         """Clear the list of parameter data"""
         self.__parameter_list = []
         
-    def clear_dependency_data(self) : 
+    def clear_dependency_data(self):
         """Clear the list of parameter data"""
         self.__dependency_list = []
 
-    def clear_analysis(self) :
+    def clear_analysis(self):
         """Clear all analysis, parameter and dependency data"""
         self.clear_analysis_data()
         self.clear_parameter_data()
         self.clear_dependency_data()
 
-    def set_parameters( self, **kwargs) :
+    def set_parameters(self, **kwargs):
         """Set all parameters given as input to the function. The inputs
            are placed in either the __parameter_list or __dependency_list,
            depending on whether the given input is user-defined or whether
@@ -554,28 +539,31 @@ class omsi_analysis_base(object) :
                    may provide a tuple t consisting of the dataobject t[0] and
                    an additional selection string t[1].
         """
-        for k, v in kwargs.items() :
+        for k, v in kwargs.items():
             name = unicode(k)
-            value  = v
+            value = v
             selection = None
-            if isinstance(v , tuple ) :
+            if isinstance(v, tuple):
                 value = v[0]
                 selection = v[1]
-            if isinstance( value , h5py.Dataset) or isinstance( value, h5py.Group) or omsi_file.is_managed(value) :
-                curr_dependency = omsi_dependency( param_name = name, link_name=name, omsi_object=value, selection=selection ) 
-                self.__dependency_list.append( curr_dependency )
-            else : #Add to the list of user-defined parameters
-                try :
+            if isinstance(value, h5py.Dataset) or isinstance(value, h5py.Group) or omsi_file.is_managed(value):
+                curr_dependency = omsi_dependency(param_name=name,
+                                                  link_name=name,
+                                                  omsi_object=value,
+                                                  selection=selection)
+                self.__dependency_list.append(curr_dependency)
+            else:  # Add to the list of user-defined parameters
+                try:
                     dtype = value.dtype
-                except :
-                    if isinstance( value , float ) or isinstance( value , int ) or isinstance( value , bool) :
-                        value = np.asarray( [value] )
+                except:
+                    if isinstance(value, float) or isinstance(value, int) or isinstance(value, bool):
+                        value = np.asarray([value])
                         dtype = value.dtype
-                    elif isinstance( value , str ) or isinstance( value , unicode ) :
+                    elif isinstance(value, str) or isinstance(value, unicode):
                         dtype = omsi_format_common.str_type
-                self.__parameter_list.append( omsi_analysis_data(name=name, data=value, dtype=value.dtype ) )
-
-
+                self.__parameter_list.append(omsi_analysis_data(name=name,
+                                                                data=value,
+                                                                dtype=dtype))
 
 #    def add_analysis_data(self , name, data, dtype ) : 
 #        """Add a new dataset to the list of data to be written to the HDF5 file
@@ -632,8 +620,7 @@ class omsi_analysis_base(object) :
 #        else :
 #             raise ValueError( "Invalid input for add_data_dependency function" )
 
-
-    def write_to_omsi_file(self , analysisObj) :
+    def write_to_omsi_file(self, analysisObj):
         """This function can be optionally overwritten to implement a custom data write 
            function for the analysis to be used by the omsi_file API.
            
@@ -653,7 +640,7 @@ class omsi_analysis_base(object) :
            """
         pass
     
-    def read_from_omsi_file(self, analysisObj, load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
+    def read_from_omsi_file(self, analysisObj, load_data=True, load_parameters=True, dependencies_omsi_format=True):
         """This function can be optionally overwritten to implement a custom data read.
            
            The default implementation tries to reconstruct the original data as far
@@ -682,29 +669,27 @@ class omsi_analysis_base(object) :
            
            
         """
-        if str(analysisObj.get_analysis_type()[0]) != str(self.get_analysis_type()) :
+        if str(analysisObj.get_analysis_type()[0]) != str(self.get_analysis_type()):
             errorMessage = "The type of the analysis specified in the omsi data file does not match the analysis type of the object "
             errorMessage = errorMessage + str(analysisObj.get_analysis_type()[0]) + " != " + str(self.get_analysis_type())
-            raise TypeError( errorMessage )
+            raise TypeError(errorMessage)
         
         identifier = analysisObj.get_analysis_identifier()
-        if identifier is not None :
+        if identifier is not None:
             self.analysis_identifier = identifier[0]
-        else :
+        else:
             print "The analysis identifier could not be read from the omsi file"
         
         self.__data_list = analysisObj.get_all_analysis_data(load_data=load_data)
-        self.__parameter_list = analysisObj.get_all_parameter_data(load_data= load_parameters)
-        self.__dependency_list = analysisObj.get_all_dependency_data(omsi_dependency_format= dependencies_omsi_format)
-        
+        self.__parameter_list = analysisObj.get_all_parameter_data(load_data=load_parameters)
+        self.__dependency_list = analysisObj.get_all_dependency_data(omsi_dependency_format=dependencies_omsi_format)
         return True
 
-        
-    def get_analysis_identifier(self) :
+    def get_analysis_identifier(self):
         """Return the name of the analysis used as key when searching for a particular analysis"""
         return self.analysis_identifier
         
-    def set_analysis_identifier(self , newName) :
+    def set_analysis_identifier(self, newName):
         """Set the name of the analysis to newName
 
            :param newName: The new analysis identifier string to be used (should be unique)
