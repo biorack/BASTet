@@ -73,7 +73,9 @@ class omsi_tic_norm(omsi_analysis_base):
             tic_norm_factors[idx[i]:idx[i+1], :] = np.sum(current_data, 2)
             msi_spectrum_maxs[idx[i]:idx[i+1], :] = np.amax(current_data[:,:, idx_mz], 2)
             del current_data
-        tic_norm_factors = 1.0 / (tic_norm_factors / float(tic_norm_factors.mean()))
+        non_zero_tic = tic_norm_factors > 0
+        mean_tic_norm = float(tic_norm_factors[non_zero_tic].mean())
+        tic_norm_factors[non_zero_tic] = 1.0 / (tic_norm_factors[non_zero_tic] / mean_tic_norm)
 
         # Normalize the data one-block-at-a-time
         for i in range(len(idx)-1):
