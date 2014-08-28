@@ -427,7 +427,7 @@ class ConvertSettings(object):
             last_arg = argv[-1]
             if last_arg in helpargs:
                 cls.print_help()
-                clea(0)
+                exit(0)
             else:
                 warnings.warn("No command-line options provided. Printing help.")
                 cls.print_help()
