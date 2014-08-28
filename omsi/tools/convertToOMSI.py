@@ -2,15 +2,19 @@
 
   For usage information execute: python convertToOMSI --help
 
-  # TODO Register all print-outs with the email message
-  # TODO add ability have --format option for each dataset to be converted
 """
+
+# TODO ConvertSettings.file_user Get the user from the file-path rather then from the command line
+# TODO Register all print-outs with the email message (use logging instead of print)
+# TODO add ability have --format option for each dataset to be converted
 
 from omsi.dataformat import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
 from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
+from omsi.shared.omsi_web_helper import WebHelper
+from omsi.shared.omsi_web_helper import UserInput
 import time
 import numpy as np
 import math
@@ -18,15 +22,6 @@ import sys
 import os
 import warnings
 import getpass
-
-# Imports for user input with timeout
-from select import select
-import platform
-try:
-    if platform.system() == "Windows":
-        import msvcrt
-except:
-    pass
 
 # Imports for thumbnail image rendering
 try:
@@ -38,15 +33,6 @@ except:
         pil_available = True
     except:
         pil_available = False
-
-# Imports for registering files with the database
-try:
-    import urllib2
-    import urllib
-except:
-    # This is to ensure the script is usable without urllib2 when register to
-    # DB is not requested
-    pass
 
 
 ####################################################################
@@ -76,15 +62,17 @@ def main(argv=None):
         emailmsg = "One or more errors occurred while parsing the command line inputs."
         for warn in ConvertSettings.recorded_warnings:
             emailmsg += unicode(warn.message) + u"\n"
-        ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
-                                    body=emailmsg,
-                                    email_type='error')
+        WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
+                             body=emailmsg,
+                             email_type='error',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
         print emailmsg
         if ConvertSettings.job_id is not None:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='error')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='error')
 
         raise ValueError(emailmsg)
     if input_warning:
@@ -92,15 +80,17 @@ def main(argv=None):
         emailmsg += "See WARNING messages below for details:\n"
         for warn in ConvertSettings.recorded_warnings:
             emailmsg += unicode(warn.message) + u"\n"
-        ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
-                                    body=emailmsg,
-                                    email_type='error')
+        WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
+                             body=emailmsg,
+                             email_type='error',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
         print emailmsg
         if ConvertSettings.job_id is not None:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='error')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='error')
         raise ValueError(emailmsg)
 
     ####################################################################
@@ -118,15 +108,17 @@ def main(argv=None):
         emailmsg += "       -- No file has been added to the database. \n"
         emailmsg += "       -- Terminating \n"
         emailmsg += unicode(sys.exc_info())
-        ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
-                                    body=emailmsg,
-                                    email_type='error')
+        WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
+                             body=emailmsg,
+                             email_type='error',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
         print emailmsg
         if ConvertSettings.job_id is not None:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='error')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='error')
         raise
 
     ####################################################################
@@ -144,15 +136,17 @@ def main(argv=None):
             ConvertSettings.omsi_output_file = omsi_file.omsi_file(omsi_outfile)
     except:
         emailmsg = "Unexpected error creating the output file:", sys.exc_info()[0]
-        ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
-                                    body=emailmsg,
-                                    email_type='error')
+        WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
+                             body=emailmsg,
+                             email_type='error',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
         print emailmsg
         if ConvertSettings.job_id is not None:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='error')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='error')
         raise
 
     ####################################################################
@@ -202,14 +196,16 @@ def main(argv=None):
             emailmsg += warn.message + "\n"
 
         #Send email notification if needed
-        ConvertWebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
-                                    body=emailmsg,
-                                    email_type='error')
+        WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
+                             body=emailmsg,
+                             email_type='error',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
         if ConvertSettings.job_id is not None:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='error')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='error')
         # Pass on which-ever error has occurred
         raise
 
@@ -225,9 +221,11 @@ def main(argv=None):
         try:
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
-                status = ConvertWebHelper.register_file_with_db(filepath=omsi_outfile,
-                                                                db_server=ConvertSettings.db_server_url,
-                                                                file_user_name=ConvertSettings.file_user)
+                status = WebHelper.register_file_with_db(filepath=omsi_outfile,
+                                                         db_server=ConvertSettings.db_server_url,
+                                                         file_user_name=ConvertSettings.file_user,
+                                                         jobid=ConvertSettings.job_id,
+                                                         check_add_nersc=ConvertSettings.check_add_nersc)
                 ConvertSettings.recorded_warnings += w
         except ValueError:
             ConvertSettings.recorded_warnings += [sys.exc_info()]
@@ -255,10 +253,10 @@ def main(argv=None):
     #####################################################################
     if ConvertSettings.job_id is not None:
         try:
-            ConvertWebHelper.update_job_status(filepath=omsi_outfile,
-                                               db_server=ConvertSettings.db_server_url,
-                                               jobid=ConvertSettings.job_id,
-                                               status='complete')
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='complete')
         except ValueError as e:
             print "ERROR: Update of job status failed: " + e.message
             ConvertSettings.recorded_warnings += ["Update of job status failed: "+e.message]
@@ -267,13 +265,17 @@ def main(argv=None):
     #  Send email notification if requested                            #
     ####################################################################
     if len(ConvertSettings.recorded_warnings) == 0:
-        ConvertWebHelper.send_email(subject='Conversion complete: '+str(omsi_outfile),
-                                    body='Success',
-                                    email_type='success')
+        WebHelper.send_email(subject='Conversion complete: '+str(omsi_outfile),
+                             body='Success',
+                             email_type='success',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
     elif len(ConvertSettings.email_error_recipients) > 0:
-        ConvertWebHelper.send_email(subject='Conversion completed with warnings: '+str(omsi_outfile),
-                                    body=warningmsg,
-                                    email_type='warning')
+        WebHelper.send_email(subject='Conversion completed with warnings: '+str(omsi_outfile),
+                             body=warningmsg,
+                             email_type='warning',
+                             email_success_recipients=ConvertSettings.email_success_recipients,
+                             email_error_recipients=ConvertSettings.email_error_recipients)
 
 
 ####################################################################
@@ -348,16 +350,10 @@ class ConvertSettings(object):
     # This option is to ensure that when the script is run elsewhere that we
     # do not just call add file without actually saving the file at NERSC
     check_add_nersc = True
-    allowed_nersc_locations = ["/project/projectdirs/openmsi/omsi_data_private",
-                               "/global/project/projectdirs/openmsi/omsi_data_private",
-                               "/data/openmsi/omsi_data"]
-    default_db_server_url = "https://openmsi.nersc.gov/"
     # Specify the server where the database is registered
-    db_server_url = default_db_server_url
+    db_server_url = WebHelper.default_db_server_url
     file_user = getpass.getuser()  # Specify for which user the file should be registered
     # require_login = False #Require login before conversion
-    #Simple safe-guard to prevent non-admins to add files from arbitrary locations to the database
-    super_users = ['bpb', 'oruebel']
     # Specify the job id
     job_id = None
     
@@ -1089,7 +1085,7 @@ class ConvertFiles(object):
             # Compute the tic normalization
             if ConvertSettings.execute_ticnorm:
                 print "Executing tic normalization"
-                tic = omsi_tic_norm(nameKey="tic_norm_"+ str(time.ctime()))
+                tic = omsi_tic_norm(nameKey="tic_norm_" + str(time.ctime()))
                 tic.execute(msidata=data, mzdata=mzdata)
                 ana, anaindex = exp.create_analysis(tic)
 
@@ -1502,326 +1498,6 @@ class ConvertFiles(object):
                         sys.stdout.write(
                             "[" + str(int(100. * float(itertest) / float(num_chunks))) + "%]" + "\r")
                         sys.stdout.flush()
-
-
-####################################################################
-####################################################################
-# Web helper for data conversion                                   #
-####################################################################
-####################################################################
-class ConvertWebHelper:
-    """Class providing a collection of functions for web-related file conversion
-       tasks, e.g, : i) adding files to the web database, ii) notifying users via email,
-       iii) setting file permissions for web-access.
-    """
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def update_job_status(filepath, db_server, jobid, status='complete'):
-        """
-        Function used to update the status of the job on the server
-
-        :param filepath: Path of the file to be added to the database (only needed update file permissions)
-        :param db_server: The database server url
-        :param jobid: The id of the current job.
-        :param status: One of 'complete' or 'error'
-        """
-        # If we are at NERSC then set the NERSC Apache permissions
-        if 'nersc.gov' in db_server:
-            ConvertWebHelper.set_apache_acl(filepath)
-
-        # Construct the db add-file url
-        update_status_url = os.path.join(db_server, "openmsi/processing/update")
-        query_params = {'jobid': jobid, 'status': status}
-        update_status_url += "?"
-        update_status_url += urllib.urlencode(query_params)
-
-        # Make the url request
-        try:
-            print "Updating job status: " + update_status_url
-            url_response = urllib2.urlopen(url=update_status_url)
-            if url_response.code == 200:
-                return True
-        except urllib2.HTTPError as requestError:
-            raise ValueError("ERROR: job status could not be updated: \n" +
-                             "      Error-code:" + str(requestError.code) + "\n" +
-                             "      Error info:" + str(requestError.read()))
-        return False
-
-    @staticmethod
-    def register_file_with_db(filepath, db_server, file_user_name, jobid=None):
-        """ Function used to register a given file with the database
-
-            :param filepath: Path of the file to be added to the database
-            :param db_server: The database server url
-            :param file_user_name: The user to be used, or None if the user should
-                                    be determined based on the file URL.
-            :param jobid: Optional input parameter defining the jobid to be updated.
-                          If the jobid is given then the job will be updated with the
-                          database instead of adding the file explicitly.
-
-            :returns: Boolean indicating whether the operation was successful
-
-        """
-        # Check if the
-        if db_server == ConvertSettings.default_db_server_url and ConvertSettings.check_add_nersc:
-            allowedpath = False
-            for ap in ConvertSettings.allowed_nersc_locations:
-                if filepath.startswith(ap):
-                    allowedpath = True
-                    break
-            if not allowedpath and file_user_name in ConvertSettings.super_users:
-                print "WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location."
-                print "Do you want to add the file? (Y/N):"
-                num_trys = 3
-                timeout = 5*60  # Timeout after 5 minutes
-                for i in range(num_trys):
-                    #user_input = raw_input()
-                    user_input = UserInput.userinput_with_timeout(timeout=timeout, default=None)
-                    if user_input is None:
-                        warnings.warn("WARNING: Attempt to add a file to openmsi.nersc.gov that," +
-                                      " is not in a default location. Timeout occurred before" +
-                                      " user confirmed. Aborted adding the file to the DB.")
-                        return False
-                    if user_input == "Y" or user_input == "y" or user_input == "Yes" or \
-                            user_input == "yes" or user_input == "YES":
-                        break
-                    elif user_input == "N" or user_input == "n" or user_input == "No" or \
-                            user_input == "no" or user_input == "NO":
-                        return False
-                    else:
-                        if i == (num_trys - 1):
-                            warnings.warn("WARNING: Attempt to add a file to openmsi.nersc.gov that," +
-                                          " is not in a default location. User input unrecognized." +
-                                          " Aborted adding the file to the DB.")
-                            return False
-                        print "Unrecognized response. Do you want to add the file? (Y/N): "
-            elif not allowedpath:
-                warnings.warn("Adding file to the OpenMSI database in unconventional location not permitted for user.")
-                return False
-            else:
-                pass  # Adding the file to the db is allowed
-
-        # If we are at NERSC then set the NERSC Apache permissions
-        if 'nersc.gov' in db_server:
-            ConvertWebHelper.set_apache_acl(filepath)
-
-        # Determine the user
-        curr_user = file_user_name
-        if not curr_user:
-            curr_user = os.path.dirname(filepath).split("/")[-1]
-        if not curr_user:
-            raise ValueError("ERROR: File could not be added to DB. Owner could not be determined.")
-
-        # Construct the db add-file url
-        add_file_url = os.path.join(db_server, "openmsi/resources/addfile")
-        addfilepath = filepath
-        # Correct the filepath if we are on openmsi.nersc.gov, as /global is not mounted but only /project.
-        if db_server == ConvertSettings.default_db_server_url and addfilepath.startswith("/global/project/projectdirs"):
-            addfilepath = filepath.lstrip("/global")
-        query_params = {'file': os.path.abspath(addfilepath), 'user': curr_user}
-        add_file_url += "?"
-        add_file_url += urllib.urlencode(query_params)
-        #add_file_url = add_file_url + "?file=" + \
-        #    os.path.abspath(filepath) + "&user=" + curr_user
-
-        # Make the url request
-        try:
-            print "Registering file with DB: " + add_file_url
-            url_response = urllib2.urlopen(url=add_file_url)
-            if url_response.code == 200:
-                return True
-        except urllib2.HTTPError as requestError:
-            raise ValueError("ERROR: File could not be added to DB: \n" +
-                             "      Error-code:" + str(requestError.code) + "\n" +
-                             "      Error info:" + str(requestError.read()))
-
-        return False
-
-    @staticmethod
-    def set_apache_acl(filepath):
-        """Helper function used to set acl permissions for apache to make the given file accesible
-           to Apache at NERSC. This necessary to make the file readable for adding it to the
-           database.
-        """
-        print "Setting NERSC ACL permissions for Apache"
-        # Note u:48 is a replacement for u:apache to ensure that
-        # that the command works properly on edison.nersc.gov which
-        # does not have the apache user. However u:48 is equivalent.
-        command = "setfacl -R -m u:48:rwx " + filepath
-        os.system(command)
-
-    @staticmethod
-    def send_email(subject, body, sender='convert@openmsi.nersc.gov', email_type='success'):
-        """Send email notification to users.
-
-           :param subject: Subject line of the email
-           :param body: Body text of the email.
-           :param sender: The originating email address
-           :param email_type: One of 'success, 'error', 'warning'. Error messages are sent
-                     to ConvertSettings.email_error_recipients, success messages to
-                     ConvertSettings.email_success_recipients and warning messages are sent to both lists.
-
-        """
-        #Define the list of recipients
-        if email_type == 'success':
-            recipients = ConvertSettings.email_success_recipients
-        elif email_type == 'error':
-            recipients = ConvertSettings.email_error_recipients
-        else:
-            recipients = ConvertSettings.email_error_recipients + ConvertSettings.email_success_recipients
-        #Remove duplicates from the list of recipients
-        recipients = list(set(recipients))
-        #Check if we have any recipients
-        if len(recipients) == 0:
-            return
-
-        from smtplib import SMTP
-        from email.MIMEText import MIMEText
-        from email.Header import Header
-        from email.Utils import parseaddr, formataddr
-
-        header_charset = 'ISO-8859-1'
-        body_charset = 'US-ASCII'
-        for bc in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
-            try:
-                body_charset = bc
-                body.encode(body_charset)
-            except UnicodeError:
-                pass
-            else:
-                break
-
-        # Define the sender and recipients
-        sender_name, sender_addr = parseaddr(sender)
-        sender_name = str(Header(unicode(sender_name), header_charset))
-        sender_addr = sender_addr.encode('ascii')
-
-        tostr = ""
-        for ri in range(len(recipients)):
-            rec = recipients[ri]
-            recname, recaddr = parseaddr(rec)
-            recname = str(Header(unicode(recname), header_charset))
-            recaddr = recaddr.encode('ascii')
-            tostr += formataddr((recname, recaddr))
-            if ri < (len(recipients)-1):
-                tostr += ", "
-
-        # Construct the message
-        msg = MIMEText(body.encode(body_charset), 'plain', body_charset)
-        msg['From'] = formataddr((sender_name, sender_addr))
-        msg['To'] = tostr
-        msg['Subject'] = Header(unicode(subject), header_charset)
-
-        # Send the message using sendmail
-        try:
-            smtp = SMTP("localhost")
-            smtp.sendmail(sender, recipients, msg.as_string())
-            smtp.quit()
-        except:
-            warnings.warn('Email could not be sent' + str(sys.exc_info()))
-
-    """
-    def loginUser(requestPassword=False):
-
-        import getpass
-        #Setup the user login mechanism in urllib2
-        if ConvertSettings.db_server_url.startswith("http:"):
-            ConvertSettings.db_server_url = "https:" + ConvertSettings.db_server_url.lstrip("http:")
-        password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        username = raw_input("Login: >> ") #Enter username
-        password = getpass.getpass()       #Enter password
-        password_mgr.add_password(None, ConvertSettings.db_server_url, username, password)
-        handler = urllib2.HTTPBasicAuthHandler(password_mgr)
-        opener = urllib2.build_opener(handler)
-        urllib2.install_opener(opener)
-
-        #Login the user to the website
-        login_data = urllib.urlencode({
-                'username' : username,
-                'password' : password,
-            })
-
-        response = urllib2.urlopen(ConvertSettings.db_server_url, login_data)
-        print response
-    """
-
-
-####################################################################
-####################################################################
-# User input helper functions                                      #
-####################################################################
-####################################################################
-class UserInput(object):
-    """Collection of helper functions used to collect user input"""
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def userinput_with_timeout_default(timeout, default=''):
-        """Read user input. Return default value given after timeout.
-
-          :param timeout: Number of seconds till timeout
-          :param default: Default string to be returned after timeout
-          :type default: String
-
-          :returns: String
-
-        """
-        sys.stdout.flush()
-        rlist, _, _ = select([sys.stdin], [], [], timeout)
-        if rlist:
-            userinput = sys.stdin.readline().replace('\n', '')
-        else:
-            userinput = default
-        return userinput
-
-    @staticmethod
-    def userinput_with_timeout_windows(timeout, default=''):
-        """Read user input. Return default value given after timeout.
-           This function is used when running on windows-based systems.
-
-          :param timeout: Number of seconds till timeout
-          :param default: Default string to be returned after timeout
-          :type default: String
-
-          :returns: String
-
-        """
-        start_time = time.time()
-        sys.stdout.flush()
-        userinput = ''
-        while True:
-            if msvcrt.kbhit():
-                readchar = msvcrt.getche()
-                if ord(readchar) == 13:  # enter_key
-                    break
-                elif ord(readchar) >= 32:  # space_char
-                    userinput += readchar
-            if len(userinput) == 0 and (time.time() - start_time) > timeout:
-                break
-        if len(userinput) > 0:
-            return userinput
-        else:
-            return default
-
-    @staticmethod
-    def userinput_with_timeout(timeout, default=''):
-        """Read user input. Return default value given after timeout.
-           This function decides which platform-dependent version should
-           be used to retrieve the user input.
-
-          :param timeout: Number of seconds till timeout
-          :param default: Default string to be returned after timeout
-          :type default: String
-
-          :returns: String
-        """
-        if platform.system() == "Windows":
-            return UserInput.userinput_with_timeout_windows(timeout, default)
-        else:
-            return UserInput.userinput_with_timeout_default(timeout, default)
 
 
 if __name__ == "__main__":
