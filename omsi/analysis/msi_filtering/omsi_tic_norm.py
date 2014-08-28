@@ -77,6 +77,15 @@ class omsi_tic_norm(omsi_analysis_base):
         mean_tic_norm = float(tic_norm_factors[non_zero_tic].mean())
         tic_norm_factors[non_zero_tic] = 1.0 / (tic_norm_factors[non_zero_tic] / mean_tic_norm)
 
+        # Determine the output data format
+        max_output_value = np.max(np.multiply(msi_spectrum_maxs, tic_norm_factors))
+        outformat = 'float'
+        if max_output_value <=  np.iinfo(np.uint16).max:
+            outformat = 'uint16'
+        elif max_output_value <= np.iinfo(np.uint32).max:
+            outformat = 'uint32'
+        print outformat
+
         # Normalize the data one-block-at-a-time
         for i in range(len(idx)-1):
             num_spectra_x = idx[i+1]-idx[i]
@@ -86,10 +95,11 @@ class omsi_tic_norm(omsi_analysis_base):
             idx_thresh = np.where(np.logical_and(mip >= self['maxCount'], tip > 0))
             current_out_norm = np.zeros(current_data.shape)
             if len(idx_thresh[0]) > 0:
-                  current_out_norm[idx_thresh[0], :] = np.multiply(current_data[idx_thresh[0], :],
-                                                                   tip.astype(float)[idx_thresh[0]][:, np.newaxis])
+                  current_out_norm[idx_thresh[0], :] = \
+                      np.around(np.multiply(current_data[idx_thresh[0], :],
+                                            tip.astype(float)[idx_thresh[0]][:, np.newaxis]))
                   # Write the data to the temporary file
-                  ofp = np.memmap(outputFilename, dtype='float', mode='w+', shape=(nx, ny, nz))
+                  ofp = np.memmap(outputFilename, dtype=outformat, mode='w+', shape=(nx, ny, nz))
                   ofp[idx[i]:idx[i+1], :, :] = current_out_norm.reshape(num_spectra_x, ny, nz)
                   del ofp
 
@@ -113,7 +123,7 @@ class omsi_tic_norm(omsi_analysis_base):
         #         del ofp
 
         # Save the data
-        self['norm_msidata'] = np.memmap(outputFilename, dtype='float', mode='w+', shape=(nx, ny, nz))
+        self['norm_msidata'] = np.memmap(outputFilename, dtype=outformat, mode='w+', shape=(nx, ny, nz))
         self['norm_mz'] = mzdata
         outputFilename.close()
 
