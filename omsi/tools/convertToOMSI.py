@@ -135,7 +135,7 @@ def main(argv=None):
         if omsi_outfile is not None:
             ConvertSettings.omsi_output_file = omsi_file.omsi_file(omsi_outfile)
     except:
-        emailmsg = "Unexpected error creating the output file:", sys.exc_info()[0]
+        emailmsg = "Unexpected error creating the output file: " + unicode(sys.exc_info()[0])
         WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
                              body=emailmsg,
                              email_type='error',
