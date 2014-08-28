@@ -28,7 +28,7 @@ class omsi_tic_norm(omsi_analysis_base):
     def execute_analysis(self):
         """
         Normalize the data based on the total intensity of a spectrum or the
-        intentsity of a select set of ions:
+        intensities of a select set of ions:
            
         Keyword Arguments:
 
@@ -157,7 +157,7 @@ class omsi_tic_norm(omsi_analysis_base):
            Developer Note: h5py currently supports only a single index list. If the user provides an index-list for both
                            x and y, then we need to construct the proper merged list and load the data manually, or if
                            the data is small enough, one can load the full data into a numpy array which supports
-                           mulitple lists in the selection.
+                           multiple lists in the selection.
 
            :param anaObj: The omsi_file_analysis object for which slicing should be performed
            :param x: x selection string
