@@ -1222,12 +1222,12 @@ class ConvertFiles(object):
         """Helper function used to determine the file format that should be used
 
            :param name: Name of the folder/file that we should read
-           :param format_type: String indicating the format-option given by the user. \
-                        If the format is not determined (i.e., "auto") then this function \
-                        tries to determine the approbriate foramt. Otherwise this option \
-                        is returned as is, as the user explicilty said which format should \
+           :param format_type: String indicating the format-option given by the user.
+                        If the format is not determined (i.e., "auto") then this function
+                        tries to determine the appropriate format. Otherwise this option
+                        is returned as is, as the user explicitly said which format should
                         be used.
-           :returns: String indicating the approbriate format. Returns None in case no valid option was found.
+           :returns: String indicating the appropriate format. Returns None in case no valid option was found.
         """
         # Option 1: The user told us the format we should use
         if format_type is not None:
@@ -1450,7 +1450,7 @@ class ConvertFiles(object):
     def write_data(input_file, data, data_io_option="spectrum", chunk_shape=None):
         """Helper function used to implement different data write options.
 
-            :param input_file: The input img data file
+            :param input_file: The input data file
             :param data: The output dataset (either an h5py dataset or omsi_file_msidata object.
             :param data_io_option: String indicating the data write method to be used. One of:
 
