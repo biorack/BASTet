@@ -11,7 +11,8 @@ TODO: omsi_file_msidata
     -- Note, for the partial_spectra and partial_cube case the datasets needs to be dynamically expandable.
 
 """
-# TODO Rename omsi_file_methods to omsi_file_methods and rename the group from method to methods in a backward compatible way
+
+# TODO enable optimized chunking for analysis data as well
 
 import h5py
 import numpy as np
