@@ -177,7 +177,7 @@ class WebHelper:
         # Note u:48 is a replacement for u:apache to ensure that
         # that the command works properly on edison.nersc.gov which
         # does not have the apache user. However u:48 is equivalent.
-        command = "setfacl -R -m u:48:rwx " + '"' + filepath + "'"
+        command = "setfacl -R -m u:48:rwx " + '"' + filepath + '"'
         os.system(command)
 
     @staticmethod
