@@ -7,6 +7,7 @@ filename = '/Users/oruebel/Devel/openmsi-data/mzML_Data/N2A2_Serratia_spots_extr
 import numpy as np
 from pyteomics import mzml
 import re
+import os
 from omsi.dataformat.file_reader_base import file_reader_base
 
 
@@ -24,7 +25,8 @@ class mzml_file(file_reader_base):
     def __init__(self, basename, readdata=True):
         """Open an img file for data reading.
 
-            :param basename: The name of the mzml file
+            :param basename: The name of the mzml file. If basename is a directory, then the first mzML file found
+                             in the directory will be used instead.
             :type basename: string
 
              :param readdata: Should the complete data be read into memory
@@ -32,6 +34,14 @@ class mzml_file(file_reader_base):
             :type readdata: bool
 
         """
+        # Determine the correct base
+        if os.path.isdir(basename):
+            filelist = self.get_files_from_dir(basename)
+            if len(filelist) > 0:
+                basename = filelist[0]
+            else:
+                raise ValueError("No valid mzML file found in the given directory.")
+
         # Call super constructor. This sets self.basename and self.readall
         super(mzml_file, self).__init__(basename=basename, readdata=readdata)
         self.mzml_type = self.__compute_filetype()
@@ -160,11 +170,28 @@ class mzml_file(file_reader_base):
 
            :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
-        try:
-            #Try to open the file and iterate over it
-            reader = mzml.read(name)
-            for _ in reader:
-                pass
-            return True
-        except:
-            return False
+        if os.path.isdir(name):  # If we point to a director, check if the dir contains an mzML file
+            filelist = cls.get_files_from_dir(name)
+            return len(filelist) > 0
+        else:
+            try:
+                #Try to open the file and iterate over it
+                reader = mzml.read(name)
+                for _ in reader:
+                    pass
+                return True
+            except:
+                return False
+
+    @classmethod
+    def get_files_from_dir(cls, dirname):
+        """
+        Get a list of all basenames of all img files in a given directory.
+        Note: The basenames include the dirname.
+        """
+        filelist = []
+        for l in os.listdir(dirname):
+            currname = os.path.join(dirname, l)
+            if os.path.isfile(currname) and currname.endswith(".mzML"):
+                filelist.append(currname)
+        return filelist
