@@ -44,10 +44,9 @@ class mzml_file(file_reader_base):
 
         # Call super constructor. This sets self.basename and self.readall
         super(mzml_file, self).__init__(basename=basename, readdata=readdata)
-        self.mzml_type = self.__compute_filetype()
-        self.mz = self.__compute_mz_axis()
+        self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
-        self.num_scans = self.__compute_num_scans()
+        self.num_scans = self.__compute_num_scans(filename=self.basename)
         self.coordinates = self.__compute_coordinates()
 
         #Compute the spatial configuration of the matrix
@@ -56,7 +55,7 @@ class mzml_file(file_reader_base):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         #Compute the mz axis
-        self.mz = self.__compute_mz_axis()
+        self.mz = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type)
 
         #Determine the shape of the dataset
         self.shape = (self.x_pos.shape[0], self.y_pos.shape[0], self.mz.shape[0])
@@ -89,35 +88,37 @@ class mzml_file(file_reader_base):
             self.data[xidx, yidx, :] = yi  # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly.
             spectrumid += 1
 
-    def __compute_mz_axis(self):
+    @classmethod
+    def __compute_mz_axis(cls, filename, mzml_filetype):
         """
         Internal helper function used to compute the mz axis
         """
-        reader = mzml.read(self.basename)
+        reader = mzml.read(filename)
         spectrum = reader.next()
-        if self.mzml_type == self.available_mzml_types['thermo']:
+        if mzml_filetype == cls.available_mzml_types['thermo']:
             mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
             mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
             # TODO Should this be a user-definable parameter?
             ppm = 5
             f = np.ceil(1e6*np.log(mzmax/mzmin)/ppm)
             return np.logspace(np.log10(mzmin), np.log10(mzmax), f)
-        elif self.mzml_type == self.available_mzml_types['bruker']:
+        elif mzml_filetype == cls.available_mzml_types['bruker']:
             return spectrum['m/z array']
         else:
             raise ValueError('Unknown mzml format')
 
-    def __compute_filetype(self):
+    @classmethod
+    def __compute_filetype(cls, filename):
         """
         Internal helper function used to compute the filetype.
         """
-        spectrum = next(mzml.read(self.basename))
+        spectrum = next(mzml.read(filename))
         if 'spotID' in spectrum:
-            return self.available_mzml_types['thermo']
+            return cls.available_mzml_types['thermo']
         elif 'id' in spectrum:
-            return self.available_mzml_types['bruker']
+            return cls.available_mzml_types['bruker']
         else:
-            return self.available_mzml_types['unknown']
+            return cls.available_mzml_types['unknown']
 
     def __compute_coordinates(self):
         """
@@ -143,11 +144,12 @@ class mzml_file(file_reader_base):
                 spectrumid += 1
         return coords
 
-    def __compute_num_scans(self):
+    @staticmethod
+    def __compute_num_scans(filename=None):
         """
         Internal helper function used to compute the number of scans in the mzml file.
         """
-        reader = mzml.read(self.basename)
+        reader = mzml.read(filename)
         return sum(1 for _ in reader)
 
     def __getitem__(self, key):
@@ -201,10 +203,16 @@ class mzml_file(file_reader_base):
         else:
             basename = name
         if basename is not None:
-            temp_mzml_file = cls(basename=basename, readdata=False)
-            itemsize = np.dtype(temp_mzml_file.data_type).itemsize
-            size = np.asarray(temp_mzml_file.shape).prod() * itemsize
-            return size
+            num_scans = cls.__compute_num_scans(filename=basename)
+            mz_axis_len = cls.__compute_mz_axis(filename=basename,
+                                                mzml_filetype=cls.__compute_filetype(filename=self.basename)).shape[0]
+            return num_scans*mz_axis_len
+
+            #temp_mzml_file = cls(basename=basename, readdata=False)
+            #itemsize = np.dtype(temp_mzml_file.data_type).itemsize
+            #size = np.asarray(temp_mzml_file.shape).prod() * itemsize
+            #print ('MZML size', size)
+            #return size
         else:
             return None
 
