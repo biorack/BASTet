@@ -222,6 +222,21 @@ def main(argv=None):
     ConvertSettings.omsi_output_file.close_file()
 
     ####################################################################
+    # Update ACL for the raw data files if needed                      #
+    ####################################################################
+    if ConvertSettings.job_id is not None or ConvertSettings.add_file_to_db:
+        for curr_dataset in ConvertSettings.dataset_list:
+            basedir = str(curr_dataset['basename'])
+            if not os.path.isdir(basedir):
+                basedir = os.path.dirname(basedir)
+            try:
+                WebHelper.set_apache_acl(basedir)
+            except:
+                ConvertSettings.recorded_warnings += ["Update of raw file ACL failed for" +
+                                                      basedir +
+                                                      str(sys.exc_info())]
+
+    ####################################################################
     #  Register the file with the database                             #
     ####################################################################
     if ConvertSettings.add_file_to_db and ConvertSettings.job_id is None:
