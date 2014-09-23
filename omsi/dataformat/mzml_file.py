@@ -201,7 +201,10 @@ class mzml_file(file_reader_base):
         else:
             basename = name
         if basename is not None:
-            return os.stat(basename).st_size
+            temp_mzml_file = cls(basename=basename, readdata=False)
+            itemsize = np.dtype(temp_mzml_file.data_type).itemsize
+            size = np.asarray(temp_mzml_file.shape).prod() * itemsize
+            return size
         else:
             return None
 
