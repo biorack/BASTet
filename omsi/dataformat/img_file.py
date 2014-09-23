@@ -211,7 +211,7 @@ class img_file(file_reader_base):
             if len(filelist) > 0:
                 basename = filelist[0]
         if basename is not None:
-            return os.stat(name + ".img").st_size
+            return os.stat(basename + ".img").st_size
         else:
             return None
 
