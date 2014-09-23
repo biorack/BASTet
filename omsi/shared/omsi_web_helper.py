@@ -40,7 +40,7 @@ class WebHelper:
         :param filepath: Path of the file to be added to the database (only needed update file permissions)
         :param db_server: The database server url
         :param jobid: The id of the current job.
-        :param status: One of 'complete' or 'error'
+        :param status: One of 'running', 'complete' or 'error'
         """
         import urllib2
         import urllib

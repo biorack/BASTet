@@ -93,6 +93,13 @@ def main(argv=None):
                                         status='error')
         raise ValueError(emailmsg)
 
+    # Notify the system that the job is running
+    if ConvertSettings.job_id is not None:
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='running')
+
     ####################################################################
     # Generate the list of datasets to be converted                    #
     ####################################################################
