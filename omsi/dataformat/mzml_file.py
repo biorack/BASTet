@@ -184,6 +184,28 @@ class mzml_file(file_reader_base):
                 return False
 
     @classmethod
+    def size(cls, name):
+        """
+        Classmethod used to check the estimated size for the given file/folder.
+
+        :param name: Name of the dir or file.
+        :type name: unicode
+
+        :returns: Integer indicating the size in byte or None if unknown.
+        """
+        basename = None
+        if os.path.isdir(name):  # If we point to a director, check if the dir contains an mzML file
+            filelist = cls.get_files_from_dir(name)
+            if len(filelist) > 0:
+                basename = filelist[0]
+        else:
+            basename = name
+        if basename is not None:
+            return os.stat(basename).st_size
+        else:
+            return None
+
+    @classmethod
     def get_files_from_dir(cls, dirname):
         """
         Get a list of all basenames of all img files in a given directory.

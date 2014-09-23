@@ -86,6 +86,18 @@ class file_reader_base(object):
         """
         raise NotImplementedError('is_valid_dataset function not implemented')
 
+    @classmethod
+    def size(cls, name):
+        """
+        Classmethod used to check the estimated size for the given file/folder.
+
+        :param name: Name of the dir or file.
+        :type name: String
+
+        :returns: Integer indicating the size in byte or None if unknown.
+        """
+        return None
+
     def get_number_of_regions(self):
         """
         File readers with multi region support must overwrite this function

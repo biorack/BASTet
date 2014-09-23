@@ -177,7 +177,7 @@ class img_file(file_reader_base):
         """Check whether the given file or directory points to a img file.
 
            :param name: Name of the dir or file.
-           :type name: String
+           :type name: unicode
 
            :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
@@ -192,6 +192,28 @@ class img_file(file_reader_base):
 
         return False
 
+    @classmethod
+    def size(cls, name):
+        """
+        Classmethod used to check the estimated size for the given file/folder.
+
+        :param name: Name of the dir or file.
+        :type name: unicode
+
+        :returns: Integer indicating the size in byte or None if unknown.
+        """
+        basename = None
+        if os.path.exists(name + ".hdr") and os.path.exists(name + ".t2m") and os.path.exists(name + ".img"):
+            basename = name
+        # If we point to a director, check if the dir contains an img file
+        elif os.path.isdir(name):
+            filelist = cls.get_files_from_dir(name)
+            if len(filelist) > 0:
+                basename = filelist[0]
+        if basename is not None:
+            return os.stat(name + ".img").st_size
+        else:
+            return None
 
     @classmethod
     def get_files_from_dir(cls, dirname):
@@ -210,7 +232,6 @@ class img_file(file_reader_base):
                         os.path.exists(basename + ".img"):
                     filelist.append(basename)
         return filelist
-
 
     def __del__(self):
         """Close the file before garbage collection"""
