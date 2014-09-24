@@ -23,15 +23,16 @@ class mzml_file(file_reader_base):
                             'thermo': 'thermo'}
 
     def __init__(self, basename, readdata=True):
-        """Open an img file for data reading.
+        """
+        Open an img file for data reading.
 
-            :param basename: The name of the mzml file. If basename is a directory, then the first mzML file found
+        :param basename: The name of the mzml file. If basename is a directory, then the first mzML file found
                              in the directory will be used instead.
-            :type basename: string
+        :type basename: string
 
-             :param readdata: Should the complete data be read into memory
-                              (this makes slicing easier). (default is True)
-            :type readdata: bool
+        :param readdata: Should the complete data be read into memory
+                             (this makes slicing easier). (default is True)
+        :type readdata: bool
 
         """
         # Determine the correct base
@@ -189,6 +190,9 @@ class mzml_file(file_reader_base):
     def size(cls, name):
         """
         Classmethod used to check the estimated size for the given file/folder.
+        For mzml this is an estimate of the final size of the full 3D datacube.
+        For efficiency the number of scans is estimated based on the size of
+        the first 1000 scans.
 
         :param name: Name of the dir or file.
         :type name: unicode
@@ -203,7 +207,22 @@ class mzml_file(file_reader_base):
         else:
             basename = name
         if basename is not None:
-            num_scans = cls.__compute_num_scans(filename=basename)
+            # Estimate the number of scans by reading the first 1000 spectra
+            index = 0
+            prev_tell = 0
+            sizes = []
+            reader = mzml.read(basename)
+            for _ in reader:
+                if index >= 1000:
+                    break
+                current_tell = reader.file.file.tell()
+                sizes.append(current_tell - prev_tell)
+                prev_tell = current_tell
+                index += 1
+            npsizes = np.asarray(sizes)
+            filesize = os.stat(basename).st_size
+            scansize = (npsizes.max() - npsizes.min()) / 2.
+            num_scans = int(filesize/scansize)
             mz_axis_len = cls.__compute_mz_axis(filename=basename,
                                                 mzml_filetype=cls.__compute_filetype(filename=self.basename)).shape[0]
             return num_scans*mz_axis_len
