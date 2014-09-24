@@ -209,22 +209,33 @@ class mzml_file(file_reader_base):
         else:
             basename = name
         if basename is not None:
-            # Estimate the number of scans by reading the first 1000 spectra
-            index = 0
-            prev_tell = 0
-            sizes = []
-            reader = mzml.read(basename)
-            for _ in reader:
-                if index >= max_num_reads:
-                    break
-                current_tell = reader.file.file.tell()
-                sizes.append(current_tell - prev_tell)
-                prev_tell = current_tell
-                index += 1
-            npsizes = np.asarray(sizes)
-            filesize = os.stat(basename).st_size
-            scansize = (npsizes.max() - npsizes.min()) / 2.
-            num_scans = int(filesize/scansize)
+            num_scans = -1
+            # Try to compute the number of scans by looking at the spectrumList count entry in the file
+            try:
+                size_line = os.popen('head -n 120 "' + basename + '" | grep "spectrumList count="').read()
+                if len(size_line) > 0:
+                    size_text = size_line.split('spectrumList count=')[1].split('"')[1]
+                    if size_text.isdigit():
+                        num_scans = int(size_text)
+            except:
+                pass
+            if num_scans < 0:
+                # Estimate the number of scans by reading the first 1000 spectra
+                index = 0
+                prev_tell = 0
+                sizes = []
+                reader = mzml.read(basename)
+                for _ in reader:
+                    if index >= max_num_reads:
+                        break
+                    current_tell = reader.file.file.tell()
+                    sizes.append(current_tell - prev_tell)
+                    prev_tell = current_tell
+                    index += 1
+                npsizes = np.asarray(sizes)
+                filesize = os.stat(basename).st_size
+                scansize = (npsizes.max() - npsizes.min()) / 2.
+                num_scans = int(filesize/scansize)
             mz_axis_len = cls.__compute_mz_axis(filename=basename,
                                                 mzml_filetype=cls.__compute_filetype(filename=basename)).shape[0]
             return num_scans*mz_axis_len
