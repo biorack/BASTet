@@ -187,7 +187,7 @@ class mzml_file(file_reader_base):
                 return False
 
     @classmethod
-    def size(cls, name):
+    def size(cls, name, max_num_reads=1000):
         """
         Classmethod used to check the estimated size for the given file/folder.
         For mzml this is an estimate of the final size of the full 3D datacube.
@@ -196,6 +196,8 @@ class mzml_file(file_reader_base):
 
         :param name: Name of the dir or file.
         :type name: unicode
+        :param max_num_reads: The maximum number of spectrum reads to be performed to estimate the file size
+        :type max_num_reads: int
 
         :returns: Integer indicating the size in byte or None if unknown.
         """
@@ -213,7 +215,7 @@ class mzml_file(file_reader_base):
             sizes = []
             reader = mzml.read(basename)
             for _ in reader:
-                if index >= 1000:
+                if index >= max_num_reads:
                     break
                 current_tell = reader.file.file.tell()
                 sizes.append(current_tell - prev_tell)
