@@ -224,7 +224,7 @@ class mzml_file(file_reader_base):
             scansize = (npsizes.max() - npsizes.min()) / 2.
             num_scans = int(filesize/scansize)
             mz_axis_len = cls.__compute_mz_axis(filename=basename,
-                                                mzml_filetype=cls.__compute_filetype(filename=self.basename)).shape[0]
+                                                mzml_filetype=cls.__compute_filetype(filename=basename)).shape[0]
             return num_scans*mz_axis_len
 
             #temp_mzml_file = cls(basename=basename, readdata=False)
