@@ -1019,7 +1019,8 @@ class ConvertFiles(object):
             ConvertFiles.write_data(input_file=input_file,
                                     data=data,
                                     data_io_option=ConvertSettings.io_option,
-                                    chunk_shape=ConvertSettings.chunks)
+                                    chunk_shape=ConvertSettings.chunks,
+                                    write_progress=(ConvertSettings.job_id is None))
             ConvertSettings.omsi_output_file.flush()
 
             # Generate any additional data copies if requested
@@ -1032,7 +1033,8 @@ class ConvertFiles(object):
                 ConvertFiles.write_data(input_file=input_file,
                                         data=tempdata,
                                         data_io_option=ConvertSettings.io_option,
-                                        chunk_shape=chunkSpec)
+                                        chunk_shape=chunkSpec,
+                                        write_progress=(ConvertSettings.job_id is None))
                 ConvertSettings.omsi_output_file.flush()
 
             # Close the input data file and free up any allocated memory
@@ -1469,7 +1471,7 @@ class ConvertFiles(object):
         return spectrum_chunk, slice_chunk, balanced_chunk
 
     @staticmethod
-    def write_data(input_file, data, data_io_option="spectrum", chunk_shape=None):
+    def write_data(input_file, data, data_io_option="spectrum", chunk_shape=None, write_progress=True):
         """Helper function used to implement different data write options.
 
             :param input_file: The input data file
@@ -1482,13 +1484,15 @@ class ConvertFiles(object):
 
             :param chunk_shape: The chunking used by the data. Needed to decide how the data should \
                                 be written when a chunk-aligned write is requested.
+            :param write_progress: Write progress in % to standard out while data is being written.
+            :type write_progress: bool
 
         """
         if data_io_option == "spectrum" or (data_io_option == "chunk" and (chunk_shape is None)):
             for xindex in xrange(0, input_file.shape[0]):
-                sys.stdout.write(
-                    "[" + str(int(100. * float(xindex) / float(input_file.shape[0]))) + "%]" + "\r")
-                sys.stdout.flush()
+                if write_progress:
+                    sys.stdout.write("[" + str(int(100. * float(xindex) / float(input_file.shape[0]))) + "%]" + "\r")
+                    sys.stdout.flush()
                 for yindex in xrange(0, input_file.shape[1]):
                     # Save the spectrum to the hdf5 file
                     data[xindex, yindex, :] = input_file[xindex, yindex, :]
@@ -1517,9 +1521,9 @@ class ConvertFiles(object):
                         data[xstart:xend, ystart:yend, zstart:zend] = input_file[
                             xstart:xend, ystart:yend, zstart:zend]
                         itertest += 1
-                        sys.stdout.write(
-                            "[" + str(int(100. * float(itertest) / float(num_chunks))) + "%]" + "\r")
-                        sys.stdout.flush()
+                        if write_progress:
+                            sys.stdout.write("[" + str(int(100. * float(itertest) / float(num_chunks))) + "%]" + "\r")
+                            sys.stdout.flush()
 
 
 if __name__ == "__main__":
