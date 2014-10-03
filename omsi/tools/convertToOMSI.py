@@ -33,6 +33,7 @@ except:
         pil_available = True
     except:
         pil_available = False
+import urllib2
 
 
 ####################################################################
@@ -95,10 +96,14 @@ def main(argv=None):
 
     # Notify the system that the job is running
     if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='running')
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='running')
+            except urllib2.URLError as e:
+                print "Update of job-status to running failed " + unicode(e)
+                ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
 
     ####################################################################
     # Generate the list of datasets to be converted                    #
@@ -122,10 +127,14 @@ def main(argv=None):
                              email_error_recipients=ConvertSettings.email_error_recipients)
         print emailmsg
         if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='error')
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='error')
+            except urllib2.URLError as e:
+                print "Update of job-status to error failed " + unicode(e)
+                ConvertSettings.recorded_warnings.append("Update of job-status to error failed " + unicode(e))
         raise
 
     ####################################################################
