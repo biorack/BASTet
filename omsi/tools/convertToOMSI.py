@@ -27,11 +27,11 @@ import getpass
 try:
     from PIL import Image
     pil_available = True
-except:
+except ImportError:
     try:
         import Image
         pil_available = True
-    except:
+    except ImportError:
         pil_available = False
 import urllib2
 
@@ -96,14 +96,14 @@ def main(argv=None):
 
     # Notify the system that the job is running
     if ConvertSettings.job_id is not None:
-            try:
-                WebHelper.update_job_status(filepath=omsi_outfile,
-                                            db_server=ConvertSettings.db_server_url,
-                                            jobid=ConvertSettings.job_id,
-                                            status='running')
-            except urllib2.URLError as e:
-                print "Update of job-status to running failed " + unicode(e)
-                ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
+        try:
+            WebHelper.update_job_status(filepath=omsi_outfile,
+                                        db_server=ConvertSettings.db_server_url,
+                                        jobid=ConvertSettings.job_id,
+                                        status='running')
+        except urllib2.URLError as e:
+            print "Update of job-status to running failed " + unicode(e)
+            ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
 
     ####################################################################
     # Generate the list of datasets to be converted                    #
@@ -169,11 +169,11 @@ def main(argv=None):
     # Convert all files                                                #
     ####################################################################
     try:
-        #Convert all files and record warnings for reporting purposes
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            ConvertFiles.convert_files()
-            ConvertSettings.recorded_warnings += w
+        # Convert all files and record warnings for reporting purposes
+        # with warnings.catch_warnings(record=True) as w:
+        #     warnings.simplefilter("always")
+        ConvertFiles.convert_files()
+        #    ConvertSettings.recorded_warnings += w
     except:
         emailmsg = "ERROR: An error occurred during the file conversion. \n"
         print "ERROR: An error occurred during the file conversion."
@@ -204,14 +204,14 @@ def main(argv=None):
         emailmsg += "\n"
         emailmsg += unicode(sys.exc_info())
 
-        #Add warnings to the email message
+        # Add warnings to the email message
         emailmsg += "\n"
         emailmsg += "---------------------------------------------" + " \n"
         emailmsg += "\n"
         for warn in ConvertSettings.recorded_warnings:
             emailmsg += warn.message + "\n"
 
-        #Send email notification if needed
+        # Send email notification if needed
         WebHelper.send_email(subject="ERROR: Conversion of file failed: " + omsi_outfile,
                              body=emailmsg,
                              email_type='error',
@@ -322,18 +322,18 @@ class ConvertSettings(object):
     dataset_list = []
     """ :param dataList: List of python dictionaries describing specific conversion \
                  settings for each conversion task. Each dictionary contains the following keys:
-    
+
                  * 'basename' : Name of the file to be converted
                  * 'format' : File format to be used (see ConvertSettings.available_formats)
                  * 'exp' : Indicate the experiment the dataset should be stored with. Valid values are \
-    
+
                               * 'new' : Generate a new experiment for the dataset
                               * 'previous' : Use the same experiment as used for the previous dataset
                               * 1, 2,3...   : Integer value indicating the index of the experiment to be used.
                 * 'region' : Optional key with index of the region to be converted. None to merge all regions.
     """
     omsi_output_file = None  # The openMSI output data file to be used.
-    
+
     ####################################################################
     #  Define available options for different parameters              ##
     ####################################################################
@@ -341,16 +341,16 @@ class ConvertSettings(object):
     available_formats = file_reader_base.file_reader_base.available_formats()
 
     # List defining the different options available for handling regions
-    available_region_options = ["split", 
-                                "merge", 
+    available_region_options = ["split",
+                                "merge",
                                 "split+merge"]
     # Available options for the data write. One chunk at a time ('chunk'), one
     # spectrum at a time ('spectrum'), or all at one once ('all')
     available_io_options = ["chunk", "spectrum", "all"]
     available_error_options = ["terminate-and-cleanup",
-                               "terminate-only", 
+                               "terminate-only",
                                "continue-on-error"]
-    
+
     ####################################################################
     #  Define the input parameters used during the conversion         ##
     ####################################################################
@@ -373,7 +373,7 @@ class ConvertSettings(object):
     compression_opts = 4
     # Should we only suggest file chunkings and quit without converting any data
     suggest_file_chunkings = False
-    
+
     ####################################################################
     #  Define file add options                                        ##
     ####################################################################
@@ -387,13 +387,13 @@ class ConvertSettings(object):
     # require_login = False #Require login before conversion
     # Specify the job id
     job_id = None
-    
+
     ####################################################################
     #  Define error-handling options                                  ##
     ####################################################################
     error_handling = "terminate-and-cleanup"
     recorded_warnings = []
-    
+
     ####################################################################
     # Define error email notification options                         ##
     ####################################################################
@@ -409,7 +409,7 @@ class ConvertSettings(object):
     execute_ticnorm = False  # Define whether tic normalization should be executed
     generate_thumbnail = False  # Should we generate thumbnail
     generate_xdmf = False  # Should we generate an xdmf header file for the file
-    
+
     # Default NMF parameter settings
     nmf_num_component = 20  # Number of components for the NMF
     nmf_timeout = 600  # Timeout for the NMF
@@ -654,7 +654,7 @@ class ConvertSettings(object):
                 if ConvertSettings.job_id == 'auto':
                     ConvertSettings.job_id = os.environ.get('PBS_JOBID')
             elif current_arg == "--email":
-                #Consume all email addresses that follow
+                # Consume all email addresses that follow
                 for ni in range((i+1), len(argv)):
                     if not argv[ni].startswith("--") and "@" in argv[ni]:
                         ConvertSettings.email_success_recipients.append(str(argv[ni]))
@@ -663,7 +663,7 @@ class ConvertSettings(object):
                     else:
                         break
             elif current_arg == "--email-success":
-                #Consume all email addresses that follow
+                # Consume all email addresses that follow
                 for ni in range((i+1), len(argv)):
                     if not argv[ni].startswith("--") and "@" in argv[ni]:
                         ConvertSettings.email_success_recipients.append(str(argv[ni]))
@@ -671,7 +671,7 @@ class ConvertSettings(object):
                     else:
                         break
             elif current_arg == "--email-error":
-                #Consume all email addresses that follow
+                # Consume all email addresses that follow
                 for ni in range((i+1), len(argv)):
                     if not argv[ni].startswith("--") and "@" in argv[ni]:
                         ConvertSettings.email_error_recipients.append(str(argv[ni]))
@@ -734,7 +734,7 @@ class ConvertSettings(object):
             for i in range(num_iter):
                 print "WARNING: HDF5 compression is only available with chunking enabled. " +\
                       "Do you want to enable chunking? (Y/N)"
-                #user_input = raw_input()
+                # user_input = raw_input()
                 user_input = UserInput.userinput_with_timeout(timeout=timeout, default=None)
                 if user_input is None:
                     input_error = True
@@ -1001,7 +1001,7 @@ class ConvertFiles(object):
             # Create a new experiment for the img file using the basefile as
             # identifer string
             if curr_dataset['exp'] == 'new':  # Create a new experiment for this dataset
-                exp = ConvertSettings.omsi_output_file.create_exp(exp_identifier=basefile)
+                exp = ConvertSettings.omsi_output_file.create_experiment(exp_identifier=basefile)
                 # Create an empty method descrition
                 sample = exp.create_method_info()
                 # Create an empty instrument description
@@ -1009,10 +1009,10 @@ class ConvertFiles(object):
                     instrument_name="undefined", mzdata=mzdata)
             # Store this dataset in combination with the previous one
             elif curr_dataset['exp'] == 'previous':
-                exp = ConvertSettings.omsi_output_file.get_exp(ConvertSettings.omsi_output_file.get_num_exp() - 1)
+                exp = ConvertSettings.omsi_output_file.get_experiment(ConvertSettings.omsi_output_file.get_num_experiments() - 1)
             # Store this dataset in combination with the given experiment index
             else:
-                exp = ConvertSettings.omsi_output_file.get_exp(curr_dataset['exp'])
+                exp = ConvertSettings.omsi_output_file.get_experiment(curr_dataset['exp'])
 
             # Allocate space in the HDF5 file for the img data
             data_dataset, mz_dataset, data_group = exp.create_msidata_full_cube(
@@ -1038,7 +1038,8 @@ class ConvertFiles(object):
                 tempdata = data.create_optimized_chunking(chunks=chunkSpec,
                                                           compression=ConvertSettings.compression,
                                                           compression_opts=ConvertSettings.compression_opts,
-                                                          copy_data=False, print_status=True)
+                                                          copy_data=False,
+                                                          print_status=True)
                 ConvertFiles.write_data(input_file=input_file,
                                         data=tempdata,
                                         data_io_option=ConvertSettings.io_option,
@@ -1078,7 +1079,7 @@ class ConvertFiles(object):
             if ConvertSettings.execute_fpl:
                 print "Executing local peak finding"
                 # Execute the peak finding
-                fpl = omsi_findpeaks_local(nameKey="omsi_findpeaks_local_" + str(time.ctime()))
+                fpl = omsi_findpeaks_local(name_key="omsi_findpeaks_local_" + str(time.ctime()))
                 fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
                 # Save the peak-finding to file
                 ana, anaindex = exp.create_analysis(fpl)
@@ -1087,17 +1088,17 @@ class ConvertFiles(object):
             if ConvertSettings.execute_fpg:
                 print "Executing global peak finding"
                 # Execute the peak finding
-                fpg = omsi_findpeaks_global(nameKey="omsi_findpeaks_global_" + str(time.ctime()))
+                fpg = omsi_findpeaks_global(name_key="omsi_findpeaks_global_" + str(time.ctime()))
                 fpg.execute(msidata=data, mzdata=mzdata)
                 # Save the peak-finding to file
                 ana, anaindex = exp.create_analysis(fpg)
-                fpgpath = ana.get_h5py_analysisgroup().name
+                fpgpath = ana.get_managed_group().name
             # Compute the nmf analysis if requested
             if ConvertSettings.execute_nmf:
                 print "Executing nmf"
                 # Exectue the nmf analysis on the peak-cube or if peak finding was not performed then
                 # execute nmf on the raw data data
-                nmf = omsi_nmf(nameKey="omsi_nmf_" + str(time.ctime()))
+                nmf = omsi_nmf(name_key="omsi_nmf_" + str(time.ctime()))
                 if ConvertSettings.execute_fpg and not ConvertSettings.nmf_use_raw_data:
                     print "   Using peak-cube data for NMF"
                     fpgdata = ana['peak_cube']
@@ -1118,7 +1119,7 @@ class ConvertFiles(object):
             # Compute the tic normalization
             if ConvertSettings.execute_ticnorm:
                 print "Executing tic normalization"
-                tic = omsi_tic_norm(nameKey="tic_norm_" + str(time.ctime()))
+                tic = omsi_tic_norm(name_key="tic_norm_" + str(time.ctime()))
                 tic.execute(msidata=data, mzdata=mzdata)
                 ana, anaindex = exp.create_analysis(tic)
 
@@ -1147,7 +1148,7 @@ class ConvertFiles(object):
                         # Generate thumbnail by merging the three gray-scale images as
                         # an RGB image
                         thumbnail = Image.merge('RGB', (im1, im2, im3))
-                        expname = str(exp.get_h5py_experimentgroup().name)
+                        expname = str(exp.get_managed_group().name)
                         expindex = expname[7:len(expname)]
                         thumbnail_filename = ConvertSettings.omsi_output_file.hdf_filename + \
                             "_" + expindex + ".png"
@@ -1174,7 +1175,7 @@ class ConvertFiles(object):
                         # Generate thumbnail by merging the three gray-scale images as
                         # an RGB image
                         thumbnail = Image.merge('RGB', (im1, im2, im3))
-                        expname = str(exp.get_h5py_experimentgroup().name)
+                        expname = str(exp.get_managed_group().name)
                         expindex = expname[7:len(expname)]
                         thumbnail_filename = ConvertSettings.omsi_output_file.hdf_filename + \
                             "_" + expindex + ".png"
@@ -1184,56 +1185,57 @@ class ConvertFiles(object):
                         print "Enable --nmf or --fpg in order to generate a thumbnail image."
                         # print "    Generating thumbnail from raw data"
                         # Find three most intense peaks that are at least 1% of the m/z range appart
-                        #numx = data.shape[0]
-                        #numy = data.shape[1]
-                        #numZ = data.shape[2]
-                        #minMzStep = numZ / 100
-                        #mzImageRange = numZ/4000
-                        #max_peak_values = np.zeros(numZ)
-                        #stepping = np.arange(0, numZ-5000, 5000)
+                        # numx = data.shape[0]
+                        # numy = data.shape[1]
+                        # numZ = data.shape[2]
+                        # minMzStep = numZ / 100
+                        # mzImageRange = numZ/4000
+                        # max_peak_values = np.zeros(numZ)
+                        # stepping = np.arange(0, numZ-5000, 5000)
                         # for i in stepping:
-                            #max_peak_values[i:(i+5000)] = data[:, :, i:(i+5000)].std(axis=0).std(axis=0).reshape(5000)
-                        #max_peak_values[stepping[-1]:numZ] = data[:, :, stepping[-1]:numZ].std(axis=0).std(axis=0).reshape(numZ - stepping[-1])
+                        #    max_peak_values[i:(i+5000)] = data[:, :, i:(i+5000)].std(axis=0).std(axis=0).reshape(5000)
+                        # max_peak_values[stepping[-1]:numZ] = \
+                        #     data[:, :, stepping[-1]:numZ].std(axis=0).std(axis=0).reshape(numZ - stepping[-1])
                         # print max_peak_values.shape
-                        #s = np.argsort(max_peak_values)
-                        #i1 = s[-1]
-                        #i2 = s[-2]
+                        # s = np.argsort(max_peak_values)
+                        # i1 = s[-1]
+                        # i2 = s[-2]
                         # for i in reversed(range(0, len(s))):
-                            # if abs(s[i] - i1) > minMzStep:
-                                #i2 = s[i]
-                                # break
-                        #i3 = s[-3]
+                        #   if abs(s[i] - i1) > minMzStep:
+                        #       i2 = s[i]
+                        #       break
+                        # i3 = s[-3]
                         # for i in reversed(range(0, len(s))):
-                            # if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
-                                #i2 = s[i]
-                                # break
+                        #   if abs(s[i] - i1) > minMzStep and abs(s[i]-i2)>minMzStep:
+                        #       i2 = s[i]
+                        #       break
                         # print minMzStep
                         # print str(i1)+" "+str(i2)+" "+str(i3)
                         # print str(mzdata[i1])+" "+str(mzdata[i2])+" "+str(mzdata[i3])
-                        #low = max(0, s[i1]-mzImageRange)
-                        #hi = min(numZ, s[i1]+mzImageRange)
+                        # low = max(0, s[i1]-mzImageRange)
+                        # hi = min(numZ, s[i1]+mzImageRange)
                         # print str(low) + " " + str(hi)
-                        #d1 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
-                        #d1 = d1 / np.max(d1)
-                        #im1 = Image.fromarray(d1.astype('float')*255).convert('L')
-                        #low = max(0, s[i2]-mzImageRange)
-                        #hi = min(numZ, s[i2]+mzImageRange)
+                        # d1 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
+                        # d1 = d1 / np.max(d1)
+                        # im1 = Image.fromarray(d1.astype('float')*255).convert('L')
+                        # low = max(0, s[i2]-mzImageRange)
+                        # hi = min(numZ, s[i2]+mzImageRange)
                         # print str(low) + " " + str(hi)
-                        #d2 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
-                        #d2 = d2 / np.max(d2)
-                        #im2 = Image.fromarray(d2.astype('float')*255).convert('L')
-                        #low = max(0, s[i3]-mzImageRange)
-                        #hi = min(numZ, s[i3]+mzImageRange)
+                        # d2 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
+                        # d2 = d2 / np.max(d2)
+                        # im2 = Image.fromarray(d2.astype('float')*255).convert('L')
+                        # low = max(0, s[i3]-mzImageRange)
+                        # hi = min(numZ, s[i3]+mzImageRange)
                         # print str(low) + " " + str(hi)
-                        #d3 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
-                        #d3 = d3 / np.max(d3)
-                        #im3 = Image.fromarray(d3.astype('float')*255).convert('L')
+                        # d3 = data[:, :,low:hi].max(axis=2).reshape((numx, numy))
+                        # d3 = d3 / np.max(d3)
+                        # im3 = Image.fromarray(d3.astype('float')*255).convert('L')
                         # Generate thumbnail by merging the three gray-scale images as an RGB image
-                        #thumbnail = Image.merge('RGB', (im1, im2, im3))
-                        #expname = str(exp.get_h5py_experimentgroup().name)
-                        #expindex = expname[7:len(expname)]
-                        #thumbnail_filename = ConvertSettings.omsi_output_file.hdf_filename+"_"+expindex+".png"
-                        #thumbnail.save(thumbnail_filename, 'PNG')
+                        # thumbnail = Image.merge('RGB', (im1, im2, im3))
+                        # expname = str(exp.get_managed_group().name)
+                        # expindex = expname[7:len(expname)]
+                        # thumbnail_filename = ConvertSettings.omsi_output_file.hdf_filename+"_"+expindex+".png"
+                        # thumbnail.save(thumbnail_filename, 'PNG')
             except ImportError:
                 print "ERROR: Thumbnail generation failed. I/O error.", sys.exc_info()[0]
                 warnings.warn("ERROR: Thumbnail generation failed. I/O error. " + str(sys.exc_info()))
@@ -1420,14 +1422,14 @@ class ConvertFiles(object):
         # overhead1 = ((spectrum_mz_chunk1 *  math.ceil (float(mzsize) / float(spectrum_mz_chunk1))) - \
         #              (spectrum_mz_chunk1 *  math.floor(float(mzsize) / float(spectrum_mz_chunk1)))) * \
         #            imagesize * numbytes
-        #overhead1 = (spectrum_mz_chunk1 - math.ceil(float(mzsize) % float(spectrum_mz_chunk1))) * imagesize * numbytes
+        # overhead1 = (spectrum_mz_chunk1 - math.ceil(float(mzsize) % float(spectrum_mz_chunk1))) * imagesize * numbytes
         factor2 = math.ceil(mzsize / float(suggested_num_values))
         if factor2 == 0:
             factor2 = 1
         spectrum_mz_chunk2 = int(math.ceil(mzsize / float(factor2)))
         factor2 = math.ceil(mzsize / float(spectrum_mz_chunk2))
         overhead2 = ((factor2 * spectrum_mz_chunk2) - mzsize) * imagesize * numbytes
-        #overhead2 = (spectrum_mz_chunk2 - math.ceil(float(mzsize) % float(spectrum_mz_chunk2))) * imagesize *numbytes
+        # overhead2 = (spectrum_mz_chunk2 - math.ceil(float(mzsize) % float(spectrum_mz_chunk2))) * imagesize *numbytes
         # overhead2 = ((spectrum_mz_chunk2 *  math.ceil (float(mzsize) / float(spectrum_mz_chunk2))) - \
         #              (spectrum_mz_chunk2 *  math.floor(float(mzsize) / float(spectrum_mz_chunk2)))) * \
         #            imagesize * numbytes
