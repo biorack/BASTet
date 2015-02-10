@@ -1,133 +1,145 @@
-from omsi.dataformat.omsi_file import omsi_file
+"""
+Simple helper tool used to generate a set of PNG images for a global peak
+analysis (one per global peak) as well as a LaTeX document that summarizes
+all the images in a single document.
+
+NOTE: The module will try to build the LaTeX document using pdflatex, i.e,
+      it is assumed that pdflatex is available.
+"""
+
 import numpy as np
-try: 
+
+from omsi.dataformat.omsi_file.main_file import omsi_file
+
+try:
     from PIL import Image
-except :
+except ImportError:
     import Image
 import datetime
-import os, sys
+import os
 import subprocess
+import sys
+
 
 def main(argv=None):
-    '''Then main function'''
-    
-    import sys
-    from sys import argv,exit
-    
+    """Then main function"""
+
     if argv is None:
         argv = sys.argv
-   
-    #Check for correct usage
-    if len(argv) <3 :
-        printHelp()
-        exit(0)
-        
+
+    # Check for correct usage
+    if len(argv) < 3:
+        print_help()
+        sys.exit(0)
+
     infile = argv[1]
-    expIndex = int(argv[2])
-    anaIndex = int(argv[3])
-    outfileName = argv[4]
-    
-    #Open the file and get to the data
-    #Note the analysis and experiment index may vary for different datasets
-    f = omsi_file( infile , 'r' )
-    e = f.get_exp(expIndex)
-    ana = e.get_analysis(anaIndex)
-    #Get the peak finding data abd load it all 
-    pc = ana[ 'peak_cube' ]
-    pm = ana[ 'peak_mz' ]
+    experiment_index = int(argv[2])
+    analysis_index = int(argv[3])
+    output_filename = argv[4]
 
-    #Load all the peak finding data
-    peakCube = pc[:]
-    peakMZ   = pm[:]
-    xdim = peakCube.shape[0]
-    ydim = peakCube.shape[1]
-    numSlices = peakCube.shape[2]
+    # Open the file and get to the data
+    # Note the analysis and experiment index may vary for different datasets
+    omsi_input_file = omsi_file(infile, 'r')
+    input_experiment = omsi_input_file.get_experiment(experiment_index)
+    input_analysis = input_experiment.get_analysis(analysis_index)
+    # Get the peak finding data abd load it all
+    input_dataset = input_analysis['peak_cube']
+    input_mz_dataset = input_analysis['peak_mz']
+    print input_analysis.items()
 
-    #Generate the images
+    # Load all the peak finding data
+    peak_cube = input_dataset[:]
+    peak_mz = input_mz_dataset[:]
+    x_dim = peak_cube.shape[0]
+    y_dim = peak_cube.shape[1]
+    num_slices = peak_cube.shape[2]
+
+    # Generate the images
     print "Generating images"
     names = []
-    for i in range(0,numSlices) :
-        sys.stdout.write("[" +str( int( 100.* float(i)/float(numSlices) )) +"%]"+ "\r")
+    for row_index in range(0, num_slices):
+        sys.stdout.write("[" + str(int(100. * float(row_index)/float(num_slices))) + "%]" + "\r")
         sys.stdout.flush()
-        
-        imData = peakCube[:,:,i]
-        imData = imData.reshape((xdim,ydim))
-        imData = imData / np.max(imData)
-        a = Image.fromarray( imData.astype('float') * 255 )
-        name = outfileName + str(peakMZ[i])
-        name = name.replace( "." , "_" ) #Replace the "." in the string to make sure pdflatex does not complain about the filename
-        name = name +".png"
-        names.append( name )
-        a.convert('L').save( name , 'PNG' )
+        image_data = peak_cube[:, :, row_index]
+        image_data = image_data.reshape((x_dim, y_dim))
+        image_data = image_data / np.max(image_data)
+        output_images = Image.fromarray(image_data.astype('float') * 255)
+        name = output_filename + str(peak_mz[row_index])
+        # Replace the "." in the string to make sure pdflatex does not complain about the filename
+        name = name.replace(".", "_")
+        name += ".png"
+        names.append(name)
+        output_images.convert('L').save(name, 'PNG')
 
-    #Generate the latex file
+    # Generate the latex file
     print "Generating LaTeX file"
 
-    texFileName = outfileName+"summary.tex"
-    latexFile = open( texFileName  , 'w' )
-    latexFile.write("\documentclass[a4paper,10pt]{article}\n")
-    latexFile.write("\usepackage[utf8x]{inputenc}\n")
-    latexFile.write("\usepackage{graphicx}\n")
-    latexFile.write("\\title{Peak Images}\n")
-    latexFile.write("\\author{Oliver Ruebel}\n")
-    latexFile.write("\date{"+str(datetime.date.today())+"}\n")
-    latexFile.write("\\begin{document}\n")
-    latexFile.write("\maketitle\n ")
+    tex_filename = output_filename+"summary.tex"
+    latex_file = open(tex_filename, 'w')
+    latex_file.write("\documentclass[a4paper,10pt]{article}\n")
+    latex_file.write("\usepackage[utf8x]{inputenc}\n")
+    latex_file.write("\usepackage{graphicx}\n")
+    latex_file.write("\\title{Peak Images}\n")
+    latex_file.write("\\author{Oliver Ruebel}\n")
+    latex_file.write("\date{"+str(datetime.date.today())+"}\n")
+    latex_file.write("\\begin{document}\n")
+    latex_file.write("\maketitle\n ")
 
-    #Write the latex table with the image files
-    numCols = 3
-    res = float(xdim) / float(ydim)
-    numRows = int( 1.29 / (0.3*(float(xdim)/float(ydim) ) ) )
-    if numRows < 1 :
-        numRows = 1
-        print "WARNING: Images may not fit on a single page. Reduce the witdh of image plots"
-    totalNumRows = int( len(names) / float(numCols) +0.5 )
-    for i in range( 0 , totalNumRows ):
-        sys.stdout.write("[" +str( int( 100.* float(i)/float(totalNumRows) )) +"%]"+ "\r")
+    # Write the latex table with the image files
+    number_of_columns = 3
+    res = float(x_dim) / float(y_dim)
+    number_of_rows = int(1.29 / (0.3*(float(x_dim)/float(y_dim))))
+    if number_of_rows < 1:
+        number_of_rows = 1
+        print "WARNING: Images may not fit on a single page. Reduce the width of image plots"
+    total_number_of_rows = int(len(names) / float(number_of_columns) + 0.5)
+    for row_index in range(0, total_number_of_rows):
+        sys.stdout.write("[" + str(int(100. * float(row_index)/float(total_number_of_rows))) + "%]" + "\r")
         sys.stdout.flush()
-        
-        if i % numRows == 0 :
-            latexFile.write("\\begin{center}\n")
-            latexFile.write("\\begin{tabular}{lll}\n")
-        
-        for ci in xrange(0,numCols) :
-            index = i*numCols+ci
-            if index < peakMZ.size :
-                latexFile.write(str(peakMZ[index]))
-            else :
-                latexFile.write(" ")
-            if ci < (numCols-1) :
-                latexFile.write(" & ")
-            else :
-                latexFile.write( " \\\\ \n")
-                
-        for ci in xrange(0,numCols) :
-            index = i*numCols+ci
-            if index < len(names) :
-                latexFile.write("\includegraphics[width=0.3\\textwidth]{"+os.path.basename(names[index])+"}")
-            else :
-                latexFile.write(" ")
-            if ci < (numCols-1) :
-                latexFile.write(" & ")
-            else :
-                latexFile.write( " \\\\ \n")
-            
-        if i%numRows == (numRows-1) or i == (totalNumRows-1) :
-            latexFile.write("\\end{tabular}\n")
-            latexFile.write("\\end{center}\n")
+        if row_index % number_of_rows == 0:
+            latex_file.write("\\begin{center}\n")
+            latex_file.write("\\begin{tabular}{lll}\n")
 
-    latexFile.write("\\end{document}\n")
-    latexFile.close()
-    
+        for column_index in xrange(0, number_of_columns):
+            index = row_index*number_of_columns+column_index
+            if index < peak_mz.size:
+                latex_file.write(str(peak_mz[index]))
+            else:
+                latex_file.write(" ")
+            if column_index < (number_of_columns-1):
+                latex_file.write(" & ")
+            else:
+                latex_file.write(" \\\\ \n")
+
+        for column_index in xrange(0, number_of_columns):
+            index = row_index*number_of_columns+column_index
+            if index < len(names):
+                latex_file.write("\includegraphics[width=0.3\\textwidth]{"+os.path.basename(names[index])+"}")
+            else:
+                latex_file.write(" ")
+            if column_index < (number_of_columns-1):
+                latex_file.write(" & ")
+            else:
+                latex_file.write(" \\\\ \n")
+
+        if row_index % number_of_rows == (number_of_rows-1) or row_index == (total_number_of_rows-1):
+            latex_file.write("\\end{tabular}\n")
+            latex_file.write("\\end{center}\n")
+
+    latex_file.write("\\end{document}\n")
+    latex_file.close()
+
     print "Building the PDF file"
-    absPath  = os.path.abspath(texFileName)
-    latexDir = os.path.dirname(absPath)
-    latexFilename = os.path.basename(absPath)
-    subprocess.call( ["pdflatex" , latexFilename] , cwd=latexDir )
+    abs_path = os.path.abspath(tex_filename)
+    latex_dir = os.path.dirname(abs_path)
+    latex_filename = os.path.basename(abs_path)
+    subprocess.call(["pdflatex", latex_filename], cwd=latex_dir)
 
 
-def printHelp() :
-    
+def print_help():
+    """
+    Print the user help information to standard out.
+    """
     print "USAGE: Call \"python peakCubeOverview.py HDF5File expIndex anaIndex outFile\" "
     print ""
     print "HDF5File : The OpenMSI HDF5 file to be used"
@@ -143,4 +155,4 @@ def printHelp() :
     print "2) Latex file with a summary of all images. The latex file can be compiled to pdf using pdflatex."
 
 if __name__ == "__main__":
-    main() 
+    main()
