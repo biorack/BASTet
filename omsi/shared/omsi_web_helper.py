@@ -1,7 +1,7 @@
 """
 Module with helper functions for interactions with the web. E.g. update job status.
-Explicitly add a file to the OpenMSI database, update file permissions so that 
-Apache can access it etc. 
+Explicitly add a file to the OpenMSI database, update file permissions so that
+Apache can access it etc.
 """
 import os
 import warnings
@@ -13,14 +13,15 @@ import platform
 try:
     if platform.system() == "Windows":
         import msvcrt
-except:
+except ImportError:
     pass
 
 
-class WebHelper:
-    """Class providing a collection of functions for web-related file conversion
-       tasks, e.g, : i) adding files to the web database, ii) notifying users via email,
-       iii) setting file permissions for web-access.
+class WebHelper(object):
+    """
+    Class providing a collection of functions for web-related file conversion
+    tasks, e.g, : i) adding files to the web database, ii) notifying users via email,
+    iii) setting file permissions for web-access.
     """
 
     default_db_server_url = "https://openmsi.nersc.gov/"
@@ -61,10 +62,10 @@ class WebHelper:
             url_response = urllib2.urlopen(url=update_status_url)
             if url_response.code == 200:
                 return True
-        except urllib2.HTTPError as requestError:
+        except urllib2.HTTPError as request_error:
             raise ValueError("ERROR: job status could not be updated: \n" +
-                             "      Error-code:" + str(requestError.code) + "\n" +
-                             "      Error info:" + str(requestError.read()))
+                             "      Error-code:" + str(request_error.code) + "\n" +
+                             "      Error info:" + str(request_error.read()))
         return False
 
     @staticmethod
@@ -94,18 +95,18 @@ class WebHelper:
                                                status='complete')
         # Check if the
         if db_server == WebHelper.default_db_server_url and check_add_nersc:
-            allowedpath = False
-            for ap in WebHelper.allowed_nersc_locations:
-                if filepath.startswith(ap):
-                    allowedpath = True
+            is_allowed_path = False
+            for allowed_nersc_location in WebHelper.allowed_nersc_locations:
+                if filepath.startswith(allowed_nersc_location):
+                    is_allowed_path = True
                     break
-            if not allowedpath and file_user_name in WebHelper.super_users:
+            if not is_allowed_path and file_user_name in WebHelper.super_users:
                 print "WARNING: Attempt to add a file to openmsi.nersc.gov that is not in a default location."
                 print "Do you want to add the file? (Y/N):"
                 num_trys = 3
                 timeout = 5*60  # Timeout after 5 minutes
                 for i in range(num_trys):
-                    #user_input = raw_input()
+                    # user_input = raw_input()
                     user_input = UserInput.userinput_with_timeout(timeout=timeout, default=None)
                     if user_input is None:
                         warnings.warn("WARNING: Attempt to add a file to openmsi.nersc.gov that," +
@@ -125,7 +126,7 @@ class WebHelper:
                                           " Aborted adding the file to the DB.")
                             return False
                         print "Unrecognized response. Do you want to add the file? (Y/N): "
-            elif not allowedpath:
+            elif not is_allowed_path:
                 warnings.warn("Adding file to the OpenMSI database in unconventional location not permitted for user.")
                 return False
             else:
@@ -151,7 +152,7 @@ class WebHelper:
         query_params = {'file': os.path.abspath(addfilepath), 'user': curr_user}
         add_file_url += "?"
         add_file_url += urllib.urlencode(query_params)
-        #add_file_url = add_file_url + "?file=" + \
+        # add_file_url = add_file_url + "?file=" + \
         #    os.path.abspath(filepath) + "&user=" + curr_user
 
         # Make the url request
@@ -160,10 +161,10 @@ class WebHelper:
             url_response = urllib2.urlopen(url=add_file_url)
             if url_response.code == 200:
                 return True
-        except urllib2.HTTPError as requestError:
+        except urllib2.HTTPError as request_error:
             raise ValueError("ERROR: File could not be added to DB: \n" +
-                             "      Error-code:" + str(requestError.code) + "\n" +
-                             "      Error info:" + str(requestError.read()))
+                             "      Error-code:" + str(request_error.code) + "\n" +
+                             "      Error info:" + str(request_error.read()))
 
         return False
 
@@ -206,16 +207,16 @@ class WebHelper:
             email_error_recipients = []
         if email_success_recipients is None:
             email_success_recipients = []
-        #Define the list of recipients
+        # Define the list of recipients
         if email_type == 'success':
             recipients = email_success_recipients
         elif email_type == 'error':
             recipients = email_error_recipients
         else:
             recipients = email_error_recipients + email_success_recipients
-        #Remove duplicates from the list of recipients
+        # Remove duplicates from the list of recipients
         recipients = list(set(recipients))
-        #Check if we have any recipients
+        # Check if we have any recipients
         if len(recipients) == 0:
             return
 
@@ -226,9 +227,9 @@ class WebHelper:
 
         header_charset = 'ISO-8859-1'
         body_charset = 'US-ASCII'
-        for bc in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+        for current_char_set in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
             try:
-                body_charset = bc
+                body_charset = current_char_set
                 body.encode(body_charset)
             except UnicodeError:
                 pass
@@ -352,15 +353,16 @@ class UserInput(object):
 
     @staticmethod
     def userinput_with_timeout(timeout, default=''):
-        """Read user input. Return default value given after timeout.
-           This function decides which platform-dependent version should
-           be used to retrieve the user input.
+        """
+        Read user input. Return default value given after timeout.
+        This function decides which platform-dependent version should
+        be used to retrieve the user input.
 
-          :param timeout: Number of seconds till timeout
-          :param default: Default string to be returned after timeout
-          :type default: String
+        :param timeout: Number of seconds till timeout
+        :param default: Default string to be returned after timeout
+        :type default: String
 
-          :returns: String
+        :returns: String
         """
         if platform.system() == "Windows":
             return UserInput.userinput_with_timeout_windows(timeout, default)
