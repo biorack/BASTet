@@ -83,7 +83,8 @@ value_as_float = construct_transform_dict( trans_type='astype' , dtype='float' )
 #1.3) Merge the two steps to compute the maximum data value as float
 max_value_as_float = construct_transform_reduce_list( max_value, value_as_float )
 #2) Normalize the data by dividing by the maximum value
-divide_by_max_value = construct_transform_dict( trans_type='dualDataTransform', operation='divide' , axes=None , x2=max_value_as_float)
+divide_by_max_value = construct_transform_dict( trans_type='dualDataTransform',
+                                                operation='divide' , axes=None , x2=max_value_as_float)
 #3) Project along the last axis (i.e., the mz axis) to compute a maximum project image
 max_projection = construct_reduce_dict( reduction_type='max' , axis=-1)
 #4) Merge the different steps and construct the json string
@@ -451,7 +452,8 @@ selection_type = {'invalid': -1,
                   'index': 0,
                   'indexlist': 2,
                   'all': 3,
-                  'range': 4}
+                  'range': 4,
+                  'multiaxis': 5}
 """This an extended list of types indicated by the check_selection_string function.
    Indices <0 are assumed to be invalid selections.
 
@@ -462,21 +464,22 @@ selection_type = {'invalid': -1,
 #  Process data selection strings                               #
 #################################################################
 def check_selection_string(selection_string):
-    """Check whether the given selection string is valid, and indicate which type of selection
-       the string defined. Checking the selection string is meant as a safeguard to prevent
-       attackers from being able to insert malicious code.
-       
-       :param selection_string: String given by the user with the desired selection
-       
-       :returns: String indicating the type of selection as defined in selection_type:
-       
-            * 'indexlist' : Selection of the form [1,2,3]
-            * 'all' : Selection of the form ':'
-            * 'range: Selection of the form 'a:b'
-            * 'index: A single index selection, e.g., '1'
-            * 'invalid': An unsupported selection 
-                 
-       """
+    """
+    Check whether the given selection string is valid, and indicate which type of selection
+    the string defined. Checking the selection string is meant as a safeguard to prevent
+    attackers from being able to insert malicious code.
+
+    :param selection_string: String given by the user with the desired selection
+
+    :returns: String indicating the type of selection as defined in selection_type:
+
+        * 'indexlist' : Selection of the form [1,2,3]
+        * 'all' : Selection of the form ':'
+        * 'range: Selection of the form 'a:b'
+        * 'index: A single index selection, e.g., '1'
+        * 'invalid': An unsupported selection
+
+    """
     import re
     # Check if we actually have a string
     if selection_string is None:
@@ -487,97 +490,188 @@ def check_selection_string(selection_string):
     # Check if the selection defines and ":" all selection
     elif re.match('^:$', selection_string):
         return selection_type['all']
-    # Check if the selection defines a range  a:b type selection
+    # Check if the selection defines a range/slice  a:b:c type selection
     elif re.match('^[0-9]+:-?[0-9]+$', selection_string):
         return selection_type['range']
     # Check if the selection defines a single index value type selection
     elif re.match('^-?[0-9]+$', selection_string):
         return selection_type['index']
+    # Check if we have a multi-axis selection
+    elif "|" in selection_string:
+        for substring in selection_string.split('|'):
+            if check_selection_string(substring) < 0:
+                return selection_type['invalid']
+        return selection_type['multiaxis']
+    # Check if we have a more complex slice selection
+    elif ":" in selection_string:
+        splitstring = selection_string.split(":")
+        try:
+            slice_values = [int(i) if len(i) > 0 else None for i in splitstring]
+        except ValueError:
+            return selection_type['invalid']
+        contains_digit = False
+        for current_slice_value in slice_values:
+            if current_slice_value is not None:
+                contains_digit = True
+                break
+        if (0 < len(slice_values) < 4) and contains_digit:
+            return selection_type['range']
+        else:
+            return selection_type['invalid']
     # If none of the above selection types are given, then the selection is
     # declared invalid
     else:
         return selection_type['invalid']
 
 
-def selection_string_to_object(selection_string):
-    """Convert the given selection string to a python selection object, i.e., either a slice, list or integer index.
-    
-       :param selection_string: A selection string of the type indexlist
-       
-       :returns: 
-       
-            * An integer index if an index selection is specified
-            * A python list of indices if a list specified in the string
-            * A python slice opject if a slice opteration is specified by the string
-            
+def selection_string_to_object(selection_string,
+                               list_to_index=False):
+    """
+    Convert the given selection string to a python selection object, i.e., either a slice, list or integer index.
+
+    :param selection_string: A selection string of the type indexlist
+    :param list_to_index: Should we turn the list into an index if the list contains only a single value.
+        Default value is False, i.e., the list is not modified.
+
+    :returns:
+
+        * An integer index if an index selection is specified
+        * A python list of indices if a list specified in the string
+        * A python slice object if a slice operation is specified by the string
+
     """
     selectiontype = check_selection_string(selection_string)
     if selectiontype == selection_type['indexlist']:
         stringlist = selection_string[1:-1].split(",")
         try:
             parsedlist = [int(i) for i in stringlist]
-        except:
+        except ValueError:
             return None
-        return parsedlist
+        if len(parsedlist) == 1 and list_to_index:
+            return parsedlist[0]
+        else:
+            return parsedlist
     elif selectiontype == selection_type['index']:
         try:
             return int(selection_string)
-        except:
+        except ValueError:
             return None
     elif selectiontype == selection_type['all']:
         return slice(None, None, None)
     elif selectiontype == selection_type['range']:
         splitstring = selection_string.split(":")
+        slice_values = [int(i) if len(i) > 0 else None for i in splitstring]
+
         if len(splitstring) == 1:
-            return slice(int(splitstring[0]), None, None)
+            return slice(slice_values[0], None, None)
         elif len(splitstring) == 2:
-            return slice(int(splitstring[0]), int(splitstring[1]), None)
+            return slice(slice_values[0], slice_values[1], None)
         elif len(splitstring) == 3:
-            return slice(int(splitstring[0]), int(splitstring[1]), int(splitstring[2]))
+            return slice(slice_values[0], slice_values[1], slice_values[2])
+        else:
+            return slice(None, None, None)
+    elif selectiontype == selection_type['multiaxis']:
+        splitstring = selection_string.split('|')
+        return tuple([selection_string_to_object(axis_selection) for axis_selection in splitstring])
+    elif isinstance(selection_string, list) or \
+            isinstance(selection_string, int) or \
+            isinstance(selection_string, tuple) or \
+            isinstance(selection_string, slice):
+        return selection_string
+    else:
+        return None
+
+
+def selection_to_string(selection):
+    """
+    Convert the given selection, which may be either an int, a list of ints, a slice object or
+    a tuple of the mentioned types which is used to define a selection along multiple axes.
+    :param selection: The selection to be converted to a string
+    :type selection: int, list, slice, or a tuple of int, list, slice objects
+    :return: The selection string
+    """
+    if isinstance(selection, list) or isinstance(selection, int):
+        return str(selection).replace(' ', '')
+    elif isinstance(selection, slice):
+        start = selection.start
+        stop = selection.stop
+        step = selection.step
+        if start is None and stop is None and step is None:
+            return ":"
+        else:
+            start_string = "" if start is None else str(start)
+            stop_string = "" if stop is None else str(stop)
+            step_string = "" if step is None else str(step)
+            return "%s:%s:%s" % (start_string, stop_string, step_string)
+    elif isinstance(selection, tuple):
+        selection_string = None
+        for axis_selection in selection:
+            if selection_string is None:
+                selection_string = selection_to_string(axis_selection)
+            else:
+                selection_string += "|" + selection_to_string(axis_selection)
+        if selection_string is None:
+            selection_string = ""
+        return selection_string
+    elif isinstance(selection, basestring):
+        if check_selection_string(selection) >= 0:
+            return selection
+        else:
+            raise ValueError('Invalid selection string given to selection_to_string(...)')
+    else:
+        raise ValueError('Invalid selection given to selection_to_string(...).')
 
 
 def selection_to_indexlist(selection_string, axis_size=0):
-    """Parse the indexlist selection string and return a python list of indices
-    
-       :param selection_string: A selection string of the type indexlist
-       :param axis_size: Size of the dimensions for which the selection is defined.
-              Only needed in case that a range selection is given.
-
-       :returns:
-            
-            * A python list of point indices for the selection.
-            * None in case the list is empty or in case an error occurred.
-
     """
+    Parse the indexlist selection string and return a python list of indices
 
+    :param selection_string: A selection string of the type indexlist
+    :param axis_size: Size of the dimensions for which the selection is defined.
+          Only needed in case that a range selection is given. This should be
+          a list of sizes, in case that a multiaxis selection is given.
+
+    :returns:
+
+        * A python list of point indices for the selection.
+        * None in case the list is empty or in case an error occurred.
+    """
     # Check if the given selection is in fact a indexlist
     selectiontype = check_selection_string(selection_string)
     if selectiontype == selection_type['indexlist']:
-        stringlist = selection_string[1:-1].split(",")
-        try:
-            parsedlist = [int(i) for i in stringlist]
-        except:
-            return None
-        return parsedlist
+        return selection_string_to_object(selection_string)
     elif selectiontype == selection_type['index']:
-        try:
-            return [int(selection_string)]
-        except:
-            return None
+        return [selection_string_to_object(selection_string)]
     elif selectiontype == selection_type['all']:
-        try:
-            return range(0, axis_size)
-        except:
-            return None
+        return range(0, axis_size)
     elif selectiontype == selection_type['range']:
-        try:
-            parsedranges = [int(i) for i in selection_string.split(":")]
-            if len(parsedranges) == 2:
-                return range(parsedranges[0], parsedranges[1])
-            else:
-                return None
-        except:
-            return None
+        slice_object = selection_string_to_object(selection_string)
+        if slice_object.start is not None:
+            start = slice_object.start
+        else:
+            start = 0
+        if slice_object.stop is not None:
+            stop = slice_object.stop
+        else:
+            stop = axis_size
+        if slice_object.step is not None:
+            step = slice_object.step
+        else:
+            step = 1
+        return range(start, stop, step)
+    elif selection_type == selection_type['multiaxis']:
+        selection_tuple = selection_string_to_object(selection_string)
+        selection_lists = []
+        if axis_size is None:
+            axis_sizes = [0] * len(selection_tuple)
+        elif isinstance(axis_size, list) or isinstance(axis_size, tuple):
+            axis_sizes = list(axis_size)
+        else:
+            axis_sizes = [axis_size] * len(selection_tuple)
+        for axis_index, axis_selection in enumerate(selection_tuple):
+            selection_lists.append(selection_to_indexlist(selection_string=axis_selection,
+                                                          axis_size=axis_sizes[axis_index]))
+            return zip(*selection_lists)
     else:
         return None
 
@@ -587,7 +681,7 @@ def selection_to_indexlist(selection_string, axis_size=0):
 #################################################################
 def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=False, **kwargs):
     """ Helper function used reduce the data of a given numpy array.
-       
+
         :param data: The input numpy array that should be reduced
         :param reduction: Data reduction to be applied to the input data.
                           Reduction operations are defined as strings indicating
@@ -605,8 +699,10 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         :returns: Reduced numpy data array or in case of error None or HttpResonse with a
                   description of the error that occurred (see http_error option).
     """
-    if http_error:
+    try:
         from django.http import HttpResponseNotFound
+    except ImportError:
+        http_error = False
 
     # 1) Check input
     # 1.1) Check if we have any data that can be reduced
@@ -659,9 +755,9 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
             selection = kwargs.pop('selection')
             if is_transform_or_reduce(selection):
                 selection = evaluate_transform_parameter(parameter=selection,
-                                                         data = x1,
+                                                         data=x1,
                                                          secondary_data=secondary_data)
-            if isinstance(selection,str) or isinstance(selection,unicode):
+            if isinstance(selection, str) or isinstance(selection, unicode):
                 selection = selection_string_to_object(selection)
         else:
             selection = slice(None)
@@ -671,12 +767,12 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
     # numpy operations defined in
     # omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
     try:
-        op = getattr(np, reduction)
+        numpy_operation = getattr(np, reduction)
         # if data.shape[axis] > 1:
         if axis_specified:
-            data = op(x1, axis=axis, **kwargs)
+            data = numpy_operation(x1, axis=axis, **kwargs)
         else:
-            data = op(x1, **kwargs)
+            data = numpy_operation(x1, **kwargs)
         return data
     except:
         if http_error:
@@ -694,8 +790,7 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
 def transform_and_reduce_data(data,
                               operations,
                               secondary_data=None,
-                              http_error=False
-                              ):
+                              http_error=False):
     """ Helper function used to apply a series of potentially multiple
         operations to a given numpy dataset. This function uses
         the transform_data_single(...) function to apply each indicated
@@ -760,61 +855,61 @@ def transform_and_reduce_data(data,
         secondary_data['data'] = data
 
     # 4) Iterate over all operations and apply them on after another.
-    currdata = data
-    for op in operations:
+    current_data = data
+    for current_operation in operations:
         # print "---------------------------"
         # print op
-        if 'variable' in op:
-            secondaryvar = op.pop('variable')
+        if 'variable' in current_operation:
+            secondaryvar = current_operation.pop('variable')
         else:
             secondaryvar = None
         # 4.1) Evaluate a data transformation that consists of multiple
         # operations
-        if isinstance(op, list):
-            transform_and_reduce_data(data=currdata,
-                                      operations=op,
+        if isinstance(current_operation, list):
+            transform_and_reduce_data(data=current_data,
+                                      operations=current_operation,
                                       secondary_data=secondary_data,
                                       http_error=http_error)
         # 4.2) Evaluate single data operation
-        elif isinstance(op, dict):
+        elif isinstance(current_operation, dict):
             # 4.2.1) Check if we need to transform or reduce the data
             # 4.2.2) Perform data transformation
-            if 'transformation' in op:
+            if 'transformation' in current_operation:
                 # 4.2.2.1 Get the transformation
-                currtransformation = op.pop('transformation')
+                current_transformation = current_operation.pop('transformation')
                 # 4.2.2.2 Get the axes for the transformations
                 axes = None
-                if 'axes' in op:
-                    axes = op.pop('axes')
-                # 4.2.3) Execute the current data op
-                currdata = transform_data_single(data=currdata,
-                                                 transformation=currtransformation,
-                                                 axes=axes,
-                                                 secondary_data=secondary_data,
-                                                 http_error=http_error,
-                                                 transform_kwargs=op)
+                if 'axes' in current_operation:
+                    axes = current_operation.pop('axes')
+                # 4.2.3) Execute the current data operation
+                current_data = transform_data_single(data=current_data,
+                                                     transformation=current_transformation,
+                                                     axes=axes,
+                                                     secondary_data=secondary_data,
+                                                     http_error=http_error,
+                                                     transform_kwargs=current_operation)
             # 4.2.3 Perform data reduction
-            elif 'reduction' in op:
+            elif 'reduction' in current_operation:
                 # 4.2.3.1 Get the data reduction operation
-                currreduction = op.pop('reduction')
+                currreduction = current_operation.pop('reduction')
                 # 4.2.3.2 Get the axis along which the data reduction should be
                 # applied
-                if 'axis' in op:
-                    axis = op.pop('axis')
+                if 'axis' in current_operation:
+                    axis = current_operation.pop('axis')
                 else:
                     axis = None  # data.ndim-1
-                if 'min_dim' in op:
-                    min_dim = op.pop('min_dim')
+                if 'min_dim' in current_operation:
+                    min_dim = current_operation.pop('min_dim')
                 else:
                     min_dim = None
                 # 4.2.3.3 Execute the data reduction operation
-                currdata = perform_reduction(data=currdata,
-                                             reduction=currreduction,
-                                             secondary_data=secondary_data,
-                                             axis=axis,
-                                             min_dim=min_dim,
-                                             http_error=http_error,
-                                             **op)
+                current_data = perform_reduction(data=current_data,
+                                                 reduction=currreduction,
+                                                 secondary_data=secondary_data,
+                                                 axis=axis,
+                                                 min_dim=min_dim,
+                                                 http_error=http_error,
+                                                 **current_operation)
             # 4.2.4 Invalid operation specification. We have neither a
             # transformation nor a reduction
             else:
@@ -827,22 +922,22 @@ def transform_and_reduce_data(data,
 
         # 4.3) Check if an error occurred during the data transformation or
         # reduction
-        if currdata is None or isinstance(currdata, HttpResponse):
+        if current_data is None or isinstance(current_data, HttpResponse):
             if http_error:
-                if isinstance(currdata, HttpResponse):
-                    return currdata
+                if isinstance(current_data, HttpResponse):
+                    return current_data
                 else:
                     return HttpResponseNotFound("Unknown error during data transformation.")
-            return currdata
+            return current_data
 
         # 4.4) Track the secondary data if needed
         if secondaryvar:
-            secondary_data[secondaryvar] = currdata
+            secondary_data[secondaryvar] = current_data
 
         # print "---------------------------"
 
     # 5) Return the transformed data
-    return currdata
+    return current_data
 
 
 def transform_data_single(data,
@@ -1003,7 +1098,7 @@ def transform_datachunk(data,
     #   arithmetic                             #
     ############################################
     elif transformation == transformation_type['dualDataTransform'] or \
-                    transformation == transformation_type['arithmetic']:
+            transformation == transformation_type['arithmetic']:
         # Retrieve the requested operation
         if 'operation' in kwargs:
             if kwargs['operation'] not in transformation_allowed_numpy_dual_data:
@@ -1053,7 +1148,7 @@ def transform_datachunk(data,
         else:
             raise KeyError(
                 "Missing operation key for scaling data transformation.")
-         # Evalute the parameters x1 and x2
+        # Evalute the parameters x1 and x2
         if 'x1' in kwargs:
             x1 = evaluate_transform_parameter(parameter=kwargs.pop('x1'),
                                               data=data,
@@ -1282,7 +1377,7 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
     """
     # 1) Validate input parameters
     # 1.1) Do we have a valid transformation type
-    if not trans_type in transformation_type:
+    if trans_type not in transformation_type:
         raise ValueError('Invalid transformation type given. Valid trans_type are:' +
                          str(transformation_type))
     # 1.1) Do we have a valid operation specified for arithmetic opertions
@@ -1301,16 +1396,14 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
                 raise ValueError(unicode("Requested scale operation not supported. Allowed operations are") +
                                  unicode(transformation_allowed_numpy_single_data))
         else:
-            raise KeyError(
-                "Missing parameter operations for scale data transformation.")
+            raise KeyError("Missing parameter operations for scale data transformation.")
     # 1.3) Check if we have threshold parameter for the threshold operation
     if trans_type == transformation_type['threshold']:
-        if not 'threshold' in kwargs:
-            warnings.warn(
-                'No threshold parameter specified. The 5th percentile will be used as default')
+        if 'threshold' not in kwargs:
+            warnings.warn('No threshold parameter specified. The 5th percentile will be used as default')
     # 1.4) Check whether we have a dtype for the astype function
     if trans_type == transformation_type['astype']:
-        if not 'dtype' in kwargs:
+        if 'dtype' not in kwargs:
             raise KeyError("Missing parameter dtype for astype transformation")
 
     transdict = {'transformation': unicode(trans_type), 'axes': axes}
@@ -1341,7 +1434,7 @@ def construct_reduce_dict(reduction_type, **kwargs):
        :returns: Dictionary with the description of the reduction operation.
 
     """
-    if not reduction_type in reduction_allowed_numpy_function:
+    if reduction_type not in reduction_allowed_numpy_function:
         raise ValueError(unicode("Requested reduction operation not supported. Allowed operations are") +
                          unicode(reduction_allowed_numpy_function))
     reducdict = {'reduction': unicode(reduction_type)}
