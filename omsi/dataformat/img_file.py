@@ -68,7 +68,7 @@ class img_file(file_reader_base):
         else:
             raise ValueError("Missing input parameter. Either provide: " +
                              " i) basename or ii) hdr_filename, t2m_filename, img_filename")
-        
+
         # Initialize the x and y length
         hdr = open(hdr_filename, 'rb')
         hdrdata = np.fromfile(file=hdr_filename, dtype='int16', count=-1)
@@ -82,7 +82,7 @@ class img_file(file_reader_base):
         self.shape[2] = self.mz.shape[0]
         t2m.close()
 
-        #Convert the shape variable to the expected tuple
+        # Convert the shape variable to the expected tuple
         self.shape = tuple(self.shape)
 
         # Open the img file with the spectrum data
@@ -99,7 +99,7 @@ class img_file(file_reader_base):
             # Check if the size of the file matches what we expect
             imgsize = os.stat(self.img_filename).st_size
             itemsize = np.dtype(self.data_type).itemsize
-            expectednumvalues = int(self.shape[0]) * int(self.shape[1]) * int(self.shape[2]) 
+            expectednumvalues = int(self.shape[0]) * int(self.shape[1]) * int(self.shape[2])
             expectedsize = expectednumvalues * int(itemsize)
             sizedifference = expectedsize - imgsize
             print "IMG size: " + str(imgsize) + " Expected size: " + \
@@ -112,8 +112,8 @@ class img_file(file_reader_base):
                 valuesmissing = float(sizedifference) / itemsize
                 warnings.warn("WARNING: Missing "+str(sizedifference) +
                               " bytes in img file (missing " + str(valuesmissing) +
-                              " intensity values; "+str(percentmissing)+"%)." + 
-                              " Expected shape: "+str(self.shape)) 
+                              " intensity values; "+str(percentmissing)+"%)." +
+                              " Expected shape: "+str(self.shape))
                 # Define how we should deal with the error
                 expandslice = (sizedifference % slicesize) == 0
                 expandspectra = (sizedifference % spectrumsize) == 0
@@ -122,13 +122,13 @@ class img_file(file_reader_base):
                 # Complete missing spectra
                 if expandspectra:
                     warnings.warn("Dealing with missing data in img file by completing last spectra with 0's.")
-                    # TODO np.require create an in-memory copy of the full data. Provide option to use memmap'ed tempfile.
+                    # TODO np.require create an in-memory copy of the full data. Allow usage of memmap'ed tempfile.
                     tempmap = np.require(np.memmap(filename=self.img_filename,
                                                    dtype=self.data_type,
                                                    mode='r',
                                                    order='C'),
                                          requirements=['O', 'C'])
-                    #Extend the memmap to the expected size
+                    # Extend the memmap to the expected size
                     tempmap.resize((expectednumvalues, ))
                     # Reshape the memmap to the expected shape
                     self.m_img_file = tempmap.reshape(self.shape, order='C')

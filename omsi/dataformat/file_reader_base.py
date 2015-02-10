@@ -1,53 +1,52 @@
 """
-Module for base classes for implementation and integration of thrid-party file readers.
+Module for base classes for implementation and integration of third-party file readers.
 
 ToDo:
 
-* get_number_of_regions(...) should be updated to return a lost of regions, one per dataset
+* get_number_of_regions(...) should be updated to return a list of regions, one per dataset
 * Need to add base class for multi dataset formats
 * Need to add base class for multi dataset+region formats
 * Need to implement new file format for combined raw data file (ie., multiple raw files in one folder).
 
 """
 
+
 class file_reader_base(object):
-    """Base-class used to define the basic interface that file-readers
-       for a new format need to implement.
+    """
+    Base-class used to define the basic interface that file-readers
+    for a new format need to implement.
 
-       __init__ interface:
-       ^^^^^^^^^^^^^^^^^^^
-       To avoid the need for custom code subclasses should be able to be constructed \
-       by providing just the basename parameter and optional readall parameter. \
-       If additional inputs are needed, then file conversion and management scripts \
-       may need to be modified to account for the custom requirements. \
+    **__init__ interface:**
 
-       * ``basename`` : Name of the directory with the files
-       * ``readdata`` : Optional parameter used for optimization. When set to false \
-                       indicates that no data will be read using the instance but  \
-                       the instance may only be used for basic metadata checking, \
-                       e.g., shape. \
+    To avoid the need for custom code subclasses should be able to be constructed \
+    by providing just the basename parameter and optional readall parameter. \
+    If additional inputs are needed, then file conversion and management scripts \
+    may need to be modified to account for the custom requirements. \
+
+    * ``basename`` : Name of the directory with the files
+    * ``readdata`` : Optional parameter used for optimization. When set to false \
+                   indicates that no data will be read using the instance but  \
+                   the instance may only be used for basic metadata checking, \
+                   e.g., shape. \
 
 
 
-       Required Attributes:
-       ^^^^^^^^^^^^^^^^^^^^
+    **Required Attributes:**
 
-       :ivar data_type: String indicating the data type to be used (e.g., uint16)
-       :ivar shape: Tuple indicating the shape of the data
-       :ivar mz: Numpy array with the m/z axis data
-       :ivar basename: The basename provided for opening the file.
+    :ivar data_type: String indicating the data type to be used (e.g., uint16)
+    :ivar shape: Tuple indicating the shape of the data
+    :ivar mz: Numpy array with the m/z axis data
+    :ivar basename: The basename provided for opening the file.
 
-       Required Interface Functions:
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    **Required Interface Functions:**
 
-       * ``__getitem__`` : Implement array slicing for files
-       * ``close_file`` : Close any opened files
-       * ``is_valid_dataset`` : Check whether a given dir/file is valid under the current format
+    * ``__getitem__`` : Implement array slicing for files
+    * ``close_file`` : Close any opened files
+    * ``is_valid_dataset`` : Check whether a given dir/file is valid under the current format
 
-       Optional Interface Functions:
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    **Optional Interface Functions:**
 
-       * ``supports_regions`` : Specify whether the format supports multiple regions (default=False)
+    * ``supports_regions`` : Specify whether the format supports multiple regions (default=False)
 
     """
 
@@ -167,25 +166,24 @@ class file_reader_base(object):
 
 
 class file_reader_base_with_regions(file_reader_base):
-    """Base-class used to define the basic interface for file-readers
-       used to implement new file formats with support for multiple
-       imaging regions per file. This class extends file_reader_base,
-       and accordingly all required attributes and functions of
-       file_reader_base must be implemented by subclasses.
+    """
+    Base-class used to define the basic interface for file-readers
+    used to implement new file formats with support for multiple
+    imaging regions per file. This class extends file_reader_base,
+    and accordingly all required attributes and functions of
+    file_reader_base must be implemented by subclasses.
 
-       Additional required attributes:
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    **Additional required attributes:**
 
-       * ``select_region`` : Integer indicating which region should be selected. \
-                        If set to None, indicates that the data should be treated \
-                        as a whole. If set to a region index, then the data should \
-                        be treated by the reader as if it only pertains to that \
-                        region, ie., the shape of the data should be set accordingly \
-                        and __getitem__ should behave as such as well.
-       * ``region_dicts`` : List of dictionaries, where each dictionary describes a \
-                        given region (e.g,. the origin and extend for rectangular \
-                        regions.
-
+    * ``select_region`` : Integer indicating which region should be selected. \
+                    If set to None, indicates that the data should be treated \
+                    as a whole. If set to a region index, then the data should \
+                    be treated by the reader as if it only pertains to that \
+                    region, ie., the shape of the data should be set accordingly \
+                    and __getitem__ should behave as such as well.
+    * ``region_dicts`` : List of dictionaries, where each dictionary describes a \
+                    given region (e.g,. the origin and extend for rectangular \
+                    regions.
 
     """
     def __init__(self, basename, readdata):
@@ -197,11 +195,12 @@ class file_reader_base_with_regions(file_reader_base):
         self.region_dicts = []
 
     def set_region_selection(self, region_index=None):
-        """Define which region should be selected for local data reads.
+        """
+        Define which region should be selected for local data reads.
 
-           :param region_index: The index of the region that should be read. The shape of the
-                    data will be adjusted accordingly. Set to None to select all regions and treat
-                    the data as a single full 3D image.
+        :param region_index: The index of the region that should be read. The shape of the
+            data will be adjusted accordingly. Set to None to select all regions and treat
+            the data as a single full 3D image.
         """
         raise NotImplementedError('set_region_selection function not implemented')
 
@@ -214,8 +213,9 @@ class file_reader_base_with_regions(file_reader_base):
         return len(self.region_dicts)
 
     def get_regions(self):
-        """ Get list of all region dictionaries defining for each region the origin
-            and extend of the region. See also self.region_dicts.
+        """
+        Get list of all region dictionaries defining for each region the origin
+        and extend of the region. See also self.region_dicts.
         """
         return self.region_dicts
 

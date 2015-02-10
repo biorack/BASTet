@@ -1,10 +1,10 @@
 """This module provides functionality for reading bruker flex mass spectrometry image files
-   
-Limitations: 
+
+Limitations:
 
 1) Currently the reader assumes a single global m/z axis for all spectra.
 2) The read of acqu files does not convert <..> entries to python values but leaves them as strings.
-3) __read_spotlist__ converts the regions to start with a 0 index. This is somewhat inconsistent in the spot list file. \
+3) __read_spotlist__ converts the regions to start with a 0 index. This is somewhat inconsistent in the spot list file.\
   The spotname seems to number regions starting with 0 while the region list numbers them starting with 1.
 4) __read_spotlist__ computes the folder where the spots are located based on the filename of the spotlist. \
    The question is whether this is always the case??? The advantage is that we do not rely on the regions.xml \
@@ -25,7 +25,7 @@ Limitations:
 11) We can currently only selected either a single region or the full data but we cannot selected multiple regions \
     at once. E.g. if a dataset contains 3 regions then we can either select all regions at once or region 1,2, or 3 \
     but one cannot selected region 1+2, 1+3, or 2+3.
-   
+
 import bruckerflex_file
 spotlist = "/Users/oruebel/Devel/msidata/Bruker_Data/UNC IMS Data/20130417 Bmycoides Paenibacillus Early SN03130/" + \
            "2013 Bmyc Paeni Early LP/2013 Bmyc Paeni Early LP Spot List.txt"
@@ -35,22 +35,22 @@ f = bruckerflex_file.bruckerflex_file( spotlist_filename = spotlist)
 f.s_read_fid( exppath+"/fid" , f.data_type )
 testacqu = f.s_read_acqu( exppath+"/acqu" )
 testmz   = f.s_mz_from_acqu( testacqu )
-testspotlist = f.s_read_spotlist(spotlist) 
-   
+testspotlist = f.s_read_spotlist(spotlist)
+
 
 .....
 from bruckerflex_file import *
 dirname = "/Users/oruebel/Devel/msidata/Bruker_Data/UNC IMS Data/20130417 Bmycoides Paenibacillus Early SN03130/" + \
           "20130417 Bmyc Paeni Early LN/20130417 Bmyc Paeni Early LN"
 a = bruckerflex_file( dirname )
-   
+
 """
 
-#import sys
 import os
 import numpy as np
 import math
 from omsi.dataformat.file_reader_base import file_reader_base_with_regions
+
 
 class bruckerflex_file(file_reader_base_with_regions):
     """Interface for reading a single bruker flex image file.
@@ -125,17 +125,17 @@ class bruckerflex_file(file_reader_base_with_regions):
         # ToDo this reads a single spectrum (ie., fid file) to figure out the
         # length of the spectra. This obviously means that we assume a single
         # m/z axis for all spectra
-        tempSpec = self.s_read_fid(
+        temp_spectrum = self.s_read_fid(
             self.pixel_dict['fid'].compressed()[0], self.data_type)
         self.full_shape = [self.pixel_dict['regions'].shape[0],
-                           self.pixel_dict['regions'].shape[1], tempSpec.shape[0]]
+                           self.pixel_dict['regions'].shape[1], temp_spectrum.shape[0]]
         self.shape = [self.pixel_dict['regions'].shape[0], self.pixel_dict[
-            'regions'].shape[1], tempSpec.shape[0]]  # Number of pixels in x,y, and z
+            'regions'].shape[1], temp_spectrum.shape[0]]  # Number of pixels in x,y, and z
 
         # ToDo this reads a single acqu metadata file to figure out the m/z
         # axis. This obviously means that we assume a single m/z axis for all
         # spectra
-        self.metadata = self.s_read_acqu( self.pixel_dict['acqu'].compressed()[0])
+        self.metadata = self.s_read_acqu(self.pixel_dict['acqu'].compressed()[0])
         self.mz = self.s_mz_from_acqu(self.metadata)
 
         # Compute the region bouding boxes
@@ -172,7 +172,7 @@ class bruckerflex_file(file_reader_base_with_regions):
         elif os.path.isdir(name):
             # Check if there are any spots in the directory
             spotlist = cls.s_spot_from_dir(name, spot_folder_only=True)
-            if spotlist is not None :
+            if spotlist is not None:
                 if len(spotlist) > 0:
                     return True
         return False
@@ -192,7 +192,6 @@ class bruckerflex_file(file_reader_base_with_regions):
             self.shape = [self.region_dicts[self.select_region]["extend"][0],
                           self.region_dicts[self.select_region]["extend"][1], self.full_shape[2]]
 
-
     def __getitem__(self, key):
         """Enable slicing of bruker files"""
         # If the full data has been loaded
@@ -200,22 +199,21 @@ class bruckerflex_file(file_reader_base_with_regions):
             # Select the region of interest, i.e., the reader acts as if the
             # selected region where the complete image of interest.
             if self.select_region is not None:
-                rdOrigin = self.region_dicts[self.select_region]["origin"]
-                rdExtend = self.region_dicts[self.select_region]["extend"]
-                lowX = rdOrigin[0]
-                lowY = rdOrigin[1]
-                highX = lowX + rdExtend[0] + 1
-                highY = lowY + rdExtend[1] + 1
+                rd_origin = self.region_dicts[self.select_region]["origin"]
+                rd_extend = self.region_dicts[self.select_region]["extend"]
+                low_x = rd_origin[0]
+                low_y = rd_origin[1]
+                high_x = low_x + rd_extend[0] + 1
+                high_y = low_y + rd_extend[1] + 1
                 # Select the region and then selection the user data within
                 # that region
-                return self.data[lowX:highX, lowY:highY, :][key]
+                return self.data[low_x:high_x, low_y:high_y, :][key]
             else:
                 # Return the data from the full image data.
                 return self.data[key]
         else:
             raise ValueError(
                 "Slicing is only supported when the object has been initialized with readall")
-
 
     def close_file(self):
         """Close the img file"""
@@ -243,10 +241,10 @@ class bruckerflex_file(file_reader_base_with_regions):
         # Construct the m/z axis for an acqu file
         # Get the directory where the file is located
         dirname = os.path.dirname(os.path.abspath(filename))
-        acquFilename = dirname + "/acqu"
-        acquDict = self.s_read_acqu(acquFilename)
-        currMZ = self.s_mz_from_acqu(acquDict)
-        return intensity, currMZ[selection]
+        acqu_filename = dirname + "/acqu"
+        acqu_dict = self.s_read_acqu(acqu_filename)
+        curr_mz = self.s_mz_from_acqu(acqu_dict)
+        return intensity, curr_mz[selection]
 
     @staticmethod
     def __compute_regions_extends___(pixel_maps):
@@ -261,16 +259,16 @@ class bruckerflex_file(file_reader_base_with_regions):
         minr = np.min(region_map)
         maxr = np.max(region_map)
         regions = []
-        for regionIndex in range(minr, maxr + 1):
-            regionLoc = np.argwhere(region_map == regionIndex)
-            minX = np.min(regionLoc[:, 0])
-            minY = np.min(regionLoc[:, 1])
-            maxX = np.max(regionLoc[:, 0])
-            maxY = np.max(regionLoc[:, 1])
-            extendX = maxX - minX
-            extendY = maxY - minY
-            boundingBox = {"origin": np.array([minX, minY]), "extend": np.array([extendX, extendY])}
-            regions.append(boundingBox)
+        for region_index in range(minr, maxr + 1):
+            region_location = np.argwhere(region_map == region_index)
+            min_x = np.min(region_location[:, 0])
+            min_y = np.min(region_location[:, 1])
+            max_x = np.max(region_location[:, 0])
+            max_y = np.max(region_location[:, 1])
+            extend_x = max_x - min_x
+            extend_y = max_y - min_y
+            bounding_box = {"origin": np.array([min_x, min_y]), "extend": np.array([extend_x, extend_y])}
+            regions.append(bounding_box)
 
         return regions
 
@@ -305,11 +303,11 @@ class bruckerflex_file(file_reader_base_with_regions):
         # Compute list of spots from folder structure
         # The base folder where the spots are supposed to be located
         spotfolder = os.path.abspath(in_dir)
-        spotfolderList = []  # List of folders with the spots
-        spotnameList = []  # List of names for the spots
-        pixelX = []  # X location of each spot
-        pixelY = []  # Y location of each spot
-        pixelR = []  # Region index of each spot
+        spotfolder_list = []  # List of folders with the spots
+        spotname_list = []  # List of names for the spots
+        pixel_x = []  # X location of each spot
+        pixel_y = []  # Y location of each spot
+        pixel_r = []  # Region index of each spot
         for l in os.listdir(in_dir):
             ap = os.path.abspath(os.path.join(in_dir, l))
             try:
@@ -319,28 +317,28 @@ class bruckerflex_file(file_reader_base_with_regions):
                     sp = rxsplit[1].split("Y")
                     px = int(sp[0])
                     py = int(sp[1])
-                    pixelR.append(pr)
-                    pixelX.append(px)
-                    pixelY.append(py)
-                    spotfolderList.append(ap)
-                    spotnameList.append(l)
+                    pixel_r.append(pr)
+                    pixel_x.append(px)
+                    pixel_y.append(py)
+                    spotfolder_list.append(ap)
+                    spotname_list.append(l)
             except:
                 pass
 
         # Check if we need to generate anything else
         if spot_folder_only:
-            return spotfolderList
+            return spotfolder_list
 
         # Check if we have any files at all
-        if len(spotfolderList) == 0:
+        if len(spotfolder_list) == 0:
             return None
 
         # Convert compute lists to numpy
-        #numSpots = len(spotfolderList)
-        xpos = np.asarray(pixelX)
-        ypos = np.asarray(pixelY)
-        region = np.asarray(pixelR)
-        spotname = np.asarray(spotnameList)
+        # numSpots = len(spotfolder_list)
+        xpos = np.asarray(pixel_x)
+        ypos = np.asarray(pixel_y)
+        region = np.asarray(pixel_r)
+        spotname = np.asarray(spotname_list)
 
         # Create maps for all entries
         xi_min = 0
@@ -369,16 +367,16 @@ class bruckerflex_file(file_reader_base_with_regions):
 
         # Get a list of all files and compute and image map to indicate where the fid and acqu files
         # for each pixel are located
-        #filelist = bruckerflex_file.get_all_files(spotfolder)
+        # filelist = bruckerflex_file.get_all_files(spotfolder)
         # Compute the longest filename. This is only needed to determine the
         # encoding for the fix-size numpy array.
-        longestNameLength = 0
+        longest_name_length = 0
         for path, subdirs, files in os.walk(spotfolder):
             for name in files:
                 fn = os.path.join(path, name)
-                if len(fn) > longestNameLength:
-                    longestNameLength = len(fn)
-        fltype = 'a' + str(longestNameLength)
+                if len(fn) > longest_name_length:
+                    longest_name_length = len(fn)
+        fltype = 'a' + str(longest_name_length)
         # ToDo: If needed we need to change this to allow for multiple fid
         # files per spot
         fidfiles = np.empty(shape=(xsize, ysize), dtype=fltype)
@@ -453,17 +451,17 @@ class bruckerflex_file(file_reader_base_with_regions):
             else:
                 li += 1
         del li
-        numSpots = len(lines)
+        num_spots = len(lines)
 
         # Initalize the different arrays
-        xpos = np.zeros(shape=(numSpots,), dtype='int32')
-        ypos = np.zeros(shape=(numSpots,), dtype='int32')
+        xpos = np.zeros(shape=(num_spots,), dtype='int32')
+        ypos = np.zeros(shape=(num_spots,), dtype='int32')
         # ToDo: We here assume that we only have 24 characters per R02X071Y048
         # spotname.
         spotname_encoding = 'a24'
-        spotname = np.zeros(shape=(numSpots,), dtype=spotname_encoding)
-        region = np.zeros(shape=(numSpots,), dtype='int32')
-        pixelindex = np.zeros(shape=(numSpots, 2), dtype='int32')
+        spotname = np.zeros(shape=(num_spots,), dtype=spotname_encoding)
+        region = np.zeros(shape=(num_spots,), dtype='int32')
+        pixelindex = np.zeros(shape=(num_spots, 2), dtype='int32')
         # Parse all the pixels
         for i in range(0, len(lines)):
             sl = lines[i].split(" ")
@@ -512,16 +510,16 @@ class bruckerflex_file(file_reader_base_with_regions):
             raise ValueError("Could not find spotfolder: "+spotfolder)
         # Get a list of all files and compute and image map to indicate where the fid and acqu files
         # for each pixel are located
-        #filelist = bruckerflex_file.get_all_files(spotfolder)
+        # filelist = bruckerflex_file.get_all_files(spotfolder)
         # Compute the longest filename. This is only needed to determine the
         # encoding for the fix-size numpy array.
-        longestNameLength = 0
+        longest_name_length = 0
         for path, subdirs, files in os.walk(spotfolder):
             for name in files:
                 fn = os.path.join(path, name)
-                if len(fn) > longestNameLength:
-                    longestNameLength = len(fn)
-        fltype = 'a' + str(longestNameLength)
+                if len(fn) > longest_name_length:
+                    longest_name_length = len(fn)
+        fltype = 'a' + str(longest_name_length)
         # ToDo: If needed we need to change this to allow for multiple fid
         # files per spot
         fidfiles = np.empty(shape=(xsize, ysize), dtype=fltype)
@@ -564,11 +562,11 @@ class bruckerflex_file(file_reader_base_with_regions):
 
         # Create a python dictionary for each region
         # Make sure that regions are numbered starting with 0.
-        #unique_regions = np.unique(regions)
-        #minRegionIndex = np.min( unique_regions )
-        #unique_regions = unique_regions - minRegionIndex
-        #region = region - np.min(region) - minRegionIndex
-        #region_dicts = {}
+        # unique_regions = np.unique(regions)
+        # minRegionIndex = np.min( unique_regions )
+        # unique_regions = unique_regions - minRegionIndex
+        # region = region - np.min(region) - minRegionIndex
+        # region_dicts = {}
         # for i in unique_regions :
         #    regionSelect = (region == i)
         #    rd = {}
@@ -577,7 +575,7 @@ class bruckerflex_file(file_reader_base_with_regions):
         #    rd['spotname'] = spotname[regionSelect]
         #    rd['pixelindex'] = pixelindex[regionSelect,:]
 
-    #@staticmethod
+    # @staticmethod
     # def get_all_files(directory) :
     #    """Simple method to get all subdirectories and files located in a folder"""
     #    fl = []
@@ -600,9 +598,9 @@ class bruckerflex_file(file_reader_base_with_regions):
             :returns: 1D numpy array of intensity values read from the file.
         """
         fidtype = np.dtype(data_type)
-        numValues = os.path.getsize(filename) / fidtype.itemsize
+        num_values = os.path.getsize(filename) / fidtype.itemsize
         fid_file = np.memmap(filename=filename, dtype=fidtype,
-                             shape=(numValues,), mode='r', order='C')
+                             shape=(num_values,), mode='r', order='C')
         values = np.array(fid_file[selection])
         del fid_file
         return values
@@ -625,58 +623,58 @@ class bruckerflex_file(file_reader_base_with_regions):
         # Parse the acqu file and store all data in a python dictonary
         #
         acqu_dict = {}
-        currLine = 0
-        while currLine < len(lines):
+        curr_line = 0
+        while curr_line < len(lines):
             # Skip lines with no data
-            if len(lines[currLine].rstrip("\n").rstrip("\r").rstrip(" ")) == 0:
-                currLine += 1
+            if len(lines[curr_line].rstrip("\n").rstrip("\r").rstrip(" ")) == 0:
+                curr_line += 1
                 continue
             # All variables should start with ## in the acqu file
-            if not lines[currLine].startswith("##"):
-                print "WARNING: Error while reading line" + str(currLine) + \
+            if not lines[curr_line].startswith("##"):
+                print "WARNING: Error while reading line" + str(curr_line) + \
                       " of the acqu file. The error may have occured on the previous line"
-                if currLine > 0:
-                    print str(currLine - 1) + ": " + lines[currLine - 1]
-                print str(currLine) + ": " + lines[currLine]
-                currLine += 1
+                if curr_line > 0:
+                    print str(curr_line - 1) + ": " + lines[curr_line - 1]
+                print str(curr_line) + ": " + lines[curr_line]
+                curr_line += 1
                 continue
 
-            sl = lines[currLine].split("=")
+            sl = lines[curr_line].split("=")
             key = sl[0]
             # Remove beginning spaces and endline and tabs at the end from the
             # value
             value = sl[1].lstrip(' ').rstrip("\n").rstrip("\r").rstrip(" ")
 
             # Try to convert the value to a number
-            isNumber = False
+            is_number = False
             try:
                 value = int(value)
-                isNumber = True
+                is_number = True
             except ValueError:
                 try:
                     value = float(value)
-                    isNumber = True
+                    is_number = True
                 except ValueError:
                     pass
 
             # Check whether the entry defines a vector of numbers
-            if not isNumber and value.startswith("(") and value.endswith(")"):
+            unicode_value = unicode(value)
+            if not is_number and unicode_value.startswith("(") and unicode_value.endswith(")"):
                 # How many values and lines do we need to read?
-                sv = value.lstrip("(").rstrip(")").split("..")
-                #low = int(sv[0])
+                sv = unicode_value.lstrip("(").rstrip(")").split("..")
+                # low = int(sv[0])
                 high = int(sv[1])
-                numVals = high + 1
-                valsPerLine = 8
-                numLines = int(math.ceil(numVals / float(valsPerLine)))
+                num_vals = high + 1
+                vals_per_line = 8
+                num_lines = int(math.ceil(num_vals / float(vals_per_line)))
                 # Read all the values into a list and convert the numbers if
                 # possible
                 value = []
-                currLine += 1
-                # print str(numLines) + " : " + sv[0] + "..." + sv[1]
-                for i in range(0, numLines):
+                curr_line += 1
+                # print str(num_lines) + " : " + sv[0] + "..." + sv[1]
+                for _ in range(0, num_lines):
 
-                    sl = lines[currLine].rstrip("\n").rstrip(
-                        "\r").rstrip(" ").split(" ")
+                    sl = lines[curr_line].rstrip("\n").rstrip("\r").rstrip(" ").split(" ")
                     try:
                         sconv = [int(ix) for ix in sl]
                     except ValueError:
@@ -685,12 +683,12 @@ class bruckerflex_file(file_reader_base_with_regions):
                         except ValueError:
                             sconv = sl
                     value = value + sconv
-                    currLine += 1
+                    curr_line += 1
 
                 acqu_dict[key] = value
             else:
                 acqu_dict[key] = value
-                currLine += 1
+                curr_line += 1
 
         return acqu_dict
 
@@ -704,25 +702,25 @@ class bruckerflex_file(file_reader_base_with_regions):
             :returns: 1D Numpy array of floats with the mz axis data.
         """
         # Get some of the numbers we need from the acqu dictionary
-        timeNumber = acqu_dict["##$TD"]
-        timeDelay = acqu_dict["##$DELAY"]
-        timeDelta = acqu_dict["##$DW"]
-        calibrationConstants = np.array(
-            [acqu_dict["##$ML1"], acqu_dict["##$ML2"], acqu_dict["##$ML3"]])
-        calibrationConstants[0] = math.pow(
-            (1e12 / calibrationConstants[0]), 0.5)
+        time_number = acqu_dict["##$TD"]
+        time_delay = acqu_dict["##$DELAY"]
+        time_delta = acqu_dict["##$DW"]
+        calibration_constants = np.array([acqu_dict["##$ML1"], acqu_dict["##$ML2"], acqu_dict["##$ML3"]])
+        calibration_constants[0] = math.pow(
+            (1e12 / calibration_constants[0]), 0.5)
         # Compute the tof axis
 
-        tof = np.arange(start=0, stop=timeNumber) * timeDelta + timeDelay
-        tof = calibrationConstants[1] - tof
+        tof = np.arange(start=0, stop=time_number) * time_delta + time_delay
+        tof = calibration_constants[1] - tof
 
         # Compute the mz axis
-        if calibrationConstants[2] == 0:
+        if calibration_constants[2] == 0:
             mz = np.power(tof, 2.0) / \
-                (calibrationConstants[0] * calibrationConstants[0])
+                (calibration_constants[0] * calibration_constants[0])
         else:
-            mz = np.power(((-1 * calibrationConstants[0]) + (np.power(math.pow(calibrationConstants[0], 2)
-                          - (4 * calibrationConstants[2] * tof), 0.5))) / (2 * calibrationConstants[2]), 2.)
+            mz = np.power(((-1 * calibration_constants[0]) +
+                           (np.power(math.pow(calibration_constants[0], 2) -
+                                     (4 * calibration_constants[2] * tof), 0.5))) / (2 * calibration_constants[2]), 2.)
 
         # Return the acqu_dict dictionary as well as the the computed m/z axis
         return mz

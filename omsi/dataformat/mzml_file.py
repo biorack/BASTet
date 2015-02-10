@@ -50,18 +50,18 @@ class mzml_file(file_reader_base):
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         self.coordinates = self.__compute_coordinates()
 
-        #Compute the spatial configuration of the matrix
+        # Compute the spatial configuration of the matrix
         self.x_pos = np.unique(self.coordinates[:, 0])
         self.y_pos = np.unique(self.coordinates[:, 1])
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
-        #Compute the mz axis
+        # Compute the mz axis
         self.mz = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type)
 
-        #Determine the shape of the dataset
+        # Determine the shape of the dataset
         self.shape = (self.x_pos.shape[0], self.y_pos.shape[0], self.mz.shape[0])
 
-        #Read the data into memory
+        # Read the data into memory
         self.data = None
         if readdata:
             self.__read_all()
@@ -80,13 +80,14 @@ class mzml_file(file_reader_base):
                 y = spectrum['intensity array']
             except KeyError:
                 # TODO Do we need user switched for reading the different spectra MS1 vs. profile spectrum?
-                #The ['MS1 spectrum'] stores the calibrated data
+                # The ['MS1 spectrum'] stores the calibrated data
                 y = spectrum['MS1 spectrum']
-                #['profile spectrum'] stores raw data
+                # ['profile spectrum'] stores raw data
             yi = np.interp(self.mz, x, y, 0, 0)
             xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
             yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
-            self.data[xidx, yidx, :] = yi  # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly.
+            self.data[xidx, yidx, :] = yi
+            # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
             spectrumid += 1
 
     @classmethod
@@ -178,7 +179,7 @@ class mzml_file(file_reader_base):
             return len(filelist) > 0
         else:
             try:
-                #Try to open the file and iterate over it
+                # Try to open the file and iterate over it
                 reader = mzml.read(name)
                 for _ in reader:
                     pass
@@ -240,11 +241,11 @@ class mzml_file(file_reader_base):
                                                 mzml_filetype=cls.__compute_filetype(filename=basename)).shape[0]
             return num_scans*mz_axis_len
 
-            #temp_mzml_file = cls(basename=basename, readdata=False)
-            #itemsize = np.dtype(temp_mzml_file.data_type).itemsize
-            #size = np.asarray(temp_mzml_file.shape).prod() * itemsize
-            #print ('MZML size', size)
-            #return size
+            # temp_mzml_file = cls(basename=basename, readdata=False)
+            # itemsize = np.dtype(temp_mzml_file.data_type).itemsize
+            # size = np.asarray(temp_mzml_file.shape).prod() * itemsize
+            # print ('MZML size', size)
+            # return size
         else:
             return None
 

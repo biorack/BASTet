@@ -1,4 +1,13 @@
+"""
+Module for implementation and specification of file formats.
+"""
+
 def mzml_available():
+    """
+    Check whether additional optional libraries are
+    available that are required for the use of the
+    mzml file reader.
+    """
     try:
         import pyteomics
         import lxml
@@ -6,6 +15,6 @@ def mzml_available():
     except ImportError:
         return False
 
-__all__ = ["img_file", "bruckerflex_file", "omsi_file", "omsi_format", "file_reader_base"]
+__all__ = ["img_file", "bruckerflex_file", "omsi_file", "file_reader_base"]
 if mzml_available():
     __all__.append("mzml_file")
