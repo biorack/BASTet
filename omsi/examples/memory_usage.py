@@ -1,4 +1,4 @@
- def mem_usage_system_psutil(self):
+def mem_usage_system_psutil(self):
      """
      Memory usage as measured by the system's psutil tool.
      This can be usefule if the PYTHON psutil is not available.

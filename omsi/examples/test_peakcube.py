@@ -1,4 +1,4 @@
-from omsi.dataformat.omsi_file import omsi_file
+from omsi.dataformat.omsi_file.main_file import omis_file
 import numpy as np
 try :
     from PIL import Image
@@ -8,7 +8,7 @@ import datetime
 import os, sys
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
     
     import sys
     from sys import argv,exit
@@ -28,8 +28,8 @@ def main(argv=None):
     
     #Open the file and get to the data
     #Note the analysis and experiment index may vary for different datasets
-    f = omsi_file( infile , 'r' )
-    e = f.get_exp(expIndex)
+    f = omis_file( infile , 'r' )
+    e = f.get_experiment(expIndex)
     ana = e.get_analysis(anaIndex)
     #Get the peak finding data abd load it all 
     pc = ana[ 'peak_cube' ]

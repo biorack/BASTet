@@ -8,7 +8,7 @@ import sys
 import math
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     import sys
     from sys import argv,exit
@@ -64,7 +64,7 @@ def main(argv=None):
         allRes[tr]['write'] =  allRes[tr]['write']+(time.time() - start)
         allRes[tr]['filesize'] = os.stat( omsiOutFile ).st_size
         omsiFile = omsi_file( omsiOutFile )
-        data = omsiFile.get_exp(0).get_msidata(0)
+        data = omsiFile.get_experiment(0).get_msidata(0)
         print "Time for data write:"+str(allRes[tr]['write'] )
         
         #Select xyz slize
@@ -105,7 +105,7 @@ def main(argv=None):
         generateTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , zchunk )
         allRes[tr]['write'] =  allRes[tr]['write']+(time.time() - start)
         omsiFile = omsi_file( omsiOutFile )
-        data = omsiFile.get_exp(0).get_msidata(0)
+        data = omsiFile.get_experiment(0).get_msidata(0)
         print "Time for data write:"+str(allRes[tr]['write'] )
 
         #Perform different types of slicing opterations and keep track of the times
@@ -139,7 +139,7 @@ def main(argv=None):
         generateTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , zchunk )
         allRes[tr]['write'] =  allRes[tr]['write']+(time.time() - start)
         omsiFile = omsi_file( omsiOutFile )
-        data = omsiFile.get_exp(0).get_msidata(0)
+        data = omsiFile.get_experiment(0).get_msidata(0)
         print "Time for data write:"+str(allRes[tr]['write'] )
         
         #Select x/y
@@ -184,7 +184,7 @@ def generateTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , zchunk )
         print "Unexpected error creating the output file:", sys.exc_info()[0]
         exit(0)
         
-    exp = omsiFile.create_exp( exp_identifier = "test" ) 
+    exp = omsiFile.create_experiment( exp_identifier = "test" )
     #Create an empty method descrition
     sample = exp.create_method_info()
     #Create an empty instrument description

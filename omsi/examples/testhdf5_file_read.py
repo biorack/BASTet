@@ -7,7 +7,7 @@ import time
 import json
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     import sys
     from sys import argv,exit
@@ -30,7 +30,7 @@ def main(argv=None):
         zmin = int(argv[6])
         zmax = int(argv[7])
         start = time.time()
-        d = omsi_file( infile , 'r' ).get_exp(0).get_msidata(0)
+        d = omsi_file(infile, 'r').get_experiment(0).get_msidata(0)
         loaddata = d[xmin:xmax , ymin:ymax, zmin:zmax]
         #content = json.dumps( loaddata.tolist() )
         stop = (time.time() - start) 
@@ -71,7 +71,7 @@ def main(argv=None):
 
         #Initialze data shape
         f = omsi_file( filename , 'r' )
-        d = f.get_exp(0).get_msidata(0)
+        d = f.get_experiment(0).get_msidata(0)
         data_shapes[filename] = d.shape
         f.close_file()
         #Initialze output storage

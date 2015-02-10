@@ -4,11 +4,11 @@ from omsi.dataformat.omsi_file import *
 #help( omsi_file )
 f = omsi_file("/project/projectdirs/openmsi/omsi_data/20120711_Brain.h5" , 'r' )
 #Get the number of experiments
-num_exp = f.get_num_exp()
+num_exp = f.get_num_experiments()
 #Get the first experiment. 
 #exp0  is an object of the type omsi_file_experiment For more information execute:
 #help( omsi_file_experiment )
-exp0 = f.get_exp(0)
+exp0 = f.get_experiment(0)
 #Get the number of available datasets and analyses
 num_dat = exp0.get_num_msidata()
 num_ana = exp0.get_num_analysis()

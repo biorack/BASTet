@@ -1,6 +1,6 @@
 """Simple viewer for OpenMSI data"""
 
-from omsi.dataformat.omsi_file import omsi_file
+from omsi.dataformat.omsi_file.main_file import omsi_file
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -38,7 +38,7 @@ class MyViewer :
         print "Done creating the view"
    
     def __call__(self, event ):   
-        '''Callback function used to update the curve plot when clicking on the image plot'''
+        """Callback function used to update the curve plot when clicking on the image plot"""
         xloc = int(event.ydata) #The x and y axis appear to be switched in the data and image
         yloc = int( event.xdata) 
         if xloc < self.hdfdata.shape[0] and yloc < self.hdfdata.shape[1] :
@@ -50,7 +50,7 @@ class MyViewer :
             self.curve.figure.canvas.draw()
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     import sys
     from sys import argv,exit
@@ -83,8 +83,8 @@ def main(argv=None):
         exit(0)
 
     #Get the experiment and dataset
-    exp = omsiFile.get_exp( expIndex )
-    data = exp.get_msidata( dataIndex ) 
+    exp = omsiFile.get_experiment( expIndex )
+    data = exp.get_msidata(dataIndex)
     mzdata = exp.get_instrument_info().get_instrument_mz()    
 
     if data is None:

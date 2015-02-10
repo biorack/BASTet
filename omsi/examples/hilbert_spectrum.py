@@ -39,7 +39,7 @@ def plot_hilbert_curve(x,y) :
     plt.show()
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     #Read input arguments
     import sys

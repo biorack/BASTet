@@ -16,7 +16,7 @@ selection = 1 #0=slice , 1= spectra
 
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     global selection
     
@@ -117,7 +117,7 @@ def sliceSelect( args ):
 
     #id =   int( mp.current_process()._identity[0] )
     omsiFile = omsi_file( filename , 'r' )
-    d = omsiFile.get_exp(0).get_msidata(0) 
+    d = omsiFile.get_experiment(0).get_msidata(0)
     xstep = xdim / numWorkers
     xstart = xstep*(id)
     xend  = xstep*(id+1)
@@ -146,7 +146,7 @@ def spectraSelect( args ):
 
     #id =   int( mp.current_process()._identity[0] )
     omsiFile = omsi_file( filename , 'r' )
-    d = omsiFile.get_exp(0).get_msidata(0) 
+    d = omsiFile.get_experiment(0).get_msidata(0)
     zstep = zdim / numWorkers
     zmin = zstep*(id)
     zmax  = zstep*(id+1)
@@ -169,7 +169,7 @@ def generateBaseTestFile( omsiOutFile , xdim , ydim, zdim ) :
         print "Unexpected error creating the output file:", sys.exc_info()[0]
         exit(0)
         
-    exp = omsiFile.create_exp( exp_identifier = "test" ) 
+    exp = omsiFile.create_experiment( exp_identifier = "test" )
     #Create an empty method descrition
     sample = exp.create_method_info()
     #Create an empty instrument description
@@ -201,7 +201,7 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
     useDonorFile = True
     if useDonorFile :
         inFile = omsi_file( donorFile )
-        inData = inFile.get_exp(0).get_msidata(0)[:]
+        inData = inFile.get_experiment(0).get_msidata(0)[:]
         inFile.close_file()
 
 
@@ -212,7 +212,7 @@ def generateChunkedTestFile( omsiOutFile , xdim , ydim, zdim, xchunk, ychunk , z
         print "Unexpected error creating the output file:", sys.exc_info()[0]
         exit(0)
         
-    exp = omsiFile.create_exp( exp_identifier = "test" ) 
+    exp = omsiFile.create_experiment( exp_identifier = "test" )
     #Create an empty method descrition
     sample = exp.create_method_info()
     #Create an empty instrument description
