@@ -1,6 +1,7 @@
-all__ = ["omsi_findpeaks_global" , "omsi_findpeaks_local", "omsi_lpf", "omsi_npg", "omsi_peakcube"]
-from omsi_findpeaks_global import *
-from omsi_findpeaks_local import *
-from omsi_lpf import *
-from omsi_npg import *
-from omsi_peakcube import *
+"""
+Package of peak-finding related analysis modules.
+"""
+
+all__ = ["omsi_findpeaks_global", "omsi_findpeaks_local"]
+from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
+from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
