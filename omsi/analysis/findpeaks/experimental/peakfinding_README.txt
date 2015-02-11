@@ -15,7 +15,7 @@ parameter, the rest of the parameter flags can be used combined or alone. It can
 					analyzed. Example: 'python mypeakfinder.py -f ~/omsi_data/napi/20120711_Brain.h5'
 					or: 'python mypeakfinder.py --file=/omsi_data/napi/20120711_Brain.h5'
 					
-	expIndex		Experiment index used by 'omsiFile.get_exp( expIndex )'. This has a default value of 0,
+	expIndex		Experiment index used by 'omsiFile.get_experiment( expIndex )'. This has a default value of 0,
 					if you want to use another then use this flag. Example: 
 					'python mypeakfinder.py -f ~/omsi_data/napi/20120711_Brain.h5 --expIndex=2'
 					

@@ -1,7 +1,7 @@
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data
 from omsi.shared.omsi_dependency import *
-from omsi.dataformat.omsi_file import omsi_file
+from omsi.dataformat.omsi_file.main_file import omsi_file
 
 import datetime
 from time import time, ctime
@@ -20,32 +20,32 @@ openCLfpFile = "opencl_findpeaks.cl"	# file name of the findpeaks opencl code
 # class omsi_findpeaks_local(omsi_analysis_base) :
 class omsi_lpf(omsi_analysis_base) :
 
-	def __init__(self, nameKey="undefined"):
+	def __init__(self, name_key="undefined"):
 		super(omsi_lpf,self).__init__()
-		self.analysis_identifier = nameKey
+		self.analysis_identifier = name_key
 		self.parameter_names = [ 'msidata' , 'mzdata', 'integration_width', 'peakheight', 'slwindow', 'smoothwidth']
 		self.data_names = [ 'LPF_Peaks_MZ' , 'LPF_Peaks_Vals' , 'LPF_Peaks_ArrayIndex' , 'LPF_indata_mz' ]
 		
 	# ------------------------ viewer functions start ---------------------- 
 	
 	@classmethod
-	def v_qslice(cls , anaObj , z , viewerOption=0) :
+	def v_qslice(cls , analysis_object , z , viewer_option=0) :
 		"""Implement support for qslice URL requests for the viewer""" 
 		#Use the dependency data for slicing here. We do not have a native option to reconstruct images from local peak finding data
-		return super(omsi_lpf,cls).v_qslice( anaObj , z, viewerOption)
+		return super(omsi_lpf,cls).v_qslice( analysis_object , z, viewer_option)
 	
 	@classmethod
-	def v_qspectrum( cls, anaObj , x, y , viewerOption=0) :
+	def v_qspectrum( cls, analysis_object , x, y , viewer_option=0) :
 		"""Implement support for qspectrum URL requests for the viewer"""
 		#Retrieve the h5py objects for the requried datasets from the local peak finding
-		if viewerOption == 0 :
+		if viewer_option == 0 :
 		
 			from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
 			import numpy as np
-			peak_mz = anaObj[ 'LPF_Peaks_MZ' ]
-			peak_values = anaObj[ 'LPF_Peaks_Vals' ]
-			arrayIndices =	anaObj[ 'LPF_Peaks_ArrayIndex' ][:]
-			indata_mz = anaObj[ 'LPF_indata_mz' ]
+			peak_mz = analysis_object[ 'LPF_Peaks_MZ' ]
+			peak_values = analysis_object[ 'LPF_Peaks_Vals' ]
+			arrayIndices =	analysis_object[ 'LPF_Peaks_ArrayIndex' ][:]
+			indata_mz = analysis_object[ 'LPF_indata_mz' ]
 			#Determine the shape of the original raw data
 			if (indata_mz is None) or (arrayIndices is None):
 				return None, None
@@ -99,45 +99,45 @@ class omsi_lpf(omsi_analysis_base) :
 			#Return the spectra and indicate that no customMZ data values (i.e. None) are needed 
 			return data, None
 			
-		elif viewerOption > 0 :
-			return super(omsi_lpf,cls).v_qspectrum( anaObj , x , y, viewerOption-1)
+		elif viewer_option > 0 :
+			return super(omsi_lpf,cls).v_qspectrum( analysis_object , x , y, viewer_option-1)
 		else :
 			return None, None
 		
 	@classmethod
-	def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
+	def v_qmz(cls, analysis_object, qslice_viewer_option=0, qspectrum_viewer_option=0) :
 		"""Implement support for qmz URL requests for the viewer"""
 		mzSpectra =	 None
 		labelSpectra = None
 		mzSlice = None
 		labelSlice = None
 		#We do not have native option for qslice, so we rely on the input data in all cases
-		if qspectrum_viewerOption == 0 and qslice_viewerOption==0: #Loadings
-			mzSpectra = anaObj[ 'LPF_indata_mz' ][:]
+		if qspectrum_viewer_option == 0 and qslice_viewer_option==0: #Loadings
+			mzSpectra = analysis_object[ 'LPF_indata_mz' ][:]
 			labelSpectra = "m/z"
 			mzSlice	 = None
 			labelSlice = None
-		elif qspectrum_viewerOption > 0 and qslice_viewerOption>0 :
-			mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( anaObj, qslice_viewerOption , qspectrum_viewerOption-1)
-		elif qspectrum_viewerOption == 0 and qslice_viewerOption>=0 : 
-			mzSpectra = anaObj[ 'LPF_indata_mz' ][:]
+		elif qspectrum_viewer_option > 0 and qslice_viewer_option>0 :
+			mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( analysis_object, qslice_viewer_option , qspectrum_viewer_option-1)
+		elif qspectrum_viewer_option == 0 and qslice_viewer_option>=0 :
+			mzSpectra = analysis_object[ 'LPF_indata_mz' ][:]
 			labelSpectra = "m/z"
-			tempA, tempB, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( anaObj, 0 , qspectrum_viewerOption)
+			tempA, tempB, mzSlice, labelSlice = super(omsi_lpf,cls).v_qmz( analysis_object, 0 , qspectrum_viewer_option)
 		
 		return mzSpectra, labelSpectra, mzSlice, labelSlice
 		
 		
 	@classmethod
-	def v_qspectrum_viewerOptions(cls , anaObj ) :
-		"""Define which viewerOptions are supported for qspectrum URL's"""
-		dependent_options = super(omsi_lpf,cls).v_qspectrum_viewerOptions(anaObj)
+	def v_qspectrum_viewer_options(cls , analysis_object ) :
+		"""Define which viewer_options are supported for qspectrum URL's"""
+		dependent_options = super(omsi_lpf,cls).v_qspectrum_viewer_options(analysis_object)
 		re = ["Local peaks"] + dependent_options
 		return re
 
 	@classmethod
-	def v_qslice_viewerOptions(cls , anaObj ) :
-		"""Define which viewerOptions are supported for qspectrum URL's"""
-		return super(omsi_lpf,cls).v_qslice_viewerOptions(anaObj)
+	def v_qslice_viewer_options(cls , analysis_object ) :
+		"""Define which viewer_options are supported for qspectrum URL's"""
+		return super(omsi_lpf,cls).v_qslice_viewer_options(analysis_object)
 	
 	# ------------------------ viewer functions end ------------------------ 
 	def execute_analysis(self) :
@@ -526,7 +526,7 @@ class omsi_lpf(omsi_analysis_base) :
 		return cl_maxtabVal, cl_maxtabPos, cl_maxtabTot
 
 def main(argv=None):
-	'''Then main function'''
+	"""Then main function"""
 
 	if argv is None:
 		argv = sys.argv
@@ -564,12 +564,12 @@ def main(argv=None):
 	print "Input file: " , omsiInFile
 	
 	#Get the experiment and dataset
-	exp = omsiFile.get_exp( expIndex )
-	data = exp.get_msidata( dataIndex )
+	exp = omsiFile.get_experiment( expIndex )
+	data = exp.get_msidata(dataIndex)
 	mzdata = data.mz[:]
 	
 	#Execute the peak finding
-	myLPF = omsi_lpf(nameKey = "omsi_lpf_"+str(ctime()))
+	myLPF = omsi_lpf(name_key="omsi_lpf_" + str(ctime()))
 	print "--- Executing LPF ---"
 	myLPF.execute( data , mzdata, peakheight = mypeakheight)
 	print "\n\nGetting peak finding analysis results"

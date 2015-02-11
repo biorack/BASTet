@@ -96,7 +96,7 @@ def main(argv):
 			exit(0)
 
 	# Open the input HDF5 file
-	if omsiInFile == None:
+	if omsiInFile is None:
 		print "No OMSI file provided! " + helpstring
 		exit(0)
 	else:
@@ -105,13 +105,13 @@ def main(argv):
 	# python call strings
 	pfstring = "python " + driverfilename + " -f " + omsiInFile + " --expIndex=" + str(expIndex) + " --dataIndex=" + str(dataIndex)
 
-	if(myRepo != None):
+	if(myRepo is not None):
 		pfstring += " --repo=" + myRepo 
 
 	lpfstring = " --peakheight=" + str(myPeakheight) + " --slwindow=" + str(mySlwindow) + " --smoothwidth=" + str(mySmoothwidth)
 	npgstring = " --mz_threshold=" + str(myMz_threshold) + " --treecut=" + str(myTreecut)
 	
-	if(SkipPeakCube == None and ((NPGIndex == None and SkipNPG == None) or NPGIndex != None)):
+	if(SkipPeakCube is None and ((NPGIndex is None and SkipNPG is None) or NPGIndex is not None)):
 		runpc = True
 	else:
 		runpc = False
@@ -153,14 +153,14 @@ def main(argv):
 
 		print "\n[PF Monitoring complete]"
 		
-		if(PCjobname != None):
+		if(PCjobname is not None):
 			
 			print "\n[Peak Cube Monitoring start]"
 			PCjobid = string.split(PCjobname, ".")[0]
 			PCresult = monitorJob(PCjobid, PCjobname, runtype="pc")
 			print "\n[Peak Cube Monitoring complete]"
 
-	if(PFjobname != None or PCjobname != None):
+	if(PFjobname is not None or PCjobname is not None):
 		if(PFjobname):
 			print "Peak finding output file: pf_job." + PFjobname + ".out.txt"
 		if(PCjobname):
@@ -210,7 +210,7 @@ def monitorJob(jobid, jobname, runtype="pf"):
 		
 		joboutput = getJobOutput(jobname, runtype)
 			
-		if(joboutput == None):
+		if(joboutput is None):
 			if(ioerrorcount > ioerrormax):
 				print "Error reading outputfile for job:", jobid
 				keepmonitoring = False
@@ -294,11 +294,11 @@ def getPFcmd(pfstring, lpfstring, npgstring, LPFIndex, NPGIndex, SkipNPG, SkipPe
 	runpc = False
 	
 	# set run flags
-	if(LPFIndex == None):
+	if(LPFIndex is None):
 		runlpf = True
-	if(NPGIndex == None and SkipNPG == None):
+	if(NPGIndex is None and SkipNPG is None):
 		runnpg = True
-	if(SkipPeakCube == None and ((NPGIndex == None and SkipNPG == None) or NPGIndex != None)):
+	if(SkipPeakCube is None and ((NPGIndex is None and SkipNPG is None) or NPGIndex is not None)):
 		runpc = True
 
 	# builf pf cmd
@@ -328,7 +328,7 @@ def getPFcmd(pfstring, lpfstring, npgstring, LPFIndex, NPGIndex, SkipNPG, SkipPe
 	else:
 		PFcmd = None
 	
-	if(PFcmd != None):
+	if(PFcmd is not None):
 		if(runpc):
 			PFcmd += " --QueuePeakCube"
 
@@ -343,7 +343,7 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 	mypbs  = "#PBS -q dirac_reg\n"
 	mypbs += "#PBS -l nodes=1:ppn=8:fermi \n"
 	mypbs += "#PBS -l walltime=06:00:00 \n"
-	if(repo != None):
+	if(repo is not None):
 		mypbs += "#PBS -A " + repo +" \n"
 	mypbs += "#PBS -N pf_job \n"
 	mypbs += "#PBS -e pf_job.$PBS_JOBID.err.txt \n"
@@ -362,7 +362,7 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 	mypbs += "echo '[peakfinder end]' \n"
 	mypbs += "date \n"
 
-	if(PFcontent == None):
+	if(PFcontent is None):
 		scriptcheck = 0
 	else:
 		scriptcheck = 1

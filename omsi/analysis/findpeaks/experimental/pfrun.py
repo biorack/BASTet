@@ -1,7 +1,7 @@
 from omsi.analysis.findpeaks.omsi_lpf import omsi_lpf
 from omsi.analysis.findpeaks.omsi_npg import omsi_npg
 from omsi.analysis.findpeaks.omsi_peakcube import omsi_peakcube
-from omsi.dataformat.omsi_file import omsi_file
+from omsi.dataformat.omsi_file.main_file import omsi_file
 
 import datetime
 from time import time, ctime
@@ -101,7 +101,7 @@ def main(argv):
 			exit(0)
 
 	# Open the input HDF5 file
-	if omsiInFile == None:
+	if omsiInFile is None:
 		print "No OMSI file provided! " + helpstring
 		exit(0)
 
@@ -116,23 +116,23 @@ def main(argv):
 	runpc = 0
 	
 	# --- LPF
-	if(LPFIndex == None):
+	if(LPFIndex is None):
 		runlpf = 1
 		LPFanalysisindex = run_lpf(omsiInFile, expIndex, dataIndex, ph=myPeakheight, slw=mySlwindow, smw=mySmoothwidth)
 	else:
 		LPFanalysisindex = LPFIndex
 
 	# --- NPG	
-	if(NPGIndex == None and SkipNPG == None):
+	if(NPGIndex is None and SkipNPG is None):
 		runnpg = 1
 		NPGanalysisindex = run_npg(omsiInFile, expIndex, dataIndex, LPFanalysisindex, mzth=myMz_threshold, tcut=myTreecut)
-	elif(NPGIndex != None):
+	elif(NPGIndex is not None):
 		NPGanalysisindex = NPGIndex
 	else:
 		NPGanalysisindex = None
 	
 	# run peak cube in big memory node
-	if(QueuePeakCube == True and LPFanalysisindex != None and NPGanalysisindex != None):
+	if(QueuePeakCube == True and LPFanalysisindex is not None and NPGanalysisindex is not None):
 		pcstring = "python " + thisfilename + " -f " + omsiInFile + " --expIndex=" + str(expIndex) + " --dataIndex=" + str(dataIndex)
 		pcstring += " --LPFIndex=" + str(LPFanalysisindex) + " --NPGIndex=" + str(NPGanalysisindex) + " \n"
 		
@@ -144,7 +144,7 @@ def main(argv):
 		print "Peak Cube output file: pc_job." + jobname + ".out.txt"
 	
 	# --- Peak Cube
-	if(SkipPeakCube == None and ((NPGIndex == None and SkipNPG == None) or NPGIndex != None)):
+	if(SkipPeakCube is None and ((NPGIndex is None and SkipNPG is None) or NPGIndex is not None)):
 		runpc = 1	
 		PCanalysisindex = run_peakcube(omsiInFile, expIndex, dataIndex, LPFanalysisindex, NPGanalysisindex)
 	else:
@@ -194,13 +194,13 @@ def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
 	
 	
 	# Get the experiment and data
-	exp = omsiFile.get_exp( expIndex )
-	data = exp.get_msidata( dataIndex )
+	exp = omsiFile.get_experiment( expIndex )
+	data = exp.get_msidata(dataIndex)
 	peaksMZdata = data.mz[:]
 	
 	# LPF --------------
 	print "\n--- Executing LPF ---"
-	myLPF = omsi_lpf(nameKey = "omsi_lpf_"+str(ctime()))
+	myLPF = omsi_lpf(name_key="omsi_lpf_" + str(ctime()))
 	myLPF.execute( msidata=data, mzdata=peaksMZdata, peakheight = ph, slwindow = slw, smoothwidth = smw)
 	print "\n\nResults"
 	peaksBins = myLPF['LPF_Peaks_MZ'][:]
@@ -233,8 +233,8 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 		exit(0)
 	
 	# Get the experiment and data
-	exp = omsiFile.get_exp( expIndex )
-	data = exp.get_msidata( dataIndex )
+	exp = omsiFile.get_experiment( expIndex )
+	data = exp.get_msidata(dataIndex)
 	LPFanalysis = exp.get_analysis( LPFIndex )
 		
 	peaksBins = LPFanalysis['LPF_Peaks_MZ'][:]
@@ -245,7 +245,7 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	
 	# NPG --------------
 	print "\n--- Executing NPG ---"
-	myNPG = omsi_npg(nameKey = "omsi_npg_"+str(ctime()))
+	myNPG = omsi_npg(name_key="omsi_npg_" + str(ctime()))
 	#myNPG.omsi_npg_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, peaksMZ, MZ_TH = mzth, clusterCut = tcut)
 	myNPG.execute( peaksBins=peaksBins,
                    npg_peaks_Intensities=peaksIntensities,
@@ -283,8 +283,8 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 		exit(0)
 	
 	# Get the experiment
-	exp = omsiFile.get_exp( expIndex )
-	data = exp.get_msidata( dataIndex )
+	exp = omsiFile.get_experiment( expIndex )
+	data = exp.get_msidata(dataIndex)
 	peaksMZdata = data.mz[:]
 	LPFanalysis = exp.get_analysis( LPFIndex )
 	NPGanalysis = exp.get_analysis( NPGIndex )
@@ -296,7 +296,7 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 	NPGLabelsList = NPGanalysis['npghc_labels_list'][:]
 	
 	print "\n--- Creating Peak Cube ---"
-	myPC = omsi_peakcube(nameKey = "omsi_peakcube_"+str(ctime()))
+	myPC = omsi_peakcube(name_key="omsi_peakcube_" + str(ctime()))
 	#myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPeaksLabels, NPGLabelsList)
 	myPC.execute( peaksBins = peaksBins,
                   peaksIntensities = peaksIntensities,
@@ -330,7 +330,7 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 	mypbs  = "#PBS -q serial\n"
 	mypbs += "#PBS -l pvmem=40GB \n"
 	mypbs += "#PBS -l walltime=06:00:00 \n"
-	if(repo != None):
+	if(repo is not None):
 		mypbs += "#PBS -A " + repo +" \n"
 	mypbs += "#PBS -N pc_job \n"
 	mypbs += "#PBS -e pc_job.$PBS_JOBID.err.txt \n"
@@ -349,7 +349,7 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 	mypbs += "echo '[peak cube end]' \n"
 	mypbs += "date \n"
 
-	if(PFcontent == None):
+	if(PFcontent is None):
 		scriptcheck = 0
 	else:
 		scriptcheck = 1
