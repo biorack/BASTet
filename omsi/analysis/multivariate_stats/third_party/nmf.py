@@ -25,7 +25,7 @@ def nmf(V,Winit,Hinit,tol,timelimit,maxiter):
  tolW = max(0.001,tol)*initgrad
  tolH = tolW
 
- for iter in xrange(1,maxiter):
+ for iter_index in xrange(1,maxiter):
   # stopping condition
   projnorm = norm(r_[gradW[logical_or(gradW<0, W>0)],
                                  gradH[logical_or(gradH<0, H>0)]])
@@ -40,9 +40,9 @@ def nmf(V,Winit,Hinit,tol,timelimit,maxiter):
   (H,gradH,iterH) = nlssubprob(V,W,H,tolH,1000)
   if iterH==1: tolH = 0.1 * tolH
 
-  if iter % 10 == 0: stdout.write('.')
+  if iter_index % 10 == 0: stdout.write('.')
 
- print '\nIter = %d Final proj-grad norm %f' % (iter, projnorm)
+ print '\nIter = %d Final proj-grad norm %f' % (iter_index, projnorm)
  return (W,H)
 
 def nlssubprob(V,W,Hinit,tol,maxiter):
@@ -60,7 +60,7 @@ def nlssubprob(V,W,Hinit,tol,maxiter):
  WtW = dot(W.T, W) 
 
  alpha = 1; beta = 0.1;
- for iter in xrange(1, maxiter):  
+ for iter_index in xrange(1, maxiter):
   grad = dot(WtW, H) - WtV
   projgrad = norm(grad[logical_or(grad < 0, H >0)])
   if projgrad < tol: break
@@ -86,6 +86,6 @@ def nlssubprob(V,W,Hinit,tol,maxiter):
       else:
        alpha = alpha/beta; Hp = Hn;
 
-  if iter == maxiter:
+  if iter_index == maxiter:
    print 'Max iter in nlssubprob'
- return (H, grad, iter)
+ return (H, grad, iter_index)
