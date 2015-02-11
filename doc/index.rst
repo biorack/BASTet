@@ -15,7 +15,7 @@ Documentation of the OpenMSI Toolkit:
    custom_analysis
    HDF5_format
    HDF5_format_performance
-   omsi 
+   omsi
 
 
 

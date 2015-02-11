@@ -1,10 +1,20 @@
 dataformat Package
 ==================
 
-:mod:`bruckerflex_file` Module
-------------------------------
+Main module for specification of data formats. This module also contains the
+`omsi_file` module which specifies the OpenMSI data format. In addition
+it defines the base class for third-party file readers (i.e, `file_reader_base`)
+and implements various basic file readers for third-party formats, e.g,
+`img_file` and `mzml_file` for IMG and MZML data files respectively (among others).
 
-.. automodule:: omsi.dataformat.bruckerflex_file
+.. toctree::
+
+    omsi.dataformat.omsi_file
+
+:mod: `file_reader_base` Module
+-------------------------------
+
+.. automodule:: omsi.dataformat.file_reader_base
     :members:
     :private-members:
     :undoc-members:
@@ -19,21 +29,23 @@ dataformat Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_file` Module
+:mod:`mzml_file` Module
 -----------------------
 
-.. automodule:: omsi.dataformat.omsi_file
+.. automodule:: omsi.dataformat.mzml_file
     :members:
     :private-members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_format` Module
--------------------------
+:mod:`bruckerflex_file` Module
+------------------------------
 
-.. automodule:: omsi.dataformat.omsi_format
+.. automodule:: omsi.dataformat.bruckerflex_file
     :members:
     :private-members:
     :undoc-members:
     :show-inheritance:
+
+
 

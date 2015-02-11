@@ -1,7 +1,7 @@
 .. _converting-files:
 
-Converting and Files and Making them Accesible
-==============================================
+Converting and Files and Making them Accessible
+===============================================
 
 Converting an MSI file at NERSC
 -------------------------------
@@ -9,7 +9,7 @@ Converting an MSI file at NERSC
 To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:
 
 .. code-block:: none
-    
+
     ssh edison.nersc.gov
     cd /project/projectdirs/openmsi/devel/convert
     source setupEnvironment.csh
