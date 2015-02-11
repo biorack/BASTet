@@ -1,87 +1,115 @@
-from omsi.analysis.omsi_analysis_base import *
+"""
+Generic analysis class used to represent analyses of unknown type, e.g., when loading
+a custom user-defined analysis from file for which the indicate class may not be
+available with the local installation. In this case we want to at least be able
+to load and investigate the data.
+"""
+from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
-class omsi_analysis_generic(omsi_analysis_base) :
-    """This analysis class is used if the specific anlaysis type is unknown, e.g., when loading 
+
+class omsi_analysis_generic(omsi_analysis_base):
+    """
+    This analysis class is used if the specific anlaysis type is unknown, e.g., when loading
     custom user-defined analysis data that may have not be available in the standard
     omsi package used.
     """
-    def __init__(self , nameKey="undefined"):
-        """Initalize the basic data members
-
-           Keyword arguments:
-
-           :param nameKey: The name for the analysis
+    def __init__(self, name_key="undefined"):
         """
-        super(omsi_analysis_generic,self).__init__()
-        self.analysis_identifier = nameKey
-        self.real_analysis_type = None #This is the analysis type indicated in the HDF5 file
-    
+        Initialize the basic data members
+
+        :param name_key: The name for the analysis
+        """
+        super(omsi_analysis_generic, self).__init__()
+        self.analysis_identifier = name_key
+        self.real_analysis_type = None  # This is the analysis type indicated in the HDF5 file
+
+    def execute_analysis(self):
+        """
+        Nothing to do here.
+        """
+        raise NotImplementedError("We cannot run this analysis. omsi_analysis_generic cannot run an analysis.")
+
     @classmethod
-    def v_qslice(cls , anaObj , z , viewerOption=0) :
-        """Implement support for qslice URL requests for the viewer""" 
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """
+        Implement support for qslice URL requests for the viewer
+        """
         return None
-    
-    @classmethod
-    def v_qspectrum( cls, anaObj , x, y , viewerOption=0) :
-        """Implement support for qspectrum URL requests for the viewer"""
-        super(omsi_analysis_generic,cls).v_qspectrum( anaObj , x , y, viewerOption )
-        
-    @classmethod
-    def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
-        """Implement support for qmz URL requests for the viewer"""
-        super(omsi_analysis_generic,cls).v_qmz( anaObj , qslice_viewerOption ,qspectrum_viewerOption )
-    
-    @classmethod
-    def v_qspectrum_viewerOptions(cls , anaObj ) :
-        """Define which viewerOptions are supported for qspectrum URL's"""
-        return super(omsi_analysis_generic,cls).v_qspectrum_viewerOptions( anaObj )
-            
 
     @classmethod
-    def v_qslice_viewerOptions(cls , anaObj ) :
-        """Define which viewerOptions are supported for qspectrum URL's"""
-        return super(omsi_analysis_generic,cls).v_qslice_viewerOptions( anaObj )
-    
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Implement support for qspectrum URL requests for the viewer
+        """
+        super(omsi_analysis_generic, cls).v_qspectrum(analysis_object, x, y, viewer_option)
+
     @classmethod
-    def get_analysis_type(cls) :
-        """Return a string indicating the type of analysis performed"""
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Implement support for qmz URL requests for the viewer
+        """
+        super(omsi_analysis_generic, cls).v_qmz(analysis_object, qslice_viewer_option, qspectrum_viewer_option)
+
+    @classmethod
+    def v_qspectrum_viewer_options(cls,
+                                   analysis_object):
+        """
+        Define which viewer_options are supported for qspectrum URL's
+        """
+        return super(omsi_analysis_generic, cls).v_qspectrum_viewer_options(analysis_object)
+
+    @classmethod
+    def v_qslice_viewer_options(cls,
+                                analysis_object):
+        """
+        Define which viewer_options are supported for qspectrum URL's
+        """
+        return super(omsi_analysis_generic, cls).v_qslice_viewer_options(analysis_object)
+
+    @classmethod
+    def get_analysis_type(cls):
+        """
+        Return a string indicating the type of analysis performed
+        """
         return "generic"
-    
-    def read_from_omsi_file(self, analysisObj , load_data=True, load_parameters=True, dependencies_omsi_format=True ) :
-        """Overwrite the default implementation to remove the type check as this class should
-        be able to store any unknown types of analysis in a generic fashion.
 
-           Keyword Parameters:
-
-           :param analysisObj: The omsi_file_analysis object associated with the hdf5 data group with the anlaysis data_list
-           :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
-           :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects. 
-           :param dependencies_omsi_format: Should dependencies be loaded as omsi_file API objects (default) or just as h5py objects. 
-           
-           Returns
-
-           :returns bool: Boolean indicating whether the data was read succesfully
-           
-
+    def read_from_omsi_file(self,
+                            analysis_object,
+                            load_data=True,
+                            load_parameters=True,
+                            dependencies_omsi_format=True,
+                            ignore_type_conflict=False):
+        """
+        See `omsi.analysis.omsi_analysis_base.read_from_omsi_file(...)` for details.
+        The function is overwritten here mainly to initialize the self.real_analysis_type
+        instance variable but otherwise uses the default behavior.
 
         """
-        self.real_analysis_type = analysisObj.get_analysis_type()
-        identifier = analysisObj.get_analysis_identifier()
-        if identifier is not None :
-            self.analysis_identifier = identifier[0]
-        else :
-            print "The analysis identifier could not be read from the omsi file"
-        
-        self.__data_list = analysisObj.get_all_analysis_data(load_data=load_data)
-        self.__parameter_list = analysisObj.get_all_parameter_data(load_data= load_parameters)
-        self.__dependency_list = analysisObj.get_all_dependency_data(omsi_format= dependencies_omsi_format)
-        
-        return True
-        
-    def get_real_analysis_type(self) :
-        """This class is designed to handle generic (including unkown) types of analysis.
+        output_val = super(omsi_analysis_generic, self).read_from_omsi_file(
+            analysis_object=analysis_object,
+            load_data=load_data,
+            load_parameters=load_parameters,
+            dependencies_omsi_format=dependencies_omsi_format,
+            ignore_type_conflict=ignore_type_conflict)
+        self.real_analysis_type = unicode(analysis_object.get_analysis_type()[:])
+        return output_val
+
+    def get_real_analysis_type(self):
+        """
+        This class is designed to handle generic (including unkown) types of analysis.
         In cases, e.g., were this class is used to store analysis data from an HDF5
         file we may have an actual analysis type available even if we do not have
-        a special analysis class may not be available in the current intallation"""
+        a special analysis class may not be available in the current installation
+        """
         return self.real_analysis_type
 
