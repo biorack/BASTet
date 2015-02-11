@@ -1,170 +1,188 @@
-from nmf import *
-from numpy import *
+"""
+Module for performing non-negative matrix factorization (NMF) for MSI data.
+"""
+import numpy as np
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
-from omsi.analysis.omsi_analysis_data import omsi_analysis_data
-from omsi.shared.omsi_dependency import *
-from omsi.dataformat.omsi_file import *
 
-class omsi_nmf(omsi_analysis_base) :
+
+class omsi_nmf(omsi_analysis_base):
     """Class defining a basic nmf analysis for a 2D MSI data file or slice of the data"""
 
-    def __init__(self, nameKey="undefined"):
+    def __init__(self, name_key="undefined"):
         """Initalize the basic data members"""
-        super(omsi_nmf,self).__init__()
-        self.analysis_identifier = nameKey
-        self.parameter_names = [ 'msidata' , 'numComponents', 'timeOut', 'numIter', 'tolerance' ]
-        self.data_names = ['wo' , 'ho']
-        
+        super(omsi_nmf, self).__init__()
+        self.analysis_identifier = name_key
+        self.parameter_names = ['msidata', 'numComponents', 'timeOut', 'numIter', 'tolerance']
+        self.data_names = ['wo', 'ho']
+
     @classmethod
-    def v_qslice(cls , anaObj , z , viewerOption=0) :
-        """Implement support for qslice URL requests for the viewer""" 
-        if viewerOption == 0 :
-            dataset = anaObj[ 'ho' ]
-            try :
-                data = eval("dataset[:,:, %s]" %(z,))
-                return data
-            except:
-                return None
-        elif viewerOption > 0 :
-            return super(omsi_nmf,cls).v_qslice(anaObj , z, viewerOption-1)
-    
+    def v_qslice(cls, analysis_object, z, viewer_option=0):
+        """Implement support for qslice URL requests for the viewer"""
+        from omsi.shared.omsi_data_selection import selection_string_to_object
+        if viewer_option == 0:
+            dataset = analysis_object['ho']
+            z_select = selection_string_to_object(selection_string=z)
+            data = dataset[:, :, z_select]
+            return data
+        elif viewer_option > 0:
+            return super(omsi_nmf, cls).v_qslice(analysis_object, z, viewer_option-1)
+
     @classmethod
-    def v_qspectrum(cls, anaObj , x, y , viewerOption=0) :
+    def v_qspectrum(cls, analysis_object, x, y, viewer_option=0):
         """Implement support for qspectrum URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
+        from omsi.shared.omsi_data_selection import selection_string_to_object
         data = None
-        customMZ = None
-        if viewerOption == 0 : #Loadings
-            dataset = anaObj[ 'ho' ]
-            if (check_selection_string(x) == selection_type['indexlist']) and (check_selection_string(y) == selection_type['indexlist']) :
-                data = eval("dataset[:][%s,%s, :]" %(x,y)) #Load the full data if multiple lists are given for the selection and let numpy handle the subselection
-            else :
-                data = eval("dataset[%s,%s, :]" %(x,y))
-            customMZ = None
-        elif viewerOption > 0 :
-            return super(omsi_nmf,cls).v_qspectrum(anaObj , x , y, viewerOption-1)
-            
-        return data, customMZ
-        
+        custom_mz = None
+        if viewer_option == 0:  # Loadings
+            dataset = analysis_object['ho']
+            x_select = selection_string_to_object(selection_string=x)
+            y_select = selection_string_to_object(selection_string=y)
+            if isinstance(x_select, list) and isinstance(y_select, list):
+                # Load the full data if multiple lists are given for
+                # the selection and let numpy handle the sub-selection
+                data = dataset[:][x_select, y_select, :]
+            else:
+                data = dataset[x_select, y_select, :]
+            custom_mz = None
+        elif viewer_option > 0:
+            return super(omsi_nmf, cls).v_qspectrum(analysis_object, x, y, viewer_option-1)
+
+        return data, custom_mz
+
     @classmethod
-    def v_qmz(cls, anaObj, qslice_viewerOption=0, qspectrum_viewerOption=0) :
+    def v_qmz(cls, analysis_object, qslice_viewer_option=0, qspectrum_viewer_option=0):
         """Implement support for qmz URL requests for the viewer"""
-        mzSpectra =  None
-        labelSpectra = None
-        mzSlice = None
-        labelSlice = None
-        #We do not need to handle the qslice_viewerOption separately here since there is only one option right now
-        if qspectrum_viewerOption == 0 and qslice_viewerOption==0: #Loadings
-            mzSpectra = arange(0 ,  anaObj[ 'ho' ].shape[2])
-            labelSpectra = "Component Index"
-            mzSlice  = None
-            labelSlice = None
-        elif qspectrum_viewerOption > 0 and qslice_viewerOption>0 :
-            mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz(anaObj, qslice_viewerOption=qslice_viewerOption-1 , qspectrum_viewerOption=qspectrum_viewerOption-1)
-        elif qspectrum_viewerOption == 0 and qslice_viewerOption>0 :
-            mzSpectra = arange(0 ,  anaObj[ 'ho' ].shape[2])
-            labelSpectra = "Component Index"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_nmf,cls).v_qmz(anaObj, qslice_viewerOption=qslice_viewerOption-1, qspectrum_viewerOption=0)
-            #NOTE: if qspectrum and qslice share the same axis, this call will not return the copied data, i.e., we need to copy the
-            #qspectrum values to the qslice values.
-            if mzSlice is None :
-                mzSlice = tempA
-                labelSlice = tempB
-        elif qspectrum_viewerOption > 0 and qslice_viewerOption==0 :
-            mzSlice =  arange(0 ,  anaObj[ 'ho' ].shape[2])
-            labelSlice = "Component Index"
-            mzSpectra, labelSpectra, tempA, tempB = super(omsi_nmf,cls).v_qmz(anaObj,  qslice_viewerOption=0 , qspectrum_viewerOption=qspectrum_viewerOption-1)
-        
-        return mzSpectra, labelSpectra, mzSlice, labelSlice
-    
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None
+        # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
+        if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings
+            mz_spectra = np.arange(0, analysis_object['ho'].shape[2])
+            label_spectra = "Component Index"
+            mz_slice = None
+            label_slice = None
+        elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
+            mz_spectra, label_spectra, mz_slice, label_slice = \
+                super(omsi_nmf, cls).v_qmz(analysis_object,
+                                           qslice_viewer_option=qslice_viewer_option-1,
+                                           qspectrum_viewer_option=qspectrum_viewer_option-1)
+        elif qspectrum_viewer_option == 0 and qslice_viewer_option > 0:
+            mz_spectra = np.arange(0, analysis_object['ho'].shape[2])
+            label_spectra = "Component Index"
+            temp_a, temp_b, mz_slice, label_slice = \
+                super(omsi_nmf, cls).v_qmz(analysis_object,
+                                           qslice_viewer_option=qslice_viewer_option-1,
+                                           qspectrum_viewer_option=0)
+            # NOTE: if qspectrum and qslice share the same axis, this call will not return the
+            # copied data, i.e., we need to copy the qspectrum values to the qslice values.
+            if mz_slice is None:
+                mz_slice = temp_a
+                label_slice = temp_b
+        elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0:
+            mz_slice = np.arange(0, analysis_object['ho'].shape[2])
+            label_slice = "Component Index"
+            mz_spectra, label_spectra, temp_a, temp_b = \
+                super(omsi_nmf, cls).v_qmz(analysis_object,
+                                           qslice_viewer_option=0,
+                                           qspectrum_viewer_option=qspectrum_viewer_option-1)
+
+        return mz_spectra, label_spectra, mz_slice, label_slice
+
     @classmethod
-    def v_qspectrum_viewerOptions(cls , anaObj) :
-        """Define which viewerOptions are supported for qspectrum URL's"""
-        dependent_options = super(omsi_nmf,cls).v_qspectrum_viewerOptions(anaObj)
-        re = ["NMF Loadings"] + dependent_options
-        return re
-        
+    def v_qspectrum_viewer_options(cls, analysis_object):
+        """Define which viewer_options are supported for qspectrum URL's"""
+        dependent_options = super(omsi_nmf, cls).v_qspectrum_viewer_options(analysis_object)
+        spectrum_viewer_options = ["NMF Loadings"] + dependent_options
+        return spectrum_viewer_options
+
     @classmethod
-    def v_qslice_viewerOptions(cls , anaObj) :
-        """Define which viewerOptions are supported for qspectrum URL's"""
-        dependent_options = super(omsi_nmf,cls).v_qslice_viewerOptions(anaObj)
-        #print dependent_options
-        re = ["NMF Images"] + dependent_options
-        return re
-        
-        
-    def execute_analysis(self) :
+    def v_qslice_viewer_options(cls, analysis_object):
+        """Define which viewer_options are supported for qspectrum URL's"""
+        dependent_options = super(omsi_nmf, cls).v_qslice_viewer_options(analysis_object)
+        slice_viewer_options = ["NMF Images"] + dependent_options
+        return slice_viewer_options
+
+    def execute_analysis(self):
         """Execute the nmf for the given msidata
-        
+
            Keyword Arguments:
            :param msidata: h5py data object with the msi data. (Mandatory user input)
            :param numComponents: Number of components to compute. (Default=20)
            :param timeOut: Maximum time it should take. (Default=600)
            :param numIter: Number of iterations. (Default=2000)
            :param tolerance: tolerance for a relative stopping condition. (Default=0.0001)
-           
+
         """
-        #Define default settings for parameters 
-        if not self['numComponents'] :
+        from omsi.analysis.multivariate_stats.third_party.nmf import nmf
+        # Define default settings for parameters
+        if not self['numComponents']:
             self['numComponents'] = 20
-        if not self['timeOut'] :
+        if not self['timeOut']:
             self['timeOut'] = 600
-        if not self['numIter'] :
+        if not self['numIter']:
             self['numIter'] = 2000
-        if not self['tolerance'] :
+        if not self['tolerance']:
             self['tolerance'] = 0.0001
-            
-        #Assign parameters to local variables for convenience
-        msidata = self['msidata']
-        numComponents = self['numComponents']
-        timeOut = self['timeOut']
-        numIter = self['numIter']
-        tolerance = self['tolerance'] 
-        
-        #Copy the input data
-        data = msidata[:]
-        nx= data.shape[0]
-        ny= data.shape[1]
-        #Determine the input shape
-        numBins   = data.shape[-1]
-        numPixels = data.size / numBins #The last data dimension is assumed to contain the spectra
-        
-        #Reshape the data         
-        data = data.reshape(numPixels, numBins)
+
+        # Assign parameters to local variables for convenience
+        current_msidata = self['msidata']
+        current_num_components = self['numComponents']
+        current_time_out = self['timeOut']
+        current_num_iter = self['numIter']
+        current_tolerance = self['tolerance']
+
+        # Copy the input data
+        data = current_msidata[:]
+        shape_x = data.shape[0]
+        shape_y = data.shape[1]
+        # Determine the input shape
+        num_bins = data.shape[-1]
+        num_pixels = data.size / num_bins  # The last data dimension is assumed to contain the spectra
+
+        # Reshape the data
+        data = data.reshape(num_pixels, num_bins)
         data = data.transpose()
-        #temp = data.max(axis = 1)
-        #idx = argwhere(temp>1000)
-        #idx = ravel(idx)
-        #data = data[idx,:];
-        #Nz = idx.shape[0];
-        Nz = numBins
+        # temp = data.max(axis = 1)
+        # idx = argwhere(temp>1000)
+        # idx = ravel(idx)
+        # data = data[idx,:];
+        # Nz = idx.shape[0];
+        shape_z = num_bins
 
-        #Execute nmf
-        (wo,ho) = nmf(data, random.randn(Nz,numComponents), random.randn(numComponents ,numPixels), tolerance, timeOut, numIter)
+        # Execute nmf
+        (wo_matrix, ho_matrix) = nmf(data,
+                                     np.random.randn(shape_z, current_num_components),
+                                     np.random.randn(current_num_components, num_pixels),
+                                     current_tolerance,
+                                     current_time_out,
+                                     current_num_iter)
 
-        #Reshape the ho matrix to be a 3D image cube
-        ho = ho.transpose() 
-        ho = ho.reshape((nx,ny,numComponents))
-        
-        #Save the analysis data to the __data_list so that the data can be saved automatically by the omsi HDF5 file API
-        self['wo'] = wo
-        self['ho'] = ho
+        # Reshape the ho matrix to be a 3D image cube
+        ho_matrix = ho_matrix.transpose()
+        ho_matrix = ho_matrix.reshape((shape_x, shape_y, current_num_components))
+
+        # Save the analysis data to the __data_list so that the data can
+        # be saved automatically by the omsi HDF5 file API
+        self['wo'] = wo_matrix
+        self['ho'] = ho_matrix
 
 
 def main(argv=None):
-    '''Then main function'''
+    """Then main function"""
 
     import sys
-    from sys import argv,exit
-    from omsi.dataformat.omsi_file import omsi_file
+    from sys import argv, exit
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
+    from math import log
+    from omsi.dataformat.omsi_file import  omsi_file
 
     if argv is None:
         argv = sys.argv
 
-    #Check for correct usage
-    if len(argv) <2 :
+    # Check for correct usage
+    if len(argv) < 2:
         print "USAGE: Call \"omsi_nmf [expIndex dataIndex]   \" "
         print "\n"
         print "This is a simple viewer for looking at OMSI HDF5 files."
@@ -172,85 +190,81 @@ def main(argv=None):
         print "dataset to be used as optional input"
         exit(0)
 
-    #Read the input arguments 
-    omsiOutFile  = argv[1]
-    expIndex = 0
-    dataIndex = 0
-    if len(argv)==4 :
-        expIndex = int(argv[2])
-        dataIndex = int(argv[3])
+    # Read the input arguments
+    omsi_output_file = argv[1]
+    experiment_index = 0
+    data_index = 0
+    if len(argv) == 4:
+        experiment_index = int(argv[2])
+        data_index = int(argv[3])
 
-    #Open the input HDF5 file
-    try:
-        omsiFile = omsi_file(omsiOutFile , 'r') #Open file in read only mode
-    except:
-        print "Unexpected error creating the output file:", sys.exc_info()[0]
-        exit(0)
+    # Open the input HDF5 file
+    omsi_input_file = omsi_file(omsi_output_file, 'r')  # Open file in read only mode
 
-    #Get the experiment and dataset
-    exp = omsiFile.get_exp(expIndex)
-    data = exp.get_msidata(dataIndex)
+    # Get the experiment and dataset
+    exp = omsi_input_file.get_experiment(experiment_index)
+    data = exp.get_msidata(data_index)
 
-    #Execute the nmf
-    testNMF = omsi_nmf()
+    # Execute the nmf
+    test_nmf = omsi_nmf()
     print "Executing nmf analysis"
-    testNMF.execute(msidata=data)
+    test_nmf.execute(msidata=data)
     print "Getting nmf analysis results"
-    wo = testNMF.get_analysis_data('wo')['data']
-    ho = testNMF.get_analysis_data('ho')['data']
-    print ho
+    wo_dataset = test_nmf.get_analysis_data('wo')['data']
+    ho_dataset = test_nmf.get_analysis_data('ho')['data']
+    print ho_dataset
     print "Plotting nmf analysis results"
-    Nx = data.shape[0]
-    Ny = data.shape[1]
-    ho1 = ho[0,:];
-    ho1 = ravel(ho1)
-    ho1 = ho1.reshape(Nx,Ny)
-    
-    ho2 = ho[1,:];
-    ho2 = ravel(ho2)
-    ho2 = ho2.reshape(Nx,Ny)
+    shape_x = data.shape[0]
+    shape_y = data.shape[1]
+    ho1 = ho_dataset[0, :]
+    ho1 = np.ravel(ho1)
+    ho1 = ho1.reshape(shape_x, shape_y)
 
-    ho3 = ho[2,:];
-    ho3 = ravel(ho3)
-    ho3 = ho3.reshape(Nx,Ny)
+    ho2 = ho_dataset[1, :]
+    ho2 = np.ravel(ho2)
+    ho2 = ho2.reshape(shape_x, shape_y)
 
-    mainFig = plt.figure()
-    gs = gridspec.GridSpec(1, 4)
-    imageFig = mainFig.add_subplot(gs[0])
-#    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor(log (ho1 + 1)) 
+    ho3 = ho_dataset[2, :]
+    ho3 = np.ravel(ho3)
+    ho3 = ho3.reshape(shape_x, shape_y)
 
-    imageFig = mainFig.add_subplot(gs[1])
-#    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor(log (ho2 + 1))
+    main_figure = plt.figure()
+    figure_grid_spec = gridspec.GridSpec(1, 4)
+    image_figure = main_figure.add_subplot(figure_grid_spec[0])
+#    image_figure.autoscale(True,'both',tight=True)
+    image_plot = image_figure.pcolor(log(ho1 + 1))
 
-    imageFig = mainFig.add_subplot(gs[2])
-#    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.pcolor(log (ho3 + 1))
+    image_figure = main_figure.add_subplot(figure_grid_spec[1])
+#    image_figure.autoscale(True,'both',tight=True)
+    image_plot = image_figure.pcolor(log(ho2 + 1))
+
+    image_figure = main_figure.add_subplot(figure_grid_spec[2])
+#    image_figure.autoscale(True,'both',tight=True)
+    image_plot = image_figure.pcolor(log(ho3 + 1))
 
 
 #    do the three color
-    ho = ho.transpose()
-    ho = ho.reshape(Nx,Ny,3)
-    temp = log (ho[:,:,0] + 1)
+    ho_dataset = ho_dataset.transpose()
+    ho_dataset = ho_dataset.reshape(shape_x, shape_y, 3)
+    temp = log(ho_dataset[:, :, 0] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
-    ho[:,:,0] = temp
-    
-    temp = log (ho[:,:,1] + 1)
+    ho_dataset[:, :, 0] = temp
+
+    temp = log(ho_dataset[:, :, 1] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
-    ho[:,:,1] = temp
-    
-    temp = log (ho[:,:,2] + 1)
+    ho_dataset[:, :, 1] = temp
+
+    temp = log(ho_dataset[:, :, 2] + 1)
     temp = temp - temp.min()
     temp = temp / temp.max()
-    ho[:,:,2] = temp
-    
-    imageFig = mainFig.add_subplot(gs[3])
-    imageFig.autoscale(True,'both',tight=True)
-    imagePlot = imageFig.imshow(ho)
-   
+    ho_dataset[:, :, 2] = temp
+
+    image_figure = main_figure.add_subplot(figure_grid_spec[3])
+    image_figure.autoscale(True, 'both', tight=True)
+    image_plot = image_figure.imshow(ho_dataset)
+
     plt.show()
 
 
