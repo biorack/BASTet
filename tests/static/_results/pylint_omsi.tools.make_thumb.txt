@@ -1,0 +1,476 @@
+************* Module omsi.tools.make_thumb
+F:  6, 4: Unable to import 'PIL' (import-error)
+R: 13, 0: Too many local variables (22/15) (too-many-locals)
+R: 10, 0: Abstract class not referenced (abstract-class-not-used)
+R:168, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
+R:276, 0: Abstract class not referenced (abstract-class-not-used)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.msidata) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.main_file) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.main_file -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.instrument) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.omsi_dependency -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.instrument -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.omsi_analysis_base -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.methods -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.omsi_analysis_generic) (cyclic-import)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:165
+==omsi.analysis.multivariate_stats.omsi_cx:155
+==omsi.analysis.omsi_analysis_base:284
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
+
+        **Developer Note:* h5py currently supports only a single index list. If the user provides an index-list for both
+        x and y, then we need to construct the proper merged list and load the data manually, or if
+        the data is small enough, one can load the full data into a numpy array which supports
+        mulitple lists in the selection.
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param x: x selection string
+        :param y: y selection string
+        :param viewer_option: If multiple default viewer behaviors are available for a given
+        analysis then this option is used to switch between them.
+
+        :returns: The following two elements are expected to be returned by this function :
+
+                1) 1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be \
+                the last axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList \
+                selections x=[0]&y=[1] usually a 2D array is expected. For ragne selections x=0:1&y=1:2 we \
+                one usually expects a 3D array.
+                2) None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. \
+                Otherwise, return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z \
+                values are needed for interpretation of the returned spectrum).This may be needed, e.g., in \
+                cases where a per-spectrum peak analysis is performed and the peaks for each spectrum appear \
+                at different m/z values.
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:335
+==omsi.analysis.multivariate_stats.omsi_cx:343
+        slice_viewer_options = custom_options + dependent_options
+        return slice_viewer_options
+
+
+############################################################
+#  3) Making your analysis self-sufficient   (Recommended) #
+############################################################
+def main(argv=None):
+    """EDIT_ME : Optional
+
+       Implement this function to enable a user to use your module also as a stand-alone script.
+       Remember, you should always call execute(...) to run your analysis and NOT execute_analysis(...)
+
+    """
+    # Get the input arguments
+    import sys
+    if argv is None:
+        argv = sys.argv
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.multivariate_stats.omsi_cx:217
+==omsi.analysis.omsi_analysis_base:361
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Get the mz axes for the analysis
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param qslice_viewer_option: If multiple default viewer behaviors are available for a given
+            analysis then this option is used to switch between them for the qslice URL pattern.
+        :param qspectrum_viewer_option: If multiple default viewer behaviors are available for a
+            given analysis then this option is used to switch between them for the qspectrum URL pattern.
+
+        :returns: The following four arrays are returned by the analysis:
+
+            - mz_spectra : Array with the static mz values for the spectra.
+            - label_spectra : Lable for the spectral mz axis
+            - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+            - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:288
+==omsi.analysis.omsi_analysis_base:416
+                mz_slice = None
+                label_slice = None
+
+        return mz_spectra, label_spectra, mz_slice, label_slice
+
+    @classmethod
+    def v_qspectrum_viewer_options(cls,
+                                   analysis_object):
+        """
+        Get a list of strings describing the different default viewer options for the analysis for qspectrum.
+        The default implementation tries to take care of handling the spectra retrieval for all the dependencies
+        but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+        implementation is often called at the end of custom implementations to also allow access to data from
+        other dependencies.
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed.
+            For most cases this is not needed here as the support for slice operations is usually a static decision
+            based on the class type, however, in some cases additional checks may be needed (e.g., ensure that the
+            required data is available).
+
+        :returns: List of strings indicating the different available viewer options. The list should be empty if
+        the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available). (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:226
+==omsi.analysis.multivariate_stats.omsi_cx:217
+==omsi.analysis.omsi_analysis_base:361
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """ Get the mz axes for the analysis
+
+            :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+            :param qslice_viewer_option: If multiple default viewer behaviors are available for a given analysis then
+                                        this option is used to switch between them for the qslice URL pattern.
+            :param qspectrum_viewer_option: If multiple default viewer behaviors are available for a given analysis
+                                     then this option is used to switch between them for the qspectrum URL pattern.
+
+            :returns: The following four arrays are returned by the analysis:
+
+                - mz_spectra : Array with the static mz values for the spectra.
+                - label_spectra : Lable for the spectral mz axis
+                - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+                - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:312
+==omsi.analysis.multivariate_stats.omsi_cx:314
+        spectrum_viewer_options = custom_options + dependent_options
+        return spectrum_viewer_options
+
+    @classmethod
+    def v_qslice_viewer_options(cls,
+                                analysis_object):
+        """
+        Get a list of strings describing the different default viewer options for the analysis for qslice.
+        The default implementation tries to take care of handling the spectra retrieval for all the depencies
+        but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+        implementation is often called at the end of custom implementations to also allow access to data from
+        other dependencies.
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed.  For
+            most cases this is not needed here as the support for slice operations is usually a static decision
+            based on the class type, however, in some cases additional checks may be needed (e.g., ensure that
+            the required data is available).
+
+        :returns: List of strings indicating the different available viewer options. The list should be empty
+            if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:135
+==omsi.analysis.multivariate_stats.omsi_cx:99
+==omsi.analysis.omsi_analysis_base:241
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+
+           :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+           :param z: Selection string indicting which z values should be selected.
+           :param viewer_option: If multiple default viewer behaviors are available for a given analysis
+                  then this option is used to switch between them.
+
+           :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will
+                     be performed typically like [:,:,zmin:zmax].
+
+        """
+        # Convert the z selection to a python selection (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.img_file:214
+==omsi.dataformat.mzml_file:248
+        else:
+            return None
+
+    @classmethod
+    def get_files_from_dir(cls, dirname):
+        """
+        Get a list of all basenames of all img files in a given directory.
+        Note: The basenames include the dirname.
+        """
+        filelist = []
+        for l in os.listdir(dirname):
+            currname = os.path.join(dirname, l) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:87
+==omsi.analysis.findpeaks.omsi_findpeaks_local:122
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """Implement support for qmz URL requests for the viewer"""
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None
+        # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
+        if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.omsi_analysis_base:766
+==omsi.analysis.omsi_analysis_generic:85
+    def read_from_omsi_file(self,
+                            analysis_object,
+                            load_data=True,
+                            load_parameters=True,
+                            dependencies_omsi_format=True,
+                            ignore_type_conflict=False):
+        """
+        See `omsi.analysis.omsi_analysis_base.read_from_omsi_file(...)` for details.
+        The function is overwritten here mainly to initialize the self.real_analysis_type
+        instance variable but otherwise uses the default behavior.
+
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:48
+==omsi.analysis.omsi_analysis_base:283
+        else:
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """Implement support for qspectrum URL requests for the viewer"""
+        # Get the h5py dataset with the peak_cube data (duplicate-code)
+R:  1, 0: Similar lines in 4 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:165
+==omsi.analysis.multivariate_stats.omsi_cx:155
+==omsi.analysis.omsi_analysis_base:284
+==omsi.analysis.omsi_analysis_generic:39
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
+ (duplicate-code)
+R:  1, 0: Similar lines in 4 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:49
+==omsi.analysis.msi_filtering.omsi_tic_norm:165
+==omsi.analysis.multivariate_stats.omsi_cx:155
+==omsi.analysis.omsi_analysis_generic:39
+        return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Implement support for qspectrum URL requests for the viewer (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:249
+==omsi.analysis.multivariate_stats.omsi_cx:248
+        num_custom_spectrum_options = 0
+
+        # Compute the output
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None
+        # Both viewer_options point to a data dependency
+        if qspectrum_viewer_option >= num_custom_spectrum_options and \ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_local:119
+==omsi.analysis.omsi_analysis_base:360
+        else:
+            return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """Implement support for qmz URL requests for the viewer""" (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.findpeaks.omsi_findpeaks_local:120
+==omsi.analysis.msi_filtering.omsi_tic_norm:226
+==omsi.analysis.multivariate_stats.omsi_cx:217
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """ Get the mz axes for the analysis (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:113
+==omsi.analysis.multivariate_stats.omsi_nmf:74
+                                           qslice_viewer_option=qslice_viewer_option-1,
+                                           qspectrum_viewer_option=0)
+            # NOTE: if qspectrum and qslice share the same axis, this call will not return the
+            # copied data, i.e., we need to copy the qspectrum values to the qslice values.
+            if mz_slice is None:
+                mz_slice = temp_a
+                label_slice = temp_b
+        elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0: (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:51
+==omsi.analysis.findpeaks.omsi_findpeaks_local:43
+==omsi.analysis.msi_filtering.omsi_tic_norm:167
+==omsi.analysis.multivariate_stats.omsi_cx:157
+==omsi.analysis.omsi_analysis_base:286
+==omsi.analysis.omsi_analysis_generic:41
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
+ (duplicate-code)
+R:  1, 0: Similar lines in 4 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:228
+==omsi.analysis.multivariate_stats.omsi_cx:219
+==omsi.analysis.omsi_analysis_base:363
+==omsi.analysis.omsi_analysis_generic:52
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Implement support for qmz URL requests for the viewer
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 5 files
+==omsi.analysis.findpeaks.omsi_findpeaks_local:31
+==omsi.analysis.msi_filtering.omsi_tic_norm:135
+==omsi.analysis.multivariate_stats.omsi_cx:99
+==omsi.analysis.omsi_analysis_base:241
+==omsi.analysis.omsi_analysis_generic:31
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """
+        Implement support for qslice URL requests for the viewer
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:271
+==omsi.analysis.multivariate_stats.omsi_nmf:194
+    experiment_index = 0
+    data_index = 0
+    if len(argv) == 4:
+        experiment_index = int(argv[2])
+        data_index = int(argv[3])
+
+    # Open the input HDF5 file (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.tools.create_peak_cube_overview:11
+==omsi.tools.make_thumb:2
+from omsi.dataformat.omsi_file.main_file import omsi_file
+
+try:
+    from PIL import Image
+except ImportError:
+    import Image (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:93
+==omsi.analysis.findpeaks.omsi_findpeaks_local:128
+==omsi.analysis.multivariate_stats.omsi_nmf:54
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None
+        # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
+        if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:174
+==omsi.analysis.findpeaks.omsi_findpeaks_local:203
+        msidata = self['msidata']
+        mzdata = self['mzdata']
+        integration_width = self['integration_width'][0]
+        peakheight = self['peakheight'][0]
+        slwindow = self['slwindow'][0]
+        smoothwidth = self['smoothwidth'][0] (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:20
+==omsi.analysis.findpeaks.omsi_findpeaks_local:18
+        self.analysis_identifier = name_key
+        self.parameter_names = ['msidata',
+                                'mzdata',
+                                'integration_width',
+                                'peakheight',
+                                'slwindow', (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:87
+==omsi.analysis.findpeaks.omsi_findpeaks_local:122
+==omsi.analysis.msi_filtering.omsi_tic_norm:228
+==omsi.analysis.multivariate_stats.omsi_cx:219
+==omsi.analysis.omsi_analysis_base:363
+==omsi.analysis.omsi_analysis_generic:52
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:30
+==omsi.analysis.findpeaks.omsi_findpeaks_local:31
+==omsi.analysis.msi_filtering.omsi_tic_norm:135
+==omsi.analysis.multivariate_stats.omsi_cx:99
+==omsi.analysis.omsi_analysis_base:241
+==omsi.analysis.omsi_analysis_generic:31
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:100
+==omsi.analysis.findpeaks.omsi_findpeaks_local:135
+            label_spectra = "m/z"
+            mz_slice = None
+            label_slice = None
+        elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
+            mz_spectra, label_spectra, mz_slice, label_slice = \ (duplicate-code)

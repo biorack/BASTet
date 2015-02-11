@@ -1,0 +1,13 @@
+************* Module omsi.analysis.findpeaks.omsi_findpeaks_local
+R: 45, 4: Too many local variables (36/15) (too-many-locals)
+C: 90,16: Invalid variable name "ni" (invalid-name)
+R: 45, 4: Too many branches (16/12) (too-many-branches)
+C:165, 8: Invalid variable name "re" (invalid-name)
+R:174, 4: Too many local variables (28/15) (too-many-locals)
+C:259,16: Invalid variable name "xp" (invalid-name)
+C:260,16: Invalid variable name "yp" (invalid-name)
+W:258,24: Unused variable 'pkmin' (unused-variable)
+W:206, 8: Unused variable 'integration_width' (unused-variable)
+R:174, 4: Too many statements (53/50) (too-many-statements)
+R:  8, 0: Too many public methods (32/20) (too-many-public-methods)
+C:321, 4: Invalid variable name "pv" (invalid-name)

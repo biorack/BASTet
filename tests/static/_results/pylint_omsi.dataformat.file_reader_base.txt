@@ -1,0 +1,7 @@
+************* Module omsi.dataformat.file_reader_base
+C: 59, 8: Invalid attribute name "mz" (invalid-name)
+W: 89,18: Unused argument 'name' (unused-argument)
+R:100, 4: Method could be a function (no-self-use)
+R:108, 4: Method could be a function (no-self-use)
+E:160,59: Class 'file_reader_base' has no '__subclasses__' member (no-member)
+E:161,64: Class 'file_reader_base_with_regions' has no '__subclasses__' member (no-member)

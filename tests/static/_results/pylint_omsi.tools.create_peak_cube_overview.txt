@@ -1,0 +1,12 @@
+************* Module omsi.tools.create_peak_cube_overview
+W: 79, 0: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+W: 80, 0: Anomalous Unicode escape in byte string: '\u'. String constant might be missing an r or u prefix. (anomalous-unicode-escape-in-string)
+W: 81, 0: Anomalous Unicode escape in byte string: '\u'. String constant might be missing an r or u prefix. (anomalous-unicode-escape-in-string)
+W: 84, 0: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+W: 86, 0: Anomalous backslash in string: '\m'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+W:117, 0: Anomalous backslash in string: '\i'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+F: 15, 4: Unable to import 'PIL' (import-error)
+R: 24, 0: Too many local variables (31/15) (too-many-locals)
+W: 90, 4: Unused variable 'res' (unused-variable)
+R: 24, 0: Too many branches (17/12) (too-many-branches)
+R: 24, 0: Too many statements (85/50) (too-many-statements)

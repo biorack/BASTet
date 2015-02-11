@@ -1,0 +1,12 @@
+************* Module omsi.analysis.findpeaks.omsi_findpeaks_global
+W:229, 0: TODO : THIS LOOP NEEDS TO BE CONVERTED TO A MAX INSTEAD OF A SUM (fixme)
+W: 44,12: No exception type(s) specified (bare-except)
+R:145, 4: Too many local variables (27/15) (too-many-locals)
+C:225,12: Invalid variable name "xx" (invalid-name)
+W:218, 8: Unused variable 'xval_peak' (unused-variable)
+W:217,16: Unused variable 'pkmin' (unused-variable)
+W:219, 8: Unused variable 'yval_peak' (unused-variable)
+R:  8, 0: Too many public methods (32/20) (too-many-public-methods)
+R:251, 0: Too many local variables (26/15) (too-many-locals)
+C:317, 4: Invalid variable name "ho" (invalid-name)
+R:251, 0: Too many statements (63/50) (too-many-statements)

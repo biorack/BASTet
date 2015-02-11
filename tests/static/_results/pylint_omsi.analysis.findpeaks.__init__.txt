@@ -1,0 +1,2 @@
+************* Module omsi.analysis.findpeaks
+C:  5, 0: Invalid constant name "all__" (invalid-name)

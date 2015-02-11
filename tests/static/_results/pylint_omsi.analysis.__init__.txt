@@ -1,0 +1,10 @@
+************* Module omsi.analysis
+W:  6, 0: Wildcard import omsi.analysis.findpeaks (wildcard-import)
+W:  7, 0: Wildcard import omsi.analysis.multivariate_stats (wildcard-import)
+W:  8, 0: Wildcard import omsi.analysis.msi_filtering (wildcard-import)
+W:  9, 0: Wildcard import omsi.analysis.omsi_analysis_base (wildcard-import)
+W: 10, 0: Wildcard import omsi.analysis.omsi_analysis_data (wildcard-import)
+W: 11, 0: Wildcard import omsi.analysis.omsi_analysis_generic (wildcard-import)
+E: 21,38: Undefined variable 'findpeaks' (undefined-variable)
+E: 21,56: Undefined variable 'multivariate_stats' (undefined-variable)
+E: 21,83: Undefined variable 'msi_filtering' (undefined-variable)
