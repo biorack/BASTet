@@ -135,7 +135,8 @@ class omsi_cx(omsi_analysis_base):
             cx_analysis_object = omsi_cx()
             cx_analysis_object.read_from_omsi_file(analysis_object=analysis_object,
                                                    load_data=False,
-                                                   load_parameters=False)
+                                                   load_parameters=False,
+                                                   load_runtime_data=False)
             return cx_analysis_object['msidata'][:, :, informative_indices]
         elif viewer_option == 0 and current_objective_dimension == cls.dimension_index['pixelDim']:
             return analysis_object['levScores'][:]

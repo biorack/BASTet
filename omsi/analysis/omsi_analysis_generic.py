@@ -87,6 +87,7 @@ class omsi_analysis_generic(omsi_analysis_base):
                             analysis_object,
                             load_data=True,
                             load_parameters=True,
+                            load_runtime_data=True,
                             dependencies_omsi_format=True,
                             ignore_type_conflict=False):
         """
@@ -99,6 +100,7 @@ class omsi_analysis_generic(omsi_analysis_base):
             analysis_object=analysis_object,
             load_data=load_data,
             load_parameters=load_parameters,
+            load_runtime_data=load_runtime_data,
             dependencies_omsi_format=dependencies_omsi_format,
             ignore_type_conflict=ignore_type_conflict)
         self.real_analysis_type = unicode(analysis_object.get_analysis_type()[:])

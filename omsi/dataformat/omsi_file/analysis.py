@@ -351,6 +351,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         if self.dependencies is None:
             warnings.warn("No dependencies defined for analysis.")
         self.parameter = self.managed_group[unicode(omsi_format_analysis.analysis_parameter_group)]
+        self.runinfo_group = self.managed_group[unicode(omsi_format_analysis.analysis_runinfo_group)]
         self.analysis_omsi_object = None
         self.name = self.managed_group.name
 
@@ -528,9 +529,34 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
         return output_list
 
+    def get_all_runinfo_data(self,
+                             load_data=False):
+        """
+        Get a dict of all runtime information stored in the file
+
+        :return: Dict with the runtime information restored.
+        """
+        output_dict = {}
+        if self.runinfo_group is not None:
+            for item_obj in self.runinfo_group.items():
+                object_name = unicode(item_obj[0])
+                if load_data:
+                    output_dict[object_name] = self.runinfo_group[object_name][:]
+                    if output_dict[object_name].shape == (1,):
+                        curr_dtype = self.runinfo_group[object_name].dtype
+                        if curr_dtype == h5py.special_dtype(vlen=unicode) or \
+                                curr_dtype == h5py.special_dtype(vlen=unicode):
+                            output_dict[object_name] = unicode(output_dict[object_name][0])
+                        else:
+                            output_dict[object_name] = output_dict[object_name][0]
+                else:
+                    output_dict[object_name] = self.runinfo_group[object_name]
+        return output_dict
+
     def restore_analysis(self,
                          load_data=True,
                          load_parameters=True,
+                         load_runtime_data=True,
                          dependencies_omsi_format=True):
         """
         Load an analysis from file and create an instance of the appropriate
@@ -539,6 +565,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
         :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects.
+        :param load_runtime_data: Should runtime data be loaded from file (default) or just stored as h5py data objects.
         :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default)
             or just as h5py objects.
 
@@ -560,6 +587,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         analysis_instance.read_from_omsi_file(analysis_object=self,
                                               load_data=load_data,
                                               load_parameters=load_parameters,
+                                              load_runtime_data=load_runtime_data,
                                               dependencies_omsi_format=dependencies_omsi_format,
                                               ignore_type_conflict=ignore_type_conflict)
         return analysis_instance

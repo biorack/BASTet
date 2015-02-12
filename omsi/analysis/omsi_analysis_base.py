@@ -163,23 +163,23 @@ class omsi_analysis_base(object):
         else:
             raise KeyError('Invalid key. The given key was not found as part of the analysis parameters nor output.')
 
-
-    def execute(self, **kwargs):
+    def runinfo_record_preexecute(self):
         """
-        Use this function to run the analysis.
+        Function used to record runtime information prior to calling the
+        `execute_analysis(...)` function.
+        The function may be overwritten in child classes to add recording of
+        additional runtime information. All runtime data should be recorded in the
+        self.run_info dictionary to ensure the data is stored in the HDF5 file.
+        Data that should not be recorded in HDF5 should be placed in separate,
+        custom data structures.
 
-        :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
-        the __setitem__ mechanism or as baches using the set_parameters function.
+        When overwriting the function we should call super(...,self).runinfo_record_pretexecute()
+        last in the custom version to ensure that the start_time is properly recorded right before
+        the execution of the analysis.
 
-            :returns: This function returns the output of the execute analysis function.
         """
-        # Set any parameters that are given to the execute function
-        self.set_parameters(**kwargs)
-
-        # Record basic excution provenance information
-        self.run_info = {}
+        # Record basic runtime environment information using the platform module
         try:
-            # Record run information
             self.run_info['architecture'] = unicode(platform.architecture())
             self.run_info['java_ver'] = unicode(platform.java_ver())
             self.run_info['libc_ver'] = unicode(platform.libc_ver())
@@ -203,24 +203,81 @@ class omsi_analysis_base(object):
         except:
             warnings.warn("WARNING: Recording of execution provenance failed: " + str(sys.exc_info()))
 
-        # Execute the analysis
+        # Attempt to record the svn version information
+        try:
+            import subprocess
+            self.run_info['svn_ver'] = subprocess.check_output('svnversion').rstrip('\n')
+        except:
+            warnings.warn("Recording of svn version information failed: "+str(sys.exc_info()))
+
+        # Record the start time for the analysis
         self.run_info['start_time'] = unicode(datetime.datetime.now())
+
+    def runinfo_record_postexecute(self,
+                                   execution_time):
+        """
+        Dunction used to record runtime information after the
+        `execute_analysis(...)` function has completed
+        The function may be overwritten in child classes to add recording of
+        additional runtime information. All runtime data should be recorded in the
+        self.run_info dictionary to ensure the data is stored in the HDF5 file.
+        Data that should not be recorded in HDF5 should be placed in separate,
+        custom data structures.
+
+        When overwriting the function we should call super(...,self).runinfo_record_postexecute(execution_time)
+        in the custom version to ensure that the execution and end_time are properly
+        recorded.
+
+        :param execution_time: The total time it took to execute the analysis.
+        """
+        # Finalize recording of post execution provenance
+        self.run_info['execution_time'] = unicode(execution_time)
+        self.run_info['end_time'] = unicode(datetime.datetime.now())
+
+    def runinfo_clean_up(self):
+        """
+        Clean up the runinfo object. In particular remove empty keys that
+        either recorded None or recorded just an empty string.
+
+        This function may be overwritten to also do clean-up needed
+        due to additional custom runtime instrumentation.
+
+        When overwriting this function we should call super(..., self).runinfo_clean_up()
+        at the end of the function to ensure that the runinfo dictionary
+        is clean, i.e., does not contain any empty entries.
+        """
+        # Remove empty items from the run_info dict
+        for ri_key, ri_value in self.run_info.items():
+            try:
+                if ri_value is None or len(ri_value) == 0:
+                    self.run_info.pop(ri_key)
+            except:
+                pass
+
+    def execute(self, **kwargs):
+        """
+        Use this function to run the analysis.
+
+        :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
+        the __setitem__ mechanism or as baches using the set_parameters function.
+
+            :returns: This function returns the output of the execute analysis function.
+        """
+        # Set any parameters that are given to the execute function
+        self.set_parameters(**kwargs)
+
+        # Record basic execution provenance information prior to running the analysis
+        self.run_info = {}
+        self.runinfo_record_preexecute()
         start_time = time.time()
 
         # Execute the analysis
         analysis_output = self.execute_analysis()
 
-        # Finalize recording of post execution provenance
-        self.run_info['execution_time'] = unicode(time.time() - start_time)
-        self.run_info['end_time'] = unicode(datetime.datetime.now())
-
-        # Remove empty items from the run_info dict
-        try:
-            for ri_key, ri_value in self.run_info.items():
-                if len(ri_value) == 0:
-                    self.run_info.pop(ri_key)
-        except:
-            pass
+        # Record basic post-execute runtime information and clean up the run-info to remove empty entries
+        execution_time = time.time() - start_time
+        self.runinfo_record_postexecute(execution_time=execution_time)
+        self.runinfo_clean_up()
 
         # Return the output of the analysis
         return analysis_output
@@ -768,6 +825,7 @@ class omsi_analysis_base(object):
                             analysis_object,
                             load_data=True,
                             load_parameters=True,
+                            load_runtime_data=True,
                             dependencies_omsi_format=True,
                             ignore_type_conflict=False):
         """
@@ -785,6 +843,7 @@ class omsi_analysis_base(object):
             the analysis data_list
         :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
         :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects.
+        :param load_runtime_data: Should runtime data be loaded from file (default) or just stored as h5py data objects
         :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default)
             or just as h5py objects.
         :param ignore_type_conflict: Set to True to allow the analysis to be loaded into the
@@ -818,6 +877,7 @@ class omsi_analysis_base(object):
         self.__parameter_list = analysis_object.get_all_parameter_data(load_data=load_parameters)
         self.__dependency_list = \
             analysis_object.get_all_dependency_data(omsi_dependency_format=dependencies_omsi_format)
+        self.run_info = analysis_object.get_all_runinfo_data(load_data=load_runtime_data)
         return True
 
     def get_analysis_identifier(self):
