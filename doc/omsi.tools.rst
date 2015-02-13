@@ -9,18 +9,18 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`makeThumb` Module
------------------------
+:mod:`make_thumb` Module
+------------------------
 
-.. automodule:: omsi.tools.makeThumb
+.. automodule:: omsi.tools.make_thumb
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`peakCubeOverview` Module
-------------------------------
+:mod:`create_peak_cube_overview` Module
+---------------------------------------
 
-.. automodule:: omsi.tools.peakCubeOverview
+.. automodule:: omsi.tools.create_peak_cube_overview
     :members:
     :undoc-members:
     :show-inheritance:

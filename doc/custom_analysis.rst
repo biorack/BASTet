@@ -72,41 +72,65 @@ Any analysis based on the infrastructure provided by ``omsi_analysis_base`` is f
     :linenos:
     :emphasize-lines: 12, 21,22,23,24
 
-    #Open the MSI file and get the desired experiment
+    # Open the MSI file and get the desired experiment
     from omsi.dataformat.omsi_file import *
     f = omsi_file( filename, 'a' )
     e = f.get_experiment(0)
 
-    #Execute the analysis
+    # Execute the analysis
     d = e.get_msidata(0)
     a = omsi_myanalysis()
     a.execute(msidata=d, integration_width=10, msidata_dependency=d)
 
-    #Save the analysis object.
+    # Save the analysis object.
     analysis_object , analysis_index = exp.create_analysis( a )
-    #This single line is sufficient to store the complete analysis to the omsi file.
-    #By default the call will block until the write is complete. Setting the
-    #parameter flushIO=False enables buffered write, so that the call will
-    #return once all data write operations have been scheduled. Here we get
-    #an omsi.dataformat.omsi_file.omsi_file_analysis
-    #object for management of the data stored in HDF5 and the integer index of the analysis.
 
-    #Restoring the analysis from file. Here we can decide which data should be loaded.
-    a2 = omsi_myanalysis().read_from_omsi_file(analysisGroup=analysis_object, \
-                                               load_data=True, \
-                                               load_parameters=True,\
-                                               dependencies_omsi_format=True )
-    #By setting load_data and/or load_parameters to False, we create h5py instead of
-    #numpy objects, avoiding the actual load of the data. CAUTION: To avoid the accidental
-    #overwrite of data we recommend to use load_data and load_parameters as False only
-    #when the file has been opend in read-only mode 'r'.
+    # This single line is sufficient to store the complete analysis to the omsi file.
+    # By default the call will block until the write is complete. Setting the
+    # parameter flushIO=False enables buffered write, so that the call will
+    # return once all data write operations have been scheduled. Here we get
+    # an omsi.dataformat.omsi_file.omsi_file_analysis
+    # object for management of the data stored in HDF5 and the integer index of the analysis.
 
-    #Rerunning the same analysis again
+    # To restore an analysis from file, i.e., read all the analysis data from file
+    # and store it in a corresponding analysis object we can do the following.
+    # Similar to the read_from_omsi_file(...) function of omsi_analysis_base
+    # mentioned below, we can decide via parameter settings of the function,
+    # which portions of the analysis should be loaded into memory
+    a2 = analysis_object.restore_analysis()
+
+    # If we want to now re-execute the same analysis we can simply call
     a2.execute()
 
-    #Rerunning the same analysis for different data
-    d2 = e.get_msidata(1)
-    a2.execute(msidata=d2)
+    # If we want to rerun the analysis but change one or more parameter settings,
+    # then we can simply change those parameters when calling the execute function
+    d2 = e.get_msidata(1)   # Get another MSI dataset
+    a2.execute(msidata=d2)  # Execute the analysis on the new MSI dataset
+
+    # The omsi_file_analysis class also provides a convenient function that allows us
+    # to recreate, i.e., restore and run the analysis, in a single function call
+    a3 = analysis_object.recreate_analysis()
+
+    # The recreate_analysis(...) function supports additional keyword arguments
+    # which will be passed to the execute(...) call of the analysis, so that we
+    # can change parameter settings for the analysis also when using the
+    # recreate analysis call.
+
+    # If we know the type of analysis object (which we can also get from file), then we
+    # naturally also restore the analysis from file ourselves via
+    a4 = omsi_myanalysis().read_from_omsi_file(analysisGroup=analysis_object, \
+                                               load_data=True, \
+                                               load_parameters=True,\
+                                               load_runtime_data=True, \
+                                               dependencies_omsi_format=True )
+    # By setting load_data and/or load_parameters to False, we create h5py instead of
+    # numpy objects, avoiding the actual load of the data. CAUTION: To avoid the accidental
+    # overwrite of data we recommend to use load_data and load_parameters as False only
+    # when the file has been opened in read-only mode 'r'.
+
+    # Rerunning the same analysis again
+    a4.execute()
+
 
 
 
