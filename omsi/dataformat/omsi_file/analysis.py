@@ -297,7 +297,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 else:
                     tempdata[0] = str(ana_data['data'])
             else:
-                warnings.warn("WARNING: " + ana_data['name'] + \
+                warnings.warn("WARNING: " + ana_data['name'] +
                               " dataset generated but not written. The given dataset was empty.")
         # Create a new dataset to store the current numpy-type dataset
         elif 'numpy' in str(type(ana_data['data'])):
@@ -312,7 +312,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             if ana_data['data'].size > 0:
                 tempdata[:] = ana_data['data']
             else:
-                warnings.warn("WARNING: " + ana_data['name'] + \
+                warnings.warn("WARNING: " + ana_data['name'] +
                               " dataset generated but not written. The given dataset was empty.")
         # Unkown dtype. Attempt to convert the dataset to numpy and write it to
         # file.
@@ -592,10 +592,12 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                               ignore_type_conflict=ignore_type_conflict)
         return analysis_instance
 
-    def recreate_analysis(self):
+    def recreate_analysis(self, **kwargs):
         """
         Load an analysis from file and re-execute it.
         This is equivalent to omsi_analysis.base.restore_analysis().execute()
+
+        :param kwargs: Additional keyword arguments to be passed to the execute function of the analysis
 
         :return: Instance of the specific analysis object (e.g, omsi_nmf) that inherits from
                  omsi.analysis.omsi_analysis_base with the input parameters and
@@ -604,7 +606,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  cannot be created.
         """
         from omsi.analysis import omsi_analysis_generic
-        analysis_instance = self.restore_analysis()
+        analysis_instance = self.restore_analysis(**kwargs)
         if isinstance(analysis_instance, omsi_analysis_generic):
             return None
         else:

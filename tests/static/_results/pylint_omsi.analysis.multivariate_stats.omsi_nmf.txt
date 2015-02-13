@@ -1,5 +1,5 @@
 ************* Module omsi.analysis.multivariate_stats.omsi_nmf
-R:  8, 0: Too many public methods (32/20) (too-many-public-methods)
+R:  8, 0: Too many public methods (35/20) (too-many-public-methods)
 W:175, 4: Redefining built-in 'exit' (redefined-builtin)
 R:171, 0: Too many local variables (26/15) (too-many-locals)
 W:213, 4: Unused variable 'wo_dataset' (unused-variable)
