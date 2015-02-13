@@ -155,7 +155,7 @@ class omsi_dependency(dict):
                     from omsi.shared.omsi_data_selection import selection_string_to_object
                     current_selection = selection_string_to_object(self['selection'])
                     if current_selection is not None:
-                        self['_data'] = data_object[current_selection]
+                        dict.__setitem__(self, '_data', data_object[current_selection])
                     else:
                         raise ValueError('Invalid selection string')
                 return self['_data']
