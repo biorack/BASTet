@@ -1,6 +1,6 @@
-from omsi.analysis.findpeaks.omsi_lpf import omsi_lpf
-from omsi.analysis.findpeaks.omsi_npg import omsi_npg
-from omsi.analysis.findpeaks.omsi_peakcube import omsi_peakcube
+from omsi.analysis.findpeaks.experimental.omsi_lpf import omsi_lpf
+from omsi.analysis.findpeaks.experimental.omsi_npg import omsi_npg
+from omsi.analysis.findpeaks.experimental.omsi_peakcube import omsi_peakcube
 from omsi.dataformat.omsi_file.main_file import omsi_file
 
 import datetime
@@ -11,31 +11,31 @@ import string
 from sys import argv,exit
 
 def main(argv):
-	
+
 	totaltimekeeper = time()
 	thisfilename = os.path.basename(__file__)
 
 	# --- Default parameters ---
-	
+
 	# omsi file parameters
 	omsiInFile = None
 	expIndex = 0
 	dataIndex = 0
 	LPFIndex = None
 	NPGIndex = None
-	
+
 	# skip analysis parameters
 	SkipNPG = None
 	SkipPeakCube = None
-	
+
 	# Flag for enabling peak cube through Carver big memory job
 	QueuePeakCube = False
-	
+
 	# LPF default parameters
 	myPeakheight = 10
 	mySlwindow = 100
 	mySmoothwidth = 3
-	
+
 	# NPG default parameters
 	myMz_threshold = 0.05
 	myTreecut = 0.1
@@ -109,12 +109,12 @@ def main(argv):
 	print "OMSI parameters: expIndex =", expIndex, ", dataIndex =", dataIndex
 	print "Analysis indexes: LPFIndex =", LPFIndex, ", NPGIndex =", NPGIndex
 	sys.stdout.flush()
-	
+
 	# run flags
 	runlpf = 0
 	runnpg = 0
 	runpc = 0
-	
+
 	# --- LPF
 	if(LPFIndex is None):
 		runlpf = 1
@@ -122,7 +122,7 @@ def main(argv):
 	else:
 		LPFanalysisindex = LPFIndex
 
-	# --- NPG	
+	# --- NPG
 	if(NPGIndex is None and SkipNPG is None):
 		runnpg = 1
 		NPGanalysisindex = run_npg(omsiInFile, expIndex, dataIndex, LPFanalysisindex, mzth=myMz_threshold, tcut=myTreecut)
@@ -130,25 +130,25 @@ def main(argv):
 		NPGanalysisindex = NPGIndex
 	else:
 		NPGanalysisindex = None
-	
+
 	# run peak cube in big memory node
 	if(QueuePeakCube == True and LPFanalysisindex is not None and NPGanalysisindex is not None):
 		pcstring = "python " + thisfilename + " -f " + omsiInFile + " --expIndex=" + str(expIndex) + " --dataIndex=" + str(dataIndex)
 		pcstring += " --LPFIndex=" + str(LPFanalysisindex) + " --NPGIndex=" + str(NPGanalysisindex) + " \n"
-		
+
 		jobname = queuePCjob(pcstring, therepo = myRepo)
 		SkipPeakCube = 1
-		
+
 		print "Peak Cube job name:", jobname
 		print "Peak Cube queued."
 		print "Peak Cube output file: pc_job." + jobname + ".out.txt"
-	
+
 	# --- Peak Cube
 	if(SkipPeakCube is None and ((NPGIndex is None and SkipNPG is None) or NPGIndex is not None)):
-		runpc = 1	
+		runpc = 1
 		PCanalysisindex = run_peakcube(omsiInFile, expIndex, dataIndex, LPFanalysisindex, NPGanalysisindex)
 	else:
-		PCanalysisindex = None		
+		PCanalysisindex = None
 
 	print "--- all complete ---"
 	print "LPF Analysis Index:", LPFanalysisindex
@@ -159,7 +159,7 @@ def main(argv):
 
 # queue peak cube job
 def queuePCjob(pcstring, therepo = None):
-	
+
 	# create temporary pbs script for carver
 	(sfd, scriptfile) = tempfile.mkstemp(prefix="pcscript.", suffix=".pbs")
 	pbsCreation = generateScript(scriptfile, PFcontent = pcstring, repo=therepo)
@@ -168,7 +168,7 @@ def queuePCjob(pcstring, therepo = None):
 	if not pbsCreation:
 		print "Error creating pbs script."
 		exit(0)
-		
+
 	print "\nQueueing carver peak cube job..."
 
 	qsubout = subprocess.check_output(["qsub", scriptfile])
@@ -179,25 +179,25 @@ def queuePCjob(pcstring, therepo = None):
 
 	# delete temporary scriptfile
 	os.remove(scriptfile)
-	
+
 	return myjobname
 
 # lpf analysis
 def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
-	
+
 	#Open the input HDF5 file
 	try:
 		omsiFile = omsi_file(omsiInFile,'r+')
 	except:
 		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
 		exit(0)
-	
-	
+
+
 	# Get the experiment and data
 	exp = omsiFile.get_experiment( expIndex )
 	data = exp.get_msidata(dataIndex)
 	peaksMZdata = data.mz[:]
-	
+
 	# LPF --------------
 	print "\n--- Executing LPF ---"
 	myLPF = omsi_lpf(name_key="omsi_lpf_" + str(ctime()))
@@ -209,19 +209,19 @@ def run_lpf(omsiInFile, expIndex, dataIndex, ph, slw, smw):
 	print "peaksIntensities:\n", peaksIntensities
 	peaksArrayIndex = myLPF['LPF_Peaks_ArrayIndex'][:]
 	print "peaksArrayIndex:\n", peaksArrayIndex
-	
+
 	print "\nSaving HDF5 analysis..."
 	LPFanalysis, LPFanalysisindex = exp.create_analysis(myLPF)
 	print "done!"
 	print "--- omsi_lpf complete ---\n"
 	print "LPF Analysis Index:", LPFanalysisindex
-	
+
 	# flush of lpf
 	exp.experiment.file.flush()
 	omsiFile.close_file()
-	
+
 	return LPFanalysisindex
-	
+
 # npg analysis
 def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 
@@ -231,18 +231,18 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	except:
 		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
 		exit(0)
-	
+
 	# Get the experiment and data
 	exp = omsiFile.get_experiment( expIndex )
 	data = exp.get_msidata(dataIndex)
 	LPFanalysis = exp.get_analysis( LPFIndex )
-		
+
 	peaksBins = LPFanalysis['LPF_Peaks_MZ'][:]
 	peaksIntensities = LPFanalysis['LPF_Peaks_Vals'][:]
 	peaksArrayIndex = LPFanalysis['LPF_Peaks_ArrayIndex'][:]
 	peaksMZdata = data.mz[:]
-	peaksMZ = peaksMZdata[peaksBins]	
-	
+	peaksMZ = peaksMZdata[peaksBins]
+
 	# NPG --------------
 	print "\n--- Executing NPG ---"
 	myNPG = omsi_npg(name_key="omsi_npg_" + str(ctime()))
@@ -259,42 +259,42 @@ def run_npg(omsiInFile, expIndex, dataIndex, LPFIndex, mzth, tcut):
 	print "NPG HC Peaks Labels: \n", NPGPL
 	NPGLL = myNPG['npghc_labels_list']
 	print "NPG HC Labels List: \n", NPGLL
-	
+
 	print "\nSaving HDF5 analysis..."
 	NPGanalysis, NPGanalysisindex = exp.create_analysis(myNPG)
 	print "done!"
 	print "--- omsi_npg complete ---\n"
 	print "NPG Analysis Index:", NPGanalysisindex
-	
+
 	# flush of npg
 	exp.experiment.file.flush()
 	omsiFile.close_file()
-		
+
 	return NPGanalysisindex
 
 # peak cube generation
 def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
-	
+
 	#Open the input HDF5 file
 	try:
 		omsiFile = omsi_file(omsiInFile,'r+')
 	except:
 		print "Error opening input file \"",omsiInFile,"\": ", sys.exc_info()[0]
 		exit(0)
-	
+
 	# Get the experiment
 	exp = omsiFile.get_experiment( expIndex )
 	data = exp.get_msidata(dataIndex)
 	peaksMZdata = data.mz[:]
 	LPFanalysis = exp.get_analysis( LPFIndex )
 	NPGanalysis = exp.get_analysis( NPGIndex )
-	
+
 	peaksBins = LPFanalysis['LPF_Peaks_MZ'][:]
 	peaksIntensities = LPFanalysis['LPF_Peaks_Vals'][:]
 	peaksArrayIndex = LPFanalysis['LPF_Peaks_ArrayIndex'][:]
 	NPGPeaksLabels = NPGanalysis['npghc_peaks_labels'][:]
 	NPGLabelsList = NPGanalysis['npghc_labels_list'][:]
-	
+
 	print "\n--- Creating Peak Cube ---"
 	myPC = omsi_peakcube(name_key="omsi_peakcube_" + str(ctime()))
 	#myPC.omsi_peakcube_exec(peaksBins, peaksIntensities, peaksArrayIndex, peaksMZdata, NPGPeaksLabels, NPGLabelsList)
@@ -310,22 +310,22 @@ def run_peakcube(omsiInFile, expIndex, dataIndex, LPFIndex, NPGIndex):
 	print "NPG Peak Cube Mzs: \n", PCm.shape, "\n", PCm
 	PMz = myPC['npg_peak_mz']
 	print "NPG Peak Mz: \n", PMz.shape, "\n", PMz
-	
+
 	print "\nSaving HDF5 analysis..."
 	PCanalysis, PCanalysisindex = exp.create_analysis(myPC)
 	print "done!"
 	print "--- omsi_peakcube complete ---\n"
 	print "PeakCube Analysis Index:", PCanalysisindex
-	
-	
+
+
 	# flush of peakcube
 	exp.experiment.file.flush()
 	omsiFile.close_file()
-	
+
 	return PCanalysisindex
 
 # generates pfscript.pbs for carver big memory job
-def generateScript(scriptfile, PFcontent = None, repo = None):	
+def generateScript(scriptfile, PFcontent = None, repo = None):
 
 	mypbs  = "#PBS -q serial\n"
 	mypbs += "#PBS -l pvmem=40GB \n"
@@ -345,7 +345,7 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 		mypbs += PFcontent
 		mypbs += "echo '+ pc complete' \n"
 		mypbs += "date \n"
-		
+
 	mypbs += "echo '[peak cube end]' \n"
 	mypbs += "date \n"
 
@@ -353,16 +353,16 @@ def generateScript(scriptfile, PFcontent = None, repo = None):
 		scriptcheck = 0
 	else:
 		scriptcheck = 1
-		
+
 	try:
 		pbs_file = open(scriptfile, "w+")
 		pbs_file.write(mypbs)
 		pbs_file.close()
 	except:
 		scriptcheck = 0
-		
+
 	return scriptcheck
-	
+
 # help documentation
 def printHelp(thisfilename):
 	print "\n---------- Peak Finder Help: ----------"
@@ -408,7 +408,7 @@ def printHelp(thisfilename):
 	print "\n\t'pc_job.JOBID.cvrsvc09-ib.out.txt'"
 	print "\nThe output file will be available once the job is complete."
 	print "---------------------------------------"
-	
+
 # stop python
 def stop():
 	raw_input("Stop!")
