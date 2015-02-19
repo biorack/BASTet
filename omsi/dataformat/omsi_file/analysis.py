@@ -204,22 +204,23 @@ class omsi_file_analysis(omsi_dependencies_manager,
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
 
         # Write the analysis name
-        analysisidentifierdata = analysis_group.require_dataset(name=unicode(omsi_format_analysis.analysis_identifier),
-                                                                shape=(1,),
-                                                                dtype=omsi_format_common.str_type)
+        analysis_identifier_data = analysis_group.require_dataset(
+            name=unicode(omsi_format_analysis.analysis_identifier),
+            shape=(1,),
+            dtype=omsi_format_common.str_type)
         if omsi_format_common.str_type_unicode:
-            analysisidentifierdata[0] = analysis.get_analysis_identifier()
+            analysis_identifier_data[0] = analysis.get_analysis_identifier()
         else:
-            analysisidentifierdata[0] = str(analysis.get_analysis_identifier())
+            analysis_identifier_data[0] = str(analysis.get_analysis_identifier())
 
         # Write the analysis type
-        analysistypedata = analysis_group.require_dataset(name=unicode(omsi_format_analysis.analysis_type),
-                                                          shape=(1,),
-                                                          dtype=omsi_format_common.str_type)
+        analysis_type_data = analysis_group.require_dataset(name=unicode(omsi_format_analysis.analysis_type),
+                                                            shape=(1,),
+                                                            dtype=omsi_format_common.str_type)
         if omsi_format_common.str_type_unicode:
-            analysistypedata[0] = analysis.get_analysis_type()
+            analysis_type_data[0] = analysis.get_analysis_type()
         else:
-            analysistypedata[0] = str(analysis.get_analysis_type())
+            analysis_type_data[0] = str(analysis.get_analysis_type())
 
         # Write the analysis data
         for ana_data in analysis.get_all_analysis_data():
@@ -227,8 +228,17 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         # Write all the parameters
         parameter_group = analysis_group.require_group(omsi_format_analysis.analysis_parameter_group)
-        for param_data in analysis.get_all_parameter_data():
-            cls.__write_omsi_analysis_data__(parameter_group, param_data)
+        for param_data in analysis.get_all_parameter_data(exclude_dependencies=True):
+            if param_data['required'] or \
+                    param_data['default'] is not None or\
+                    param_data.data_set():
+                cls.__write_omsi_analysis_data__(parameter_group, param_data)
+                # Try to add the help string attribute
+                try:
+                    help_attr = omsi_format_analysis.analysis_parameter_help_attr
+                    parameter_group[param_data['name']].attrs[help_attr] = param_data['help']
+                except KeyError:
+                    pass
 
         # Write all the runtime execution information
         runinfo_group = analysis_group.require_group(omsi_format_analysis.analysis_runinfo_group)
@@ -249,8 +259,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
             cls.__write_omsi_analysis_data__(runinfo_group, anadata)
 
         # Write all data dependencies
+        dependencies = [dep['data'] for dep in analysis.get_all_dependency_data()]
         omsi_file_dependencies.__create__(parent_group=analysis_group,
-                                          dependencies_data_list=analysis.get_all_dependency_data())
+                                          dependencies_data_list=dependencies)
 
         # Execute the custom data write for the analysis
         analysis.write_to_omsi_file(analysis_group)
@@ -268,9 +279,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param ana_data: The omsi_analysis_data object with the description of the data to be written.
         :type ana_data: omsi.analysis.omsi_analysis_data
         """
-
+        from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data
         # Create link in HDF5 to an existing dataset within the file
-        if isinstance(ana_data['dtype'], int):
+        if isinstance(ana_data, omsi_analysis_data) and isinstance(ana_data['dtype'], int):
             if ana_data['dtype'] == ana_data.ana_hdf5link:
                 linkobject = data_group.file.get(ana_data['data'])
                 data_group[ana_data['name']] = linkobject
@@ -307,8 +318,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
             if ana_data['data'].size > 1000:
                 chunks = True
             # Write the current analysis dataset
-            tempdata = data_group.require_dataset(
-                name=ana_data['name'], shape=ana_data['data'].shape, dtype=ana_data['dtype'], chunks=chunks)
+            tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                  shape=ana_data['data'].shape,
+                                                  dtype=ana_data['dtype'],
+                                                  chunks=chunks)
             if ana_data['data'].size > 0:
                 tempdata[:] = ana_data['data']
             else:
@@ -317,9 +330,12 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # Unkown dtype. Attempt to convert the dataset to numpy and write it to
         # file.
         else:
-            print "WARNING: " + str(ana_data['name']) + \
-                  ": The data specified by the analysis object is not " + \
-                  "in numpy format. Attempting to convert the data to numpy"
+            # Savely convert scalars to numpy but warn in case we see something else
+            if ana_data['dtype'] not in [int, float, long, complex, bool, str, unicode,
+                                         'int', 'float', 'long', 'complex', 'bool', 'str', 'unicode']:
+                warnings.warn("WARNING: " + str(ana_data['name']) + \
+                              ": The data specified by the analysis object is not " + \
+                              "in numpy format. Attempting to convert the data to numpy")
             try:
                 dat = np.asarray(ana_data['data'])
                 if len(dat.shape) == 0:
@@ -329,11 +345,11 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 if dat.size > 0:
                     tempdata[:] = dat
                 else:
-                    print "WARNGING: " + ana_data['name'] + \
-                          " dataset generated but not written. The given dataset was empty."
+                    warnings.warn(ana_data['name'] + " dataset generated but not written. The given dataset was empty.")
             except:
-                print "ERROR: " + str(ana_data['name']) + \
-                      ": The data specified by the analysis could not be converted to numpy for writing to HDF5"
+                warnings.warn("ERROR: " + str(ana_data['name']) +
+                              ": The data specified by the analysis could not be " +
+                              "converted to numpy for writing to HDF5")
 
     def __init__(self,
                  analysis_group):
@@ -507,26 +523,42 @@ class omsi_file_analysis(omsi_dependencies_manager,
         return output_list
 
     def get_all_parameter_data(self,
-                               load_data=False):
+                               load_data=False,
+                               exclude_dependencies=False):
         """
         Get all parameter data associated with the analysis.
 
         :param load_data: Should the data be loaded or just the h5py objects be stored in the dictionary.
 
-        :returns: List of omsi_analysis_data objects with names and h5py or numpy object. Access using
+        :returns: List of omsi_parameter_data objects with names and h5py or numpy object. Access using
                  [index]['name'] and [index]['data'].
         """
-        from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+        from omsi.analysis.omsi_analysis_data import omsi_parameter_data
+        from omsi.shared.omsi_dependency import omsi_dependency
         output_list = []
         if self.parameter is not None:
             for item_obj in self.parameter.items():
-                output_list.append(omsi_analysis_data())
-                output_list[-1]['name'] = str(item_obj[0])
+                curr_parameter = omsi_parameter_data(name=unicode(item_obj[0]),
+                                                     help='')
+                curr_parameter_dataset = self.parameter[unicode(item_obj[0])]
+                if omsi_format_analysis.analysis_parameter_help_attr in curr_parameter_dataset.attrs:
+                    curr_parameter['help'] = unicode(
+                        curr_parameter_dataset.attrs[omsi_format_analysis.analysis_parameter_help_attr])
                 if load_data:
-                    output_list[-1]['data'] = self.parameter[unicode(item_obj[0])][:]
+                    curr_parameter['data'] = curr_parameter_dataset[:]
                 else:
-                    output_list[-1]['data'] = self.parameter[unicode(item_obj[0])]
-                output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
+                    curr_parameter['data'] = curr_parameter_dataset
+                curr_parameter['dtype'] = unicode(curr_parameter['data'].dtype)
+                output_list.append(curr_parameter)
+        if not exclude_dependencies:
+            dependency_data = self.get_all_dependency_data(omsi_dependency_format=False)
+            for dep in dependency_data:
+                curr_parameter = omsi_parameter_data(name=dep.get_parameter_name(),
+                                                     help='')
+                curr_parameter['data'] = dep.get_omsi_dependency()
+                curr_parameter['dtype'] = omsi_dependency
+                output_list.append(curr_parameter)
+
         return output_list
 
     def get_all_runinfo_data(self,
@@ -566,7 +598,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
         :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects.
         :param load_runtime_data: Should runtime data be loaded from file (default) or just stored as h5py data objects.
-        :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default)
+        :param dependencies_omsi_format: Should dependencies be loaded as omsi_file API objects (default)
             or just as h5py objects.
 
         :return: Instance of the specific analysis object (e.g, omsi_nmf) that inherits from
