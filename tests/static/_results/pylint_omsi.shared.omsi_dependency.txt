@@ -1,4 +1,5 @@
 ************* Module omsi.shared.omsi_dependency
-R: 27, 4: Too many arguments (6/5) (too-many-arguments)
-R: 66, 4: Too many branches (19/12) (too-many-branches)
-W:162,12: No exception type(s) specified (bare-except)
+W: 33,17: Redefining built-in 'help' (redefined-builtin)
+R: 27, 4: Too many arguments (7/5) (too-many-arguments)
+R: 71, 4: Too many branches (21/12) (too-many-branches)
+W:170,12: No exception type(s) specified (bare-except)

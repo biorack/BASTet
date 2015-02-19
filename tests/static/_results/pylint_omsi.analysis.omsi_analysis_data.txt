@@ -1,0 +1,8 @@
+************* Module omsi.analysis.omsi_analysis_data
+W:183,17: Redefining built-in 'help' (redefined-builtin)
+R:181, 4: Too many arguments (9/5) (too-many-arguments)
+W:307,12: No exception type(s) specified (bare-except)
+W:314, 8: No exception type(s) specified (bare-except)
+W:317,12: No exception type(s) specified (bare-except)
+R:274, 4: Too many branches (14/12) (too-many-branches)
+R:135, 0: Too many public methods (23/20) (too-many-public-methods)
