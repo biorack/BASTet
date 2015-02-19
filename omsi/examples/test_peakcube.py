@@ -1,4 +1,4 @@
-from omsi.dataformat.omsi_file.main_file import omis_file
+from omsi.dataformat.omsi_file.main_file import omsi_file
 import numpy as np
 try :
     from PIL import Image
@@ -9,29 +9,29 @@ import os, sys
 
 def main(argv=None):
     """Then main function"""
-    
+
     import sys
     from sys import argv,exit
-    
+
     if argv is None:
         argv = sys.argv
-   
+
     #Check for correct usage
     if len(argv) <3 :
         printHelp()
         exit(0)
-        
+
     infile = argv[1]
     expIndex = int(argv[2])
     anaIndex = int(argv[3])
     outfileName = argv[4]
-    
+
     #Open the file and get to the data
     #Note the analysis and experiment index may vary for different datasets
-    f = omis_file( infile , 'r' )
+    f = omsi_file( infile , 'r' )
     e = f.get_experiment(expIndex)
     ana = e.get_analysis(anaIndex)
-    #Get the peak finding data abd load it all 
+    #Get the peak finding data abd load it all
     pc = ana[ 'peak_cube' ]
     pm = ana[ 'peak_mz' ]
 
@@ -48,7 +48,7 @@ def main(argv=None):
     for i in range(0,numSlices) :
         sys.stdout.write("[" +str( int( 100.* float(i)/float(numSlices) )) +"%]"+ "\r")
         sys.stdout.flush()
-        
+
         imData = peakCube[:,:,i]
         imData = imData.reshape((xdim,ydim))
         imData = imData / np.max(imData)
@@ -80,11 +80,11 @@ def main(argv=None):
     for i in range( 0 , totalNumRows ):
         sys.stdout.write("[" +str( int( 100.* float(i)/float(totalNumRows) )) +"%]"+ "\r")
         sys.stdout.flush()
-        
+
         if i % numRows == 0 :
             latexFile.write("\\begin{center}\n")
             latexFile.write("\\begin{tabular}{lll}\n")
-        
+
         for ci in xrange(0,numCols) :
             index = i*numCols+ci
             if index < peakMZ.size :
@@ -95,7 +95,7 @@ def main(argv=None):
                 latexFile.write(" & ")
             else :
                 latexFile.write( " \\\\ \n")
-                
+
         for ci in xrange(0,numCols) :
             index = i*numCols+ci
             if index < len(names) :
@@ -106,7 +106,7 @@ def main(argv=None):
                 latexFile.write(" & ")
             else :
                 latexFile.write( " \\\\ \n")
-            
+
         if i%numRows == (numRows-1) or i == (totalNumRows-1) :
             latexFile.write("\\end{tabular}\n")
             latexFile.write("\\end{center}\n")
@@ -114,7 +114,7 @@ def main(argv=None):
     latexFile.write("\\end{document}\n")
 
 def printHelp() :
-    
+
     print "USAGE: Call \"python peakCubeOverview.py HDF5File expIndex anaIndex outFile\" "
     print ""
     print "HDF5File : The OpenMSI HDF5 file to be used"
@@ -130,4 +130,4 @@ def printHelp() :
     print "2) Latex file with a summary of all images. The latex file can be compiled to pdf using pdflatex."
 
 if __name__ == "__main__":
-    main() 
+    main()
