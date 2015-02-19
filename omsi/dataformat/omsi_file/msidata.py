@@ -587,21 +587,23 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         # The object is not fully initalized
         if self.managed_group is None:
-            raise ValueError("The msidata object has not been initalized.")
+            raise ValueError("The msidata object has not been initialized.")
 
         # Complete the input selection if it is only partially specified. In this way we can
-        # assume in the following code that we always have three key selection
-        # parameters
-        if not isinstance(key, tuple):
+        # assume in the following code that we always have three key selection parameters
+        if isinstance(key, basestring):
+            return super(omsi_file_msidata, self).__getitem__(key)
+        elif not isinstance(key, tuple):
             key = (key, slice(None), slice(None))
-        elif len(key) == 1:
-            key = (key, slice(None), slice(None))
-        elif len(key) == 2:
-            key = (key[0], key[1], slice(None))
-        elif len(key) != 3:
-            raise ValueError("Invalid selection")
+        else:
+            if len(key) == 1:
+                key = (key, slice(None), slice(None))
+            elif len(key) == 2:
+                key = (key[0], key[1], slice(None))
+            elif len(key) != 3:
+                raise ValueError("Invalid selection")
 
-        # Check the data format and call the approbriate getitem function
+        # Check the data format and call the appropriate getitem function
         if self.format_type == omsi_format_msidata.format_types['full_cube']:
             return self.__getitem_fullcube__(key)
         elif self.format_type == omsi_format_msidata.format_types['partial_cube']:
