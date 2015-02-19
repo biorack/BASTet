@@ -467,10 +467,14 @@ class omsi_file_dependencydata(omsi_file_common):
         # Save the name of the parameter
         param_name_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_parameter), shape=(1,), dtype=omsi_format_common.str_type)
+        help_attr = omsi_format_dependencydata.dependency_parameter_help_attr
         if omsi_format_common.str_type_unicode:
             param_name_data[0] = dependency_data['param_name']
+            param_name_data.attrs[help_attr] = unicode(dependency_data['help'])
         else:
             param_name_data[0] = str(dependency_data['param_name'])
+            param_name_data.attrs[help_attr] = str(dependency_data['help'])
+
         # Save the selection
         selection_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_selection), shape=(1,), dtype=omsi_format_common.str_type)
@@ -576,6 +580,17 @@ class omsi_file_dependencydata(omsi_file_common):
         """
         return self.managed_group[unicode(omsi_format_dependencydata.dependency_parameter)][0]
 
+    def get_parameter_help(self):
+        """
+        Get the help string for the parameter name if available.
+        """
+        try:
+            group_name = unicode(omsi_format_dependencydata.dependency_parameter)
+            attr_name = unicode(omsi_format_dependencydata.dependency_parameter_help_attr)
+            return self.managed_group.attrs[attr_name]
+        except:
+            return ""
+
     def get_dataset_name(self):
         """
         Get the string indicating the name of dataset. This may be empty as it is only used if the
@@ -642,5 +657,8 @@ class omsi_file_dependencydata(omsi_file_common):
             output_dependency['dataname'] = self.get_dataset_name()
         except:
             output_dependency['dataname'] = None
-
+        try:
+            output_dependency['help'] = self.get_parameter_help()
+        except:
+            pass
         return output_dependency

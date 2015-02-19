@@ -116,8 +116,9 @@ class omsi_format_analysis(omsi_format_common):
     analysis_identifier = "analysis_identifier"
     analysis_type = "analysis_type"
     analysis_parameter_group = "parameter"
+    analysis_parameter_help_attr = 'help'
     analysis_runinfo_group = "runinfo"
-    current_version = "0.1"
+    current_version = "0.2"
 
 
 class omsi_format_dependencydata(omsi_format_common):
@@ -144,7 +145,8 @@ class omsi_format_dependencydata(omsi_format_common):
     dependency_selection = "selection"
     dependency_mainname = "main_name"
     dependency_datasetname = "data_name"
-    current_version = "0.1"
+    dependency_parameter_help_attr = 'help'
+    current_version = "0.2"
 
 
 class omsi_format_dependencies(omsi_format_common):
