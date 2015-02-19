@@ -25,6 +25,14 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`omsi_analysis_driver` Module
+----------------------------------
+
+.. automodule:: omsi.analysis.omsi_analysis_driver
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`omsi_analysis_generic` Module
 -----------------------------------
 

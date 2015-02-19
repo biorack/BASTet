@@ -10,7 +10,12 @@ The implementation of a new analysis is divided into three main steps. We here p
 
 **Step 1) Basic integration of your analysis with OpenMSI (Required)**
 
- The basic integration is simple and should requires only minimal additional effort. The basic integration with the OpenMSI provides full integration of the analysis with the OpenMSI file format and API and provide full support for OpenMSI's data provenance capabilities. It also provides basic integration of the analysis with the website, in that a user will be able to browse the analysis in the online file browser. The basic integration automatically provides full support for the ``qmetadata`` and ``qcube`` URL data access patterns. The basic integration provides limited support for the ``qslice``, ``qspectrum``, and ``qmz`` patterns, in that it automatically exposes all dependencies of the analysis that support these patterns but it does not expose the data of the analysis itself. This is part of step 2.
+ The basic integration is simple and should requires only minimal additional effort. The basic integration with the OpenMSI provides:
+
+  * full integration of the analysis with the OpenMSI file format and API
+  * full support for OpenMSI's data provenance capabilities
+  * full integration with analysis drivers (e.g, the command line driver) enabling direct execution of the analysis with automatic handling of user input specification, help, etc.
+  * basic integration of the analysis with the website, in that a user will be able to browse the analysis in the online file browser. The basic integration automatically provides full support for the ``qmetadata`` and ``qcube`` URL data access patterns. The basic integration provides limited support for the ``qslice``, ``qspectrum``, and ``qmz`` patterns, in that it automatically exposes all dependencies of the analysis that support these patterns but it does not expose the data of the analysis itself. This is part of step 2.
 
 **Step 2)  Integrating your analysis with the OpenMSI web-based viewer (Recommended)**
 
@@ -24,7 +29,7 @@ This step makes your analysis "self-sufficient" in that it allows you to execute
 Some important features of ``omsi_analysis_base``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``omsi.analysis.omsi_analysis_base`` is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) intergration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), and iii) support for data provenance.
+``omsi.analysis.omsi_analysis_base`` is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) integration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), iii) support for data provenance, and iv) in combination with the `omsi_analysis_driver` module enable the direct execution of analysis, e.g, from the command line
 
 Slicing
 """""""
@@ -66,7 +71,21 @@ NOTE: The viewer functions typically support a viewerOption parameter. viewerOpt
 Executing, saving, and restoring an analysis object
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
-Any analysis based on the infrastructure provided by ``omsi_analysis_base`` is fully integrated with OpenMSI file API provided by``omsi.dataformat.omsi_file``. This means the analysis can be directly  API saved to an OMSI HDF5 file and  the saved analysis can be restored from file. In OMSI files, analyses are generally associated with experiments, so that we use the ``omsi.dataformat.omsi_file.omsi_file_experiment`` API here.
+Using the command-line driver we can directly execute analysis as follows:
+
+.. code-block:: python
+
+    python omsi/analysis/omsi_analysis_driver <analysis_module_class> <analysis_parameters>
+
+E.g. to execute a non-negative matrix factorization (NMF) using the `omsi.analysis.multivariate_stats.omsi_nmf` module we can simply:
+
+.. code-block:: python
+
+    python omsi/analysis/omsi_analysis_driver.py multivariate_stats/omsi_nmf.py
+        --msidata "test_brain_convert.h5:/entry_0/data_0"
+        --save "test_ana_save.h5"
+
+Any analysis based on the infrastructure provided by ``omsi_analysis_base`` is fully integrated with OpenMSI file API provided by``omsi.dataformat.omsi_file``. This means the analysis can be directly saved to an OMSI HDF5 file and  the saved analysis can be restored from file. In OMSI files, analyses are generally associated with experiments, so that we use the ``omsi.dataformat.omsi_file.omsi_file_experiment`` API here.
 
 .. code-block:: python
     :linenos:
@@ -153,38 +172,69 @@ The simple steps outlined below provide you now with full integration of your an
             """Initalize the basic data members"""
 
             super(omsi_mypeakfinder,self).__init__()
-            self.parameter_names = [ 'msidata' , 'mzdata', 'integration_width', 'peakheight' ]
-            self.data_names = [ 'peak_cube' , 'peak_mz' ]
+
             self.analysis_identifier = name_key
+            # Define the names of the outputs generated by the analysis
+            self.data_names = [ 'peak_cube' , 'peak_mz' ]
+
+            # Define the input parameters of the analysis
+            dtypes = self.get_default_dtypes()
+            groups = self.get_default_parameter_groups()
+            self.add_parameter(name='msidata',
+                               help='The MSI dataset to be analyzed',
+                               dtype=dtypes['ndarray'],
+                               group=groups['input'],
+                               required=True)
+            self.add_parameter(name='mzdata',
+                               help='The m/z values for the spectra of the MSI dataset',
+                               dtype=dtypes['ndarray'],
+                               group=groups['input'],
+                               required=True)
+            self.add_parameter(name='integration_width',
+                               help='The window over which peaks should be integrated',
+                               dtype=float,
+                               default=0.1,
+                               group=groups['settings'],
+                               required=True)
+            self.add_parameter(name='peakheight',
+                               help='Peak height parameter',
+                               dtype=int,
+                               default=2,
+                               group=groups['settings'],
+                               required=True)
+
 
         def execute_analysis(self) :
             """..."""
-
-            #Set default parameter values for optional parameters
-            if not self['integration_width'] :
-                self['integration_width']=10
-
-            #Copy parameters to local variables for convenience
+            # Copy parameters to local variables. This is purely for convenience and is not mandatory.
+            # NOTE: Input parameters are automatically record (i.e., we don't need to to anything special.
             msidata = self['msidata']
             mzdata = self['mzdata']
-            integration_width = self['integration_width'][0]
-            peakheight = self['peakheight'][0]
+            integration_width = self['integration_width']
+            peakheight = self['peakheight']
 
-            #Implementation of my peakfinding algorithm
+            # Implementation of my peakfinding algorithm
 
             ...
 
-            #Save output data
+            # Return the result.
+            # NOTE: We need to return the output in the order we specified them in self.data_names
+            # NOTE: The outputs will be automatically recorded (i.e., we don't need to anything special).
+            return peakCube, peakMZ
             self['peak_cube'] = peakCube
-            self['peak_mz']   = peakMZ
 
         ...
 
+    # Defining a main function is optional. However, allowing a user to directly execute your analysis
+    # from the command line is simple, as we can easily reuse the command-line driver module
+    if __name__ == "__main__":
+        from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+        omsi_cl_driver(analysis_class=omsi_mypeakfinder).main()
 
 1.1 Creating a new analysis skeleton
 """"""""""""""""""""""""""""""""""""
 
-- Copy the analysis template to the appropriate location where your analysis should live. Any new anlysis should be located in a submodule of the ``omsi.analysis.`` module. E.g., if you implement a new peak finding algorithm, it should be placed in omsi/analysis/findpeaks. For example:
+- Copy the analysis template to the appropriate location where your analysis should live (NOTE: The analysis template may have been updated since this documentation was written). Any new analysis should be located in a submodule of the ``omsi.analysis.`` module. E.g., if you implement a new peak finding algorithm, it should be placed in omsi/analysis/findpeaks. For example:
 
 .. code-block:: none
 
@@ -208,16 +258,15 @@ The simple steps outlined below provide you now with full integration of your an
     all__ = [ "omsi_mypeakfinder",  "omsi_findpeaks_global" , ...]
     from omsi_findpeaks_global import *
     from omsi_findpeaks_local import *
-    from omsi_lpf import *
-    from omsi_npg import *
-    from omsi_peakcube import *
-    from omsi_mypeakfinder import *
+    ...
+
+- The analysis template contains documentation on how to implement a new analysis. Simply search for `EDIT_ME` to locate where you should add code and descriptions of what code to add.
 
 1.2 Specifying analysis inputs and outputs
 """"""""""""""""""""""""""""""""""""""""""
 
 
-In the ``__init__`` function specify the names of the input parameters of your analysis as well as the names of the ouput data generated by your analysis. E.g.,
+In the ``__init__`` function specify the names of the input parameters of your analysis as well as the names of the output data generated by your analysis. Note, the ``__init__`` function should have a signature that allows us to instantiate the analysis without having to provide any inputs. E.g.,
 
 .. code-block:: python
     :linenos:
@@ -227,14 +276,44 @@ In the ``__init__`` function specify the names of the input parameters of your a
         """Initalize the basic data members"""
 
         super(omsi_mypeakfinder,self).__init__()
-        self.parameter_names = [ 'msidata' , 'mzdata', 'integration_width', 'peakheight' ]
-        self.data_names = [ 'peak_cube' , 'peak_mz' ]
         self.analysis_identifier = name_key
+
+        # Define the names of the outputs
+        self.data_names = ['peak_cube', 'peak_mz']
+
+        # Define the input parameters
+        dtypes = self.get_default_dtypes()  # List of default data types. Build-in types are
+                                            # available as well but can be safely used directly as well
+        groups = self.get_default_parameter_groups() # List of default groups to organize parameters. We suggest
+                                                     # to use the 'input' group for all input data to be analyzed
+                                                     # as this will make the integration with OpenMSI easier
+        self.add_parameter(name='msidata',
+                           help='The MSI dataset to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='mzdata',
+                           help='The m/z values for the spectra of the MSI dataset',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='integration_width',
+                           help='The window over which peaks should be integrated',
+                           dtype=float,
+                           default=0.1,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='peakheight',
+                           help='Peak height parameter',
+                           dtype=int,
+                           default=2,
+                           group=groups['settings'],
+                           required=True)
 
 1.3: Implementing the ``execute_analysis`` function
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
-**1.3.1** Document your execute_analysis function. OpenMSI typically uses Sphynx notation in the doc-string.
+**1.3.1** Document your execute_analysis function. OpenMSI typically uses Sphynx notation in the doc-string. The doc-string of the execute_analysis(..) function and the class are used by the analysis driver modules to provide a description of your analysis as part of the help and will also be included in the help string generated by the `get_help_string()` inherited via `omsi_analysis_base` function.
 
 .. code-block:: python
     :linenos:
@@ -242,96 +321,33 @@ In the ``__init__`` function specify the names of the input parameters of your a
 
     def execute_analysis(self) :
         """This analysis computes global peaks in MSI data...
-
-           :param msidata: The input MSI data
-           :param mzdata: The mz axis information for the MSI dataset
-           :param integration_width: The integration width to be used
-           :param peakheight: Minimum peak height threshold.
-
-           :returns: The funtion generated a 'peak_cube' dataset of all
-                     global peaks and 'peak_mz' with the m/z values.
-
         """
 
-**1.3.2** Define default values for any optional input parameters and implement your analysis. s
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 4,5
-
-    def execute_analysis(self) :
-        """..."""
-
-        if not self['integration_width'] :
-            self['integration_width']=10
-
-
-
-**1.3.3**  Implement your analysis. For conveniece it is often useful to assign the your parameters to local variables, although, this is by no means required. Note, all values are stored as 1D+ numpy arrays. I.e., for scalar parameters we need to access the [0] value. E.g.:
+**1.3.2**  Implement your analysis. For convenience it is often useful to assign the your parameters to local variables, although, this is by no means required. Note, all values are stored as 1D+ numpy arrays, however, are automatically converted for you, so that we can just do:
 
 .. code-block:: python
 
-    integration_width = self['integration_width'][0]
+    integration_width = self['integration_width']
 
-**1.3.4** Save the results of your analysis to the respective output variables. This will allow users to conveniently access your results and it enables the OpenMSI file API to save your results to file. We here automatically convert single scalars to 1D numpy arrays to ensure consistency. Although, the data write function can handle a large rangeof python built_in types by automaticaly converting them to numpy for storage in HDF5, we generally recommend to convert use numpy directly here to save your data.
+**1.3.4** Return the outputs of your analysis in the same order as specified in the `self.data_names` you specified in your `__init__` function (here `['peak_cube', 'peak_mz']`):
 
 .. code-block:: python
 
-    self['peak_cube'] = peakCube
-    self['peak_mz']   = peakMZ
+    return peakCube, peakMZ
+
+Results returned by your analysis will be automatically saved to the respective output variables. This allows users to conveniently access your results and it enables the OpenMSI file API to save your results to file. We here automatically convert single scalars to 1D numpy arrays to ensure consistency. Although, the data write function can handle a large range of python built_in types by automatically converting them to numpy for storage in HDF5, we generally recommend to convert use numpy directly here to save your data.
 
 With this you have now completed the basic integration of your analysis with the OpenMSI framework.
 
-
-
-Optional: Custom data save
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In most cases the default data save and restore functions should be sufficient. However, the ``omsi_analysis_base`` API also supports implementation of custom HDF5 write. To extend the existing data write code, simple implement the following function provided by ``omsi_analysis_base`` .
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 1
-
-    def write_to_omsi_file(self , analysisGroup) :
-        """This function can be optionally overwritten to implement a custom data write
-           function for the analysis to be used by the omsi_file API.
-
-           Note, this function should be used only to add additional data to the analysis
-           group. The data that is written by default is typically still written by the
-           omsi_file_experiment.create_analysis() function, i.e., the following data is
-           wirtten by default: i) analysis_identifier ,ii) get_analysis_type,
-           iii)__data_list, iv) __parameter_list , v) __dependency_list. Since the
-           omsi_file.experiment.create_analysis() functions takes care of setting up the
-           basic structure of the analysis storage (included the subgroubs for storing
-           parameters and data dependencies) this setup can generally be assumed to exist
-           before this function is called. This function is called automatically at the
-           end omsi_file.experiment.create_analysis() (i.e, actually
-           omsi_file_analysis.__populate_analysis__(..)) so that this function does not need
-           to be called explicitly.
-
-           Keyword Arguments:
-
-           :param analysisGroup: The omsi_file_analysis object of the group for the
-                                 analysis that can be used for writing.
-
-           """
-        pass
-
-Optional: Custom analysis restore
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Similarly in order implement custom data restore behavior we can overwrite the default implementation of ``omsi_analysis_base.read_from_omsi_file)`` . In this case one will usually call the default implementation via ``super(omsi_myanalysis,self).read_from_omsi_file(...)`` first and then add any additional behavior.
-
 Step 2) Integrating the Analysis with the OpenMSI Web API:
-----------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once the analysis is stored in the OMSI file format, integration with ``qmetadata`` and ``qcube`` calls of the web API is automatic. The ``qmetadata`` and ``qcube`` functions provide general purpose access to the data so that we can immediatly start to program against our analysis.
 
 Some applications---such as the OpenMSI web-based viewer---utilize the simplified, special data access patterns ``qslice``, ``qspectrum``, and ``qmz`` in order to interact with the data. The default implementation of these function available in ``omsi.analysis.omsi_analysis_base`` exposes the data from all depencdencies of the analysis that support these patterns. For full integration with the web API, however, we need to implement this functionality in our analysis class. The ``qmz`` pattern in particular is relevant to both the ``qslice`` and ``qspectrum`` pattern and should be always implemented as soon as one of the two patterns is defined.
 
 2.1 Implementing the ``qslice`` pattern
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: python
     :linenos:
@@ -389,7 +405,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
 
 
 2.2 Implementing the ``qspectrum`` pattern
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: python
     :linenos:
@@ -475,7 +491,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
             return re
 
 2.3 Implementing the ``qmz`` pattern
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""
 
 .. code-block:: python
     :linenos:
@@ -545,3 +561,188 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
                                   0 , qspectrum_viewer_option-1)
 
                 return mzSpectra, labelSpectra, mzSlice, labelSlice
+
+Step 3) Making your analysis self-sufficient
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Making your analysis self sufficient is trivial. If you used the analysis template provided by the toolkit, then you have already completed this step for free. In order to allow a user to run our analysis from the command line we need a main function. We here can simply reuse the command line driver provided by the toolkit. Using the command line driver we can run the analysis via:
+
+.. code-block:: python
+
+    python omsi/analysis/omsi_analysis_driver.py findpeaks.omsi_mypeakfinder
+        --msidata "test_brain_convert.h5:/entry_0/data_0"
+        --mzdata "test_brain_convert.h5:/entry_0/data_0/mz"
+        --save "test_ana_save.h5"
+
+To now enable us to execute our analysis module itself we simply need to add the following code (which is already part of the template)
+
+
+.. code-block:: python
+    :linenos:
+
+    if __name__ == "__main__":
+        from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+        omsi_cl_driver(analysis_class=omsi_mypeakfinder).main()
+
+With this we can now directly execute our analysis from the command line, get a command-line help, specify all our input parameters on the command line, and save our analysis to file. To run the analysis we can now do:
+
+
+.. code-block:: python
+
+    python omsi/analysis/findpeaks/omsi_findpeaks_global.py
+        --msidata "test_brain_convert.h5:/entry_0/data_0"
+        --mzdata "test_brain_convert.h5:/entry_0/data_0/mz"
+        --save "test_ana_save.h5"
+
+This will run our peak finder on the given input data and save the result to the first experiment in the test_ana_save.h5 (the output file will be automatically created if it does not exist).
+
+The command line driver also provides us a well-formated help based on the our parameter specification and the doc-string of the analysis class and its execute_analysis(...) function. E.g:
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    >>> python omsi/analysis/findpeaks/omsi_findpeaks_global.py --help
+
+    usage: omsi_findpeaks_global.py [-h] [--save SAVE] --msidata MSIDATA --mzdata
+                                    MZDATA [--integration_width INTEGRATION_WIDTH]
+                                    [--peakheight PEAKHEIGHT]
+                                    [--slwindow SLWINDOW]
+                                    [--smoothwidth SMOOTHWIDTH]
+
+    class description:
+
+        Basic global peak detection analysis. The default implementation
+        computes the peaks on the average spectrum and then computes the peak-cube data,
+        i.e., the values for the detected peaks at each pixel.
+
+        TODO: The current version assumes 2D data
+
+
+    execution description:
+
+            Execute the global peak finding for the given msidata and mzdata.
+
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --save SAVE           Define the file and experiment where the analysis
+                            should be stored. A new file will be created if the
+                            given file does not exists but the directory does. The
+                            filename is expected to be of the from:
+                            <filename>:<entry_#> . If no experiment index is
+                            given, then experiment index 0 (i.e, entry_0) will be
+                            assumed by default. A validpath may, e.g, be
+                            "test.h5:/entry_0" or jus "test.h5" (default: None)
+
+    analysis settings:
+      Analysis settings
+
+      --integration_width INTEGRATION_WIDTH
+                            The window over which peaks should be integrated
+                            (default: 0.1)
+      --peakheight PEAKHEIGHT
+                            Peak height parameter (default: 2)
+      --slwindow SLWINDOW   Sliding window parameter (default: 100)
+      --smoothwidth SMOOTHWIDTH
+                            Smooth width parameter (default: 3)
+
+    input data:
+      Input data to be analyzed
+
+      --msidata MSIDATA     The MSI dataset to be analyzed (default: None)
+      --mzdata MZDATA       The m/z values for the spectra of the MSI dataset
+                            (default: None)
+
+    how to specify ndarray data?
+    ----------------------------
+    n-dimensional arrays stored in OpenMSI data files may be specified as
+    input parameters via the following syntax:
+          -- MSI data: <filename>.h5:/entry_#/data_#
+          -- Analysis data: <filename>.h5:/entry_#/analysis_#/<dataname>
+          -- Arbitrary dataset: <filename>.h5:<object_path>
+    E.g. a valid definition may look like: 'test_brain_convert.h5:/entry_0/data_0'
+    In rear cases we may need to manually define an array (e.g., a mask)
+    Here we can use standard python syntax, e.g, '[1,2,3,4]' or '[[1, 3], [4, 5]]'
+
+    This command-line tool has been auto-generated using the OpenMSI Toolkit
+
+
+
+Advanced: Customizing core features
+-----------------------------------
+
+Custom data save
+^^^^^^^^^^^^^^^^
+
+In most cases the default data save and restore functions should be sufficient. However, the ``omsi_analysis_base`` API also supports implementation of custom HDF5 write. To extend the existing data write code, simple implement the following function provided by ``omsi_analysis_base`` .
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    def write_to_omsi_file(self , analysisGroup) :
+        """This function can be optionally overwritten to implement a custom data write
+           function for the analysis to be used by the omsi_file API.
+
+           Note, this function should be used only to add additional data to the analysis
+           group. The data that is written by default is typically still written by the
+           omsi_file_experiment.create_analysis() function, i.e., the following data is
+           wirtten by default: i) analysis_identifier ,ii) get_analysis_type,
+           iii)__data_list, iv) __parameter_list , v) __dependency_list. Since the
+           omsi_file.experiment.create_analysis() functions takes care of setting up the
+           basic structure of the analysis storage (included the subgroubs for storing
+           parameters and data dependencies) this setup can generally be assumed to exist
+           before this function is called. This function is called automatically at the
+           end omsi_file.experiment.create_analysis() (i.e, actually
+           omsi_file_analysis.__populate_analysis__(..)) so that this function does not need
+           to be called explicitly.
+
+           Keyword Arguments:
+
+           :param analysisGroup: The omsi_file_analysis object of the group for the
+                                 analysis that can be used for writing.
+
+           """
+        pass
+
+Custom analysis restore
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Similarly in order implement custom data restore behavior we can overwrite the default implementation of :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.read_from_omsi_file` . In this case one will usually call the default implementation via ``super(omsi_myanalysis,self).read_from_omsi_file(...)`` first and then add any additional behavior.
+
+
+Custom analysis execution
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Analysis are typically executed using the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.execute` function we inherit from py:class:`omsi.analysis.omsi_analysis_base.omsi_analysis_base`. The ``execute()`` function controls many pieces, from recording and defining input parameters and outputs to executing the actual analysis. We, therefore, for NOT recommend to overwrite the ``exceute(..)`` function, but rather to customize specific portions of the execution. To do this, `execute()` is broken into a number of functions which are called in a specific order. In this way we can easily overwrite select functions to customize a particular feature without having to overwrite the complete ``execute(..)`` function.
+
+Customizing setting of parameters
+"""""""""""""""""""""""""""""""""
+
+First, the execute function uses :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.update_analysis_parameters` to set all parameters that have been passed to execute accordingly. The default implementation of ``update_analysis_parameters(..)``, hence, simply calls ``self.set_parameter_values(...)`` to set all parameter values. We can customize this behavior simply by overwriting the ``update_analysis_parameters(...)`` function.
+
+Customizing setting of default settings
+"""""""""""""""""""""""""""""""""""""""
+Second, the execute function uses the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.define_missing_parameters` function to set any required parameters that have not been set by the user to their respective values. Overwrite this function to customize how default parameter values are determined/set.
+
+Customizing the recording of runtime information
+""""""""""""""""""""""""""""""""""""""""""""""""
+The recording of runtime information is performed using the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_record_preexecute` and :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_record_postexecute` functions. As the names indicate, the preexecute function is called before the ``execute_analysis`` function is called and records basic system information, and the postexecute function is called after the analysis is completed to record additional information, e.g, the time and duration of the analysis. The function py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_clean_up` is then called to clean up the recorded runtime information (which is stored in `self.run_info`). By default, ``runinfo_clean_up()`` removes any empty entries, i.e., key/value pairs where the value is either None or an empty string. We can customize the clean-up process by overwriting ``runinfo_clean_up()``
+
+Customizing the analysis execution
+""""""""""""""""""""""""""""""""""
+The analysis is completely implemented in the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.execute_analysis` function, which we have to implement in our derived class, i.e, running the analysis is fully custom anyways.
+
+Customizing the recording of analysis outputs
+"""""""""""""""""""""""""""""""""""""""""""""
+Finally (i.e., right before returning analysis results), ``execute(..)`` uses the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.record_execute_analysis_outputs` function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., `self[output_name] = my_output`. By overwriting `record_execute_analysis_outputs(...)` we can customize the recording of data outputs.
+
+
+
+
+
+
+
+
+
