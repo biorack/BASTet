@@ -29,12 +29,24 @@ class omsi_analysis_template(omsi_analysis_base):
         omsi_analysis_base. If you did a replace all then this should be done already.
         """
         super(omsi_analysis_template, self).__init__()
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
         """
         EDIT_ME
 
         Add a list of names of input parameters for your analysis
+        using the self.add_add_parameter.
+
+        For parameters that define n-dimension arrays you should specify the
+        dtypes['ndarray'] as dtype. This will allow discovery
+        of dependencies and proper function with the analysis drivers.
+        Other available dtypes include standard built-ins, e.g,
+        int, float etc. See self.get_default_dtypes() for details.
+
+        It is also recommended to organize parameters into groups using
+        the default set of groups, e.g., groups['input'], groups['settings'],
+        groups['stop'].
         """
-        self.parameter_names = []
         """
         EDIT_ME
 
@@ -71,39 +83,35 @@ class omsi_analysis_template(omsi_analysis_base):
 
         """
         EDIT_ME
-        1) Set default values for any of your input parameters that are optional. E.g,
 
-        if not self['integration_width'] :
-            self['integration_width']=10
-
-        """
-
-        """
-        EDIT_ME
-
-        2) For conveniece it is often useful to assign the your parameters to local
+        1) For conveniece it is often useful to assign the your parameters to local
           variables, although, this is by no means required. Note, all values are
           stored as 1D+ numpy arrays. I.e., for scalar parameters we need to
           access the [0] value. E.g.:
 
-        integration_width = self['integration_width'][0]
+        integration_width = self['integration_width']
         """
 
         """
         EDIT_ME
 
-        3) Implement your analysis here
+        2 Implement your analysis here
         """
 
         """
         EDIT_ME
 
-        4) Add the analysis results and parameters to the anlaysis data so that it can
-           be accessed and written to file. We here convert the single scalars to 1D numpy
-           arrays to ensure consistency. The data write function can handle also a large range
-           of python built_in types by converting them to numpy for storage in HDF5 but to
-           ensure a consitent behavior we convert the values directly here. Saving the data
-           is simple. E.g:
+        3) return the outputs (specified in the order as given in self.data_names as
+           return values for the analysis.
+
+           The analysis results (and parameters) will be automatically recorded
+           so that they can be saved to file.
+
+           If we don't want to automatically record all outputs or otherwise
+           need to customize the recording of outputs, then overwrite the
+           self.record_execute_analysis_outputs() function inherited from
+           omsi_analysis_base. In this case we need to record our outputs
+           manually via:
 
            self['my_result'] = my_output
         """
@@ -365,20 +373,13 @@ class omsi_analysis_template(omsi_analysis_base):
 ############################################################
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
-def main(argv=None):
-    """
-    EDIT_ME : Optional
-
-    Implement this function to enable a user to use your module also as a stand-alone script.
-    Remember, you should always call execute(...) to run your analysis and NOT execute_analysis(...)
-
-    """
-    # Get the input arguments
-    import sys
-    if argv is None:
-        argv = sys.argv
-
-
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    """
+    EDIT_ME
+
+    Simply replace the omsi_analysis_template class name with your class name
+    """
+    omsi_cl_driver(analysis_class=omsi_analysis_template).main()
+
 
