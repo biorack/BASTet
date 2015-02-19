@@ -29,7 +29,8 @@ class omsi_dependency(dict):
                  link_name=None,
                  omsi_object=None,
                  selection=None,
-                 dataname=None):
+                 dataname=None,
+                 help=None):
         """
         Initialize the allowed set of keys.
 
@@ -42,6 +43,7 @@ class omsi_dependency(dict):
         :param dataname: String indicating the dataset within the omsi_object. If the omsi_object
             is an h5py object within a managed Group, then the omsi_object is automatically split
             up into the parent object and dataname.
+        :param help: Optional string describing the object
 
         """
         super(omsi_dependency, self).__init__()
@@ -54,6 +56,7 @@ class omsi_dependency(dict):
         dict.__setitem__(self, 'dataname', None)
         dict.__setitem__(self, 'selection', None)
         dict.__setitem__(self, '_data', None)
+        dict.__setitem__(self, 'help', '')
 
         # Set all the dataname and omsi_object keys to their appropriate values
         if omsi_object is not None:
@@ -62,6 +65,8 @@ class omsi_dependency(dict):
             self.__setitem__('dataname', dataname)
         if selection is not None and len(selection) > 0:  # Ignore None and empty string
             self.__setitem__('selection', selection)
+        if help is not None:
+            self.__setitem__('help', help)
 
     def __setitem__(self,
                     key,
@@ -80,7 +85,7 @@ class omsi_dependency(dict):
                         dict.__setitem__(self, 'dataname', unicode(value.name.split('/')[-1]))
                         # print super(omsi_dependency,self).__str__()
                     else:
-                        print "WARNING: The generated dependency does not point to a managed object."
+                        warnings.warn("The generated dependency does not point to a managed object.")
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
                     dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
                 else:
@@ -110,6 +115,9 @@ class omsi_dependency(dict):
                 dict.__setitem__(self, 'link_name', unicode(value))
             elif key == '_data':
                 raise KeyError('_data key is managed by omsi_dependency. Explicit definition of _data not permitted.')
+            elif key == 'help':
+                if isinstance(value, basestring):
+                    dict.__setitem__(self, 'help', unicode(value))
             else:
                 dict.__setitem__(self, key, value)
             # print super(omsi_dependency,self).__str__()
