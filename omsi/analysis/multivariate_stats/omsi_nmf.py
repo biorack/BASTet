@@ -12,7 +12,35 @@ class omsi_nmf(omsi_analysis_base):
         """Initalize the basic data members"""
         super(omsi_nmf, self).__init__()
         self.analysis_identifier = name_key
-        self.parameter_names = ['msidata', 'numComponents', 'timeOut', 'numIter', 'tolerance']
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI matrix to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           required=True,
+                           group=groups['input'])
+        self.add_parameter(name='numComponents',
+                           help='The number of output components to compute.',
+                           default=20,
+                           dtype=int,
+                           required=True,
+                           group=groups['settings'])
+        self.add_parameter(name='timeOut',
+                           help='Time in seconds after which to terminate.',
+                           default=600,
+                           dtype=int,
+                           required=True,
+                           group=groups['stop'])
+        self.add_parameter(name='numIter',
+                           help='Maximum number of iterations.',
+                           dtype=int,
+                           default=2000,
+                           group=groups['stop'])
+        self.add_parameter(name='tolerance',
+                           help='The tolerance for a relative stopping condition.',
+                           dtype=float,
+                           default=0.0001,
+                           group=groups['stop'])
         self.data_names = ['wo', 'ho']
 
     @classmethod
@@ -104,26 +132,10 @@ class omsi_nmf(omsi_analysis_base):
         return slice_viewer_options
 
     def execute_analysis(self):
-        """Execute the nmf for the given msidata
-
-           Keyword Arguments:
-           :param msidata: h5py data object with the msi data. (Mandatory user input)
-           :param numComponents: Number of components to compute. (Default=20)
-           :param timeOut: Maximum time it should take. (Default=600)
-           :param numIter: Number of iterations. (Default=2000)
-           :param tolerance: tolerance for a relative stopping condition. (Default=0.0001)
-
+        """
+        Execute the nmf for the given msidata
         """
         from omsi.analysis.multivariate_stats.third_party.nmf import nmf
-        # Define default settings for parameters
-        if not self['numComponents']:
-            self['numComponents'] = 20
-        if not self['timeOut']:
-            self['timeOut'] = 600
-        if not self['numIter']:
-            self['numIter'] = 2000
-        if not self['tolerance']:
-            self['tolerance'] = 0.0001
 
         # Assign parameters to local variables for convenience
         current_msidata = self['msidata']
@@ -162,112 +174,113 @@ class omsi_nmf(omsi_analysis_base):
         ho_matrix = ho_matrix.transpose()
         ho_matrix = ho_matrix.reshape((shape_x, shape_y, current_num_components))
 
-        # Save the analysis data to the __data_list so that the data can
-        # be saved automatically by the omsi HDF5 file API
-        self['wo'] = wo_matrix
-        self['ho'] = ho_matrix
-
-
-def main(argv=None):
-    """Then main function"""
-
-    import sys
-    from sys import argv, exit
-    import matplotlib.pyplot as plt
-    import matplotlib.gridspec as gridspec
-    from math import log
-    from omsi.dataformat.omsi_file import  omsi_file
-
-    if argv is None:
-        argv = sys.argv
-
-    # Check for correct usage
-    if len(argv) < 2:
-        print "USAGE: Call \"omsi_nmf [expIndex dataIndex]   \" "
-        print "\n"
-        print "This is a simple viewer for looking at OMSI HDF5 files."
-        print "The viewer takes the index of the experiment and the"
-        print "dataset to be used as optional input"
-        exit(0)
-
-    # Read the input arguments
-    omsi_output_file = argv[1]
-    experiment_index = 0
-    data_index = 0
-    if len(argv) == 4:
-        experiment_index = int(argv[2])
-        data_index = int(argv[3])
-
-    # Open the input HDF5 file
-    omsi_input_file = omsi_file(omsi_output_file, 'r')  # Open file in read only mode
-
-    # Get the experiment and dataset
-    exp = omsi_input_file.get_experiment(experiment_index)
-    data = exp.get_msidata(data_index)
-
-    # Execute the nmf
-    test_nmf = omsi_nmf()
-    print "Executing nmf analysis"
-    test_nmf.execute(msidata=data)
-    print "Getting nmf analysis results"
-    wo_dataset = test_nmf.get_analysis_data('wo')['data']
-    ho_dataset = test_nmf.get_analysis_data('ho')['data']
-    print ho_dataset
-    print "Plotting nmf analysis results"
-    shape_x = data.shape[0]
-    shape_y = data.shape[1]
-    ho1 = ho_dataset[0, :]
-    ho1 = np.ravel(ho1)
-    ho1 = ho1.reshape(shape_x, shape_y)
-
-    ho2 = ho_dataset[1, :]
-    ho2 = np.ravel(ho2)
-    ho2 = ho2.reshape(shape_x, shape_y)
-
-    ho3 = ho_dataset[2, :]
-    ho3 = np.ravel(ho3)
-    ho3 = ho3.reshape(shape_x, shape_y)
-
-    main_figure = plt.figure()
-    figure_grid_spec = gridspec.GridSpec(1, 4)
-    image_figure = main_figure.add_subplot(figure_grid_spec[0])
-#    image_figure.autoscale(True,'both',tight=True)
-    image_plot = image_figure.pcolor(log(ho1 + 1))
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[1])
-#    image_figure.autoscale(True,'both',tight=True)
-    image_plot = image_figure.pcolor(log(ho2 + 1))
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[2])
-#    image_figure.autoscale(True,'both',tight=True)
-    image_plot = image_figure.pcolor(log(ho3 + 1))
-
-
-#    do the three color
-    ho_dataset = ho_dataset.transpose()
-    ho_dataset = ho_dataset.reshape(shape_x, shape_y, 3)
-    temp = log(ho_dataset[:, :, 0] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho_dataset[:, :, 0] = temp
-
-    temp = log(ho_dataset[:, :, 1] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho_dataset[:, :, 1] = temp
-
-    temp = log(ho_dataset[:, :, 2] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho_dataset[:, :, 2] = temp
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[3])
-    image_figure.autoscale(True, 'both', tight=True)
-    image_plot = image_figure.imshow(ho_dataset)
-
-    plt.show()
-
+        return wo_matrix, ho_matrix
 
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    omsi_cl_driver(analysis_class=omsi_nmf).main()
+
+
+# def main(argv=None):
+#     """Then main function"""
+#
+#     import sys
+#     from sys import argv, exit
+#     import matplotlib.pyplot as plt
+#     import matplotlib.gridspec as gridspec
+#     from math import log
+#     from omsi.dataformat.omsi_file import  omsi_file
+#
+#     if argv is None:
+#         argv = sys.argv
+#
+#     # Check for correct usage
+#     if len(argv) < 2:
+#         print "USAGE: Call \"omsi_nmf [expIndex dataIndex]   \" "
+#         print "\n"
+#         print "This is a simple viewer for looking at OMSI HDF5 files."
+#         print "The viewer takes the index of the experiment and the"
+#         print "dataset to be used as optional input"
+#         exit(0)
+#
+#     # Read the input arguments
+#     omsi_output_file = argv[1]
+#     experiment_index = 0
+#     data_index = 0
+#     if len(argv) == 4:
+#         experiment_index = int(argv[2])
+#         data_index = int(argv[3])
+#
+#     # Open the input HDF5 file
+#     omsi_input_file = omsi_file(omsi_output_file, 'r')  # Open file in read only mode
+#
+#     # Get the experiment and dataset
+#     exp = omsi_input_file.get_experiment(experiment_index)
+#     data = exp.get_msidata(data_index)
+#
+#     # Execute the nmf
+#     test_nmf = omsi_nmf()
+#     print "Executing nmf analysis"
+#     test_nmf.execute(msidata=data)
+#     print "Getting nmf analysis results"
+#     wo_dataset = test_nmf.get_analysis_data('wo')['data']
+#     ho_dataset = test_nmf.get_analysis_data('ho')['data']
+#     print ho_dataset
+#     print "Plotting nmf analysis results"
+#     shape_x = data.shape[0]
+#     shape_y = data.shape[1]
+#     ho1 = ho_dataset[0, :]
+#     ho1 = np.ravel(ho1)
+#     ho1 = ho1.reshape(shape_x, shape_y)
+#
+#     ho2 = ho_dataset[1, :]
+#     ho2 = np.ravel(ho2)
+#     ho2 = ho2.reshape(shape_x, shape_y)
+#
+#     ho3 = ho_dataset[2, :]
+#     ho3 = np.ravel(ho3)
+#     ho3 = ho3.reshape(shape_x, shape_y)
+#
+#     main_figure = plt.figure()
+#     figure_grid_spec = gridspec.GridSpec(1, 4)
+#     image_figure = main_figure.add_subplot(figure_grid_spec[0])
+# #    image_figure.autoscale(True,'both',tight=True)
+#     image_plot = image_figure.pcolor(log(ho1 + 1))
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[1])
+# #    image_figure.autoscale(True,'both',tight=True)
+#     image_plot = image_figure.pcolor(log(ho2 + 1))
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[2])
+# #    image_figure.autoscale(True,'both',tight=True)
+#     image_plot = image_figure.pcolor(log(ho3 + 1))
+#
+#
+# #    do the three color
+#     ho_dataset = ho_dataset.transpose()
+#     ho_dataset = ho_dataset.reshape(shape_x, shape_y, 3)
+#     temp = log(ho_dataset[:, :, 0] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho_dataset[:, :, 0] = temp
+#
+#     temp = log(ho_dataset[:, :, 1] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho_dataset[:, :, 1] = temp
+#
+#     temp = log(ho_dataset[:, :, 2] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho_dataset[:, :, 2] = temp
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[3])
+#     image_figure.autoscale(True, 'both', tight=True)
+#     image_plot = image_figure.imshow(ho_dataset)
+#
+#     plt.show()
+#
+#
+# if __name__ == "__main__":
+#     main()
 

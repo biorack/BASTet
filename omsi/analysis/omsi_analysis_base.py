@@ -6,7 +6,7 @@ OpenMSI science gateway.
 from omsi.dataformat.omsi_file.format import omsi_format_common
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
 from omsi.shared.omsi_dependency import omsi_dependency
 import platform
 import time
@@ -29,32 +29,25 @@ class omsi_analysis_base(object):
     default the data is retrieved from __data_list and the __getitem__(key) function. which implements
     the [..] operator, returns __data_list[key]['data']. The key is a string indicating the name of
     the parameter to be retrieved. If the key is not found in the __data_list then the function will
-    try to retrieve the data from __parameter_list instead. By adding "parameter/key" or "dependency/key"
-    one may also explicitly retrieve values from the __parameter_list and __dependency_list.
+    try to retrieve the data from self.parameters list instead. By adding "parameter/key" or "dependency/key"
+    one may also explicitly retrieve values from the parameters.
 
     **Instance Variables:**
 
     :ivar analysis_identifier: Define the name for the analysis used as key in search operations
-    :ivar __data_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived classes \
-    need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. \
-    See omsi.analysis.omsi_analysis_data for details.
-    :ivar  __parameter_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived \
-         classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file \
-         to this dictionary. See omsi.analysis.omsi_analysis_data for details.
-    :ivar  __dependency_list: Dictonary of omsi_dependency to be written to the HDF5 file. Derived classes \
-         need to add all dependencies data that should be saved for the analysis in the omsi HDF5 file to this \
-         dictionary. See omsi.analysis.omsi_analysis_data for details.
-    :ivar parameter_names: List of strings of all names of analysis parameters \
-         (including those that may have dependencies). This is the combination of \
-         all target keys of __dependency_list and __parameter_list.
-    :ivar data_names: List of strings of all names of analysis output datasets. These are the \
+    :ivar __data_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived classes
+        need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary.
+        See omsi.analysis.omsi_analysis_data for details.
+    :ivar parameters: List of omsi_parameter_data objects of all  analysis parameters
+         (including those that may have dependencies).
+    :ivar data_names: List of strings of all names of analysis output datasets. These are the
          target keys for __data_list.
 
     **Execution Functions:**
 
     * ``execute`` : Then main function the user needs to call in order to execute the analysis
     * ``execute_analysis: This function needs to be implemented by child classes of `omsi_analysis_base` \
-    to implement the specifics of executing the analysis.
+        to implement the specifics of executing the analysis.
 
     **I/O functions:**
 
@@ -111,31 +104,27 @@ class omsi_analysis_base(object):
         """Initalize the basic data members"""
         self.analysis_identifier = "undefined"
         self.__data_list = []
-        self.__parameter_list = []
-        self.__dependency_list = []
-        self.parameter_names = []
+        self.parameters = []
         self.data_names = []
         self.run_info = {}
 
     def __getitem__(self,
                     key):
-        """This class supports basic slicing to access data stored in the main member variables.
-           By default the data is retrieved from __data_list and the __getitem__(key) function.
-           which implemtent the [..] operator, returns __data_list[key]['data']. The key is
-           a string indicating the name of the parameter to be retrieved. If the key is not
-           found in the __data_list then the function will try to retrieve the data from
-           __parameter_list and __dependency_list instead.
+        """
+        This class supports basic slicing to access data stored in the main member variables.
+        By default the data is retrieved from __data_list and the __getitem__(key) function.
+        which implemtent the [..] operator, returns __data_list[key]['data']. The key is
+        a string indicating the name of the parameter to be retrieved. If the key is not
+        found in the __data_list then the function will try to retrieve the data from
+        the self.parameters list.
         """
         if isinstance(key, str) or isinstance(key, unicode):
             for i in self.__data_list:
                 if i['name'] == key:
                     return i['data']
-            for i in self.__parameter_list:
+            for i in self.parameters:
                 if i['name'] == key:
-                    return i['data']
-            for i in self.__dependency_list:
-                if i['param_name'] == unicode(key):
-                    return i.get_data()
+                    return i.get_data_or_default()
             return None
         else:
             return None
@@ -143,13 +132,14 @@ class omsi_analysis_base(object):
     def __setitem__(self,
                     key,
                     value):
-        """Set values in the __data, __parameter and __dependencies dicts.
-           If the given key is found in the parameter_names list then it is assigned
-           to the paramerters/dependencies, otherwise the key is assumed to be a
-           an output that needs to be added to the __data_list
         """
-        if key in self.parameter_names:
-            self.set_parameters(**{key: value})
+        Set values in the __data, or parameters lists.
+        If the given key is found in the parameters list then it is assigned
+        to the paramerters/dependencies, otherwise the key is assumed to be a
+        an output that needs to be added to the __data_list
+        """
+        if key in self.get_parameter_names():
+            self.set_parameter_values(**{key: value})
         elif key in self.data_names:
             if 'numpy' not in str(type(value)):
                 temp_value = np.asarray(value)
@@ -162,6 +152,33 @@ class omsi_analysis_base(object):
                                                            dtype=value.dtype))
         else:
             raise KeyError('Invalid key. The given key was not found as part of the analysis parameters nor output.')
+
+    def update_analysis_parameters(self, **kwargs):
+        """
+        Record the analysis parameters pass to the execute() function.
+
+        The default implementation simply calls the set_parameter_values(...) function.
+        This function may be overwritten to customize the behavior of how parameters
+        are recorded by the execute function.
+
+        :param kwargs: Dictionary of keyword arguments with the parameters passed to the execute(..) function
+
+        """
+        self.set_parameter_values(**kwargs)
+
+    def define_missing_parameters(self):
+        """
+        Called by the execute function before self.update_analysis_parameters
+        to set any required parameters that have not been defined to their respective default values.
+
+        This function may be overwritten in child classes to customize
+        the definition of default parameter values and to apply any
+        modifications (or checks) of parameters before the analysis is executed.
+        Any changes applied here will be recorded in the parameter of the analysis.
+        """
+        for param in self.parameters:
+            if param['required'] and not param.data_set():
+                param['data'] = param['default']
 
     def runinfo_record_preexecute(self):
         """
@@ -216,7 +233,7 @@ class omsi_analysis_base(object):
     def runinfo_record_postexecute(self,
                                    execution_time):
         """
-        Dunction used to record runtime information after the
+        Function used to record runtime information after the
         `execute_analysis(...)` function has completed
         The function may be overwritten in child classes to add recording of
         additional runtime information. All runtime data should be recorded in the
@@ -254,17 +271,41 @@ class omsi_analysis_base(object):
             except:
                 pass
 
+    def record_execute_analysis_outputs(self, analysis_output):
+        """
+        Function used internally by execute to record the output
+        of the custom execute_analysis(...) function to the __data_list.
+
+        This function may be overwritten in child classes in order to
+        customize the behavior for recording data outputs. Eg., for some
+        analyses one may only want to record a particular set of outputs,
+        rather than all outputs generated by the analysis.
+
+        :param analysis_output: The output of the execute_analysis(...) function to be recorded
+        """
+        # Record the analysis output so that we can save it to file
+        if analysis_output is not None:
+            if len(self.data_names) == 1:   # We need this case, because analysis_output is not a tuple we can slice
+                self[self.data_names[0]] = analysis_output
+            else:
+                for data_index, data_name in enumerate(self.data_names):
+                    self[data_name] = analysis_output[data_index]
+
     def execute(self, **kwargs):
         """
         Use this function to run the analysis.
 
         :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
-        the __setitem__ mechanism or as baches using the set_parameters function.
+            the __setitem__ mechanism or as baches using the set_parameter_values function.
 
-            :returns: This function returns the output of the execute analysis function.
+        :returns: This function returns the output of the execute analysis function.
+
         """
         # Set any parameters that are given to the execute function
-        self.set_parameters(**kwargs)
+        self.update_analysis_parameters(**kwargs)
+
+        # Set the parameters that required parameters that have a default value but that have not been initialized
+        self.define_missing_parameters()
 
         # Record basic execution provenance information prior to running the analysis
         self.run_info = {}
@@ -278,6 +319,9 @@ class omsi_analysis_base(object):
         execution_time = time.time() - start_time
         self.runinfo_record_postexecute(execution_time=execution_time)
         self.runinfo_clean_up()
+
+        # Record the analysis output
+        self.record_execute_analysis_outputs(analysis_output=analysis_output)
 
         # Return the output of the analysis
         return analysis_output
@@ -301,17 +345,18 @@ class omsi_analysis_base(object):
                  analysis_object,
                  z,
                  viewer_option=0):
-        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+        """
+        Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
 
-           :param analysis_object: The omsi_file_analysis object for which slicing should be performed
-           :param z: Selection string indicting which z values should be selected.
-           :param viewer_option: If multiple default viewer behaviors are available for a given analysis
-                                then this option is used to switch between them.
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param z: Selection string indicting which z values should be selected.
+        :param viewer_option: If multiple default viewer behaviors are available for a given analysis
+                            then this option is used to switch between them.
 
-           :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be
-                     performed typically like [:,:,zmin:zmax].
+        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be
+                 performed typically like [:,:,zmin:zmax].
 
-           :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
+        :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         from omsi.shared.omsi_data_selection import check_selection_string, \
@@ -350,16 +395,16 @@ class omsi_analysis_base(object):
         """
         Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
 
-        **Developer Note:* h5py currently supports only a single index list. If the user provides an index-list for both
-        x and y, then we need to construct the proper merged list and load the data manually, or if
+        **Developer Note:** h5py currently supports only a single index list. If the user provides an index-list
+        for both x and y, then we need to construct the proper merged list and load the data manually, or if
         the data is small enough, one can load the full data into a numpy array which supports
-        mulitple lists in the selection.
+        multiple lists in the selection.
 
         :param analysis_object: The omsi_file_analysis object for which slicing should be performed
         :param x: x selection string
         :param y: y selection string
         :param viewer_option: If multiple default viewer behaviors are available for a given
-        analysis then this option is used to switch between them.
+            analysis then this option is used to switch between them.
 
         :returns: The following two elements are expected to be returned by this function :
 
@@ -428,9 +473,9 @@ class omsi_analysis_base(object):
 
         :param analysis_object: The omsi_file_analysis object for which slicing should be performed
         :param qslice_viewer_option: If multiple default viewer behaviors are available for a given
-        analysis then this option is used to switch between them for the qslice URL pattern.
+            analysis then this option is used to switch between them for the qslice URL pattern.
         :param qspectrum_viewer_option: If multiple default viewer behaviors are available for a
-        given analysis then this option is used to switch between them for the qspectrum URL pattern.
+            given analysis then this option is used to switch between them for the qspectrum URL pattern.
 
         :returns: The following four arrays are returned by the analysis:
 
@@ -438,6 +483,7 @@ class omsi_analysis_base(object):
             - labelSpectra : Lable for the spectral mz axis
             - mzSlice : Array of the static mz values for the slices or None if identical to the mzSpectra.
             - labelSlice : Lable for the slice mz axis or None if identical to labelSpectra.
+
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index = \
@@ -492,7 +538,8 @@ class omsi_analysis_base(object):
             required data is available).
 
         :returns: List of strings indicating the different available viewer options. The list should be empty if
-        the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).
+            the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).
+
         """
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index = \
             cls.__construct_dependent_viewer_options__(analysis_object)
@@ -503,18 +550,19 @@ class omsi_analysis_base(object):
                                 analysis_object):
         """
         Get a list of strings describing the different default viewer options for the analysis for qslice.
-        The default implementation tries to take care of handling the spectra retrieval for all the depencies
+        The default implementation tries to take care of handling the spectra retrieval for all the dependencies
         but can naturally not decide how the qspectrum should be handled by a derived class. However, this
         implementation is often called at the end of custom implementations to also allow access to data from
         other dependencies.
 
         :param analysis_object: The omsi_file_analysis object for which slicing should be performed.  For most cases
-        this is not needed here as the support for slice operations is usually a static decission based on
-        the class type, however, in some cases additional checks may be needed (e.g., ensure that the required
-        data is available).
+            this is not needed here as the support for slice operations is usually a static decission based on
+            the class type, however, in some cases additional checks may be needed (e.g., ensure that the required
+            data is available).
 
         :returns: List of strings indicating the different available viewer options. The list should be empty
-        if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
+            if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
+
         """
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index = \
             cls.__construct_dependent_viewer_options__(analysis_object)
@@ -560,14 +608,14 @@ class omsi_analysis_base(object):
             elif isinstance(di['omsi_object'], omsi_file_analysis):
                 slice_options = omsi_viewer_helper.get_qslice_viewer_options(di['omsi_object'])
                 spectrum_options = omsi_viewer_helper.get_qspectrum_viewer_options(di['omsi_object'])
-                for si in range(0, len(slice_options)):
-                    re_slice.append(slice_options[si])
+                for sloption_index in range(0, len(slice_options)):
+                    re_slice.append(slice_options[sloption_index])
                     re_slicedata.append(di['omsi_object'])
-                    re_slice_option_index.append(si)
-                for si in range(0, len(spectrum_options)):
-                    re_spectrum.append(spectrum_options[si])
+                    re_slice_option_index.append(sloption_index)
+                for sloption_index in range(0, len(spectrum_options)):
+                    re_spectrum.append(spectrum_options[sloption_index])
                     re_spectrumdata.append(di['omsi_object'])
-                    re_spectrum_option_index.append(si)
+                    re_spectrum_option_index.append(sloption_index)
                 # analysisType = str(anaObj.get_analysis_type()[0])
                 # if omsi_viewer_helper.supports_slice( di['omsi_object']) :
                 #     re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
@@ -579,72 +627,108 @@ class omsi_analysis_base(object):
                 warnings.warn("Unknown dependency")
         return re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index
 
+    @staticmethod
+    def get_default_dtypes():
+        """
+        Get a list of available default dtypes used for analyses.
+        Same as `omsi_analysis_dtypes.get_dtypes()`.
+        """
+        return omsi_analysis_dtypes.get_dtypes()
+
+    @staticmethod
+    def get_default_parameter_groups():
+        """
+        Get a list of commonly used parameter groups and associated descriptions.
+
+        Use of default groups provides consistency and allows other system to
+        design custom behavior around the semantic of parameter groups
+
+        :return: Dictionary where the keys are the short names of the groups and the
+            values are dicts with following keys:value pairs: 'name' , 'description'.
+            Use the 'name' to define the group to be used.
+        """
+        return {'stop': {'name': 'stop conditions',
+                         'description': 'Termination criteria for the analysis'},
+                'input': {'name': 'input data',
+                          'description': 'Input data to be analyzed'},
+                'settings': {'name': 'analysis settings',
+                             'description': 'Analysis settings'}}
+
+    def get_help_string(self):
+        """
+        Get a string describing the analysis.
+
+        :return: Help string describing the analysis and its parameters
+        """
+        from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+        temp_driver = omsi_cl_driver(analysis_class=self.__class__)
+        temp_driver.initialize_argument_parser()
+        return temp_driver.parser.format_help()
+
     def get_analysis_type(self):
-        """Return a string indicating the type of analysis performed"""
+        """
+        Return a string indicating the type of analysis performed
+        """
         return self.__module__  # self.__class__.__name__
 
     def get_analysis_data_names(self):
-        """Get a list of all analysis dataset names."""
+        """
+        Get a list of all analysis dataset names.
+        """
         return self.data_names
 
     def get_parameter_names(self):
-        """Get a list of all parameter dataset names (including those that may define
-           dependencies."""
-        return self.parameter_names
+        """
+        Get a list of all parameter dataset names (including those that may define
+        dependencies.
+        """
+        return [param['name'] for param in self.parameters]
 
     def get_analysis_data(self,
                           index):
-        """Given the index return the associated dataset to be written to the HDF5 file
+        """
+        Given the index return the associated dataset to be written to the HDF5 file
 
-          :param index : Retrun the index entry of the private member __data_list.
+        :param index : Retrun the index entry of the private member __data_list.
         """
         return self.__data_list[index]
 
     def get_parameter_data(self,
                            index):
-        """Given the index return the associated dataset to be written to the HDF5 file
-
-          :param index : Retrun the index entry of the private member __parameter_list.
         """
-        return self.__parameter_list[index]
+        Given the index return the associated dataset to be written to the HDF5 file
 
-    def get_dependency_data(self,
-                            index):
-        """Given the index return the associated dataset to be written to the HDF5 file
-
-          :param index : Retrun the index entry of the private member __parameter_list.
+        :param index : Return the index entry of the private member parameters.
         """
-        return self.__dependency_list[index]
+        return self.parameters[index]
 
     def get_analysis_data_by_name(self,
                                   dataname):
-        """Given the key name of the data return the associated omsi_analysis_data object.
+        """
+        Given the key name of the data return the associated omsi_analysis_data object.
 
-          :param dataname: Name of the analysis data requested from the private __data_list member.
+        :param dataname: Name of the analysis data requested from the private __data_list member.
+
+        :returns: The omsi_analysis_data object or None if not found.
         """
         for i in self.__data_list:
             if i['name'] == dataname:
                 return i
+        return None
 
     def get_parameter_data_by_name(self,
                                    dataname):
-        """Given the key name of the data return the associated omsi_analysis_data object.
-
-          :param dataname: Name of the parameter requested from the private __parameter_list member.
         """
-        for i in self.__parameter_list:
+        Given the key name of the data return the associated omsi_parameter_data object.
+
+        :param dataname: Name of the parameter requested from the parameters member.
+
+        :returns: The omsi_parameter_data object or None if not found
+        """
+        for i in self.parameters:
             if i['name'] == dataname:
                 return i
-
-    def get_dependency_data_by_name(self,
-                                    dataname):
-        """Given the key name of the data return the associated omsi_analysis_data object.
-
-          :param dataname: Name of the dependency requested from the private __dependency_list member.
-        """
-        for i in self.__dependency_list:
-            if i['name'] == dataname:
-                return i
+        return None
 
     def get_all_run_info(self):
         """Get the dict with the complete info about the last run of the analysis"""
@@ -654,18 +738,32 @@ class omsi_analysis_base(object):
         """Get the complete list of all analysis datasets to be written to the HDF5 file"""
         return self.__data_list
 
-    def get_all_parameter_data(self):
-        """Get the complete list of all parameter datasets to be written to the HDF5 file"""
-        return self.__parameter_list
+    def get_all_parameter_data(self,
+                               exclude_dependencies=False):
+        """
+        Get the complete list of all parameter datasets to be written to the HDF5 file
+
+        :param exclude_dependencies: Boolean indicating whether we should exclude parameters
+            that define dependencies from the list
+        """
+        if exclude_dependencies:
+            return [param for param in self.parameters if not param.is_dependency()]
+        else:
+            return self.parameters
 
     def get_all_dependency_data(self):
-        """Get the complete list of all direct dependencies to be written to the HDF5 file
-
-           NOTE: These are only the direct dependencies as sepecified by the analysis itself. \
-           Use  get_all_dependency_data_recursive(..) to also get the indirect depencies of \
-           the analysis due to dependencies of the depencies themself.
         """
-        return self.__dependency_list
+        Get the complete list of all direct dependencies to be written to the HDF5 file
+
+        NOTE: These are only the direct dependencies as specified by the analysis itself. \
+        Use  get_all_dependency_data_recursive(..) to also get the indirect depencies of \
+        the analysis due to dependencies of the depencies themself.
+        """
+        dependency_list = []
+        for param in self.parameters:
+            if param.is_dependency():
+                dependency_list.append(param)
+        return dependency_list
 
     def get_num_analysis_data(self):
         """Retrun the number of analysis datasets to be wirtten to the HDF5 file"""
@@ -673,11 +771,11 @@ class omsi_analysis_base(object):
 
     def get_num_parameter_data(self):
         """Retrun the number of parameter datasets to be wirtten to the HDF5 file"""
-        return len(self.__parameter_list)
+        return len(self.parameters)
 
     def get_num_dependency_data(self):
-        """Retrun the number of dependencies to be wirtten to the HDF5 file"""
-        return len(self.__dependency_list)
+        """Return the number of dependencies to be wirtten to the HDF5 file"""
+        return len(self.get_all_dependency_data())
 
     def clear_analysis_data(self):
         """Clear the list of analysis data"""
@@ -685,32 +783,30 @@ class omsi_analysis_base(object):
 
     def clear_parameter_data(self):
         """Clear the list of parameter data"""
-        self.__parameter_list = []
-
-    def clear_dependency_data(self):
-        """Clear the list of parameter data"""
-        self.__dependency_list = []
+        for param in self.parameters:
+            param.clear_data()
 
     def clear_analysis(self):
         """Clear all analysis, parameter and dependency data"""
         self.clear_analysis_data()
         self.clear_parameter_data()
-        self.clear_dependency_data()
 
-    def set_parameters(self,
-                       **kwargs):
-        """Set all parameters given as input to the function. The inputs
-           are placed in either the __parameter_list or __dependency_list,
-           depending on whether the given input is user-defined or whether
-           the input has dependencies
+    def set_parameter_values(self,
+                             **kwargs):
+        """
+        Set all parameters given as input to the function. The inputs
+        are placed in the self.parameters list. If the parameter refers
+        to an existing h5py.Dataset, h5py.Group,  managed h5py object,
+        or is an instance of an existing omis_analysi_base object, then
+        a omsi_dependency will be created and stored as value instead.
 
-           :param **kwargs: Dictionary of keyword arguments. All keys are
-                   expected to be strings. All values are expected to be
-                   either i) numpy arrays, ii) int, float, str or unicode
-                   variables, iii) h5py.Dataset or  h5py.Group, iv) or any
-                   the omsi_file API class objects. For iii) and iv) one
-                   may provide a tuple t consisting of the dataobject t[0] and
-                   an additional selection string t[1].
+        :param kwargs: Dictionary of keyword arguments. All keys are
+               expected to be strings. All values are expected to be
+               either i) numpy arrays, ii) int, float, str or unicode
+               variables, iii) h5py.Dataset or  h5py.Group, iv) or any
+               the omsi_file API class objects. For iii) and iv) one
+               may provide a tuple consisting of the dataobject t[0] and
+               an additional selection string t[1].
         """
         import h5py
         from omsi.dataformat.omsi_file.common import omsi_file_common
@@ -718,19 +814,27 @@ class omsi_analysis_base(object):
             name = unicode(k)
             value = v
             selection = None
+            curr_parameter = self.get_parameter_data_by_name(name)
+            dtype = unicode
             if isinstance(v, tuple):
                 value = v[0]
                 selection = v[1]
-            if isinstance(value, h5py.Dataset) or isinstance(value, h5py.Group) or omsi_file_common.is_managed(value):
-                curr_dependency = omsi_dependency(param_name=name,
-                                                  link_name=name,
-                                                  omsi_object=value,
-                                                  selection=selection)
-                self.__dependency_list.append(curr_dependency)
-            else:  # Add to the list of user-defined parameters
+            if isinstance(value, h5py.Dataset) or \
+                    isinstance(value, h5py.Group) or \
+                    omsi_file_common.is_managed(value) or \
+                    isinstance(value, omsi_analysis_base):
+                value = omsi_dependency(param_name=name,
+                                        link_name=name,
+                                        omsi_object=value,
+                                        selection=selection,
+                                        help=curr_parameter['help'])
+                dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+            elif isinstance(value, omsi_dependency):
+                dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+            else:
                 try:
                     dtype = value.dtype  # if the object specifies a valid numpy dtype
-                except:
+                except AttributeError:
                     if isinstance(value, float) or isinstance(value, int) or isinstance(value, bool):
                         value = np.asarray([value])
                         dtype = value.dtype
@@ -739,9 +843,55 @@ class omsi_analysis_base(object):
                     else:
                         value = np.asarray(value)
                         dtype = value.dtype
-                self.__parameter_list.append(omsi_analysis_data(name=name,
-                                                                data=value,
-                                                                dtype=dtype))
+
+            # Parameter set
+            if curr_parameter is not None:
+                curr_parameter['dtype'] = dtype
+                curr_parameter['data'] = value
+            else:  # If used correctly this should not happen. Ensures that we don't omit any data
+                warnings.warn('Parameter ' + name + " not found in omsi_analysis_base.set_parameter_values(). " +
+                              "Adding a new parameter.")
+                self.parameters.append(omsi_parameter_data(name=name,
+                                                           help='',
+                                                           dtype=dtype,
+                                                           required=False,
+                                                           data=value))
+
+    def add_parameter(self,
+                      name,
+                      help,
+                      dtype=unicode,
+                      required=False,
+                      default=None,
+                      choices=None,
+                      data=None,
+                      group=None):
+        """
+        Add a new parameter for the analysis. This function is typically used in the constructor
+        of a derived analysis to specify the parameters of the analysis.
+
+        :param name: The name of the parameter
+        :param help: Help string describing the parameter
+        :param type: Optional type. Default is string.
+        :param required: Boolean indicating whether the parameter is required (True) or optional (False). Default False.
+        :param default: Optional default value for the parameter. Default None.
+        :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
+        :param data: The data assigned to the parameter. None by default.
+        :param group: Optional group string used to organize parameters. Default None, indicating that
+            parameters are automatically organized by driver class (e.g. in required and optional parameters)
+
+        :raises: ValueError is raised if the parameter with the given name already exists.
+        """
+        if self.get_parameter_data_by_name(name) is not None:
+            raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
+        self.parameters.append(omsi_parameter_data(name=name,
+                                                   help=help,
+                                                   dtype=dtype,
+                                                   required=required,
+                                                   default=default,
+                                                   choices=choices,
+                                                   data=data,
+                                                   group=group))
 
 #    def add_analysis_data(self , name, data, dtype ) :
 #        """Add a new dataset to the list of data to be written to the HDF5 file
@@ -807,7 +957,7 @@ class omsi_analysis_base(object):
         group. The data that is written by default is typically still written by
         the `omsi_file_experiment.create_analysis()` function, i.e., the following data is
         written by default: i) analysis_identifier ,ii) get_analysis_type, iii)__data_list,
-        iv) __parameter_list , v) __dependency_list. Since the `omsi_file.experiment.create_analysis()`
+        iv) parameters . Since the `omsi_file.experiment.create_analysis()`
         functions takes care of setting up the basic structure of the analysis storage
         (included the subgroubs for storing parameters and data dependencies) this setup can generally
         be assumed to exist before this function is called. This function is called
@@ -844,7 +994,7 @@ class omsi_analysis_base(object):
         :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
         :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects.
         :param load_runtime_data: Should runtime data be loaded from file (default) or just stored as h5py data objects
-        :param dependencies_omsi_format: Should dependencies be loaded as omsi_file_ API objects (default)
+        :param dependencies_omsi_format: Should dependencies be loaded as omsi_file API objects (default)
             or just as h5py objects.
         :param ignore_type_conflict: Set to True to allow the analysis to be loaded into the
                current analysis object even if the type indicated in the file does not match the
@@ -874,9 +1024,11 @@ class omsi_analysis_base(object):
             warnings.warn("The analysis identifier could not be read from the omsi file")
 
         self.__data_list = analysis_object.get_all_analysis_data(load_data=load_data)
-        self.__parameter_list = analysis_object.get_all_parameter_data(load_data=load_parameters)
-        self.__dependency_list = \
-            analysis_object.get_all_dependency_data(omsi_dependency_format=dependencies_omsi_format)
+        parameter_list = analysis_object.get_all_parameter_data(load_data=load_parameters,
+                                                                exclude_dependencies=False)
+        parameters_values = {param['name']: param['data'] for param in parameter_list}
+        self.clear_parameter_data()
+        self.set_parameter_values(**parameters_values)
         self.run_info = analysis_object.get_all_runinfo_data(load_data=load_runtime_data)
         return True
 

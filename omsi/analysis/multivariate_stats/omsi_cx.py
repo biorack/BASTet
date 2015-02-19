@@ -19,7 +19,25 @@ class omsi_cx(omsi_analysis_base):
     def __init__(self, name_key="undefined"):
         """Initalize the basic data members"""
         super(omsi_cx, self).__init__()
-        self.parameter_names = ['msidata', 'rank', 'objectiveDim']
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI matrix to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           required=True,
+                           group=groups['input'])
+        self.add_parameter(name='rank',
+                           help='Rank approximation to be used',
+                           dtype=dtypes['int'],
+                           default=10,
+                           required=True,
+                           group=groups['settings'])
+        self.add_parameter(name='objectiveDim',
+                           help='Objective dimension',
+                           required=True,
+                           default=self.dimension_index['imageDim'],
+                           dtype=dtypes['int'],
+                           group=groups['settings'])
         self.data_names = ['infIndices', 'levScores']
         self.analysis_identifier = name_key
 
@@ -39,17 +57,11 @@ class omsi_cx(omsi_analysis_base):
             :type mydata: ...
 
         """
-        # Setting Default Values
-        if not self['rank']:
-            self['rank'] = 10
-        if not self['objectiveDim']:
-            self['objectiveDim'] = self.dimension_index['imageDim']
-
         # getting the values into local variables
         msidata = self['msidata'][:]  # Load all MSI data
         original_shape = msidata.shape
-        rank = self['rank'][0]
-        objective_dimensions = self['objectiveDim'][0]
+        rank = self['rank']
+        objective_dimensions = self['objectiveDim']
 
         # Convert the input data to a 2D matrix for processing by the leverage score algorithm
         num_bins = msidata.shape[-1]
@@ -66,8 +78,7 @@ class omsi_cx(omsi_analysis_base):
             informative_indices = informative_indices.reshape(original_shape[0:-1])
 
         # Safe the output results
-        self['levScores'] = leverage_scores
-        self['infIndices'] = informative_indices
+        return informative_indices, leverage_scores
 
     @classmethod
     def comp_lev_exact(cls,
@@ -349,21 +360,9 @@ class omsi_cx(omsi_analysis_base):
 ############################################################
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
-def main(argv=None):
-    """EDIT_ME : Optional
-
-       Implement this function to enable a user to use your module also as a stand-alone script.
-       Remember, you should always call execute(...) to run your analysis and NOT execute_analysis(...)
-
-    """
-    # Get the input arguments
-    import sys
-    if argv is None:
-        argv = sys.argv
-
-
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    omsi_cl_driver(analysis_class=omsi_cx).main()
 
 
 """Test script:

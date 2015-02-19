@@ -14,16 +14,52 @@ class omsi_findpeaks_local(omsi_analysis_base):
     """
 
     def __init__(self, name_key="undefined"):
-        """Initalize the basic data members"""
+        """
+        Initialize the basic data members
+        """
         super(omsi_findpeaks_local, self).__init__()
         self.analysis_identifier = name_key
-        self.parameter_names = ['msidata',
-                                'mzdata',
-                                'integration_width',
-                                'peakheight',
-                                'slwindow',
-                                'smoothwidth',
-                                'printStatus']
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI dataset to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='mzdata',
+                           help='The m/z values for the spectra of the MSI dataset',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='integration_width',
+                           help='The window over which peaks should be integrated',
+                           dtype=float,
+                           default=0.1,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='peakheight',
+                           help='Peak height parameter',
+                           dtype=int,
+                           default=10,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='slwindow',
+                           help='Sliding window parameter',
+                           dtype=int,
+                           default=100,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='smoothwidth',
+                           help='Smooth width parameter',
+                           dtype=int,
+                           default=3,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='printStatus',
+                           help='Print progress status during the analysis',
+                           required=True,
+                           group=groups['settings'],
+                           default=False)
         self.data_names = ['peak_mz',
                            'peak_value',
                            'peak_arrayindex',
@@ -174,40 +210,15 @@ class omsi_findpeaks_local(omsi_analysis_base):
     def execute_analysis(self):
         """
         Execute the nmf for the given msidata
-
-        Keyword Arguments:
-
-        :param msidata: numpy or h5py data object with the msi data. This should be a 3D array.
-            (Mandatory user input)
-        :param mzdata: h5py or numpy object with the mzdata for the spectrum. (Mandatory user input)
-        :param integration_width: integer paramter indicating the window over which peaks
-            should be integrated. (Default=10)
-        :param peakheight: ??? (Default=10)
-        :param slwindow: ??? (Default=100)
-        :param smoothwidth: ??? (Default=3)
-        :param printStatus: Print status messages during execution (Default=False)
-
         """
-        # Set default parameters if needed
-        if not self['integration_width']:
-            self['integration_width'] = 10
-        if not self['peakheight']:
-            self['peakheight'] = 10
-        if not self['slwindow']:
-            self['slwindow'] = 100
-        if not self['smoothwidth']:
-            self['smoothwidth'] = 3
-        if not self['printStatus']:
-            self['printStatus'] = False
-
         # Assign paramters to local variables for convenience
         msidata = self['msidata']
         mzdata = self['mzdata']
-        integration_width = self['integration_width'][0]
-        peakheight = self['peakheight'][0]
-        slwindow = self['slwindow'][0]
-        smoothwidth = self['smoothwidth'][0]
-        print_status = self['printStatus'][0]
+        integration_width = self['integration_width']
+        peakheight = self['peakheight']
+        slwindow = self['slwindow']
+        smoothwidth = self['smoothwidth']
+        print_status = self['printStatus']
 
         # Make sure needed imports are available
         from omsi.analysis.findpeaks.third_party.findpeaks import findpeaks
@@ -273,57 +284,58 @@ class omsi_findpeaks_local(omsi_analysis_base):
 
         # Save the analysis data to the __data_list so that the data can be
         # saved automatically by the omsi HDF5 file API
-        self['peak_mz'] = np.asarray(peak_mz)
-        self['peak_value'] = np.asarray(peak_values)
-        self['peak_arrayindex'] = peak_arrayindex
-        self['indata_mz'] = mzdata[:]
-
-
-def main(argv=None):
-    """Then main function"""
-
-    import sys
-    from omsi.dataformat.omsi_file.main_file import omsi_file
-
-    if argv is None:
-        argv = sys.argv
-
-    # Check for correct usage
-    if len(argv) < 2:
-        print "USAGE: Call \"omsi_findpeaks_global OMSI_FILE [expperiment_index data_index]   \" "
-        print "\n"
-        print "This is a simple test function to test the peak finding on a given omsi HDF5 file"
-        exit(0)
-
-    # Read the input arguments
-    omsi_input_filename = argv[1]
-    expperiment_index = 0
-    data_index = 0
-    if len(argv) == 4:
-        expperiment_index = int(argv[2])
-        data_index = int(argv[3])
-
-    # Open the input HDF5 file
-    omsi_input_file = omsi_file(omsi_input_filename, 'r')  # Open file in read only mode
-
-    # Get the experiment and dataset
-    exp = omsi_input_file.get_experiment(expperiment_index)
-    data = exp.get_msidata(data_index)
-    mzdata = exp.get_instrument_info().get_instrument_mz()
-
-    # Execute the peak finding
-    test_omsi_fpl = omsi_findpeaks_local()
-    print "Executing peakfinding analysis"
-    test_omsi_fpl.execute(msidata=data, mzdata=mzdata)
-    print "Getting peak finding analysis results"
-    pmz = test_omsi_fpl['peak_mz']['data']
-    print pmz
-    pv = test_omsi_fpl['peak_value']['data']
-    print pv
-    pai = test_omsi_fpl['peak_arrayindex']['data']
-    print pai
-
+        return np.asarray(peak_mz), np.asarray(peak_values), peak_arrayindex, mzdata[:]
 
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    omsi_cl_driver(analysis_class=omsi_findpeaks_local).main()
+
+
+# def main(argv=None):
+#     """Then main function"""
+#
+#     import sys
+#     from omsi.dataformat.omsi_file.main_file import omsi_file
+#
+#     if argv is None:
+#         argv = sys.argv
+#
+#     # Check for correct usage
+#     if len(argv) < 2:
+#         print "USAGE: Call \"omsi_findpeaks_global OMSI_FILE [expperiment_index data_index]   \" "
+#         print "\n"
+#         print "This is a simple test function to test the peak finding on a given omsi HDF5 file"
+#         exit(0)
+#
+#     # Read the input arguments
+#     omsi_input_filename = argv[1]
+#     expperiment_index = 0
+#     data_index = 0
+#     if len(argv) == 4:
+#         expperiment_index = int(argv[2])
+#         data_index = int(argv[3])
+#
+#     # Open the input HDF5 file
+#     omsi_input_file = omsi_file(omsi_input_filename, 'r')  # Open file in read only mode
+#
+#     # Get the experiment and dataset
+#     exp = omsi_input_file.get_experiment(expperiment_index)
+#     data = exp.get_msidata(data_index)
+#     mzdata = exp.get_instrument_info().get_instrument_mz()
+#
+#     # Execute the peak finding
+#     test_omsi_fpl = omsi_findpeaks_local()
+#     print "Executing peakfinding analysis"
+#     test_omsi_fpl.execute(msidata=data, mzdata=mzdata)
+#     print "Getting peak finding analysis results"
+#     pmz = test_omsi_fpl['peak_mz']['data']
+#     print pmz
+#     pv = test_omsi_fpl['peak_value']['data']
+#     print pv
+#     pai = test_omsi_fpl['peak_arrayindex']['data']
+#     print pai
+#
+#
+# if __name__ == "__main__":
+#     main()
 

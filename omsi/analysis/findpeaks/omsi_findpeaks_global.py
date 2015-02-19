@@ -4,10 +4,9 @@ for the full MSI data.
 """
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
-
 class omsi_findpeaks_global(omsi_analysis_base):
     """
-    Class defining a basic gloabl peak finding. The default implementation
+    Basic global peak detection analysis. The default implementation
     computes the peaks on the average spectrum and then computes the peak-cube data,
     i.e., the values for the detected peaks at each pixel.
 
@@ -19,12 +18,42 @@ class omsi_findpeaks_global(omsi_analysis_base):
         """Initialize the basic data members"""
         super(omsi_findpeaks_global, self).__init__()
         self.analysis_identifier = name_key
-        self.parameter_names = ['msidata',
-                                'mzdata',
-                                'integration_width',
-                                'peakheight',
-                                'slwindow',
-                                'smoothwidth']
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI dataset to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='mzdata',
+                           help='The m/z values for the spectra of the MSI dataset',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='integration_width',
+                           help='The window over which peaks should be integrated',
+                           dtype=float,
+                           default=0.1,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='peakheight',
+                           help='Peak height parameter',
+                           dtype=int,
+                           default=2,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='slwindow',
+                           help='Sliding window parameter',
+                           dtype=int,
+                           default=100,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='smoothwidth',
+                           help='Smooth width parameter',
+                           dtype=int,
+                           default=3,
+                           group=groups['settings'],
+                           required=True)
         self.data_names = ['peak_cube',
                            'peak_mz']
 
@@ -144,40 +173,19 @@ class omsi_findpeaks_global(omsi_analysis_base):
 
     def execute_analysis(self):
         """
-        Execute the global peak finding for the given msidata
-
-        Keyword Arguments:
-
-        :param msidata: numpy or h5py data object with the msi data. This should be a 3D array. (Mandatory user input)
-        :param mzdata: h5py or numpy object with the mzdata for the spectrum. (Mandatory user input)
-        :param integration_width: integer paramter indicating the window over which peaks
-            should be integrated. (Default=10)
-        :param peakheight: ??? . (Default=2)
-        :param slwindow: ??? . (Default=100)
-        :param smoothwidth: ??? . (Default=3)
-
+        Execute the global peak finding for the given msidata and mzdata.
         """
         # Make sure all imports are here
         from omsi.analysis.findpeaks.third_party.findpeaks import findpeaks
         import numpy as np
 
-        # Set default parameter values if needed
-        if not self['integration_width']:
-            self['integration_width'] = 0.1
-        if not self['peakheight']:
-            self['peakheight'] = 2
-        if not self['slwindow']:
-            self['slwindow'] = 100
-        if not self['smoothwidth']:
-            self['smoothwidth'] = 3
-
         # Copy parameters to local variables for convenience
         msidata = self['msidata']
-        mzdata = self['mzdata']
-        integration_width = self['integration_width'][0]
-        peakheight = self['peakheight'][0]
-        slwindow = self['slwindow'][0]
-        smoothwidth = self['smoothwidth'][0]
+        mzdata = self['mzdata'][:]  # Load the mz data into memory so that we can use numpy int arrays for slicing
+        integration_width = self['integration_width']
+        peakheight = self['peakheight']
+        slwindow = self['slwindow']
+        smoothwidth = self['smoothwidth']
 
         # Load the input data
         data = msidata[:]
@@ -244,99 +252,98 @@ class omsi_findpeaks_global(omsi_analysis_base):
 
         # Save the analysis data to the __data_list so that the data can be
         # saved automatically by the omsi HDF5 file API
-        self['peak_cube'] = peak_cube
-        self['peak_mz'] = mz_peaks
-
-
-def main(argv=None):
-    """Then main function"""
-
-    import sys
-    from omsi.dataformat.omsi_file.main_file import omsi_file
-    import matplotlib.pyplot as plt
-    import matplotlib.gridspec as gridspec
-    import numpy as np
-
-    if argv is None:
-        argv = sys.argv
-
-    # Check for correct usage
-    if len(argv) < 2:
-        print "USAGE: Call \"omsi_findpeaks_global OMSI_FILE [expIndex data_index]   \" "
-        print "\n"
-        print "This is a simple test function to test the peak finding on a given omsi HDF5 file"
-        exit(0)
-
-    # Read the input arguments
-    omsi_input_filename = argv[1]
-    experiment_index = 0
-    data_index = 0
-    if len(argv) == 4:
-        experiment_index = int(argv[2])
-        data_index = int(argv[3])
-
-    # Open the input HDF5 file
-    omsi_input_file = omsi_file(omsi_input_filename, 'r')  # Open file in read only mode
-
-    # Get the experiment and dataset
-    experiment = omsi_input_file.get_experiment(experiment_index)
-    msidata = experiment.get_msidata(data_index)
-    mzdata = experiment.get_instrument_info().get_instrument_mz()
-
-    # Execute the peak finding
-    ofpg_object = omsi_findpeaks_global()
-    print "Executing peakfinding analysis"
-    ofpg_object.execute(msidata=msidata, mzdata=mzdata)
-    print "Getting peak finding analysis results"
-    peak_cube = ofpg_object['peak_cube']['data']
-    print peak_cube
-
-    # Plot the first three peak images
-    print "Plotting example peak finding analysis results"
-    shape_x = peak_cube.shape[0]
-    shape_y = peak_cube.shape[1]
-    ho1 = peak_cube[:, :, 0]
-    ho2 = peak_cube[:, :, 0]
-    ho3 = peak_cube[:, :, 0]
-
-    main_figure = plt.figure()
-    figure_grid_spec = gridspec.GridSpec(1, 4)
-    image_figure = main_figure.add_subplot(figure_grid_spec[0])
-    image_figure.autoscale(True, 'both', tight=True)
-    _ = image_figure.pcolor(np.log(ho1 + 1))
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[1])
-    image_figure.autoscale(True, 'both', tight=True)
-    _ = image_figure.pcolor(np.log(ho2 + 1))
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[2])
-    image_figure.autoscale(True, 'both', tight=True)
-    _ = image_figure.pcolor(np.log(ho3 + 1))
-
-    # do the three color
-    ho = np.zeros(shape=(shape_x, shape_y, 3))
-    temp = np.log(peak_cube[:, :, 0] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho[:, :, 0] = temp
-
-    temp = np.log(peak_cube[:, :, 1] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho[:, :, 1] = temp
-
-    temp = np.log(peak_cube[:, :, 2] + 1)
-    temp = temp - temp.min()
-    temp = temp / temp.max()
-    ho[:, :, 2] = temp
-
-    image_figure = main_figure.add_subplot(figure_grid_spec[3])
-    image_figure.autoscale(True, 'both', tight=True)
-    _ = image_figure.imshow(ho)
-
-    plt.show()
-
+        return peak_cube, mz_peaks
 
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    omsi_cl_driver(analysis_class=omsi_findpeaks_global).main()
+
+
+# def main(argv=None):
+#     """Then main function"""
+#
+#     import sys
+#     from omsi.dataformat.omsi_file.main_file import omsi_file
+#     import matplotlib.pyplot as plt
+#     import matplotlib.gridspec as gridspec
+#     import numpy as np
+#
+#     if argv is None:
+#         argv = sys.argv
+#
+#     # Check for correct usage
+#     if len(argv) < 2:
+#         print "USAGE: Call \"omsi_findpeaks_global OMSI_FILE [expIndex data_index]   \" "
+#         print "\n"
+#         print "This is a simple test function to test the peak finding on a given omsi HDF5 file"
+#         exit(0)
+#
+#     # Read the input arguments
+#     omsi_input_filename = argv[1]
+#     experiment_index = 0
+#     data_index = 0
+#     if len(argv) == 4:
+#         experiment_index = int(argv[2])
+#         data_index = int(argv[3])
+#
+#     # Open the input HDF5 file
+#     omsi_input_file = omsi_file(omsi_input_filename, 'r')  # Open file in read only mode
+#
+#     # Get the experiment and dataset
+#     experiment = omsi_input_file.get_experiment(experiment_index)
+#     msidata = experiment.get_msidata(data_index)
+#     mzdata = experiment.get_instrument_info().get_instrument_mz()
+#
+#     # Execute the peak finding
+#     ofpg_object = omsi_findpeaks_global()
+#     print "Executing peakfinding analysis"
+#     ofpg_object.execute(msidata=msidata, mzdata=mzdata)
+#     print "Getting peak finding analysis results"
+#     peak_cube = ofpg_object['peak_cube']['data']
+#     print peak_cube
+#
+#     # Plot the first three peak images
+#     print "Plotting example peak finding analysis results"
+#     shape_x = peak_cube.shape[0]
+#     shape_y = peak_cube.shape[1]
+#     ho1 = peak_cube[:, :, 0]
+#     ho2 = peak_cube[:, :, 0]
+#     ho3 = peak_cube[:, :, 0]
+#
+#     main_figure = plt.figure()
+#     figure_grid_spec = gridspec.GridSpec(1, 4)
+#     image_figure = main_figure.add_subplot(figure_grid_spec[0])
+#     image_figure.autoscale(True, 'both', tight=True)
+#     _ = image_figure.pcolor(np.log(ho1 + 1))
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[1])
+#     image_figure.autoscale(True, 'both', tight=True)
+#     _ = image_figure.pcolor(np.log(ho2 + 1))
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[2])
+#     image_figure.autoscale(True, 'both', tight=True)
+#     _ = image_figure.pcolor(np.log(ho3 + 1))
+#
+#     # do the three color
+#     ho = np.zeros(shape=(shape_x, shape_y, 3))
+#     temp = np.log(peak_cube[:, :, 0] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho[:, :, 0] = temp
+#
+#     temp = np.log(peak_cube[:, :, 1] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho[:, :, 1] = temp
+#
+#     temp = np.log(peak_cube[:, :, 2] + 1)
+#     temp = temp - temp.min()
+#     temp = temp / temp.max()
+#     ho[:, :, 2] = temp
+#
+#     image_figure = main_figure.add_subplot(figure_grid_spec[3])
+#     image_figure.autoscale(True, 'both', tight=True)
+#     _ = image_figure.imshow(ho)
+#
+#     plt.show()
 

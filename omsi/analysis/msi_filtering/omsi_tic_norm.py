@@ -19,7 +19,37 @@ class omsi_tic_norm(omsi_analysis_base):
         """Initalize the basic data members"""
 
         super(omsi_tic_norm, self).__init__()
-        self.parameter_names = ['msidata', 'mzdata', 'maxCount', 'mzTol', 'infIons']
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI matrix to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           required=True,
+                           group=groups['input'])
+        self.add_parameter(name='mzdata',
+                           help='The m/z values for the spectra of the MSI dataset',
+                           dtype=dtypes['ndarray'],
+                           required=True,
+                           group=groups['input'])
+        self.add_parameter(name='maxCount',
+                           help='Maximum count',
+                           dtype=dtypes['int'],
+                           required=True,
+                           group=groups['settings'],
+                           default=0)
+        self.add_parameter(name='mzTol',
+                           help='MZ tolerance',
+                           dtype=dtypes['float'],
+                           group=groups['settings'],
+                           default=0.1,
+                           required=True)
+        self.add_parameter(name='infIons',
+                           help='Optional list of informative ions',
+                           dtype=dtypes['ndarray'],
+                           required=False,
+                           group=groups['settings'],
+                           default=None)
+
         self.data_names = ['norm_msidata', 'norm_mz']
         self.analysis_identifier = name_key
 
@@ -44,10 +74,6 @@ class omsi_tic_norm(omsi_analysis_base):
         """
         # Setting Default Values and retrieving parameter data
         nx, ny, nz = self['msidata'].shape
-        if not self['maxCount']:
-            self['maxCount'] = 0
-        if not self['mzTol']:
-            self['mzTol'] = 0.1
         try:
             ion_list = self['infIons']
         except KeyError:
@@ -128,6 +154,13 @@ class omsi_tic_norm(omsi_analysis_base):
         self['norm_msidata'] = np.memmap(output_filename, dtype=outformat, mode='w+', shape=(nx, ny, nz))
         self['norm_mz'] = mzdata
         output_filename.close()
+
+    def record_execute_analysis_outputs(self, analysis_output):
+        """
+        We are not returning any outputs here, but we are going to record them manually.
+        :param analysis_output: The output of the execute_analysis(...) function.
+        """
+        pass
 
     ###############################################################
     #  2) Integrating your analysis with the OpenMSI              #
@@ -340,21 +373,9 @@ class omsi_tic_norm(omsi_analysis_base):
 ############################################################
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
-def main(argv=None):
-    """EDIT_ME : Optional
-
-       Implement this function to enable a user to use your module also as a stand-alone script.
-       Remember, you should always call execute(...) to run your analysis and NOT execute_analysis(...)
-
-    """
-    # Get the input arguments
-    import sys
-    if argv is None:
-        argv = sys.argv
-
-
 if __name__ == "__main__":
-    main()
+    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    omsi_cl_driver(analysis_class=omsi_tic_norm).main()
 
 
 
