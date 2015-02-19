@@ -88,7 +88,7 @@ required-attributes=
 bad-functions=map,filter,apply,input,file
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=i,j,k,ex,Run,_,x,y,z,xi,yi,zi,x1,x2,x3,nx,ny,nz
+good-names=i,j,k,v,e,ex,Run,_,x,y,z,xi,yi,zi,x1,x2,x3,nx,ny,nz
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata
@@ -299,7 +299,7 @@ max-returns=6
 max-branches=12
 
 # Maximum number of statements in function / method body
-max-statements=50
+max-statements=100
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7
