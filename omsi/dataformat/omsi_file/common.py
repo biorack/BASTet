@@ -147,6 +147,8 @@ class omsi_file_common(object):
         given h5py group object.
 
         :param h5py_object: h5py object for which the corresponding omsi_file API object should be generated.
+                        This may also be a string describing the requested object based on a combination of the
+                        path to the file and a path ot the object <filename.h5>:<object_path>
         :param resolve_dependencies: Set to True if omsi_file_dependencydata objects should be resolved to retrieve
                         the dependent object the dependency is pointing to. Dependencies are resolved recursively,
                         i.e., if a dependency points to another dependency then that one will be resolved as well.
@@ -174,8 +176,7 @@ class omsi_file_common(object):
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
         from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 
-        # If the input object is already an omsi API object then return it as
-        # is
+        # If the input object is already an omsi API object then return it as is
         if isinstance(h5py_object, omsi_file) or \
            isinstance(h5py_object, omsi_file_experiment) or \
            isinstance(h5py_object, omsi_file_methods) or\
@@ -185,9 +186,10 @@ class omsi_file_common(object):
            isinstance(h5py_object, omsi_file_dependencies) or \
            isinstance(h5py_object, omsi_file_dependencydata):
             return h5py_object
-
+        # IF we have an h5py.File then create and omsi_file
         if isinstance(h5py_object, h5py.File):
             return omsi_file(h5py_object)
+        # If we have an h5py.Group, then try to create a corresponding omsi API object
         elif isinstance(h5py_object, h5py.Group):
             # Check if the group has an explicit type attribute
             try:
@@ -219,7 +221,7 @@ class omsi_file_common(object):
                 else:
                     return None
             except:
-                # If the attribute is missing, then try to determin the type
+                # If the attribute is missing, then try to determine the type
                 # based on he name of group
                 groupname = h5py_object.name.split("/")[-1]
                 parentgroupname = h5py_object.parent.name.split("/")[-1]
@@ -248,10 +250,62 @@ class omsi_file_common(object):
                     return omsi_file(h5py_object.file)
                 else:
                     return None
+        # If we have an hpy.Dataset then we don't have a corresponding API object. Return as is
         elif isinstance(h5py_object, h5py.Dataset):
             return h5py_object
+        elif isinstance(h5py_object, basestring):
+            import os
+            filename, object_path = cls.parse_path_string(h5py_object)
+            if filename is not None and os.path.exists(filename) and os.path.isfile(filename):
+                try:
+                    curr_omsi_file = omsi_file(filename, 'r')
+                except:
+                    return None
+            else:
+                return None
+
+            if object_path is not None:
+                try:
+                    file_object = curr_omsi_file[object_path]
+                except KeyError:
+                    return None
+                return omsi_file_common.get_omsi_object(file_object, resolve_dependencies=True)
+            else:
+                raise ValueError('omsi_file_common.Invalid path or file')
+
         else:
             return None
+
+    @staticmethod
+    def parse_path_string(path):
+        """
+        Given a string of the from <filename.h5>:<object_path> retrieve
+        the name of the file and the object path.
+
+        :param path: The string defining the file and object path.
+
+        :return: Tuple with the filename and the object path. Both may
+            be None depending on whether an object_path is given and
+            whether the path string is valid.
+
+        :raises: ValueError in case that an invalid string is given
+        """
+        file_path = None
+        object_path = None
+        if ".h5" not in path:
+            pass
+        elif path.endswith(".h5") and ".h5:" not in path:
+            file_path = path
+            object_path = None
+        else:
+            split_string = path.split('.h5:')
+            file_path = split_string[0] + ".h5"
+            if len(split_string) == 2:
+                object_path = split_string[1]
+            elif len(split_string) > 2:
+                raise ValueError("Invalid path string given")
+        return file_path, object_path
+
 
     @classmethod
     def get_num_items(cls, file_group, basename=""):
