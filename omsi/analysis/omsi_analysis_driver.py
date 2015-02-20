@@ -244,25 +244,26 @@ class omsi_cl_driver(omsi_driver_base):
         if self.output_save_arg_name in parsed_arguments:
             # Determine the filename and experiment group from the path
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
-            output_filename, output_object_path = omsi_file_common.parse_path_string(self.output_target)
-            # Create the output file
-            if output_filename is None:
-                raise ValueError("ERROR: Invalid save parameter specification " + self.output_target)
-            elif os.path.exists(output_filename) and not os.path.isfile(output_filename):
-                raise ValueError("ERROR: Save parameter not specifiy a file.")
-            if not os.path.exists(output_filename):
-                out_file = omsi_file(output_filename, mode='a')
-                self.output_target = out_file.create_experiment()
-                self. __output_target_self = output_filename
-            else:
-                out_file = omsi_file(output_filename, mode='a')
-                if output_object_path is not None:
-                    self.output_target = omsi_file_common.get_omsi_object(out_file[output_object_path])
+            if self.output_target is not None:
+                output_filename, output_object_path = omsi_file_common.parse_path_string(self.output_target)
+                # Create the output file
+                if output_filename is None:
+                    raise ValueError("ERROR: Invalid save parameter specification " + self.output_target)
+                elif os.path.exists(output_filename) and not os.path.isfile(output_filename):
+                    raise ValueError("ERROR: Save parameter not specifiy a file.")
+                if not os.path.exists(output_filename):
+                    out_file = omsi_file(output_filename, mode='a')
+                    self.output_target = out_file.create_experiment()
+                    self. __output_target_self = output_filename
                 else:
-                    if out_file.get_num_experiments() > 0:
-                        self.output_target = out_file.get_experiment(0)
+                    out_file = omsi_file(output_filename, mode='a')
+                    if output_object_path is not None:
+                        self.output_target = omsi_file_common.get_omsi_object(out_file[output_object_path])
                     else:
-                        self.output_target = out_file.create_experiment()
+                        if out_file.get_num_experiments() > 0:
+                            self.output_target = out_file.get_experiment(0)
+                        else:
+                            self.output_target = out_file.create_experiment()
         else:
             self.output_target = None
 

@@ -290,6 +290,8 @@ class omsi_file_common(object):
 
         :raises: ValueError in case that an invalid string is given
         """
+        if not isinstance(path, basestring):
+            raise ValueError('The given path is not a string.')
         file_path = None
         object_path = None
         if ".h5" not in path:
