@@ -1044,3 +1044,28 @@ class omsi_analysis_base(object):
            :type identifier: str
         """
         self.analysis_identifier = identifier
+
+    @classmethod
+    def supports_mpi(cls):
+        """
+        Check whether the analysis module supports parallel execution using mpi4py or pyMPI
+
+        The default implementation tries to be 'smart' by inspecting the source code of the
+        analysis to see if MPI is imported by the code.
+
+        Overwrite this function to indicate whether your analysis supports parallel execution
+        or not.
+        """
+        import inspect
+        import re
+        code = inspect.getsource(cls)
+        supports_mpi = re.search('import\s+mpi4py', code)
+        supports_mpi = supports_mpi or re.search('from\s+mpi4py\s+import', code)
+        supports_mpi = supports_mpi or re.search('import\s+mpi', code)
+        supports_mpi = supports_mpi or re.search('from\s+mpi\s+import', code)
+        return supports_mpi
+
+
+
+
+
