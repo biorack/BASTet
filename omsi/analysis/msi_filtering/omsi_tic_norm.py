@@ -1,9 +1,12 @@
 """
 Module with the TIC normalization analysis.
 """
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
-import numpy as np
 from tempfile import TemporaryFile
+
+import numpy as np
+
+from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+
 
 
 ###############################################################
@@ -374,7 +377,7 @@ class omsi_tic_norm(omsi_analysis_base):
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
 if __name__ == "__main__":
-    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
     omsi_cl_driver(analysis_class=omsi_tic_norm).main()
 
 

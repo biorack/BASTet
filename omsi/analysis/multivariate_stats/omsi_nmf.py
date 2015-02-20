@@ -2,6 +2,7 @@
 Module for performing non-negative matrix factorization (NMF) for MSI data.
 """
 import numpy as np
+
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
 
@@ -177,7 +178,7 @@ class omsi_nmf(omsi_analysis_base):
         return wo_matrix, ho_matrix
 
 if __name__ == "__main__":
-    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
     omsi_cl_driver(analysis_class=omsi_nmf).main()
 
 

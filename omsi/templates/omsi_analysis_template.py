@@ -374,7 +374,7 @@ class omsi_analysis_template(omsi_analysis_base):
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
 if __name__ == "__main__":
-    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
     """
     EDIT_ME
 

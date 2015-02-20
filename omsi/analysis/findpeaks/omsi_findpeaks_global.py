@@ -255,7 +255,7 @@ class omsi_findpeaks_global(omsi_analysis_base):
         return peak_cube, mz_peaks
 
 if __name__ == "__main__":
-    from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+    from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
     omsi_cl_driver(analysis_class=omsi_findpeaks_global).main()
 
 

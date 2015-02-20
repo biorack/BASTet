@@ -3,17 +3,19 @@ Module specifying the base analysis API for integrating new analysis with the to
 OpenMSI science gateway.
 """
 
-from omsi.dataformat.omsi_file.format import omsi_format_common
-from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
-from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
-from omsi.shared.omsi_dependency import omsi_dependency
 import platform
 import time
 import datetime
 import sys
 import warnings
+
 import numpy as np
+
+from omsi.dataformat.omsi_file.format import omsi_format_common
+from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
+from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
+from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
+from omsi.shared.omsi_dependency import omsi_dependency
 
 
 class omsi_analysis_base(object):
@@ -660,7 +662,7 @@ class omsi_analysis_base(object):
 
         :return: Help string describing the analysis and its parameters
         """
-        from omsi.analysis.omsi_analysis_driver import omsi_cl_driver
+        from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
         temp_driver = omsi_cl_driver(analysis_class=self.__class__)
         temp_driver.initialize_argument_parser()
         return temp_driver.parser.format_help()
