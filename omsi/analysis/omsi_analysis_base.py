@@ -329,7 +329,6 @@ class omsi_analysis_base(object):
                     warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile.")
             try:
                 import pstats
-                import StringIO
             except ImportError:
                 warnings.warn("Profiling of run failed due to import error for pstats module")
                 self.profile_time_and_usage = False
@@ -339,41 +338,47 @@ class omsi_analysis_base(object):
             except ImportError:
                 self.profile_memory = False
                 warnings.warn("Profiling of memory failed dur to import error. Could not import memory_profiler.")
+        if self.profile_time_and_usage or self.profile_memory:
             try:
                 import StringIO
             except ImportError:
                 self.profile_memory = False
-                warnings.warn("Profiling of memory failed dur to import error. Could not import StringIO.")
+                self.profile_time_and_usage
+                warnings.warn("All profiling disabled. Could not import StringIO.")
 
-        # Set any parameters that are given to the execute function
+        # 1) Set any parameters that are given to the execute function
         self.update_analysis_parameters(**kwargs)
 
-        # Set the parameters that required parameters that have a default value but that have not been initialized
+        # 2) Set the parameters that required parameters that have a default value but that have not been initialized
         self.define_missing_parameters()
 
-        # Record basic execution provenance information prior to running the analysis
+        # 3) Record basic execution provenance information prior to running the analysis
         self.run_info = {}
         self.runinfo_record_preexecute()
 
-        # Define the start-time for the execution of our analysis
+        # 4) Define the start-time for the execution of our analysis
         start_time = time.time()
 
-        # Execute the analysis as is without any profiling
+        # 5) Run the analysis
+        # 5.1) Execute the analysis as is without any profiling
         if not self.profile_time_and_usage and not self.profile_memory:
             analysis_output = self.execute_analysis()
-        # Execute the analysis with runtime profiling enabled
+        # 5.2) Execute the analysis with runtime profiling enabled
         else:
             profiler_time_and_use = None
             profiler_mem = None
+            # 5.2.1) Profile time and usage only
             if self.profile_time_and_usage and not self.profile_memory:
                 # Enable profiling cProfile and execute the analysis
                 profiler_time_and_use = Profile()
                 profiler_time_and_use.enable()
                 analysis_output = self.execute_analysis()
                 profiler_time_and_use.disable()
+            # 5.2.2) Profile memory usage only
             elif self.profile_memory and not self.profile_time_and_usage:
                 profiler_mem = memory_profiler.LineProfiler()
                 analysis_output = profiler_mem(self.execute_analysis)()
+            # 5.2.3) Profile i) time and usage  and ii) memory usage
             elif self.profile_memory and self.profile_time_and_usage:
                 profiler_mem = memory_profiler.LineProfiler()
                 profiler_time_and_use = Profile()
@@ -381,7 +386,8 @@ class omsi_analysis_base(object):
                 analysis_output = profiler_mem(self.execute_analysis)()
                 profiler_time_and_use.disable()
 
-            # Save the time and usage profiling data from cProfile
+            # 5.3) Record the profiling data
+            # 5.3.1) Save the time and usage profiling data from cProfile
             if profiler_time_and_use is not None:
                 profiler_time_and_use.create_stats()
                 self.run_info['profile'] = unicode(profiler_time_and_use.stats)
@@ -392,10 +398,11 @@ class omsi_analysis_base(object):
                 profiler_stats.print_stats()
                 self.run_info['profile_stats'] = stats_io.getvalue()
 
-            # Save the results of the memory profiler
+            # 5.3.2) Save the results of the memory profiler
             if profiler_mem is not None:
                 mem_stats_io = StringIO.StringIO()
                 memory_profiler.show_results(profiler_mem, stream=mem_stats_io)
+                self.run_info['profile_mem'] = unicode(profiler_mem.code_map)
                 self.run_info['profile_mem_stats'] = mem_stats_io.getvalue()
 
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
