@@ -140,7 +140,14 @@ class omsi_cl_driver(omsi_driver_base):
         analysis_module_object = __import__(analysis_module_name, globals(), locals(), [analysis_class_name], -1)
 
         # Determine the self.analysis parameter
-        self.analysis_class = getattr(analysis_module_object, analysis_class_name)
+        try:
+            self.analysis_class = getattr(analysis_module_object, analysis_class_name)
+        except AttributeError as e:
+            print e.message
+            print ""
+            print "Could not locate " + analysis_class_name + " in " + analysis_module_name
+            print "Please check the name of the analysis. Maybe there is a spelling error."
+            exit()
 
     def initialize_argument_parser(self):
         """
