@@ -55,10 +55,16 @@ class omsi_cl_driver(omsi_driver_base):
     Name of the key-word argument used to define
     """
 
+    profile_arg_name = 'profile'
+    """
+    Name of the key-word argument used to enable profiling of the analysis
+    """
+
     def __init__(self,
                  analysis_class,
                  add_analysis_class_arg=False,
-                 add_output_arg=True):
+                 add_output_arg=True,
+                 add_profile_arg=False):
         """
 
         :param analysis_class: The analysis class for which we want to execute the analysis.
@@ -70,6 +76,8 @@ class omsi_cl_driver(omsi_driver_base):
             command-line argument to determine the analysis class name
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
             argument for defining the output target for the analysis.
+        :param add_profile_arg: Boolean indicating whether we should add the optional keyword
+            argument for enabling profiling of the analysis.
 
         :raises: A ValueError is raised in the case of conflicting inputs, i.e., if
             i) analysis_class==None and add_analysis_class_arg=False, i.e., the analysis class is not determined or
@@ -87,9 +95,11 @@ class omsi_cl_driver(omsi_driver_base):
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
+        self.add_profile_arg = add_profile_arg
         self.parser = None
         self.required_argument_group = None
         self.output_target = None
+        self.profile_analysis = False
         self. __output_target_self = None  #  Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
@@ -98,6 +108,8 @@ class omsi_cl_driver(omsi_driver_base):
         """
         Internal helper function used to get the analysis class object based on the
         analysis_class_arg_name positional argument from the command line.
+
+        *Side effects:* The function sets ``self.analysis_class`
         """
         if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
             raise ValueError("Missing required input argument defining the analysis to be executed missing")
@@ -126,6 +138,9 @@ class omsi_cl_driver(omsi_driver_base):
         """
         Internal helper function used to initialize the argument parser.
         NOTE: self.analysis_class must be set before calling this function.
+
+        *Side effects:* The function sets ``self.parser`` and ``self.required_argument_group``
+
         """
         # Initialize the analysis object to collect information about the arguments
         analysis_object = None if self.analysis_class is None else self.analysis_class()
@@ -185,7 +200,83 @@ class omsi_cl_driver(omsi_driver_base):
                                      required=False,
                                      help=output_arg_help)
 
+        # Add the optional keyword argument for enabling profiling of the analysis
+        if self.add_profile_arg:
+            profile_arg_help = 'Enable runtime profiling of the analysis. NOTE: This is intended for ' + \
+                               'debugging and investigation of the runtime behavior of an analysis.' + \
+                               'Enabling profiling entails certain overhead in performance'
+            self.parser.add_argument("--"+self.profile_arg_name,
+                                     action='store_true',
+                                     default=False,
+                                     required=False,
+                                     help=profile_arg_help)
+
+    def parse_cl_arguments(self):
+        """
+        The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
+
+        This function parses all arguments that are specific to the command-line parser itself. Analysis
+        arguments are added and parsed later by the add_and_parse_analysis_arguments(...) function.
+        The reason for this is two-fold: i) to separate the parsing of analysis arguments and arguments of the
+        command-line driver and ii) if the same HDF5 file is used as input and output target, then we need to
+        open it first here in append mode before it gets opened in read mode later by the arguments.
+
+        *Side effects:* The function sets ``self.output_target`` and ``self.profile_analysis``
+
+        """
+        # Parse the arguments and convert them to a dict using vars
+        parsed_arguments = vars(self.parser.parse_known_args()[0])
+
+        # Clean up the arguments to remove default arguments of the driver class
+        # before we hand the arguments to the analysis class
+        if self.analysis_class_arg_name in parsed_arguments:
+            parsed_arguments.pop(self.analysis_class_arg_name)
+
+        # Process the --save argument to determine where we should save the output
+        if self.output_save_arg_name in parsed_arguments:
+            # Determine the filename and experiment group from the path
+            self.output_target = parsed_arguments.pop(self.output_save_arg_name)
+            if self.output_target is not None:
+                output_filename, output_object_path = omsi_file_common.parse_path_string(self.output_target)
+                # Create the output file
+                if output_filename is None:
+                    raise ValueError("ERROR: Invalid save parameter specification " + self.output_target)
+                elif os.path.exists(output_filename) and not os.path.isfile(output_filename):
+                    raise ValueError("ERROR: Save parameter not specifiy a file.")
+                if not os.path.exists(output_filename):
+                    out_file = omsi_file(output_filename, mode='a')
+                    self.output_target = out_file.create_experiment()
+                    self. __output_target_self = output_filename
+                else:
+                    out_file = omsi_file(output_filename, mode='r+')
+                    if output_object_path is not None:
+                        self.output_target = omsi_file_common.get_omsi_object(out_file[output_object_path])
+                    else:
+                        if out_file.get_num_experiments() > 0:
+                            self.output_target = out_file.get_experiment(0)
+                        else:
+                            self.output_target = out_file.create_experiment()
+        else:
+            self.output_target = None
+
+        # Process the --profile-analysis profiling argument
+        if self.profile_arg_name in parsed_arguments:
+            self.profile_analysis = parsed_arguments.pop(self.profile_arg_name)
+
+    def add_and_parse_analysis_arguments(self):
+        """
+        The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
+
+        This function is responsible for adding all command line arguments that are specific to the analysis and
+        to then parse those argument and save the relevant data in the self.analysis_arguments dictionary.
+        Command-line arguments that are specific to the command line driver are removed, so that only
+        arguments that can be consumed by the analysis are handed to the analysis.
+
+        *Side effects:* The function sets ``self.analysis_arguments``
+
+        """
         # Add all arguments from our analysis object
+        analysis_object = None if self.analysis_class is None else self.analysis_class()
         if analysis_object is not None:
             for arg_param in analysis_object.get_all_parameter_data():
                 arg_name = "--" + arg_param['name']
@@ -217,50 +308,10 @@ class omsi_cl_driver(omsi_driver_base):
                                             #                       #     are not allowed
                                             dest=arg_dest)          #     Automatically determined by the name
 
-    def parse_cl_arguments(self):
-        """
-        The function assumes that the command line parser has been setup.
-
-        This function initializes the self.analysis_arguments and self.output_target
-        instance variables.
-
-        """
-        # Parse the arguments and convert them to a dict using vars
         parsed_arguments = vars(self.parser.parse_args())
-
-        # Clean up the arguments to remove default arguments of the driver class
-        # before we hand the arguments to the analysis class
-        if self.analysis_class_arg_name in parsed_arguments:
-            parsed_arguments.pop(self.analysis_class_arg_name)
-
-        # Process the --save argument to determine where we should save the output
-        if self.output_save_arg_name in parsed_arguments:
-            # Determine the filename and experiment group from the path
-            self.output_target = parsed_arguments.pop(self.output_save_arg_name)
-            if self.output_target is not None:
-                output_filename, output_object_path = omsi_file_common.parse_path_string(self.output_target)
-                # Create the output file
-                if output_filename is None:
-                    raise ValueError("ERROR: Invalid save parameter specification " + self.output_target)
-                elif os.path.exists(output_filename) and not os.path.isfile(output_filename):
-                    raise ValueError("ERROR: Save parameter not specifiy a file.")
-                if not os.path.exists(output_filename):
-                    out_file = omsi_file(output_filename, mode='a')
-                    self.output_target = out_file.create_experiment()
-                    self. __output_target_self = output_filename
-                else:
-                    out_file = omsi_file(output_filename, mode='a')
-                    if output_object_path is not None:
-                        self.output_target = omsi_file_common.get_omsi_object(out_file[output_object_path])
-                    else:
-                        if out_file.get_num_experiments() > 0:
-                            self.output_target = out_file.get_experiment(0)
-                        else:
-                            self.output_target = out_file.create_experiment()
-        else:
-            self.output_target = None
-
-        # Define the analysis arguments to be used
+        parsed_arguments.pop(self.analysis_class_arg_name, None)
+        parsed_arguments.pop(self.profile_arg_name, None)
+        parsed_arguments.pop(self.output_save_arg_name)
         self.analysis_arguments = parsed_arguments
 
     def print_settings(self):
@@ -271,13 +322,19 @@ class omsi_cl_driver(omsi_driver_base):
         for key, value in self.analysis_arguments.iteritems():
             print "   " + unicode(key) + " = " + unicode(value)
         if self.output_target is not None:
-            print "Save to: " + unicode(self.output_target)
+            if isinstance(self.output_target, omsi_file_common):
+                h5py_object = omsi_file_common.get_h5py_object(self.output_target)
+                print "Save to: " + unicode(h5py_object.file.filename) + u":" + unicode(h5py_object.name)
+            else:
+                print "Save to: " + unicode(self.output_target)
 
     def remove_output_target(self):
         """
         This function is used to delete any output target files created by the
         command line driver. This is done in case that an error occurred and
         we do not want to leave garbage files left over.
+
+        *Side effects* The function modifies ``self.output_target``
 
         :return: Boolean indicating whether we succesfully cleaned up the output
         """
@@ -316,15 +373,16 @@ class omsi_cl_driver(omsi_driver_base):
             print self.parser.print_help
             raise ValueError('Analysis class is not a subclass of omsi_analysis_base.')
 
-
         # Initialize the argument parser
         if self.parser is None:
             self.initialize_argument_parser()
 
-        # Parse the command line arguments to determine the analysis settings
         try:
+            # Parse the command line arguments to determine the command line driver settings
             self.parse_cl_arguments()
-        except ValueError:
+            # Add and parse the command line arguments specifc to the analysis to determine the analysis settings
+            self.add_and_parse_analysis_arguments()
+        except:
             self.remove_output_target()
             raise
 
@@ -334,10 +392,19 @@ class omsi_cl_driver(omsi_driver_base):
         # Call the execute function of the analysis
         try:
             analysis_object = self.analysis_class()
+            if self.profile_analysis:
+                analysis_object.enable_profiling(self.profile_analysis)
             analysis_object.execute(**self.analysis_arguments)
         except:
             self.remove_output_target()
             raise
+
+        # Print the profiling results
+        if self.profile_analysis:
+            print ""
+            print "PROFILING DATA:"
+            print ""
+            analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
         # Save the analysis to file
         if self.output_target is not None:
@@ -347,4 +414,7 @@ class omsi_cl_driver(omsi_driver_base):
 if __name__ == "__main__":
 
     # Create an command-line driver and call the main function to run the analysis
-    omsi_cl_driver(analysis_class=None, add_analysis_class_arg=True).main()
+    omsi_cl_driver(analysis_class=None,
+                   add_analysis_class_arg=True,
+                   add_output_arg=True,
+                   add_profile_arg=True).main()
