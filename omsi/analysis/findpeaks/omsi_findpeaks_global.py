@@ -250,6 +250,11 @@ class omsi_findpeaks_global(omsi_analysis_base):
         # handle also a large range of python built_in types by converting them to numpy for storage in HDF5 but
         # to ensure a consistent behavior we convert the values directly here
 
+        # Clean up the biggest chunks of memory we allocated when we potentially loaded the data from file
+        del data
+        del processed_msidata
+        del flat_data
+
         # Save the analysis data to the __data_list so that the data can be
         # saved automatically by the omsi HDF5 file API
         return peak_cube, mz_peaks
