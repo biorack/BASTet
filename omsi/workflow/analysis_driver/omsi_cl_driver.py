@@ -100,7 +100,7 @@ class omsi_cl_driver(omsi_driver_base):
         self.required_argument_group = None
         self.output_target = None
         self.profile_analysis = False
-        self. __output_target_self = None  #  Path to output target created by the driver if we need to remove it
+        self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
 
@@ -405,6 +405,12 @@ class omsi_cl_driver(omsi_driver_base):
             print "PROFILING DATA:"
             print ""
             analysis_object.get_profile_stats_object(consolidate=True).print_stats()
+
+        try:
+            print ""
+            print "Time to execute analysis: " + analysis_object.run_info['execution_time'] + " s"
+        except:
+            pass
 
         # Save the analysis to file
         if self.output_target is not None:
