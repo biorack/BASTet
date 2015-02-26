@@ -16,6 +16,10 @@ from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
 from omsi.shared.omsi_dependency import omsi_dependency
+try:
+    from mpi4py import MPI
+except ImportError:
+    pass
 
 
 class omsi_analysis_base(object):
@@ -44,6 +48,9 @@ class omsi_analysis_base(object):
          (including those that may have dependencies).
     :ivar data_names: List of strings of all names of analysis output datasets. These are the
          target keys for __data_list.
+    :ivar profile_execute_analysis: Boolean indicating whether we should profile the execute_analysis(...) function
+        when called as part of the execute(...) function. The default value is false. Set to True before
+        calling execute(...) using the enable_profiling(...) function.
 
     **Execution Functions:**
 
@@ -109,6 +116,7 @@ class omsi_analysis_base(object):
         self.parameters = []
         self.data_names = []
         self.run_info = {}
+        self.profile_execute_analysis = False
 
     def __getitem__(self,
                     key):
@@ -303,6 +311,23 @@ class omsi_analysis_base(object):
         :returns: This function returns the output of the execute analysis function.
 
         """
+        # Import modules for profiling if needed
+        if self.profile_execute_analysis:
+            try:
+                from cProfile import Profile
+            except ImportError:
+                try:
+                    from profile import Profile
+                except ImportError:
+                    self.profile_execute_analysis = False
+                    warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile")
+            try:
+                import pstats
+                import StringIO
+            except ImportError:
+                warnings.warn("Profiling of run failed due to import error for pstats module")
+                self.profile_execute_analysis = False
+
         # Set any parameters that are given to the execute function
         self.update_analysis_parameters(**kwargs)
 
@@ -312,10 +337,30 @@ class omsi_analysis_base(object):
         # Record basic execution provenance information prior to running the analysis
         self.run_info = {}
         self.runinfo_record_preexecute()
+
+        # Define the start-time for the execution of our analysis
         start_time = time.time()
 
-        # Execute the analysis
-        analysis_output = self.execute_analysis()
+        # Execute the analysis as is
+        if not self.profile_execute_analysis:
+            analysis_output = self.execute_analysis()
+        # Execute the analysis with runtime profiling enables
+        else:
+            # Enable profiling and run the analysis
+            profiler = Profile()
+            profiler.enable()
+            analysis_output = self.execute_analysis()
+            profiler.disable()
+
+            # Save the profiling data
+            profiler.create_stats()
+            self.run_info['profile'] = unicode(profiler.stats)
+
+            # Save the summary statistics for the profiling data
+            stats_io = StringIO.StringIO()
+            profiler_stats = pstats.Stats(profiler, stream=stats_io).sort_stats('cumulative')
+            profiler_stats.print_stats()
+            self.run_info['profile_stats'] = stats_io.getvalue()
 
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
         execution_time = time.time() - start_time
@@ -656,6 +701,85 @@ class omsi_analysis_base(object):
                 'settings': {'name': 'analysis settings',
                              'description': 'Analysis settings'}}
 
+    def enable_profiling(self, enable=True):
+        """
+        Enable or disable profiling
+
+        :param enable: Enable (True) or disable (False) profiling
+        :type enable: bool
+
+        :returns: Boolean indicating whether the operation was succesful
+        """
+        if not enable:
+            self.profile_execute_analysis = False
+        else:
+            # Try to import all required packages for profiling
+            try:
+                try:
+                    from cProfile import Profile
+                except ImportError:
+                    from profile import Profile
+                import pstats
+                import StringIO
+                import ast
+                imports_ok = True
+            except:
+                imports_ok = False
+            if imports_ok:
+                self.profile_execute_analysis = True
+            else:
+                self.profile_execute_analysis = False
+            return imports_ok
+
+    def get_profile_stats_object(self, consolidate=True):
+        """
+        Based on the execution profile of the execute_analysis(..) function get
+        ``pstats.Stats`` object to help with the interpretation of the data.
+
+        :param consolidate: Boolean flag indicating whether multiple stats (e.g., from multiple cores)
+            should be consolidated into a single stats object. Default is True.
+
+        :return: A single pstats.Stats object if consolidate is True. Otherwise the function
+            returns a list of pstats.Stats objects, one per recorded statistic. None is returned
+            in case that the stats objects cannot be created.
+        """
+        from pstats import Stats
+        from ast import literal_eval
+        if 'profile' in self.run_info:
+            # Parse the profile data (which is stored as a string)
+            try:
+                profile_data = literal_eval(self.run_info['profile'])
+            except:
+                return None
+
+            # If we only have a single stat, then convert our data to a list, so that we can
+            # handle the single and multiple statistics case in the same way in the remainder of this function
+            if not isinstance(profile_data, list):
+                profile_data = [profile_data,]
+
+            # Create a list of profile objects that the pstats.Stats class understands
+            profile_dummies = []
+            for profile_i in profile_data:
+                # Here we are creating for each statistic a dummy class on the fly that holds our
+                # profile_data in the stats attributes and has an empty create_stats function.
+                # This trick allows us to create a pstats.Stats object without having to write our
+                # stats data to file or having to create a cProfile.Profile object first. Writing
+                # the data to file involves overhead and is ugly and creating a profiler and
+                # overwriting its stats is potentially problematic
+                profile_dummies.append(type('Profile',
+                                            (object,),
+                                            {'stats' : profile_i, 'create_stats': lambda x: None})())
+
+            # Create the statistics object and return it
+            if consolidate:
+                profile_stats = Stats(*profile_dummies)
+                return profile_stats
+            else:
+                profile_stats = [Stats(profile_i) for profile_i in profile_dummies]
+                return profile_stats
+        else:
+            return None
+
     def get_help_string(self):
         """
         Get a string describing the analysis.
@@ -959,7 +1083,7 @@ class omsi_analysis_base(object):
         group. The data that is written by default is typically still written by
         the `omsi_file_experiment.create_analysis()` function, i.e., the following data is
         written by default: i) analysis_identifier ,ii) get_analysis_type, iii)__data_list,
-        iv) parameters . Since the `omsi_file.experiment.create_analysis()`
+        iv) parameters, v) runinfo . Since the `omsi_file.experiment.create_analysis()`
         functions takes care of setting up the basic structure of the analysis storage
         (included the subgroubs for storing parameters and data dependencies) this setup can generally
         be assumed to exist before this function is called. This function is called
@@ -1047,25 +1171,6 @@ class omsi_analysis_base(object):
         """
         self.analysis_identifier = identifier
 
-    @classmethod
-    def supports_mpi(cls):
-        """
-        Check whether the analysis module supports parallel execution using mpi4py or pyMPI
-
-        The default implementation tries to be 'smart' by inspecting the source code of the
-        analysis to see if MPI is imported by the code.
-
-        Overwrite this function to indicate whether your analysis supports parallel execution
-        or not.
-        """
-        import inspect
-        import re
-        code = inspect.getsource(cls)
-        supports_mpi = re.search('import\s+mpi4py', code)
-        supports_mpi = supports_mpi or re.search('from\s+mpi4py\s+import', code)
-        supports_mpi = supports_mpi or re.search('import\s+mpi', code)
-        supports_mpi = supports_mpi or re.search('from\s+mpi\s+import', code)
-        return supports_mpi
 
 
 
