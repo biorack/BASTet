@@ -118,6 +118,9 @@ class omsi_cl_driver(omsi_driver_base):
         analysis_class_arg_name positional argument from the command line.
 
         *Side effects:* The function sets ``self.analysis_class`
+
+        :raises: ImportError in case that the analysis module cannot be loaded
+        :raises: AttributeError in case that the analysis class cannot be extracted from the module
         """
         if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
             raise ValueError("Missing required input argument defining the analysis to be executed missing")
@@ -137,7 +140,14 @@ class omsi_cl_driver(omsi_driver_base):
             analysis_module_name = 'omsi.analysis.' + analysis_module_name
 
         # Import the module
-        analysis_module_object = __import__(analysis_module_name, globals(), locals(), [analysis_class_name], -1)
+        try:
+            analysis_module_object = __import__(analysis_module_name, globals(), locals(), [analysis_class_name], -1)
+        except ImportError as e:
+            print e.message
+            print ""
+            print "Could not locate module " + analysis_module_name
+            print "Please check the name of the module. Maybe there is a spelling error."
+            raise
 
         # Determine the self.analysis parameter
         try:
@@ -147,7 +157,7 @@ class omsi_cl_driver(omsi_driver_base):
             print ""
             print "Could not locate " + analysis_class_name + " in " + analysis_module_name
             print "Please check the name of the analysis. Maybe there is a spelling error."
-            exit()
+            raise
 
     def initialize_argument_parser(self):
         """
@@ -395,7 +405,10 @@ class omsi_cl_driver(omsi_driver_base):
         """
         # Get the analysis object if needed
         if self.add_analysis_class_arg:
-            self.get_analysis_class_from_cl()
+            try:
+                self.get_analysis_class_from_cl()
+            except (ImportError, AttributeError):
+                exit()
 
         # Check if we have a valid analysis class
         if self.analysis_class is None:
