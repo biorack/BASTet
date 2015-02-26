@@ -223,7 +223,7 @@ class omsi_parameter_data(dict):
         :raises: ValueError is raised in case that an invalid value is provided
         """
         if key in self.default_keys:
-            if key == 'group':
+            if key == 'group' and value is not None:
                 if not isinstance(value, basestring) and not isinstance(value, dict):
                     raise ValueError('Invalid group description for omsi_analysis_parameter')
                 if isinstance(value, dict) and 'name' not in value:
