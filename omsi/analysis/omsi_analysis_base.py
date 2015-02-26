@@ -48,9 +48,14 @@ class omsi_analysis_base(object):
          (including those that may have dependencies).
     :ivar data_names: List of strings of all names of analysis output datasets. These are the
          target keys for __data_list.
-    :ivar profile_execute_analysis: Boolean indicating whether we should profile the execute_analysis(...) function
-        when called as part of the execute(...) function. The default value is false. Set to True before
-        calling execute(...) using the enable_profiling(...) function.
+    :ivar profile_time_and_usage: Boolean indicating whether we should profile the execute_analysis(...) function
+        when called as part of the execute(...) function. The default value is false. Use the enable_time_and_usage_profiling(..)
+        function to determine which profiling should be performed. The time_and_usage profile uses pythons
+        cProfile (or Profile) to monitor how often and for how long particular parts of the analysis code
+        executed.
+    :ivar profile_memory: Boolean indicating whether we should monitor memory usage (line-by-line) when
+        executing the execute_analysis(...) function. The default value is false. Use the enable_time_and_usage_profiling(..)
+        function to determine which profiling should be performed.
 
     **Execution Functions:**
 
@@ -116,7 +121,8 @@ class omsi_analysis_base(object):
         self.parameters = []
         self.data_names = []
         self.run_info = {}
-        self.profile_execute_analysis = False
+        self.profile_time_and_usage = False
+        self.profile_memory = False
 
     def __getitem__(self,
                     key):
@@ -312,21 +318,32 @@ class omsi_analysis_base(object):
 
         """
         # Import modules for profiling if needed
-        if self.profile_execute_analysis:
+        if self.profile_time_and_usage:
             try:
                 from cProfile import Profile
             except ImportError:
                 try:
                     from profile import Profile
                 except ImportError:
-                    self.profile_execute_analysis = False
-                    warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile")
+                    self.profile_time_and_usage = False
+                    warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile.")
             try:
                 import pstats
                 import StringIO
             except ImportError:
                 warnings.warn("Profiling of run failed due to import error for pstats module")
-                self.profile_execute_analysis = False
+                self.profile_time_and_usage = False
+        if self.profile_memory:
+            try:
+                import memory_profiler
+            except ImportError:
+                self.profile_memory = False
+                warnings.warn("Profiling of memory failed dur to import error. Could not import memory_profiler.")
+            try:
+                import StringIO
+            except ImportError:
+                self.profile_memory = False
+                warnings.warn("Profiling of memory failed dur to import error. Could not import StringIO.")
 
         # Set any parameters that are given to the execute function
         self.update_analysis_parameters(**kwargs)
@@ -341,26 +358,45 @@ class omsi_analysis_base(object):
         # Define the start-time for the execution of our analysis
         start_time = time.time()
 
-        # Execute the analysis as is
-        if not self.profile_execute_analysis:
+        # Execute the analysis as is without any profiling
+        if not self.profile_time_and_usage and not self.profile_memory:
             analysis_output = self.execute_analysis()
-        # Execute the analysis with runtime profiling enables
+        # Execute the analysis with runtime profiling enabled
         else:
-            # Enable profiling and run the analysis
-            profiler = Profile()
-            profiler.enable()
-            analysis_output = self.execute_analysis()
-            profiler.disable()
+            profiler_time_and_use = None
+            profiler_mem = None
+            if self.profile_time_and_usage and not self.profile_memory:
+                # Enable profiling cProfile and execute the analysis
+                profiler_time_and_use = Profile()
+                profiler_time_and_use.enable()
+                analysis_output = self.execute_analysis()
+                profiler_time_and_use.disable()
+            elif self.profile_memory and not self.profile_time_and_usage:
+                profiler_mem = memory_profiler.LineProfiler()
+                analysis_output = profiler_mem(self.execute_analysis)()
+            elif self.profile_memory and self.profile_time_and_usage:
+                profiler_mem = memory_profiler.LineProfiler()
+                profiler_time_and_use = Profile()
+                profiler_time_and_use.enable()
+                analysis_output = profiler_mem(self.execute_analysis)()
+                profiler_time_and_use.disable()
 
-            # Save the profiling data
-            profiler.create_stats()
-            self.run_info['profile'] = unicode(profiler.stats)
+            # Save the time and usage profiling data from cProfile
+            if profiler_time_and_use is not None:
+                profiler_time_and_use.create_stats()
+                self.run_info['profile'] = unicode(profiler_time_and_use.stats)
 
-            # Save the summary statistics for the profiling data
-            stats_io = StringIO.StringIO()
-            profiler_stats = pstats.Stats(profiler, stream=stats_io).sort_stats('cumulative')
-            profiler_stats.print_stats()
-            self.run_info['profile_stats'] = stats_io.getvalue()
+                # Save the summary statistics for the profiling data
+                stats_io = StringIO.StringIO()
+                profiler_stats = pstats.Stats(profiler_time_and_use, stream=stats_io).sort_stats('cumulative')
+                profiler_stats.print_stats()
+                self.run_info['profile_stats'] = stats_io.getvalue()
+
+            # Save the results of the memory profiler
+            if profiler_mem is not None:
+                mem_stats_io = StringIO.StringIO()
+                memory_profiler.show_results(profiler_mem, stream=mem_stats_io)
+                self.run_info['profile_mem_stats'] = mem_stats_io.getvalue()
 
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
         execution_time = time.time() - start_time
@@ -701,20 +737,20 @@ class omsi_analysis_base(object):
                 'settings': {'name': 'analysis settings',
                              'description': 'Analysis settings'}}
 
-    def enable_profiling(self, enable=True):
+    def enable_time_and_usage_profiling(self, enable=True):
         """
-        Enable or disable profiling
+        Enable or disable profiling of time and usage of code parts of execute_analysis.
 
         :param enable: Enable (True) or disable (False) profiling
         :type enable: bool
 
-        :returns: Boolean indicating whether the operation was succesful
+        :raises: ImportError is raised if a required package for profiling is not available.
         """
-        if not enable:
-            self.profile_execute_analysis = False
-        else:
-            # Try to import all required packages for profiling
-            try:
+        if enable != self.profile_time_and_usage:
+            if not enable:
+                self.profile_time_and_usage = False
+            else:
+                # Try to import all required packages for profiling
                 try:
                     from cProfile import Profile
                 except ImportError:
@@ -722,14 +758,37 @@ class omsi_analysis_base(object):
                 import pstats
                 import StringIO
                 import ast
-                imports_ok = True
-            except:
-                imports_ok = False
-            if imports_ok:
-                self.profile_execute_analysis = True
+                self.profile_time_and_usage = True
+
+    def enable_memory_profiling(self, enable=True):
+        """
+        Enable or disable line-by-line profiling of memory usage of execute_analysis.
+
+        :param enable_memory: Enable (True) or disable (False) line-by-line profiling of memory usage
+        :type enable_memory: bool
+
+        :raises: ImportError is raised if a required package for profiling is not available.
+        """
+        if enable != self.profile_memory:
+            if not enable:
+                self.profile_memory = False
             else:
-                self.profile_execute_analysis = False
-            return imports_ok
+                import memory_profiler
+                import StringIO
+                self.profile_memory = True
+
+    def get_memory_profile_info(self):
+        """
+        Based on the memory profile of the execute_analysis(..) function get
+        the string describing the line-by-line memory usage.
+
+        :return: String describing the memory usage profile. None is returned in case that
+            no memory profiling data is available.
+        """
+        if 'profile_mem_stats' in self.run_info:
+            return self.run_info['profile_mem_stats']
+        else:
+            return None
 
     def get_profile_stats_object(self, consolidate=True):
         """
@@ -741,7 +800,7 @@ class omsi_analysis_base(object):
 
         :return: A single pstats.Stats object if consolidate is True. Otherwise the function
             returns a list of pstats.Stats objects, one per recorded statistic. None is returned
-            in case that the stats objects cannot be created.
+            in case that the stats objects cannot be created or no profiling data is available.
         """
         from pstats import Stats
         from ast import literal_eval
@@ -755,7 +814,7 @@ class omsi_analysis_base(object):
             # If we only have a single stat, then convert our data to a list, so that we can
             # handle the single and multiple statistics case in the same way in the remainder of this function
             if not isinstance(profile_data, list):
-                profile_data = [profile_data,]
+                profile_data = [profile_data, ]
 
             # Create a list of profile objects that the pstats.Stats class understands
             profile_dummies = []
@@ -768,7 +827,7 @@ class omsi_analysis_base(object):
                 # overwriting its stats is potentially problematic
                 profile_dummies.append(type('Profile',
                                             (object,),
-                                            {'stats' : profile_i, 'create_stats': lambda x: None})())
+                                            {'stats': profile_i, 'create_stats': lambda x: None})())
 
             # Create the statistics object and return it
             if consolidate:

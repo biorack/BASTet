@@ -33,38 +33,43 @@ class omsi_cl_driver(omsi_driver_base):
     :cvar analysis_class_arg_name: Name of the optional first positional argument to be used
         to define the analysis class to be used.
 
+    :cvar profile_arg_name: Name of the keyword argument used to enable profiling of the analysis
+
+    :cvar profile_mem_arg_name: Name of the keyword argument used to enable profiling of memory usage of an analysis
+
+
     :ivar analysis_class: The class (subclass of omsi_analysis_base) defining the analysis to be executed
     :ivar add_analysis_class_arg: Boolean indicating whether an optional positional command line argument
         should be used to determine the analysis class (or whether the analysis class will be set explicitly)
     :ivar add_output_arg: Boolean indicating whether an optional keyword argument should be added to define
         the output target for the analysis.
+    :ivar add_profile_arg: Add the optional --profile keyword argument for profiling the analysis
+    :ivar profile_analysis: Boolean indicating whether we should profile the analysis
     :ivar parser: The argparse.ArgumentParser instance used for defining command-line arguments
     :ivar required_argument_group: argparse.ArgumentParser argument group used to define required command line arguments
+    :ivar custom_argument_groups: Dict of custom argparse.ArgumentParser argument groups specified by the analysis
     :ivar output_target: Specification of the output target where the analysis result should be stored
     :ivar analysis_arguments: Dictionary defining the input arguments to be used for the analysis
 
     """
     analysis_class_arg_name = '__analysis_class'
-    """
-    The name where the positional argument for defining the
-    analysis class will be stored.
-    """
+    """The name where the positional argument for defining the analysis class will be stored."""
 
     output_save_arg_name = 'save'
-    """
-    Name of the key-word argument used to define
-    """
+    """Name of the key-word argument used to define"""
 
     profile_arg_name = 'profile'
-    """
-    Name of the key-word argument used to enable profiling of the analysis
-    """
+    """Name of the keyword argument used to enable profiling of the analysis"""
+
+    profile_mem_arg_name = 'memprofile'
+    """Name of the keyword argument used to enable profiling of memory usage of an analysis"""
 
     def __init__(self,
                  analysis_class,
                  add_analysis_class_arg=False,
                  add_output_arg=True,
-                 add_profile_arg=False):
+                 add_profile_arg=False,
+                 add_mem_profile_arg=False):
         """
 
         :param analysis_class: The analysis class for which we want to execute the analysis.
@@ -78,6 +83,8 @@ class omsi_cl_driver(omsi_driver_base):
             argument for defining the output target for the analysis.
         :param add_profile_arg: Boolean indicating whether we should add the optional keyword
             argument for enabling profiling of the analysis.
+        :param add_mem_profile_arg: Boolean indicating whether we should add the optional
+            keyword argument for enabling memory profiling of the analysis.
 
         :raises: A ValueError is raised in the case of conflicting inputs, i.e., if
             i) analysis_class==None and add_analysis_class_arg=False, i.e., the analysis class is not determined or
@@ -90,16 +97,17 @@ class omsi_cl_driver(omsi_driver_base):
             raise ValueError('The analysis class must be either set explicitly or determined from the command line.')
         if analysis_class is not None and add_analysis_class_arg:
             raise ValueError('Conflicting inputs: analysis_class set and add_analysis_class_arg set to True.')
-
         super(omsi_cl_driver, self).__init__(analysis_class)
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
         self.add_profile_arg = add_profile_arg
+        self.add_mem_profile_arg = add_mem_profile_arg
         self.parser = None
         self.required_argument_group = None
         self.output_target = None
         self.profile_analysis = False
+        self.profile_analysis_mem = False
         self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
@@ -204,12 +212,24 @@ class omsi_cl_driver(omsi_driver_base):
         if self.add_profile_arg:
             profile_arg_help = 'Enable runtime profiling of the analysis. NOTE: This is intended for ' + \
                                'debugging and investigation of the runtime behavior of an analysis.' + \
-                               'Enabling profiling entails certain overhead in performance'
+                               'Enabling profiling entails certain overheads in performance'
             self.parser.add_argument("--"+self.profile_arg_name,
                                      action='store_true',
                                      default=False,
                                      required=False,
                                      help=profile_arg_help)
+        # Add the optional keyword argument for enabling memory profiling of the analysis
+        if self.add_mem_profile_arg:
+            profile_mem_arg_help = 'Enable runtime profiling of the memory usage of analysis. ' + \
+                                   'NOTE: This is intended for debugging and investigation of ' + \
+                                   'the runtime behavior of an analysis. Enabling profiling ' + \
+                                   'entails certain overheads in performance.'
+            self.parser.add_argument("--"+self.profile_mem_arg_name,
+                                     action='store_true',
+                                     default=False,
+                                     required=False,
+                                     help=profile_mem_arg_help)
+
 
     def parse_cl_arguments(self):
         """
@@ -259,9 +279,13 @@ class omsi_cl_driver(omsi_driver_base):
         else:
             self.output_target = None
 
-        # Process the --profile-analysis profiling argument
+        # Process the --profile profiling argument
         if self.profile_arg_name in parsed_arguments:
             self.profile_analysis = parsed_arguments.pop(self.profile_arg_name)
+
+        # Process the --memprofile argument
+        if self.profile_mem_arg_name in parsed_arguments:
+            self.profile_analysis_mem = parsed_arguments.pop(self.profile_mem_arg_name)
 
     def add_and_parse_analysis_arguments(self):
         """
@@ -311,7 +335,8 @@ class omsi_cl_driver(omsi_driver_base):
         parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
         parsed_arguments.pop(self.profile_arg_name, None)
-        parsed_arguments.pop(self.output_save_arg_name)
+        parsed_arguments.pop(self.output_save_arg_name, None)
+        parsed_arguments.pop(self.profile_mem_arg_name, None)
         self.analysis_arguments = parsed_arguments
 
     def print_settings(self):
@@ -391,21 +416,43 @@ class omsi_cl_driver(omsi_driver_base):
 
         # Call the execute function of the analysis
         try:
+            # Create the analysis object
             analysis_object = self.analysis_class()
+            # Enable time and usage profiling if requested
             if self.profile_analysis:
-                analysis_object.enable_profiling(self.profile_analysis)
+                try:
+                    analysis_object.enable_time_and_usage_profiling(self.profile_analysis)
+                except ImportError as e:
+                    print "Profiling of time and usage not available due to missing packages."
+                    print e.message
+            # Enable memory profiling if requested
+            if self.profile_analysis_mem:
+                try:
+                    analysis_object.enable_memory_profiling(self.profile_analysis_mem)
+                except ImportError as e:
+                    print "Profiling of memory usage not available due to missing packages"
+                    print e.message
+            # Execute the analysis
             analysis_object.execute(**self.analysis_arguments)
         except:
             self.remove_output_target()
             raise
 
-        # Print the profiling results
+        # Print the profiling results of time and usage
         if self.profile_analysis:
             print ""
-            print "PROFILING DATA:"
+            print "PROFILING DATA: TIME AND USAGE"
             print ""
             analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
+        # Print the profiling results for memory usage
+        if self.profile_analysis_mem:
+            print ""
+            print "PROFILING DATA: MEMORY"
+            print ""
+            print analysis_object.get_memory_profile_info()
+
+        # Print the time it took to run the analysis
         try:
             print ""
             print "Time to execute analysis: " + analysis_object.run_info['execution_time'] + " s"
@@ -423,4 +470,5 @@ if __name__ == "__main__":
     omsi_cl_driver(analysis_class=None,
                    add_analysis_class_arg=True,
                    add_output_arg=True,
-                   add_profile_arg=True).main()
+                   add_profile_arg=True,
+                   add_mem_profile_arg=True).main()

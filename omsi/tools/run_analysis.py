@@ -10,4 +10,5 @@ if __name__ == "__main__":
     omsi_cl_driver(analysis_class=None,
                    add_analysis_class_arg=True,
                    add_output_arg=True,
-                   add_profile_arg=True).main()
+                   add_profile_arg=True,
+                   add_mem_profile_arg=True).main()
