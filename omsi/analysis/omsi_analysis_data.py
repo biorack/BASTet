@@ -44,7 +44,7 @@ class omsi_analysis_dtypes(dict):
         from omsi.dataformat.omsi_file.common import omsi_file_common
         if isinstance(argument, basestring):
             try:
-                return ast.literal_eval(argument)
+                return np.asarray(ast.literal_eval(argument))
             except (ValueError, SyntaxError):
                 omsi_out_object = omsi_file_common.get_omsi_object(h5py_object=argument)
                 if omsi_out_object is not None:
@@ -305,6 +305,7 @@ class omsi_parameter_data(dict):
             try:
                 outdata = curr_dtype(outdata)
             except:
+                raise
                 warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
                               self['name'] + "  " + str(outdata) + "  " + unicode(sys.exc_info()))
 

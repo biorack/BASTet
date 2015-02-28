@@ -279,10 +279,17 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param ana_data: The omsi_analysis_data object with the description of the data to be written.
         :type ana_data: omsi.analysis.omsi_analysis_data
         """
-        from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data
+        from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
+        curr_dtype = ana_data['dtype']
+        try:
+            if curr_dtype == omsi_analysis_dtypes.get_dtypes()['ndarray']:
+                curr_dtype = ana_data['data'].dtype
+        except TypeError:
+            pass
+
         # Create link in HDF5 to an existing dataset within the file
         if isinstance(ana_data, omsi_analysis_data) and isinstance(ana_data['dtype'], int):
-            if ana_data['dtype'] == ana_data.ana_hdf5link:
+            if curr_dtype == ana_data.ana_hdf5link:
                 linkobject = data_group.file.get(ana_data['data'])
                 data_group[ana_data['name']] = linkobject
                 omsiobj = omsi_file_common.get_omsi_object(linkobject)
@@ -298,7 +305,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                     data_group[ana_data['name']].attrs[
                         omsi_format_common.type_attribute] = omsiobjtype
         # Create a new string-type dataset
-        elif (ana_data['dtype'] == omsi_format_common.str_type) or (ana_data['dtype'] == h5py.special_dtype(vlen=str)):
+        elif (curr_dtype == omsi_format_common.str_type) or (curr_dtype == h5py.special_dtype(vlen=str)):
             tempdata = data_group.require_dataset(name=unicode(ana_data['name']),
                                                   shape=(1,),
                                                   dtype=omsi_format_common.str_type)
@@ -320,7 +327,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             # Write the current analysis dataset
             tempdata = data_group.require_dataset(name=ana_data['name'],
                                                   shape=ana_data['data'].shape,
-                                                  dtype=ana_data['dtype'],
+                                                  dtype=ana_data['data'].dtype,
                                                   chunks=chunks)
             if ana_data['data'].size > 0:
                 tempdata[:] = ana_data['data']
