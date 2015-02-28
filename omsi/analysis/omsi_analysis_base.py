@@ -1007,7 +1007,7 @@ class omsi_analysis_base(object):
             value = v
             selection = None
             curr_parameter = self.get_parameter_data_by_name(name)
-            dtype = unicode
+            dtype = curr_parameter['dtype']   # unicode
             if isinstance(v, tuple):
                 value = v[0]
                 selection = v[1]
@@ -1020,25 +1020,31 @@ class omsi_analysis_base(object):
                                         omsi_object=value,
                                         selection=selection,
                                         help=curr_parameter['help'])
-                dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+                # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, omsi_dependency):
-                dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+                # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+                pass
             else:
                 try:
                     dtype = value.dtype  # if the object specifies a valid numpy dtype
                 except AttributeError:
-                    if isinstance(value, float) or isinstance(value, int) or isinstance(value, bool):
+                    if isinstance(value, float) or \
+                            isinstance(value, int) or \
+                            isinstance(value, bool) or \
+                            isinstance(value, long) or \
+                            isinstance(value, complex):
                         value = np.asarray([value])
-                        dtype = value.dtype
+                        # dtype = value.dtype
                     elif isinstance(value, str) or isinstance(value, unicode):
-                        dtype = omsi_format_common.str_type
+                        # dtype = omsi_format_common.str_type
+                        pass
                     else:
                         value = np.asarray(value)
-                        dtype = value.dtype
+                        # dtype = value.dtype
 
             # Parameter set
             if curr_parameter is not None:
-                curr_parameter['dtype'] = dtype
+                # curr_parameter['dtype'] = dtype
                 curr_parameter['data'] = value
             else:  # If used correctly this should not happen. Ensures that we don't omit any data
                 warnings.warn('Parameter ' + name + " not found in omsi_analysis_base.set_parameter_values(). " +
