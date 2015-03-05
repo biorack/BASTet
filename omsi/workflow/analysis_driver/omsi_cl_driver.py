@@ -191,7 +191,7 @@ class omsi_cl_driver(omsi_driver_base):
         self.parser = argparse.ArgumentParser(description=parser_description,
                                               epilog=parser_epilog,
                                               formatter_class=RawDescriptionDefaultHelpArgParseFormatter,
-                                              add_help=True)
+                                              add_help=False)  # We'll add the help later in
 
         # Create the argument group for required arguments
         self.required_argument_group = self.parser.add_argument_group(title="required analysis arguments")
@@ -279,7 +279,7 @@ class omsi_cl_driver(omsi_driver_base):
                 if output_filename is None:
                     raise ValueError("ERROR: Invalid save parameter specification " + self.output_target)
                 elif os.path.exists(output_filename) and not os.path.isfile(output_filename):
-                    raise ValueError("ERROR: Save parameter not specifiy a file.")
+                    raise ValueError("ERROR: Save parameter not specify a file.")
                 if not os.path.exists(output_filename):
                     out_file = omsi_file(output_filename, mode='a')
                     self.output_target = out_file.create_experiment()
@@ -348,6 +348,11 @@ class omsi_cl_driver(omsi_driver_base):
                                             # metavar               #     Don't use. Positional analysis arguments
                                             #                       #     are not allowed
                                             dest=arg_dest)          #     Automatically determined by the name
+        # Add the help argument
+        self.parser.add_argument('-h', '--help',
+                            action='help',
+                            default=argparse.SUPPRESS,
+                            help='show this help message and exit')
 
         parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
@@ -425,7 +430,7 @@ class omsi_cl_driver(omsi_driver_base):
         try:
             # Parse the command line arguments to determine the command line driver settings
             self.parse_cl_arguments()
-            # Add and parse the command line arguments specifc to the analysis to determine the analysis settings
+            # Add and parse the command line arguments specific to the analysis to determine the analysis settings
             self.add_and_parse_analysis_arguments()
         except:
             self.remove_output_target()
