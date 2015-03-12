@@ -142,7 +142,7 @@ class omsi_mz_rebin(omsi_analysis_base):
                     print 'Rebinning pixel %s of %s' % (ix*iy, npixel)
 
         #return variables
-        return new_msidata, new_mzdata
+        return np.asarray(new_msidata), np.asarray(new_mzdata)
 
 
     ###############################################################
