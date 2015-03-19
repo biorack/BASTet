@@ -8,7 +8,7 @@
 # TODO Register all print-outs with the email message (use logging instead of print)
 # TODO add ability have --format option for each dataset to be converted
 
-from omsi.dataformat import *
+from omsi.dataformat.omsi_file import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
