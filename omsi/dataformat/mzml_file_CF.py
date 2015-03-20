@@ -34,6 +34,9 @@ class mzml_file(file_reader_base):
                              (this makes slicing easier). (default is True)
         :type readdata: bool
 
+        :param resolution: For profile data only, the minimum m/z spacing to use for creating the "full" reprofiled
+                            data cube
+        :type resolution: float
         """
         # Determine the correct base
         if os.path.isdir(basename):
@@ -59,7 +62,8 @@ class mzml_file(file_reader_base):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
-        self.mz = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type, scan_types=self.scan_types)
+        self.mz = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type,
+                                         scan_types=self.scan_types)
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
         self.shape = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz]
@@ -100,7 +104,10 @@ class mzml_file(file_reader_base):
                 spectrumid += 1
 
     @classmethod
-    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
+    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):  ## TODO completely refactor this to make it smartly handle profile or centroid datasets
+        ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
+        ## TODO: profile datasets should work as is
+        ## TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
         """
         Internal helper function used to compute the mz axis of each scantype
         Returns a list of numpy arrays
@@ -109,17 +116,28 @@ class mzml_file(file_reader_base):
 
         if mzml_filetype == cls.available_mzml_types['thermo']:
 
-            mz_axes = [np.array([]) for scantype in scan_types]
+            mz_axes = [np.array([]) for _ in scan_types]
+            all_centroid = True
             for spectrum in reader:
                 scanfilt = spectrum['scanList']['scan'][0]['filter string']
                 scantype_idx = scan_types.index(scanfilt)
                 mz = spectrum['m/z array']
-                if len(mz) >= len(mz_axes[scantype_idx]):
-                    mz_axes[scantype_idx] = mz
+                if spectrum.has_key('profile spectrum'):
+                    all_centroid = False
+                    if len(mz) > len(mz_axes[scantype_idx]):
+                        mzdiff = np.diff(mz).min()
+                        mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
+                        mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
+                        mz_axes[scantype_idx] = np.arange(start=mzmin, stop=mzmax, step=mzdiff)
+                        mz_axes[scantype_idx] = np.append(arr=mz_axes[scantype_idx], values=mzmax)
+            if all_centroid:
+                print 'Error: openMSI currently incapable of cnetroid-mode data'
+                raise AttributeError
+
 
             return mz_axes
 
-        elif mzml_filetype == cls.available_mzml_types['bruker']:  # TODO write list-based parser and test on MS2 data
+        elif mzml_filetype == cls.available_mzml_types['bruker']:
             return spectrum['m/z array']
         else:
             raise ValueError('Unknown mzml format')
