@@ -56,30 +56,37 @@ class omsi_mz_rebin(omsi_analysis_base):
                            default=4,
                            group=groups['settings'])
 
-        self.data_names = ['new_msidata', 'new_mzdata']
+        self.data_names = ['new_msidata', 'new_mz']
         self.analysis_identifier = name_key
 
 
     def execute_analysis(self):
         """
         Input:   msidata     the original msidata cube [ndarray with shape X by Y by M]
-                    mzdata      the original mz data vector  [ndarray with shape M]
-                    new_mzdata  the desired mz data vector after re-binning [ndarray with shape N, optional]
+                 mzdata      the original mz data vector  [ndarray with shape M]
+                 new_mzdata  the desired mz data vector after re-binning [ndarray with shape N, optional]
                                     incompatible with new spacing
                                     this must be used for non-uniform rebinning
-                    new_spacing the desired spacing in Daltons after re-binning [float, optional]
+                 new_spacing the desired spacing in Daltons after re-binning [float, optional]
                                     incompatible with new_mzdata.  If this option is picked, the
                                     new_mzdata is calculated as np.arange(min(mzdata), max(mzdata), new_spacing)
-                    method      the method used by griddata for interpolation
+                 method      the method used by griddata for interpolation
                                         [{'linear', 'nearest', 'cubic'}, optional]
                                         ***NOTE: 'cubic' will be unusably slow for most datasets
 
-        Output:     new_msidata a new datacube [ndarray with shape X by Y by N]
-                    new_mzdata  the new m/z data vector [ndarray with shape N]"""
+        Output:  new_msidata a new datacube [ndarray with shape X by Y by N]
+                 new_mz  the new m/z data vector [ndarray with shape N]"""
 
         # check for required packages
         try:
             import scipy.ndimage as ndi
+            try:
+                import scipy.version as spver
+                scipy_version = [int(i) for i in spver.version.split('.')]
+                scipy_main_version = scipy_version[1]
+            except:
+                scipy_main_version = 0
+
         except ImportError:
             print "This analysis requires package scipy.ndimage.  Install and try again."
             raise AttributeError
@@ -136,8 +143,12 @@ class omsi_mz_rebin(omsi_analysis_base):
             for iy in range(ny):
                 cs = np.concatenate(([zero, ], msidata[ix, iy, :].cumsum()))
                 scan = np.diff(cs[q])
-                new_msidata[ix, iy, :] = \
-                    ndi.filters.gaussian_filter(scan, sigma=filter_sigma, truncate=trunc)
+                if scipy_main_version > 13:
+                    new_msidata[ix, iy, :] = \
+                        ndi.filters.gaussian_filter(scan, sigma=filter_sigma, truncate=trunc)
+                else:
+                    new_msidata[ix, iy, :] = \
+                        ndi.filters.gaussian_filter(scan, sigma=filter_sigma)
                 if ix%10==0 and ix==iy:
                     print 'Rebinning pixel %s of %s' % (ix*iy, npixel)
 
@@ -172,27 +183,20 @@ class omsi_mz_rebin(omsi_analysis_base):
         from omsi.shared.omsi_data_selection import selection_string_to_object
         zselect = selection_string_to_object(z)  # Convert the selection string to a python selection
 
-        """EDIT_ME Specify the number of custom viewer_options you are going to provide for qslice"""
-        num_custom_viewer_options = 0
+        num_custom_viewer_options = 1
 
         # Expose the qslice viewer functionality of any data dependencies
         if viewer_option >= num_custom_viewer_options:
             return super(omsi_mz_rebin, cls).v_qslice(analysis_object,
-                                                               z,
-                                                               viewer_option=viewer_option-num_custom_viewer_options)
+                                                      z,
+                                                      viewer_option=viewer_option-num_custom_viewer_options)
 
-        """
-        EDIT_ME
+        #Define your custom qslice viewer options. Here you need to handle all the different
+        #behaviors that are custom to your analysis. Below a simple example.
+        if viewer_option == 0:
+            dataset = analysis_object['new_msidata']
+            return dataset[:, :, zselect]
 
-        Define your custom qslice viewer options. Here you need to handle all the different
-        behaviors that are custom to your analysis. Below a simple example.
-
-        if viewer_option == 0 :
-           dataset = anaObj[ 'my_output_data' ] #This is e.g, an output dataset of your analysis
-           return dataset[ : , :, zselect ]
-        elif viewer_option == 1 :
-           ...
-        """
         return None
 
     @classmethod
@@ -231,41 +235,25 @@ class omsi_mz_rebin(omsi_analysis_base):
         x_select = selection_string_to_object(x)  # Convert the selection string to a python selection
         y_select = selection_string_to_object(y)  # Convert the selection string to a python selection
 
-        """
-        EDIT_ME
-
-        Specify the number of custom viewer_options you are going to provide for qslice
-        """
-        num_custom_viewer_options = 0
+        num_custom_viewer_options = 1
 
         # Expose the qslice viewer functionality of any data dependencies
         if viewer_option >= num_custom_viewer_options:
-            """
-            EDIT_ME
-
-            Replace omsi_mz_rebin with your classname
-            """
             return super(omsi_mz_rebin, cls).v_qspectrum(analysis_object,
-                                                                  x,
-                                                                  y,
-                                                                  viewer_option=viewer_option-num_custom_viewer_options)
+                                                         x,
+                                                         y,
+                                                         viewer_option=viewer_option-num_custom_viewer_options)
 
-        """
-        EDIT_ME
+        # Define your custom qspectrum viewer options. Here you need to handle all the different
+        # behaviors that are custom to your analysis. Note, this function is expected to return
+        # two object: i) The data for the spectrum and ii) the m/z axis information for the spectrum
+        # or None, in case that the m/z data is identical to what the v_qmz function returns.
+        #vBelow a simple example.
+        if viewer_option == 0:
+            dataset = analysis_object['new_mz']
+            data = dataset[x_select, y_select, :]
+            return data, None
 
-        Define your custom qspectrum viewer options. Here you need to handle all the different
-        behaviors that are custom to your analysis. Note, this function is expected to return
-        two object: i) The data for the spectrum and ii) the m/z axis information for the spectrum
-        or None, in case that the m/z data is identical to what the v_qmz function returns.
-        Below a simple example.
-
-        if viewer_option == 0 :
-           dataset = anaObj[ 'my_output_data' ] #This is e.g, an output dataset of your analysis
-           data = dataset[ x_select , y_select, : ]
-           return data, None
-        elif viewer_option == 1 :
-           ...
-        """
         return None, None
 
     @classmethod
@@ -286,14 +274,8 @@ class omsi_mz_rebin(omsi_analysis_base):
             - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
             - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
         """
-
-        """
-        EDIT_ME
-
-        Define the number of custom viewer options for qslice and qspectrum.
-        """
-        num_custom_slice_viewer_options = 0
-        num_custom_spectrum_viewer_options = 0
+        num_custom_slice_viewer_options = 1
+        num_custom_spectrum_viewer_options = 1
 
         # Compute the output
         mz_spectra = None
@@ -303,24 +285,25 @@ class omsi_mz_rebin(omsi_analysis_base):
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
-            """EDIT_ME Replace the omsi_mz_rebin class name with your class name"""
             mz_spectra, label_spectra, mz_slice, label_slice = \
                 super(omsi_mz_rebin, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
                            qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
 
-        """
-        EDIT_ME
-
-        Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:
-
-        if qspectrum_viewer_option == 0 and qslice_viewer_option==0:
-            mz_spectra =  anaObj[ 'peak_mz' ][:]
+        # Implement the qmz pattern for all the custom qslice and qspectrum viewer options. E.g:
+        if qspectrum_viewer_option == 0 and qslice_viewer_option ==0:
+            mz_spectra =  analysis_object['new_mz'][:]
             label_spectra = "m/z"
             mz_slice  = None
             label_slice = None
-        """
+        elif qspectrum_viewer_option == 0:
+            mz_spectra =  analysis_object['new_mz'][:]
+            label_spectra = "m/z"
+        elif qslice_viewer_option == 0:
+            mz_slice  = analysis_object['new_mz'][:]
+            label_slice = "m/z"
+
         return mz_spectra, label_spectra, mz_slice, label_slice
 
     @classmethod
@@ -340,22 +323,7 @@ class omsi_mz_rebin(omsi_analysis_base):
                 be empty if the analysis does not support qspectrum requests
                 (i.e., v_qspectrum(...) is not available).
         """
-
-        """
-        EDIT_ME
-
-        Define a list of custom viewer_options are supported. E.g:
-
-        custom_options = ['Peak cube']
-        """
-        custom_options = []
-
-        """
-        EDIT_ME
-
-        Change the omsi_mz_rebin class-name to your class. If you did a
-        replace all, then this should be done already.
-        """
+        custom_options = ['Rebinned Spectra']
         dependent_options = super(omsi_mz_rebin, cls).v_qspectrum_viewer_options(analysis_object)
         spectrum_viewer_options = custom_options + dependent_options
         return spectrum_viewer_options
@@ -378,22 +346,7 @@ class omsi_mz_rebin(omsi_analysis_base):
         :returns: List of strings indicating the different available viewer options. The list should be
             empty if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
         """
-
-        """
-        EDIT_ME
-
-        Define a list of custom viewer_options are supported. E.g:
-
-        custom_options = ['Peak cube']
-        """
-        custom_options = []
-
-        """
-        EDIT_ME
-
-        Change the omsi_mz_rebin class-name to your class.  If you did
-        a replace all, then this should be done already.
-        """
+        custom_options = ['Rebinned Images']
         dependent_options = super(omsi_mz_rebin, cls).v_qslice_viewer_options(analysis_object)
         slice_viewer_options = custom_options + dependent_options
         return slice_viewer_options
@@ -404,11 +357,6 @@ class omsi_mz_rebin(omsi_analysis_base):
 ############################################################
 if __name__ == "__main__":
     from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
-    """
-    EDIT_ME
-
-    Simply replace the omsi_mz_rebin class name with your class name
-    """
     omsi_cl_driver(analysis_class=omsi_mz_rebin).main()
 
 
