@@ -9,6 +9,7 @@
 # TODO add ability have --format option for each dataset to be converted
 
 from omsi.dataformat.omsi_file import *
+from omsi.dataformat import *
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
@@ -331,6 +332,7 @@ class ConvertSettings(object):
                               * 'previous' : Use the same experiment as used for the previous dataset
                               * 1, 2,3...   : Integer value indicating the index of the experiment to be used.
                 * 'region' : Optional key with index of the region to be converted. None to merge all regions.
+                * 'dataset' : Optional key with index of the dataset to be converted.
     """
     omsi_output_file = None  # The openMSI output data file to be used.
 
@@ -422,8 +424,8 @@ class ConvertSettings(object):
     ####################################################################
     #  Define metadata options                                        ##
     ####################################################################
-    metadata = {}  # Dictionary with keys --method, --instrument, --notes for experiment-level metdata and
-                   # --method#, instrument#, notes# for dataset-level metadata
+    metadata = {}   # Dictionary with keys --method, --instrument, --notes for experiment-level metdata and
+                    # --method#, instrument#, notes# for dataset-level metadata
 
     @classmethod
     def parse_input_args(cls, argv):
@@ -958,6 +960,8 @@ class ConvertFiles(object):
                     input_file = ConvertSettings.available_formats[curr_format](basename=basefile, readdata=True)
                     if input_file.supports_regions():
                         input_file.set_region_selection(region_index=curr_dataset['region'])
+                    if input_file.supports_multidata():
+                        input_file.set_dataset_selection(dataset_index=curr_dataset['dataset'])
                 else:
                     print "ERROR: The following file will not be converted. File type unknown for: " + basefile
                     print "INFO: If you know the correct file format then try setting appropriate --format option."
@@ -1303,10 +1307,33 @@ class ConvertFiles(object):
                       'exp': 'new'}
             currds['format'] = ConvertFiles.check_format(name=currds['basename'],
                                                          format_type=format_type)
-            supportsregions = False
+            supports_regions = False
+            supports_multidata = False
             if currds['format'] is not None:
-                supportsregions = ConvertSettings.available_formats[currds['format']].supports_regions()
-            if supportsregions:
+                supports_regions = ConvertSettings.available_formats[currds['format']].supports_regions()
+                supports_multidata = ConvertSettings.available_formats[currds['format']].supports_multidata()
+            if supports_multidata:
+                try:
+                    tempfile = ConvertSettings.available_formats[currds['format']](
+                        basename=currds['basename'],
+                        readdata=False)
+                    for dataset_index in xrange(0, tempfile.get_number_of_datasets()):
+                        nds = {'basename': currds['basename'],
+                               'format': currds['format'],
+                               'dataset': dataset_index,
+                               'exp': 'previous'}
+                        re_dataset_list.append(nds)
+                except:
+                    print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
+                    if ConvertSettings.error_handling == "continue-on-error":
+                        print currds['basename'] + " failure during conversion. Skipping the file and continue."
+                        continue
+                    elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
+                            ConvertSettings.error_handling == "terminate-only":
+                        raise
+                    else:
+                        raise
+            if supports_regions:
                 if data_region_option == "merge" or data_region_option == "split+merge":
                     currds['region'] = None
                     re_dataset_list.append(currds)
@@ -1324,8 +1351,8 @@ class ConvertFiles(object):
                             re_dataset_list.append(nds)
                     except:
                         print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
-                        print currds['basename'] + " failure during converion. Skipping the file and continue."
                         if ConvertSettings.error_handling == "continue-on-error":
+                            print currds['basename'] + " failure during conversion. Skipping the file and continue."
                             continue
                         elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                                 ConvertSettings.error_handling == "terminate-only":
