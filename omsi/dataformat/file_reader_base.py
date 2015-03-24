@@ -35,7 +35,8 @@ class file_reader_base(object):
 
     :ivar data_type: String indicating the data type to be used (e.g., uint16)
     :ivar shape: Tuple indicating the shape of the data
-    :ivar mz: Numpy array with the m/z axis data
+    :ivar mz: Numpy array with the m/z axis data. In the case of multi-data this is a
+        list of numpy arrays, one per dataset.
     :ivar basename: The basename provided for opening the file.
 
     **Required Interface Functions:**
@@ -227,5 +228,70 @@ class file_reader_base_with_regions(file_reader_base):
         return True
 
 
+class file_reader_base_multidata(file_reader_base):
+    """
+    Base-class used to define the basic interface for file-readers
+    used to implement new file formats with support for multiple
+    dataset (e.g, MSI dataset with multiple spectrum types).
+    This class extends file_reader_base, and accordingly all
+    required attributes and functions of
+    file_reader_base must be implemented by subclasses.
 
+    In addition to the file_reader_base functions we need to implement
+    the get_number_of_datasets(...) and get_dataset_dependencies(...)
+    functions.
+
+    :ivar select_dataset: Unsigned integer indicating the currently selected dataset
+    """
+
+    def __init__(self, basename, readdata):
+        """
+        Construct the base class and define required attributes.
+        """
+        super(file_reader_base_multidata, self).__init__(basename, readdata)
+        self.select_dataset = 0
+
+    def set_dataset_selection(self, dataset_index):
+        """
+        Define the current dataset to be read.
+        """
+        try:
+            num_datasets = self.get_number_of_datasets()
+        except NotImplementedError:
+            num_datasets = -1
+        if num_datasets >= 0 and dataset_index >= self.get_number_of_datasets():
+            raise ValueError("Given dataset_index is out of range.")
+        self.select_dataset = dataset_index
+
+    def get_number_of_datasets(self):
+        """
+        Get the number of available datasets.
+        """
+        raise NotImplementedError('Determine the number of different data blocks')
+
+    def get_dataset_dependencies(self):
+        """
+        Get the dependencies between the current dataset and any of the
+        other datasets stored in the current file.
+        """
+        raise NotImplementedError('Determine the dependencies to other data blocks for the the current block')
+
+    def get_all_dataset_dependencies(self):
+        """
+        Get a list of all inter dependencies
+        """
+        current_dataset = self.select_dataset
+        dataset_dependencies = []
+        for dataset_index in range(self.get_number_of_datasets()):
+            self.set_dataset_selection(dataset_index)
+            dataset_dependencies += self.get_dataset_dependencies()
+        self.set_dataset_selection(current_dataset)
+        return dataset_dependencies
+
+    @classmethod
+    def supports_multidata(cls):
+        """
+        Define whether the file format supports multiple data blocks.
+        """
+        return True
 

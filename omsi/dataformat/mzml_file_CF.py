@@ -8,10 +8,10 @@ import numpy as np
 from pyteomics import mzml
 import re
 import os
-from omsi.dataformat.file_reader_base import file_reader_base
+from omsi.dataformat.file_reader_base import file_reader_base_multidata
 
 
-class mzml_file(file_reader_base):
+class mzml_file(file_reader_base_multidata):
     """
     Interface for reading a single 2D mzml file with several distinct scan types.
 
@@ -181,6 +181,10 @@ class mzml_file(file_reader_base):
 
     # TODO: add methods for classifying scans by type: MS1 vs. MS2_precursorA vs. MS2_precursorB ?
 
+    @classmethod
+    def test(cls):
+        pass
+
     @staticmethod
     def __compute_num_scans(filename=None):  #Why is the "self" arg not needed here?
         """
@@ -189,7 +193,8 @@ class mzml_file(file_reader_base):
         reader = mzml.read(filename)
         return sum(1 for _ in reader)
 
-    def __compute_scan_types(self, filename=None):  #Why is the "self" arg needed here & below?
+    @staticmethod
+    def __compute_scan_types(filename=None):  #Why is the "self" arg needed here & below?
         """
         Internal helper function used to compute a list of unique scan types in the mzml file.
         """
@@ -204,11 +209,10 @@ class mzml_file(file_reader_base):
                 pass
         return scantypes
 
-
     def __getitem__(self, key):
         """Enable slicing of img files"""
         if self.data is not None:
-            return self.data[key]
+            return self.data[self.select_dataset][key]
         else:
             raise ValueError("Slicing is currently only supported when the object has been initialized with readall")
 
@@ -312,3 +316,17 @@ class mzml_file(file_reader_base):
             if os.path.isfile(currname) and currname.endswith(".mzML"):
                 filelist.append(currname)
         return filelist
+
+    def get_number_of_datasets(self):
+        """
+        Get the number of available datasets.
+        """
+        return len(self.mz)
+
+    def get_dataset_dependencies(self):
+        """
+        Get the dependencies between the current dataset and any of the
+        other datasets stored in the current file.
+        """
+        # TODO We need to implement the creation of dependencies between the current dataset given by self.select_dataset and all other datasets
+        return []
