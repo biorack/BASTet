@@ -53,6 +53,7 @@ class mzml_file(file_reader_base_multidata):
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         print 'Read %s scans from mzML file.' % self.num_scans
         self.scan_types = self.__compute_scan_types(filename=self.basename)
+        self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
         print 'Found %s different scan types in mzML file.' % len(self.scan_types)
         self.coordinates = self.__compute_coordinates()
 
@@ -186,7 +187,7 @@ class mzml_file(file_reader_base_multidata):
         pass
 
     @staticmethod
-    def __compute_num_scans(filename=None):  #Why is the "self" arg not needed here?
+    def __compute_num_scans(filename=None):
         """
         Internal helper function used to compute the number of scans in the mzml file.
         """
@@ -194,7 +195,7 @@ class mzml_file(file_reader_base_multidata):
         return sum(1 for _ in reader)
 
     @staticmethod
-    def __compute_scan_types(filename=None):  #Why is the "self" arg needed here & below?
+    def __compute_scan_types(filename=None):
         """
         Internal helper function used to compute a list of unique scan types in the mzml file.
         """
@@ -208,6 +209,29 @@ class mzml_file(file_reader_base_multidata):
             except:
                 pass
         return scantypes
+
+    @staticmethod
+    def __compute_scan_dependencies(scan_types=None):  #Why is the "self" arg needed here & below?
+        """
+        Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
+        """
+        dependencies = []
+
+        #find MS1 scans   # TODO this algorithm could be much smarter; now will work only on single MS scans
+
+        ms1scanlist = []
+
+        for ind, stype in enumerate(scan_types):
+            if stype.find('Full ms') != -1:    #Regular
+                ms1scanlist.append(ind)
+
+        #make MS2 scans dependent on MS1 scans
+        for ms1scan in ms1scanlist:
+            for ind2, stype in enumerate(scan_types):
+                if stype.find('ms2') != -1:     #MS2 scan filter strings from thermo contain the string 'ms2'
+                    dependencies.append((ms1scan, ind2))
+
+        return dependencies
 
     def __getitem__(self, key):
         """Enable slicing of img files"""
