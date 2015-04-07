@@ -36,11 +36,13 @@ class omsi_nmf(omsi_analysis_base):
                            help='Maximum number of iterations.',
                            dtype=int,
                            default=2000,
+                           required=True,
                            group=groups['stop'])
         self.add_parameter(name='tolerance',
                            help='The tolerance for a relative stopping condition.',
                            dtype=float,
                            default=0.0001,
+                           required=True,
                            group=groups['stop'])
         self.data_names = ['wo', 'ho']
 
