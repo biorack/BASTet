@@ -160,8 +160,10 @@ class file_reader_base(object):
         # Create list of all derived formats
         formatreaders = {sub.format_name(): sub for sub in file_reader_base.__subclasses__()}
         formatreaders.update({sub.format_name(): sub for sub in file_reader_base_with_regions.__subclasses__()})
+        formatreaders.update({sub.format_name(): sub for sub in file_reader_base_multidata.__subclasses__()})
         # Remove extended interface classes which do not implement an actual format
         formatreaders.pop('file_reader_base_with_regions')
+        formatreaders.pop('file_reader_base_multidata')
         # Retrun the list of formats
         return formatreaders
 
@@ -249,7 +251,7 @@ class file_reader_base_multidata(file_reader_base):
         Construct the base class and define required attributes.
         """
         super(file_reader_base_multidata, self).__init__(basename, readdata)
-        self.select_dataset = 0
+        self.select_dataset = None
 
     def set_dataset_selection(self, dataset_index):
         """

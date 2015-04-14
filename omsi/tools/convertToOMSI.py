@@ -1004,9 +1004,10 @@ class ConvertFiles(object):
             # Define the layout for the img data in the HDF5
             # Create a new experiment for the img file using the basefile as
             # identifer string
-            if curr_dataset['exp'] == 'new':  # Create a new experiment for this dataset
+            # Create a new experiment for this dataset
+            if curr_dataset['exp'] == 'new' or ConvertSettings.omsi_output_file.get_num_experiments() == 0:
                 exp = ConvertSettings.omsi_output_file.create_experiment(exp_identifier=basefile)
-                # Create an empty method descrition
+                # Create an empty method description
                 sample = exp.create_method_info()
                 # Create an empty instrument description
                 instrument = exp.create_instrument_info(
@@ -1333,7 +1334,7 @@ class ConvertFiles(object):
                         raise
                     else:
                         raise
-            if supports_regions:
+            elif supports_regions:
                 if data_region_option == "merge" or data_region_option == "split+merge":
                     currds['region'] = None
                     re_dataset_list.append(currds)
@@ -1391,6 +1392,8 @@ class ConvertFiles(object):
                 inputfile = ConvertSettings.available_formats[currformat](basename=basefile, readdata=False)
                 if inputfile.supports_regions():
                     inputfile.set_region_selection(currdataset["region"])
+                elif inputfile.supports_multidata():
+                    inputfile.set_dataset_selection(currdataset['dataset'])
                 else:
                     warnings.warn("WARNING: Type of file could not be determined for: " + basefile)
                     continue

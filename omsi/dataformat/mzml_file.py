@@ -8,12 +8,12 @@ import numpy as np
 from pyteomics import mzml
 import re
 import os
-from omsi.dataformat.file_reader_base import file_reader_base
+from omsi.dataformat.file_reader_base import file_reader_base_multidata
 
 
-class mzml_file(file_reader_base):
+class mzml_file(file_reader_base_multidata):
     """
-    Interface for reading a single 2D mzml file.
+    Interface for reading a single 2D mzml file with several distinct scan types.
 
     :ivar available_mzml_types: Dict of available mzml flavors.
     """
@@ -34,6 +34,9 @@ class mzml_file(file_reader_base):
                              (this makes slicing easier). (default is True)
         :type readdata: bool
 
+        :param resolution: For profile data only, the minimum m/z spacing to use for creating the "full" reprofiled
+                            data cube
+        :type resolution: float
         """
         # Determine the correct base
         if os.path.isdir(basename):
@@ -48,6 +51,10 @@ class mzml_file(file_reader_base):
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
+        print 'Read %s scans from mzML file.' % self.num_scans
+        self.scan_types = self.__compute_scan_types(filename=self.basename)
+        self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
+        print 'Found %s different scan types in mzML file.' % len(self.scan_types)
         self.coordinates = self.__compute_coordinates()
 
         # Compute the spatial configuration of the matrix
@@ -56,10 +63,13 @@ class mzml_file(file_reader_base):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
-        self.mz = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type)
+        self.mz_all = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type,
+                                         scan_types=self.scan_types)
 
-        # Determine the shape of the dataset
-        self.shape = (self.x_pos.shape[0], self.y_pos.shape[0], self.mz.shape[0])
+        # Determine the shape of the dataset, result is a list of shapes for each datacube
+        self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all]
+        self.shape = None
+        self.mz = None
 
         # Read the data into memory
         self.data = None
@@ -69,41 +79,67 @@ class mzml_file(file_reader_base):
     def __read_all(self):
         """
         Internal helper function used to read all data. The
-        function directly modifies the self.data entry.
+        function directly modifies the self.data entry.  Data is now a list of datacubes
         """
-        reader = mzml.read(self.basename)
-        self.data = np.zeros(shape=self.shape, dtype=self.data_type)
-        spectrumid = 0
-        for spectrum in reader:
-            x = spectrum['m/z array']
-            try:
-                y = spectrum['intensity array']
-            except KeyError:
-                # TODO Do we need user switched for reading the different spectra MS1 vs. profile spectrum?
-                # The ['MS1 spectrum'] stores the calibrated data
-                y = spectrum['MS1 spectrum']
-                # ['profile spectrum'] stores raw data
-            yi = np.interp(self.mz, x, y, 0, 0)
-            xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
-            yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
-            self.data[xidx, yidx, :] = yi
+
+        self.data = [np.zeros(shape=self.shape_all_data[scan_idx], dtype=self.data_type) for scan_idx, scantype in enumerate(self.scan_types)]
+
+        for scan_idx, scantype in enumerate(self.scan_types):
+            reader = mzml.read(self.basename)
+            spectrumid = 0
+            for spectrum in reader:
+                if spectrum['scanList']['scan'][0]['filter string'] == scantype:
+                    x = spectrum['m/z array']
+                    try:
+                        y = spectrum['intensity array']
+                    except KeyError:
+                        raise KeyError
+                    yi = np.interp(self.mz_all[scan_idx], x, y, 0, 0)
+                    xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
+                    yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
+                    try:
+                        self.data[scan_idx][xidx, yidx, :] = yi
+                    except:
+                        print spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape,
             # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
-            spectrumid += 1
+                if spectrumid%1000 == 0:
+                    print 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype)
+                spectrumid += 1
 
     @classmethod
-    def __compute_mz_axis(cls, filename, mzml_filetype):
+    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):  ## TODO completely refactor this to make it smartly handle profile or centroid datasets
+        ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
+        ## TODO: profile datasets should work as is
+        ## TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
         """
-        Internal helper function used to compute the mz axis
+        Internal helper function used to compute the mz axis of each scantype
+        Returns a list of numpy arrays
         """
         reader = mzml.read(filename)
-        spectrum = reader.next()
+
         if mzml_filetype == cls.available_mzml_types['thermo']:
-            mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
-            mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
-            # TODO Should this be a user-definable parameter?
-            ppm = 5
-            f = np.ceil(1e6*np.log(mzmax/mzmin)/ppm)
-            return np.logspace(np.log10(mzmin), np.log10(mzmax), f)
+
+            mz_axes = [np.array([]) for _ in scan_types]
+            all_centroid = True
+            for spectrum in reader:
+                scanfilt = spectrum['scanList']['scan'][0]['filter string']
+                scantype_idx = scan_types.index(scanfilt)
+                mz = spectrum['m/z array']
+                if spectrum.has_key('profile spectrum'):
+                    all_centroid = False
+                    if len(mz) > len(mz_axes[scantype_idx]):
+                        mzdiff = np.diff(mz).min()
+                        mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
+                        mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
+                        mz_axes[scantype_idx] = np.arange(start=mzmin, stop=mzmax, step=mzdiff)
+                        mz_axes[scantype_idx] = np.append(arr=mz_axes[scantype_idx], values=mzmax)
+            if all_centroid:
+                print 'Error: openMSI currently incapable of cnetroid-mode data'
+                raise AttributeError
+
+
+            return mz_axes
+
         elif mzml_filetype == cls.available_mzml_types['bruker']:
             return spectrum['m/z array']
         else:
@@ -146,6 +182,12 @@ class mzml_file(file_reader_base):
                 spectrumid += 1
         return coords
 
+    # TODO: add methods for classifying scans by type: MS1 vs. MS2_precursorA vs. MS2_precursorB ?
+
+    @classmethod
+    def test(cls):
+        pass
+
     @staticmethod
     def __compute_num_scans(filename=None):
         """
@@ -154,10 +196,52 @@ class mzml_file(file_reader_base):
         reader = mzml.read(filename)
         return sum(1 for _ in reader)
 
+    @staticmethod
+    def __compute_scan_types(filename=None):
+        """
+        Internal helper function used to compute a list of unique scan types in the mzml file.
+        """
+        reader = mzml.read(filename)
+        scantypes = []
+        for _ in reader:
+            try:
+                scanfilter = reader.next()['scanList']['scan'][0]['filter string']
+                if scanfilter not in scantypes:
+                    scantypes.append(scanfilter)
+            except:
+                pass
+        return scantypes
+
+    @staticmethod
+    def __compute_scan_dependencies(scan_types=None):  #Why is the "self" arg needed here & below?
+        """
+        Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
+        """
+        dependencies = []
+
+        #find MS1 scans   # TODO this algorithm could be much smarter; now will work only on single MS scans
+
+        ms1scanlist = []
+
+        for ind, stype in enumerate(scan_types):
+            if stype.find('Full ms') != -1:    #Regular
+                ms1scanlist.append(ind)
+
+        #make MS2 scans dependent on MS1 scans
+        for ms1scan in ms1scanlist:
+            for ind2, stype in enumerate(scan_types):
+                if stype.find('ms2') != -1:     #MS2 scan filter strings from thermo contain the string 'ms2'
+                    dependencies.append((ms1scan, ind2))
+
+        return dependencies
+
     def __getitem__(self, key):
         """Enable slicing of img files"""
         if self.data is not None:
-            return self.data[key]
+            if self.select_dataset is None:
+                return self.data[key]
+            else:
+                return self.data[self.select_dataset][key]
         else:
             raise ValueError("Slicing is currently only supported when the object has been initialized with readall")
 
@@ -261,3 +345,25 @@ class mzml_file(file_reader_base):
             if os.path.isfile(currname) and currname.endswith(".mzML"):
                 filelist.append(currname)
         return filelist
+
+    def get_number_of_datasets(self):
+        """
+        Get the number of available datasets.
+        """
+        return len(self.mz_all)
+
+    def set_dataset_selection(self, dataset_index):
+        """
+        Define the current dataset to be read.
+        """
+        super(mzml_file, self).set_dataset_selection(dataset_index)
+        self.shape = self.shape_all_data[self.select_dataset]
+        self.mz = self.mz_all[self.select_dataset]
+
+    def get_dataset_dependencies(self):
+        """
+        Get the dependencies between the current dataset and any of the
+        other datasets stored in the current file.
+        """
+        # TODO We need to implement the creation of dependencies between the current dataset given by self.select_dataset and all other datasets
+        return []
