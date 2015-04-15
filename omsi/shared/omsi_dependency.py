@@ -68,12 +68,26 @@ class omsi_dependency(dict):
         if help is not None:
             self.__setitem__('help', help)
 
+    def copy(self):
+        """
+        Return a new omsi_dependency object with the same data as stored in the current object
+
+        :return: omsi_dependency object
+        """
+        new_dependency = omsi_dependency()
+        for key, value in self.iteritems():
+            if key == '_data':
+                new_dependency._force_set_data(value)
+            else:
+                new_dependency[key] = value
+        return new_dependency
+
     def __setitem__(self,
                     key,
                     value):
         """Overwrite the __setitem__ function inherited from dict to ensure that only elements with a specific
            set of keys can be modified"""
-
+        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
         if key in self:
             if key == "omsi_object":
                 if omsi_file_common.is_managed(value):
@@ -88,6 +102,8 @@ class omsi_dependency(dict):
                         warnings.warn("The generated dependency does not point to a managed object.")
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
                     dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
+                elif isinstance(value, omsi_analysis_base):
+                    dict.__setitem__(self, 'omsi_object', value)
                 else:
                     raise ValueError(str(value) +
                                      " invalid omsi_object parameter for "
@@ -137,7 +153,21 @@ class omsi_dependency(dict):
         if key in self.keys():
             return dict.__getitem__(self, key)
         else:
-            return self.get_data()[key]
+            data_ref = self.get_data()
+            if isinstance(data_ref, omsi_dependency):
+               return None
+            else:
+                return self.get_data()[key]
+
+
+    def _force_set_data(self, data):
+        """
+        Force setting of the _data key to the given data value. Use with great caution. This function
+        is used internally when a dependency is created for which we have a pointer to the data ready.
+
+        :param data: The data object to be used as the data value for the dependency.
+        """
+        dict.__setitem__(self, '_data', data)
 
     def get_data(self):
         """Get the data associated with the dependency.
@@ -152,6 +182,12 @@ class omsi_dependency(dict):
         else:
             if self['dataname']:
                 data_object = self['omsi_object'][self['dataname']]
+                # Ensure that the dependency can actually be resolved. E.g, if the data the dependency points to
+                # is not ready yet then we may get a dependency back that points to the same object as we do,
+                # which in turn could result in an endless recursion
+                if isinstance(data_object, omsi_dependency):
+                    if data_object['omsi_object'] is self['omsi_object']:
+                        return self
             else:
                 data_object = self['omsi_object']
             try:
