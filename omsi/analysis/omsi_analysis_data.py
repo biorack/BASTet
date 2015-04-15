@@ -197,7 +197,7 @@ class omsi_parameter_data(dict):
         :param default: Optional default value for the parameter. Default None.
         :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
         :param data: The data assigned to the parameter. None by default.
-        :param group: The parameter group toe be used. None by default.
+        :param group: The parameter group to be used. None by default.
 
         """
         # Initialize the dict
@@ -234,11 +234,31 @@ class omsi_parameter_data(dict):
                            " not in the list of allowed keys. Allowed keys are: " +
                            unicode(self.default_keys))
 
+    def copy(self):
+        """
+        Return a new omsi_parameter_data object with the same data as stored in the current object
+
+        :return: omsi_dependency object
+        """
+        new_parameter = omsi_parameter_data('')
+        new_parameter.update(self)
+        return new_parameter
+
     def data_set(self):
         """
         Check if a data has been assigned for the parameter.
         """
         return self['data'] is not None
+
+    def data_ready(self):
+        """
+        This function check if the data points to a dependency and if so, then check if the dependency can be
+        resolved or not
+        """
+        if self.is_dependency():
+            if isinstance(self['data'].get_data(), omsi_dependency):
+                return False
+        return True
 
     def is_dependency(self):
         """
@@ -270,7 +290,6 @@ class omsi_parameter_data(dict):
         else:
             return None
 
-
     def get_data_or_default(self):
         """
         Get the data of the parameter if set, otherwise get the default value if available.
@@ -297,6 +316,9 @@ class omsi_parameter_data(dict):
         else:
             outdata = self['default']
 
+        if not self['required'] and outdata is None:
+            return outdata
+
         # Convert the data to the proper type if needed
         # Convert the data to a scalar type if needed
         scalar_types = [int, float, long, complex, bool, str, unicode]
@@ -305,7 +327,7 @@ class omsi_parameter_data(dict):
             try:
                 outdata = curr_dtype(outdata)
             except:
-                raise
+                # raise
                 warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
                               self['name'] + "  " + str(outdata) + "  " + unicode(sys.exc_info()))
 
