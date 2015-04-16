@@ -58,6 +58,10 @@ class omsi_file_common(object):
     using a single input parameter indicating the manager h5py.Group object that
     contains the given object.
 
+    :ivar managed_group: The h5py.Group object managed by the class
+    :ivar name: The path to the object in the hdf5 file. Same as managed_group.name
+    :ivar file: The h5py.File object the managed_group is associated with. Same as managed_group.file
+
     """
 
     def __init__(self, managed_group):
@@ -66,6 +70,7 @@ class omsi_file_common(object):
             raise ValueError("Managed group must be initialized with an h5py.Group object. None given.")
         self.managed_group = managed_group
         self.name = self.managed_group.name
+        self.file = self.managed_group.file
 
     @classmethod
     def is_managed(cls, in_object):
@@ -279,7 +284,7 @@ class omsi_file_common(object):
     @staticmethod
     def parse_path_string(path):
         """
-        Given a string of the from <filename.h5>:<object_path> retrieve
+        Given a string of the form <filename.h5>:<object_path> retrieve
         the name of the file and the object path.
 
         :param path: The string defining the file and object path.
@@ -294,20 +299,76 @@ class omsi_file_common(object):
             raise ValueError('The given path is not a string.')
         file_path = None
         object_path = None
-        if ".h5" not in path:
-            pass
+        # Case 1: We have a string of the form <filename>:<objectname>
+        if ".h5" not in path and ":" in path:
+            split_string = path.split(':')
+            if len(split_string) == 2:
+                file_path = split_string[0]
+                object_path = split_string[1]
+            elif len(split_string) == 1:
+                file_path = split_string[0]
+                object_path= None
+            else:
+                raise ValueError("Invalid path string given")
+        # Case 2: We have a string of the form filename.h5
         elif path.endswith(".h5") and ".h5:" not in path:
             file_path = path
             object_path = None
-        else:
+        # Case 3: We have a string of the form <filename>.h5:<objectname>
+        elif ".h5:" in path:
             split_string = path.split('.h5:')
             file_path = split_string[0] + ".h5"
             if len(split_string) == 2:
                 object_path = split_string[1]
             elif len(split_string) > 2:
                 raise ValueError("Invalid path string given")
+        # Case 4: We have a string that contains only the path to the object itself
+        else:
+            file_path = None
+            object_path = path
         return file_path, object_path
 
+    @staticmethod
+    def create_path_string(filename, objectname):
+        """
+        Given the name of the file and the object path within the file,
+        create a string describing the external reference to the datra
+
+        :param filename: The full or relative path to the file
+        :param objectname: The object path in the HDF5 file
+
+        :return: String describing the path to the object
+        """
+        import os
+        import warnings
+        if not filename.endswith('.h5'):
+            warnings.warn('Filename does not end with .h5 as expected.')
+        objectname_string = objectname if objectname is not None else ""
+        filename_string = filename if filename is not None else ""
+        return filename_string + ":" + objectname_string
+
+    @staticmethod
+    def same_file(filename1, filename2):
+        """
+        Check whether two files are the same.
+
+        This function uses the os.path.samefile(...) method to compare files and
+        falls back to comparing the absolute paths of files if samefile should
+        fail or cannot be imported.
+
+        :param filename1: The name of the first file
+        :param filename2: The name of the second file
+        :return:
+        """
+        try:
+            from os.path import samefile, abspath
+            try:
+                return samefile(filename1, filename2)
+            except:
+                pass
+        except ImportError:  # E.g. we are on Windows
+            pass
+        return abspath(filename1) == abspath(filename2)
 
     @classmethod
     def get_num_items(cls, file_group, basename=""):

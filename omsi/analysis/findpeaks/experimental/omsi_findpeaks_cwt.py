@@ -2,6 +2,13 @@
 Making the scipy.signal.find_peaks_cwt() method available as an omsi analysis method
 """
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from joblib import Parallel, delayed
+from scipy import signal as sig
+
+def analysis_step(xi,yi,m, widths, min_snr):
+    print xi,yi
+    peak_indices = sig.find_peaks_cwt(m, widths=widths, wavelet=sig.ricker, min_snr=min_snr)
+    return peak_indices
 
 class omsi_findpeaks_cwt(omsi_analysis_base):
     """
@@ -44,6 +51,12 @@ class omsi_findpeaks_cwt(omsi_analysis_base):
                            dtype=float,
                            group=groups['settings'],
                            required=True)
+        self.add_parameter(name='nthreads',
+                           help='Number of parallel processing threads',
+                           default=1,
+                           dtype=int,
+                           group=groups['settings'],
+                           required=True)
 
         self.data_names = ['peak_locations'] #need to return peak intensities and x,y
         self.analysis_identifier = name_key
@@ -53,9 +66,6 @@ class omsi_findpeaks_cwt(omsi_analysis_base):
         The continuous wavelet transform peak identification algorithm from scipy.signal.find_peaks_cwt().
         In openmsi it is renamed "findpeaks_cwt" with one fewer underscore.
         """
-
-        from scipy import signal as sig
-
         msidata = self['msidata']    #now in memory as hdf5 cube or np.ndarray
         widths = self['widths']      #should already be numpy ndarray
         min_snr = self['min_snr']
@@ -65,17 +75,22 @@ class omsi_findpeaks_cwt(omsi_analysis_base):
 
         mzindices = []
 
-        for xi in xrange(0, shape_x):
-            for yi in xrange(0, shape_y):
-                print xi, yi
-
-                # Load the spectrum
-                m = msidata[xi, yi, :]
-
-                # find indices of m where peaks are
-                peak_indices = sig.find_peaks_cwt(m, widths=widths, wavelet=sig.ricker, min_snr=min_snr)
-                mzindices.append(peak_indices)
+        if self['nthreads'] > 1:
+            print shape_x, shape_y
+            num_pixel = shape_x * shape_y
+            Parallel(n_jobs=self['nthreads'])(
+                delayed(analysis_step)(int(i/shape_x),
+                                       (i - (shape_x*int(i/shape_x))),
+                                       msidata[int(i/shape_x), (i - (shape_x*int(i/shape_x))), :],
+                                       widths,
+                                       min_snr) for i in range(num_pixel))
+        else:
+            for xi in xrange(0, shape_x):
+                d = msidata[xi, : ,:]
+                for yi in xrange(0, shape_y):
+                    analysis_step(xi,yi,msidata[xi,yi, :], widths, min_snr)
         return mzindices
+
 
     ###############################################################
     #  2) Integrating your analysis with the OpenMSI              #

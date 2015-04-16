@@ -8,7 +8,7 @@ import time
 import datetime
 import sys
 import warnings
-
+import weakref
 import numpy as np
 
 from omsi.dataformat.omsi_file.format import omsi_format_common
@@ -16,10 +16,36 @@ from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
 from omsi.shared.omsi_dependency import omsi_dependency
+
 try:
     from mpi4py import MPI
+    MPI_AVAILABLE = True
 except ImportError:
-    pass
+    MPI_AVAILABLE = False
+
+
+class AnalysisReadyError(Exception):
+    """
+    Custom exception used to indicate that an analysis is not ready to execute.
+    """
+    def __init__(self, value, params=None):
+        """
+        Initialize the AnalysisReadyError
+
+        :param value: Error message string
+        :param params: Optional list of dependent parameters that are not ready to be used.
+        """
+        self.value = value
+        self.params = params
+        message = unicode(self.value)
+        if self.params is not None and len(self.params) > 0:
+            message += " The following parameters are not ready: "
+            for param in self.params:
+                try:
+                    message += " " + param['name']
+                except KeyError:
+                    pass
+        super(AnalysisReadyError, self).__init__(repr(message))
 
 
 class omsi_analysis_base(object):
@@ -49,13 +75,14 @@ class omsi_analysis_base(object):
     :ivar data_names: List of strings of all names of analysis output datasets. These are the
          target keys for __data_list.
     :ivar profile_time_and_usage: Boolean indicating whether we should profile the execute_analysis(...) function
-        when called as part of the execute(...) function. The default value is false. Use the enable_time_and_usage_profiling(..)
-        function to determine which profiling should be performed. The time_and_usage profile uses pythons
-        cProfile (or Profile) to monitor how often and for how long particular parts of the analysis code
-        executed.
+        when called as part of the execute(...) function. The default value is false. Use the
+        enable_time_and_usage_profiling(..) function to determine which profiling should be performed. The time_and
+        _usage profile uses pythons cProfile (or Profile) to monitor how often and for how long particular parts
+        of the analysis code executed.
     :ivar profile_memory: Boolean indicating whether we should monitor memory usage (line-by-line) when
-        executing the execute_analysis(...) function. The default value is false. Use the enable_time_and_usage_profiling(..)
-        function to determine which profiling should be performed.
+        executing the execute_analysis(...) function. The default value is false. Use the
+        enable_time_and_usage_profiling(..) function to determine which profiling should be performed.
+    :ivar omsi_analysis_storage: List of omsi_file_analysis object where the analysis is stored. The list may be empty.
 
     **Execution Functions:**
 
@@ -114,6 +141,12 @@ class omsi_analysis_base(object):
     view (v_qspectrum). By providing different viewer options we allow the user to decide which option they \
     are most interested in.
     """
+
+    _analysis_instances = set()
+    """
+    Class variable used to track all instances of omsi_analysis_base
+    """
+
     def __init__(self):
         """Initalize the basic data members"""
         self.analysis_identifier = "undefined"
@@ -123,6 +156,8 @@ class omsi_analysis_base(object):
         self.run_info = {}
         self.profile_time_and_usage = False
         self.profile_memory = False
+        self.omsi_analysis_storage = []
+        self._analysis_instances.add(weakref.ref(self))
 
     def __getitem__(self,
                     key):
@@ -141,6 +176,13 @@ class omsi_analysis_base(object):
             for i in self.parameters:
                 if i['name'] == key:
                     return i.get_data_or_default()
+            if key in self.data_names:
+                return omsi_dependency(param_name=None,
+                                       link_name=None,
+                                       dataname=key,
+                                       omsi_object=self,
+                                       selection=None,
+                                       help=None)
             return None
         else:
             return None
@@ -156,6 +198,7 @@ class omsi_analysis_base(object):
         """
         if key in self.get_parameter_names():
             self.set_parameter_values(**{key: value})
+            self.omsi_analysis_storage = []
         elif key in self.data_names:
             if 'numpy' not in str(type(value)):
                 temp_value = np.asarray(value)
@@ -166,8 +209,59 @@ class omsi_analysis_base(object):
                 self.__data_list.append(omsi_analysis_data(name=key,
                                                            data=value,
                                                            dtype=value.dtype))
+            self.omsi_analysis_storage = []
         else:
             raise KeyError('Invalid key. The given key was not found as part of the analysis parameters nor output.')
+
+    @classmethod
+    def get_analysis_instances(cls):
+        """
+        Generator function used to iterate through all instances of omsi_analysis_base.
+        The function creates references for all weak references stored in cls._analysis_instances
+        and returns the references if it exists and cleans up the any invalid references after the
+        iteration is complete.
+        :return: References to omsi_analysis_base objects
+        """
+        invalid_references = set()
+        for ref in cls._analysis_instances:
+            obj = ref()
+            if obj is not None:
+                yield obj
+            else:
+                invalid_references.add(ref)
+        cls._analysis_instances -= invalid_references
+
+    @classmethod
+    def locate_analysis(cls,
+                        data_object,
+                        include_parameters=False):
+        """
+        Given a data_object try to locate the analysis that create the object as an
+        output of its execution.
+
+        :param data_object: The data object of interest.
+        :param include_parameters: Boolean indicating whether also input parameters should be considered
+            in the search in addition to the outputs of an analysis
+
+        :return: omsi_dependency pointing to the relevant object or None in case the
+            object was not found.
+        """
+        for ana_obj in cls.get_analysis_instances():
+            ana_params_and_outputs = ana_obj.get_analysis_data_names()
+            if include_parameters:
+                ana_params_and_outputs += ana_obj.get_parameter_names()
+            for dataname in ana_params_and_outputs:
+                obj = ana_obj[dataname]
+                if obj is data_object:
+                    if type(obj) not in (float, int, bool, long, complex, str, unicode):
+                        return omsi_dependency(param_name=None,
+                                               link_name=None,
+                                               dataname=dataname,
+                                               omsi_object=ana_obj,
+                                               selection=None,
+                                               help=None)
+
+        return None
 
     def update_analysis_parameters(self, **kwargs):
         """
@@ -195,6 +289,19 @@ class omsi_analysis_base(object):
         for param in self.parameters:
             if param['required'] and not param.data_set():
                 param['data'] = param['default']
+
+    def check_ready_to_execute(self):
+        """
+        Check if all inputs are ready to determine if the analysis is ready to run.
+
+        :return: List of omsi_analysis_parameter objects that are not ready. If the
+            returned list is empty, then the analysis is ready to run.
+        """
+        pending_indputs = []
+        for param in self.parameters:
+            if not param.data_ready():
+                pending_indputs.append(param)
+        return pending_indputs
 
     def runinfo_record_preexecute(self):
         """
@@ -287,6 +394,38 @@ class omsi_analysis_base(object):
             except:
                 pass
 
+    def gather_run_info(self, root=0, comm=None):
+        """
+        Simple helper function to gather the runtime information collected on
+        multiple processes when running using MPI on a single process
+
+        :param root: The process where the runtime information should be collected
+        :return: If we have more then one processes then this function returns a
+            dictionary with the same keys as usual for the run_info but the
+            values are now lists with one entry per mpi processes. If we only have
+            a single process, then the run_info object will be returned without
+            changes. NOTE: Similar to mpi gather, the function only collects
+            information on the root. All other processes will return just their
+            own private runtime information.
+
+        """
+        if MPI_AVAILABLE:
+            if not comm:
+                comm = self.comm = None if not MPI_AVAILABLE else MPI.COMM_WORLD
+            if self.comm.Get_size() > 1:
+                self.run_info['mpi_rank'] = self.comm.Get_rank()
+                run_data = self.comm.gather(self.run_info, root=0)
+                if self.comm.Get_rank() == 0:
+                    merged_run_data = {}
+                    for run_dict in run_data:
+                        for key in run_dict:
+                            try:
+                                merged_run_data[key].append(run_dict[key])
+                            except KeyError:
+                                merged_run_data[key] = [run_dict[key]]
+                    return merged_run_data
+        return self.run_info
+
     def record_execute_analysis_outputs(self, analysis_output):
         """
         Function used internally by execute to record the output
@@ -316,6 +455,9 @@ class omsi_analysis_base(object):
 
         :returns: This function returns the output of the execute analysis function.
 
+        :raises: AnalysisReadyError in case that the analysis is not ready to be executed. This may be
+            the case, e.g, when a dependent input parameter is not ready to be used.
+
         """
         # Import modules for profiling if needed
         if self.profile_time_and_usage:
@@ -337,20 +479,29 @@ class omsi_analysis_base(object):
                 import memory_profiler
             except ImportError:
                 self.profile_memory = False
-                warnings.warn("Profiling of memory failed dur to import error. Could not import memory_profiler.")
+                warnings.warn("Profiling of memory failed due to import error. Could not import memory_profiler.")
         if self.profile_time_and_usage or self.profile_memory:
             try:
                 import StringIO
             except ImportError:
                 self.profile_memory = False
-                self.profile_time_and_usage
+                self.profile_time_and_usage = False
                 warnings.warn("All profiling disabled. Could not import StringIO.")
 
-        # 1) Set any parameters that are given to the execute function
+        # 1) Remove the saved analysis object since we are running the analysis again
+        self.omsi_analysis_storage = []
+
+        # 2) Define all parameters and make sure that they are ready
+        # 2.1) Set any parameters that are given to the execute function
         self.update_analysis_parameters(**kwargs)
 
-        # 2) Set the parameters that required parameters that have a default value but that have not been initialized
+        # 2.2) Set the parameters that are required that have a default value but that have not been initialized
         self.define_missing_parameters()
+
+        # 2.3) Check that all parameters are ready to be used
+        pending_params = self.check_ready_to_execute()
+        if len(pending_params) > 0:
+            raise AnalysisReadyError("The analysis is not ready.", pending_params)
 
         # 3) Record basic execution provenance information prior to running the analysis
         self.run_info = {}
@@ -857,6 +1008,22 @@ class omsi_analysis_base(object):
         temp_driver.initialize_argument_parser()
         return temp_driver.parser.format_help()
 
+    def get_omsi_analysis_storage(self):
+        """
+        Get a list of known locations where this analysis has been saved.
+
+        :return: List of `omsi.dataformat.omsi_file.analysis. omsi_file_analysis` objects where the analysis is saved.
+        """
+        return self.omsi_analysis_storage
+
+    def has_omsi_analysis_storage(self):
+        """
+        Check whether a storage location is known where the anlaysis has been saved.
+
+        :return: Boolean indicating whether self.omsi_analysis_storage is not empty
+        """
+        return len(self.omsi_analysis_storage) > 0
+
     def get_analysis_type(self):
         """
         Return a string indicating the type of analysis performed
@@ -947,9 +1114,12 @@ class omsi_analysis_base(object):
         """
         Get the complete list of all direct dependencies to be written to the HDF5 file
 
-        NOTE: These are only the direct dependencies as specified by the analysis itself. \
-        Use  get_all_dependency_data_recursive(..) to also get the indirect depencies of \
-        the analysis due to dependencies of the depencies themself.
+        NOTE: These are only the direct dependencies as specified by the analysis itself.
+        Use  get_all_dependency_data_recursive(..) to also get the indirect decencies of
+        the analysis due to dependencies of the decencies themselves.
+
+        :returns: List of omsi_parameter_data objects that define dependencies.
+
         """
         dependency_list = []
         for param in self.parameters:
@@ -968,6 +1138,14 @@ class omsi_analysis_base(object):
     def get_num_dependency_data(self):
         """Return the number of dependencies to be wirtten to the HDF5 file"""
         return len(self.get_all_dependency_data())
+
+    def keys(self):
+        """
+        Get a list of all valid keys, i.e., a combination of all input parameter and output names.
+
+        :return: List of strings with all input parameter and output names.
+        """
+        return self.get_analysis_data_names() + self.get_parameter_names()
 
     def clear_analysis_data(self):
         """Clear the list of analysis data"""
@@ -1022,25 +1200,44 @@ class omsi_analysis_base(object):
                                         help=curr_parameter['help'])
                 # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, omsi_dependency):
-                # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
-                pass
+                # Set any possibly missing parameters
+                value['param_name'] = name
+                value['link_name'] = name
+                value['help'] = curr_parameter['help']
             else:
-                try:
-                    dtype = value.dtype  # if the object specifies a valid numpy dtype
-                except AttributeError:
-                    if isinstance(value, float) or \
-                            isinstance(value, int) or \
-                            isinstance(value, bool) or \
-                            isinstance(value, long) or \
-                            isinstance(value, complex):
-                        value = np.asarray([value])
-                        # dtype = value.dtype
-                    elif isinstance(value, str) or isinstance(value, unicode):
-                        # dtype = omsi_format_common.str_type
-                        pass
-                    else:
-                        value = np.asarray(value)
-                        # dtype = value.dtype
+                # Try to locate the input parameter to see if it is an output of another analysis
+                check_param = self.locate_analysis(value)
+                # The given parameter value is the output of another analysis so we create a link to it
+                if check_param is not None:
+                    check_param['param_name'] = name  # Define the name of the dependent parameter
+                    check_param['link_name'] = name   # Define the name of the object when stored to file
+                    # If the analysis has been saved to file already, then change the dependency to point
+                    # to the corresponding file object instead
+                    # if len(check_param['omsi_object'].get_omsi_analysis_storage()) > 0:
+                    #    check_param['omsi_object'] = check_param['omsi_object'].omsi_analysis_storage[0]
+
+                    # Since we have the data still in memory, add a reference to the data to the
+                    # dependency to use the in-memory data rather then forcing a data load from file
+                    check_param._force_set_data(value)
+                    value = check_param
+                # If the input could not be located as an output of another analysis
+                else:
+                    try:
+                        dtype = value.dtype  # if the object specifies a valid numpy dtype
+                    except AttributeError:
+                        if isinstance(value, float) or \
+                                isinstance(value, int) or \
+                                isinstance(value, bool) or \
+                                isinstance(value, long) or \
+                                isinstance(value, complex):
+                            value = np.asarray([value])
+                            # dtype = value.dtype
+                        elif isinstance(value, str) or isinstance(value, unicode):
+                            # dtype = omsi_format_common.str_type
+                            pass
+                        else:
+                            value = np.asarray(value)
+                            # dtype = value.dtype
 
             # Parameter set
             if curr_parameter is not None:
@@ -1228,6 +1425,7 @@ class omsi_analysis_base(object):
         self.clear_parameter_data()
         self.set_parameter_values(**parameters_values)
         self.run_info = analysis_object.get_all_runinfo_data(load_data=load_runtime_data)
+        self.omsi_analysis_storage.append(analysis_object)
         return True
 
     def get_analysis_identifier(self):

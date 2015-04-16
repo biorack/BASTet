@@ -18,5 +18,6 @@ __all__ = ["findpeaks",
            "msi_filtering",
            "omsi_analysis_data",
            "omsi_analysis_base",
+           "AnalysisReadyError",
            "omsi_analysis_generic"] + findpeaks.all__ + multivariate_stats.all__ + msi_filtering.all__
 

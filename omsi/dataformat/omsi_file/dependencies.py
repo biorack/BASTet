@@ -3,6 +3,9 @@ Base module for managing of dependencies between data in OpenMSI HDF5 files
 """
 
 import time
+import os
+import h5py
+import warnings
 
 from omsi.dataformat.omsi_file.format import omsi_format_common, \
     omsi_format_dependencies, \
@@ -37,18 +40,22 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         except:
             self.dependencies = None
 
-    def create_dependencies(self, dependencies_data_list=None):
+    def create_dependencies(self, dependencies_data_list=None, use_relative_links=True):
         """
         Create a managed group for storing data dependencies
 
         :param parent_group: The h5py.Group for which the dependencies group should be initialized.
         :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
                Default is None which is mapped to an empty list []
+        :param use_relative_links: Should we use relative links to external files if possible. Default value
+            is True.
+        :type use_relative_links: bool
 
         :returns: omsi_file_dependencies object created by the function.
         """
         return omsi_file_dependencies.__create__(parent_group=self.dependencies_parent,
-                                                 dependencies_data_list=dependencies_data_list)
+                                                 dependencies_data_list=dependencies_data_list,
+                                                 use_relative_links=use_relative_links)
 
     def add_dependency(self, dependency, flush_io=True):
         """
@@ -424,7 +431,7 @@ class omsi_file_dependencydata(omsi_file_common):
 
     """Class for managing data groups used for storing data dependencies"""
     @classmethod
-    def __create__(cls, parent_group, dependency_data):
+    def __create__(cls, parent_group, dependency_data, use_relative_links=True):
         """
         Create a new dependency group within the given parent group and populate it
         with the required datasets using omsi_file_dependencydata.__populate_dependency__
@@ -434,6 +441,9 @@ class omsi_file_dependencydata(omsi_file_common):
         :type dependency_group: h5py.Group
         :param dependency_data: The analysis dependency specification.
         :type dependency_data: omsi.shared.omsi_dependency_data
+        :param use_relative_links: Should we use relative links to external files if possible. Default value
+            is True.
+        :type use_relative_links: bool
 
         :returns: omsi_file_dependencydata object for management of the newly created object
 
@@ -447,11 +457,12 @@ class omsi_file_dependencydata(omsi_file_common):
         new_dep_group.attrs[omsi_format_common.version_attribute] = omsi_format_dependencydata.current_version
         new_dep_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
         dependency_object = omsi_file_dependencydata.__populate_dependency__(dependency_group=new_dep_group,
-                                                                             dependency_data=dependency_data)
+                                                                             dependency_data=dependency_data,
+                                                                             use_relative_links=use_relative_links)
         return dependency_object
 
     @classmethod
-    def __populate_dependency__(cls, dependency_group, dependency_data):
+    def __populate_dependency__(cls, dependency_group, dependency_data, use_relative_links=True):
         """
         Populate the given dependency_group with the associated data.
 
@@ -459,12 +470,15 @@ class omsi_file_dependencydata(omsi_file_common):
         :type dependency_group: h5py.Group
         :param dependency_data: The analysis dependency specification.
         :type dependency_data: omsi.shared.omsi_dependency
+        :param use_relative_links: Should we use relative links to external files if possible. Default value
+            is True.
+        :type use_relative_links: bool
 
         :returns: omsi_file_dependencydata object for management of the newly created object
 
         """
         dep_group = dependency_group
-        # Save the name of the parameter
+        # 1) Save the name of the parameter
         param_name_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_parameter), shape=(1,), dtype=omsi_format_common.str_type)
         help_attr = omsi_format_dependencydata.dependency_parameter_help_attr
@@ -475,7 +489,7 @@ class omsi_file_dependencydata(omsi_file_common):
             param_name_data[0] = str(dependency_data['param_name'])
             param_name_data.attrs[help_attr] = str(dependency_data['help'])
 
-        # Save the selection
+        # 2) Save the selection
         selection_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_selection), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['selection'] is not None:
@@ -494,14 +508,33 @@ class omsi_file_dependencydata(omsi_file_common):
                 raise ValueError(errormessage)
         else:
             selection_data[0] = ""
-        # Save the main omsi object
-        mainname_data = dep_group.require_dataset(name=unicode(
-            omsi_format_dependencydata.dependency_mainname), shape=(1,), dtype=omsi_format_common.str_type)
-        if omsi_format_common.str_type_unicode:
-            mainname_data[0] = unicode(dependency_data['omsi_object'].name)
-        else:
-            mainname_data[0] = str(dependency_data['omsi_object'].name)
-        # Save the additional dataset name
+
+        # 3) Save the string describing the location of the main omsi object
+        mainname_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_mainname),
+                                                  shape=(1,),
+                                                  dtype=omsi_format_common.str_type)
+        # 3.1) Get the name of the object
+        mainname_string = dependency_data['omsi_object'].name
+        # 3.2) Determine whether this is an internal dependency or an external file dependency
+        mainname_filename = omsi_file_common.get_h5py_object(dependency_data['omsi_object']).file.filename
+        if not omsi_file_common.same_file(mainname_filename, dep_group.file.filename):
+            # 3.2.1 Create a relative path for the file if possible
+            if use_relative_links:
+                # Relative paths between the directories where the two files are stored
+                relative_dir_path = os.path.relpath(os.path.dirname(os.path.abspath(mainname_filename)),
+                                                    os.path.dirname(os.path.abspath(dep_group.file.filename)))
+                # Create the relative path to the target file
+                mainname_filename = os.path.join(relative_dir_path,
+                                                 os.path.basename(mainname_filename))
+
+            # 3.2.2 Create the string for the external link
+            mainname_string = omsi_file_common.create_path_string(mainname_filename, mainname_string)
+
+        # 3.3) Write the data to file
+        mainname_string = unicode(mainname_string) if omsi_format_common.str_type_unicode else str(mainname_string)
+        mainname_data[0] = unicode(mainname_string)
+
+        # 4) Save the additional dataset name
         dataset_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_datasetname), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['dataname']:
@@ -510,7 +543,7 @@ class omsi_file_dependencydata(omsi_file_common):
             else:
                 dataset_data[0] = str(dependency_data['dataname'])
         else:
-            dataset_data[0] = u''
+            dataset_data[0] = u'' if omsi_format_common.str_type_unicode else ''
 
         return omsi_file_dependencydata(dep_group)
 
@@ -603,19 +636,53 @@ class omsi_file_dependencydata(omsi_file_common):
         except:
             return ""
 
-    def get_dependency_omsiobject(self, recursive=True):
+    def get_mainname(self):
+        """
+        Get the main name string describing the name of the object (and possibly path of the file if external)
+
+        :return: String indicating the main name of the object that we link to
+        """
+        return self.managed_group[unicode(omsi_format_dependencydata.dependency_mainname)][0]
+
+    def get_dependency_omsiobject(self, recursive=True, external_mode=None):
         """
         Get the omsi file API object corresponding to the object the dependency is pointing to.
 
         :param recursive: Should dependencies be resolved recursively, i.e., if the dependency points
                           to another dependencies. Default=True.
+        :param external_mode: The file open mode (e.g., 'r', 'a') to be used when we encounter external dependencies,
+            i.e., dependencies that are stored in external files. By default this is set to None,
+            indicating that the same mode should be used in which this (i.e,. the current file
+            describing the dependency) was opened. Allowed modes are 'r', 'r+', and 'a'. The modes
+            'w', 'w+, 'x' are prohibited to ensure that we do not break external files.
 
         :returns: An omsi file API object (e.g., omsi_file_analysis or omsi_file_msidata) if the link
                   points to a group or the h5py.Dataset the link is pointing to.
         """
-        omsi_object_name = self.managed_group[
-            unicode(omsi_format_dependencydata.dependency_mainname)][0]
-        h5py_object = self.managed_group.file[unicode(omsi_object_name)]
+        # Get the name of the object
+        dependency_path = self.get_mainname()
+        # Determine if this is an internal or external dependency
+        filename, omsi_object_name = omsi_file_common.parse_path_string(dependency_path)
+        # Determine if we need to open a new file
+        h5py_file = self.managed_group.file
+        if filename is not None:
+            if not omsi_file_common.same_file(filename, self.managed_group.file.filename):
+                # Determine the filemode
+                filemode = external_mode
+                if filemode is None:
+                    filemode = self.managed_group.file.mode
+                filemode = filemode if filemode not in ['w', 'w+', 'x'] else 'a'
+                # Resolve relative path names
+                if not os.path.isabs(filename):
+                    filename = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(self.managed_group.file.filename)),
+                                                            filename))
+                try:
+                    h5py_file = h5py.File(filename, self.managed_group.file.mode)
+                except IOError:
+                    h5py_file = h5py.File(filename, 'r')
+                    warnings.warn('External dependency forced to be opened in read-only mode.')
+
+        h5py_object = h5py_file.file[unicode(omsi_object_name)]
         omsi_object = omsi_file_common.get_omsi_object(h5py_object,
                                                        resolve_dependencies=recursive)
         return omsi_object
@@ -649,10 +716,11 @@ class omsi_file_dependencydata(omsi_file_common):
             output_dependency['selection'] = self.get_selection_string()
         except:
             output_dependency['selection'] = None
-        try:
-            output_dependency['omsi_object'] = self.get_dependency_omsiobject()
-        except:
-            output_dependency['omsi_object'] = None
+        #try:
+        output_dependency['omsi_object'] = self.get_dependency_omsiobject()
+        #except:
+        #    warnings.warn('Failed to retrieve the dependency object for: ' + self.get_mainname())
+        #    #output_dependency['omsi_object'] = None
         try:
             output_dependency['dataname'] = self.get_dataset_name()
         except:

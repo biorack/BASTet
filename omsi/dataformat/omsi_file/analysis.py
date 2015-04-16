@@ -3,6 +3,7 @@ Module for managing custom analysis data in OMSI HDF5 files.
 """
 import numpy as np
 import h5py
+import os
 
 from omsi.dataformat.omsi_file.format import \
     omsi_format_common, \
@@ -26,28 +27,69 @@ class omsi_analysis_manager(omsi_file_object_manager):
 
     """
     def __init__(self, analysis_parent):
-        super(omsi_analysis_manager, self).__init__(analysis_parent)
+        try:
+            # In most cases all members in the inheritance hierarchy are expected to accept the parent group as input
+            super(omsi_analysis_manager, self).__init__(analysis_parent)
+        except TypeError:
+            # We are initialized separate from an omis_file_common hierarchy and our super is just object
+            super(omsi_analysis_manager, self).__init__()
         self.analysis_parent = analysis_parent
 
-    def create_analysis(self, analysis, flush_io=True):
+    def create_analysis(self,
+                        analysis,
+                        flush_io=True,
+                        force_save=False,
+                        save_unsaved_dependencies=True):
         """
         Add a new group for storing derived analysis results for the current experiment
 
         Create the analysis group using omsi_file_analysis.__create___ which in turn uses
         omsi_file_analysis.__populate_analysis__(...) to populate the group with the appropriate data.
 
+        NOTE: Dependencies are generally resolved to point to file objects. However, if save_unsaved_dependencies
+        is set to False and a given in-memory dependency has not been saved yet, then the value associated with
+        that dependency will be saved instead as part of the parameters and, hence, only the value of the
+        dependency is persevered in that case and not the full dependency chain.
+
+        NOTE: Dependencies if they only exists in memory are typically saved recursively unless
+        save_unsaved_dependencies is set to False. I.e, calling create_analysis may result in the
+        creating of multiple other dependent analyses if they have not been saved before.
+
+
         :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
         :type analysis: omsi.analysis.omsi_analysis_base:
+
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed
                        so that all data has been written to file
+        :type flush_io: bool
+
+        :param force_save: Should we save the analysis even if it has been saved before for the same parent?
+            If force_save is False (default) and the self.omsi_analysis_storage parameter of the omsi_analysis_base
+            object given as the analysis input parameter is not empty, then we will try to locate the appropriate
+            object first and return it instead, rather than saving the analysis again. Note, only if the prior
+            storage location is within the current self.analysis_parent will we return the previous storage object,
+            otherwise a new object will be created in the file. If force_save is True, then the analysis will be
+            saved either way and the self.omsi_analysis_storage parameter will be extended.
+        :type force_save: bool
+
+        :param save_unsaved_dependencies: If there are unsaved (in-memory) dependencies, then should those be
+            saved to file as well? Default value is True, i.e, by default all in-memory dependencies that have
+            not been saved yet, i.e, for which the self.omsi_analysis_storage of the corresponding omsi_analysis_
+            base object is empty, are saved as well. If in-memory dependencies have been saved before, then a
+            link to those dependencies will be established, rather than re-saving the dependency.
+        :type save_unsaved_dependencies: bool
 
         :returns: The omsi_file_analysis object for the newly created analysis group and the
-                integer index of the analysis
+                integer index of the analysis. NOTE: if force_save is False (default), then the group
+                returned may not be new but may be simply the first entry in the list of existing
+                storage locations for the given analysis.
         """
         return omsi_file_analysis.__create__(parent_group=self.analysis_parent,
                                              analysis=analysis,
                                              analysis_index=None,  # Same as self.get_num_analysis()
-                                             flush_io=flush_io)
+                                             flush_io=flush_io,
+                                             force_save=force_save,
+                                             save_unsaved_dependencies=save_unsaved_dependencies)
 
     def get_num_analysis(self):
         """
@@ -123,7 +165,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
                    parent_group,
                    analysis,
                    analysis_index=None,
-                   flush_io=True):
+                   flush_io=True,
+                   force_save=False,
+                   save_unsaved_dependencies=True):
         """
         Add a new group for storing derived analysis results for the given parent object
 
@@ -132,13 +176,31 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         :param parent_group: The h5py.Group where the method object should be created
         :type parent_group: h5py.Group
-        :param analysis_index: The integer index of the analysis to be created. Set to None if the
+
+        :param analysis_index: The integer index of the analysis to be created. Set to None (default) if the
                          function should determine the index automatically.
+        :type analysis_index: int or None
+
         :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
         :type analysis: omsi.analysis.omsi_analysis_base:
+
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed
                        so that all data has been written to file
         :type flush_io: True
+
+        :param force_save: Should we save the analysis even if it has been saved before? If force_save is
+            False (default) and the self.omsi_analysis_storage parameter of the omsi_analysis_base object
+            given as the analysis input parameter is not None, then the analysis will not be saved again.
+            If force_save is True, then the analysis will be saved either way and the self.omsi_analysis_storage
+            parameter will be extended.
+        :type force_save: bool
+
+        :param save_unsaved_dependencies: If there are unsaved (in-memory) dependencies, then should those be
+            saved to file as well? Default value is True, i.e, by default all in-memory dependencies that have
+            not been saved yet, i.e, for which the self.omsi_analysis_storage of the corresponding omsi_analysis_
+            base object is empty, are saved as well. If in-memory dependencies have been saved before, then a
+            link to those dependencies will be established, rather than re-saving the dependency.
+        :type save_unsaved_dependencies: bool
 
         :returns: i) the omsi_file_analysis object for the newly created analysis group ii) the integer index
                   for the analysis.
@@ -152,7 +214,6 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # 2 Check if input values are correct
         # 2.1 Confirm that we have a valid analysis object
         if not isinstance(analysis, omsi_analysis_base):
-
             errormessage = "Could not write the analysis. The input object was of type " + \
                 str(type(analysis)) + " not of omsi_analysis_base as expected."
             raise NameError(errormessage)
@@ -167,13 +228,38 @@ class omsi_file_analysis(omsi_dependencies_manager,
         if analysis_group_name in parent_group.keys():
             raise IndexError("An analysis with the requested index already exists.")
 
-        # 3 Create the group and define the required attributes
+        # 3. Check if we need to save the analysis or whether it has already been saved
+        if not(force_save or len(analysis.get_omsi_analysis_storage()) == 0):
+            # Check if the analysis has been saved before for the same parent_group
+            parent_filename = os.path.abspath(parent_group.file.filename)
+            for prior_data_store in analysis.get_omsi_analysis_storage():
+                prior_filename = os.path.abspath(prior_data_store.managed_group.file.filename)
+                if prior_data_store.name == parent_group.name and \
+                        prior_filename == parent_filename:
+                    return prior_data_store, prior_data_store.get_analysis_index()
+
+        # 4. Create the group and define the required attributes
         analysis_group = parent_group.require_group(analysis_group_name)
         analysis_group.attrs[omsi_format_common.type_attribute] = "omsi_file_analysis"
         analysis_group.attrs[omsi_format_common.version_attribute] = omsi_format_analysis.current_version
         analysis_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
 
-        # Populate the group with data and return the omsi_file_analysis object
+        # 5. Check if there are any unsaved in-memory dependencies. NOTE: All dependencies are assumed to have
+        if save_unsaved_dependencies:
+            save_extra_dependencies = []
+            for dependency in analysis.get_all_dependency_data():
+                if isinstance(dependency['data']['omsi_object'], omsi_analysis_base):
+                    if not dependency['data']['omsi_object'].has_omsi_analysis_storage():
+                        save_extra_dependencies.append(dependency)
+            if len(save_extra_dependencies) > 0:  # Same as 'if save_extra_dependencies:'
+                temp_analysis_manager = omsi_analysis_manager(analysis_parent=parent_group)
+                for dependency in save_extra_dependencies:
+                    temp_analysis_manager.create_analysis(analysis=dependency['data']['omsi_object'],
+                                                          flush_io=flush_io,
+                                                          force_save=False,
+                                                          save_unsaved_dependencies=save_unsaved_dependencies)
+
+        # 6. Populate the group with data and return the omsi_file_analysis object
         analysis_object = omsi_file_analysis.__populate_analysis__(analysis_group, analysis)
 
         # Flush I/O if necessary
@@ -192,6 +278,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         NOTE: This is a private helper function. Use the corresponding create_analysis function
         of omsi_file_experiment to create a completely new analysis.
 
+        NOTE: At this point we assume that all in-memory dependencies have been resolved. If not,
+        then the raw data associated with the given parameter will be saved instead.
+
         :param analysis_group: h5py group in which the analysis data should be stored.
         :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
         :type analysis: omsi.analysis.omsi_analysis_base:
@@ -202,8 +291,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         from omsi.analysis.omsi_analysis_data import omsi_analysis_data
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
+        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 
-        # Write the analysis name
+        # 1. Write the analysis name
         analysis_identifier_data = analysis_group.require_dataset(
             name=unicode(omsi_format_analysis.analysis_identifier),
             shape=(1,),
@@ -213,7 +303,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         else:
             analysis_identifier_data[0] = str(analysis.get_analysis_identifier())
 
-        # Write the analysis type
+        # 2. Write the analysis type
         analysis_type_data = analysis_group.require_dataset(name=unicode(omsi_format_analysis.analysis_type),
                                                             shape=(1,),
                                                             dtype=omsi_format_common.str_type)
@@ -222,17 +312,65 @@ class omsi_file_analysis(omsi_dependencies_manager,
         else:
             analysis_type_data[0] = str(analysis.get_analysis_type())
 
-        # Write the analysis data
+        # 3. Write the analysis data
         for ana_data in analysis.get_all_analysis_data():
             cls.__write_omsi_analysis_data__(analysis_group, ana_data)
 
-        # Write all the parameters
+        # 4. Determine all dependencies and parameters that we need to write
+        dependencies = []  # [dep['data'] for dep in analysis.get_all_dependency_data()]
+        parameters = []
+        # 4.1 Resolve in-memory dependencies if possible
+        for dependent_parameter in analysis.get_all_dependency_data():
+            # 4.1.1 We have an in-memory dependency
+            if isinstance(dependent_parameter['data']['omsi_object'], omsi_analysis_base):
+                # 4.1.1.1 We can resolve the dependency to an object in an HDF5 file
+                if dependent_parameter['data']['omsi_object'].has_omsi_analysis_storage():
+                    # Create a new dependency that points to the approbriate file location
+                    # NOTE: We do not modify the dependency in the analysis object that we save
+                    #       but we only change it for the purpose of storage
+                    new_dep = dependent_parameter['data'].copy()
+                    new_dep_omsi_object = None
+                    # Check if we can find an analysis data store within the same parent (or at least file)
+                    parent_filename = os.path.abspath(analysis_group.file.filename)
+                    for analysis_store in dependent_parameter['data']['omsi_object'].get_omsi_analysis_storage():
+                        analysis_store_filename = os.path.abspath(analysis_store.managed_group.file.filename)
+                        if analysis_store.name == analysis_group.parent.name and \
+                                analysis_store_filename == parent_filename:
+                            new_dep_omsi_object = analysis_store
+                            break
+                        elif analysis_store_filename == parent_filename:
+                            new_dep_omsi_object = analysis_store
+
+                    # We could not find a prior data store within the same file so use one from another file
+                    if new_dep_omsi_object is None:
+                        dep_object = dependent_parameter['data']['omsi_object']
+                        new_dep['omsi_object'] = dep_object.get_omsi_analysis_storage()[0]
+                    else:
+                        new_dep['omsi_object'] = new_dep_omsi_object
+                    # Append it to the list of dependencies
+                    dependencies.append(new_dep)
+                # 4.1.1.2  We cannot resolve the dependency and need to store it as an parameter instead
+                else:
+                    # Replace the dependency with the actual data and save it as a parameter instead
+                    new_param = dependent_parameter.copy()
+                    new_param['data'] = new_param['data'].get_data()
+                    parameters.append(new_param)
+
+            # 4.1.2 We have a file-based dependencies so keep it as is and add it to the list of dependencies
+            else:
+                dependencies.append(dependent_parameter['data'])
+
+        # 4.2 Add all regular parameters to the list of parameters
+        parameters += analysis.get_all_parameter_data(exclude_dependencies=True)
+
+        # 5. Write all the parameters
         parameter_group = analysis_group.require_group(omsi_format_analysis.analysis_parameter_group)
-        for param_data in analysis.get_all_parameter_data(exclude_dependencies=True):
-            if param_data['required'] or \
-                    param_data['default'] is not None or\
-                    param_data.data_set():
-                cls.__write_omsi_analysis_data__(parameter_group, param_data)
+        for param_data in parameters:
+            if param_data['required'] or param_data.data_set() or param_data['default'] is not None:
+                anadata = omsi_analysis_data(name=param_data['name'],
+                                             data=param_data.get_data_or_default(),
+                                             dtype=param_data['dtype'])
+                cls.__write_omsi_analysis_data__(parameter_group, anadata)
                 # Try to add the help string attribute
                 try:
                     help_attr = omsi_format_analysis.analysis_parameter_help_attr
@@ -240,7 +378,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 except KeyError:
                     pass
 
-        # Write all the runtime execution information
+        # 6. Write all the runtime execution information
         runinfo_group = analysis_group.require_group(omsi_format_analysis.analysis_runinfo_group)
         for run_info_key, run_info_value in analysis.get_all_run_info().items():
             # Generate an omsi_analysis_data object in order to use the
@@ -258,15 +396,21 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                              dtype=dat.dtype)
             cls.__write_omsi_analysis_data__(runinfo_group, anadata)
 
-        # Write all data dependencies
-        dependencies = [dep['data'] for dep in analysis.get_all_dependency_data()]
+        # 7. Write all dependencies
         omsi_file_dependencies.__create__(parent_group=analysis_group,
                                           dependencies_data_list=dependencies)
 
-        # Execute the custom data write for the analysis
+        # 8. Execute the custom data write for the analysis
         analysis.write_to_omsi_file(analysis_group)
 
-        return omsi_file_analysis(analysis_group)
+        # 9. Create the output object
+        re = omsi_file_analysis(analysis_group)
+
+        # 10. Save the output object in the ist of omsi analysis data stores as part of the analysis object
+        analysis.omsi_analysis_storage.append(re)
+
+        # 11. Retrun the new omsi_file_analysis object
+        return re
 
     @classmethod
     def __write_omsi_analysis_data__(cls,
@@ -334,14 +478,14 @@ class omsi_file_analysis(omsi_dependencies_manager,
             else:
                 warnings.warn("WARNING: " + ana_data['name'] +
                               " dataset generated but not written. The given dataset was empty.")
-        # Unkown dtype. Attempt to convert the dataset to numpy and write it to
+        # Unknown dtype. Attempt to convert the dataset to numpy and write it to
         # file.
         else:
-            # Savely convert scalars to numpy but warn in case we see something else
+            # Safely convert scalars to numpy but warn in case we see something else
             if ana_data['dtype'] not in [int, float, long, complex, bool, str, unicode,
                                          'int', 'float', 'long', 'complex', 'bool', 'str', 'unicode']:
-                warnings.warn("WARNING: " + str(ana_data['name']) + \
-                              ": The data specified by the analysis object is not " + \
+                warnings.warn("WARNING: " + str(ana_data['name']) +
+                              ": The data specified by the analysis object is not " +
                               "in numpy format. Attempting to convert the data to numpy")
             try:
                 dat = np.asarray(ana_data['data'])
@@ -375,7 +519,6 @@ class omsi_file_analysis(omsi_dependencies_manager,
             warnings.warn("No dependencies defined for analysis.")
         self.parameter = self.managed_group[unicode(omsi_format_analysis.analysis_parameter_group)]
         self.runinfo_group = self.managed_group[unicode(omsi_format_analysis.analysis_runinfo_group)]
-        self.analysis_omsi_object = None
         self.name = self.managed_group.name
 
     def __getitem__(self,
@@ -417,6 +560,14 @@ class omsi_file_analysis(omsi_dependencies_manager,
                             "Requested assignment operation failed")
                 except:
                     raise KeyError("Requested assignment operation failed")
+
+    def get_analysis_index(self):
+        """
+        Based on the name of the group, get the index of the analysis.
+
+        :return: Integer index of the analysis in the file.
+        """
+        return int(self.managed_group.name.split('_')[-1])
 
     def get_analysis_identifier(self):
         """
