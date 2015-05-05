@@ -56,6 +56,7 @@ class mzml_file(file_reader_base_multidata):
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
         print 'Found %s different scan types in mzML file.' % len(self.scan_types)
         self.coordinates = self.__compute_coordinates()
+        self.scan_params = self.__parse_scan_parameters(self)
 
         # Compute the spatial configuration of the matrix
         self.x_pos = np.unique(self.coordinates[:, 0])
@@ -213,6 +214,56 @@ class mzml_file(file_reader_base_multidata):
         return scantypes
 
     @staticmethod
+    def __parse_scan_parameters(self):
+        """
+        Internal helper function used to parse out scan parameters from the scan filter string
+        """
+        # precursor m/z
+        # example scan filter: MS2: ITMS + p MALDI Z ms2 907.73@cid60.00 [500.00-700.00]
+        ## example scan filter: MS1: FTMS + p MALDI Full ms [850.00-1000.00]
+
+        scan_params = []
+
+        for scan_idx, scantype in enumerate(self.scan_types):
+            #precursor
+            ms2pre = filter(None, re.findall('[\d.]+(?=@)', scantype))
+            if ms2pre:
+                ms2_precursor = float(ms2pre[0])
+            else:
+                ms2_precursor = 0
+            #dissociation type
+            dissot = filter(None, re.findall('(?<=\d@)[A-z]*', scantype))
+            if dissot:
+                dissociationtype = dissot[0]
+            else:
+                dissociationtype = 'None'
+            #dissociatoin energy
+            dissoe = filter(None, re.findall('(?<='+dissociationtype+')'+'[\d.]+', scantype))
+            if dissoe:
+                dissociationenergy = float(dissoe[0])
+            else:
+                dissociationenergy = 0
+            #polarity
+            pol = filter(None, re.findall('([+][ ]p)', scantype))
+            if pol:
+                polarity = 'pos'
+            else:
+                pol = filter(None, re.findall('([-][ ]p)', scantype))
+                if pol:
+                    polarity = 'neg'
+                else:
+                    polarity = 'unk'
+            #put all params in dictionary
+            paramdict = {'DissociationEnergy': dissociationenergy,
+                          'MSnPrecursorMZ': ms2_precursor,
+                          'DissociationType': dissociationtype,
+                          'Polarity': polarity}
+
+            scan_params.append(paramdict)
+
+        return scan_params
+
+    @staticmethod
     def __compute_scan_dependencies(scan_types=None):  #Why is the "self" arg needed here & below?
         """
         Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
@@ -258,7 +309,7 @@ class mzml_file(file_reader_base_multidata):
 
            :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
-        if os.path.isdir(name):  # If we point to a director, check if the dir contains an mzML file
+        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
             filelist = cls.get_files_from_dir(name)
             return len(filelist) > 0
         else:
@@ -287,7 +338,7 @@ class mzml_file(file_reader_base_multidata):
         :returns: Integer indicating the size in byte or None if unknown.
         """
         basename = None
-        if os.path.isdir(name):  # If we point to a director, check if the dir contains an mzML file
+        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
             filelist = cls.get_files_from_dir(name)
             if len(filelist) > 0:
                 basename = filelist[0]
