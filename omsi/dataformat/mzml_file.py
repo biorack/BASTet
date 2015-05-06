@@ -225,6 +225,14 @@ class mzml_file(file_reader_base_multidata):
         scan_params = []
 
         for scan_idx, scantype in enumerate(self.scan_types):
+
+            #MSnValueOfN
+            n = filter(None, re.findall('(?<=ms)\d*', scantype))
+            if n:
+                MSnValueOfN = int(n[0])
+            else:
+                MSnValueOfN = 1
+
             #precursor
             ms2pre = filter(None, re.findall('[\d.]+(?=@)', scantype))
             if ms2pre:
@@ -237,7 +245,7 @@ class mzml_file(file_reader_base_multidata):
                 dissociationtype = dissot[0]
             else:
                 dissociationtype = 'None'
-            #dissociatoin energy
+            #dissociation energy
             dissoe = filter(None, re.findall('(?<='+dissociationtype+')'+'[\d.]+', scantype))
             if dissoe:
                 dissociationenergy = float(dissoe[0])
@@ -254,7 +262,8 @@ class mzml_file(file_reader_base_multidata):
                 else:
                     polarity = 'unk'
             #put all params in dictionary
-            paramdict = {'DissociationEnergy': dissociationenergy,
+            paramdict = {'MSnValueOfN': MSnValueOfN,
+                          'DissociationEnergy': dissociationenergy,
                           'MSnPrecursorMZ': ms2_precursor,
                           'DissociationType': dissociationtype,
                           'Polarity': polarity}
