@@ -425,5 +425,4 @@ class mzml_file(file_reader_base_multidata):
         Get the dependencies between the current dataset and any of the
         other datasets stored in the current file.
         """
-        # TODO We need to implement the creation of dependencies between the current dataset given by self.select_dataset and all other datasets
-        return []
+        return self.scan_dependencies
