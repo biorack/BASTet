@@ -71,6 +71,20 @@ class file_reader_base(object):
         """
         raise NotImplementedError('close_file function not implemented.')
 
+    def get_dataset_metadata(self):
+        """
+        Get dict of additional metadata associated with the current dataset
+
+        NOTE: In the case that multiple regions and/or datasets are supported,
+        this function should return the metadata of the currently selected
+        dataset only. If no particular dataset is selected, then all should
+        be returned.
+
+        :return: Dict where keys are strings and associated values to be stored as
+            metadata with the dataset.
+        """
+        return {}
+
     @classmethod
     def is_valid_dataset(cls, name):
         """

@@ -64,8 +64,9 @@ class mzml_file(file_reader_base_multidata):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
-        self.mz_all = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type,
-                                         scan_types=self.scan_types)
+        self.mz_all = self.__compute_mz_axis(filename=self.basename,
+                                             mzml_filetype=self.mzml_type,
+                                             scan_types=self.scan_types)
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
         self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all]
@@ -83,7 +84,9 @@ class mzml_file(file_reader_base_multidata):
         function directly modifies the self.data entry.  Data is now a list of datacubes
         """
 
-        self.data = [np.zeros(shape=self.shape_all_data[scan_idx], dtype=self.data_type) for scan_idx, scantype in enumerate(self.scan_types)]
+        self.data = [np.zeros(shape=self.shape_all_data[scan_idx],
+                              dtype=self.data_type)
+                     for scan_idx, scantype in enumerate(self.scan_types)]
 
         for scan_idx, scantype in enumerate(self.scan_types):
             reader = mzml.read(self.basename)
@@ -103,15 +106,16 @@ class mzml_file(file_reader_base_multidata):
                     except:
                         print spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape,
             # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
-                if spectrumid%1000 == 0:
+                if spectrumid % 1000 == 0:
                     print 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype)
                 spectrumid += 1
 
     @classmethod
-    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):  ## TODO completely refactor this to make it smartly handle profile or centroid datasets
-        ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
-        ## TODO: profile datasets should work as is
-        ## TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
+    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
+        # TODO completely refactor this to make it smartly handle profile or centroid datasets
+        # TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
+        # TODO: profile datasets should work as is
+        # TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
         """
         Internal helper function used to compute the mz axis of each scantype
         Returns a list of numpy arrays
@@ -126,7 +130,7 @@ class mzml_file(file_reader_base_multidata):
                 scanfilt = spectrum['scanList']['scan'][0]['filter string']
                 scantype_idx = scan_types.index(scanfilt)
                 mz = spectrum['m/z array']
-                if spectrum.has_key('profile spectrum'):
+                if 'profile spectrum' in spectrum:
                     all_centroid = False
                     if len(mz) > len(mz_axes[scantype_idx]):
                         mzdiff = np.diff(mz).min()
@@ -135,9 +139,8 @@ class mzml_file(file_reader_base_multidata):
                         mz_axes[scantype_idx] = np.arange(start=mzmin, stop=mzmax, step=mzdiff)
                         mz_axes[scantype_idx] = np.append(arr=mz_axes[scantype_idx], values=mzmax)
             if all_centroid:
-                print 'Error: openMSI currently incapable of cnetroid-mode data'
+                print 'Error: openMSI currently incapable of centroid-mode data'
                 raise AttributeError
-
 
             return mz_axes
 
@@ -220,38 +223,41 @@ class mzml_file(file_reader_base_multidata):
         """
         # precursor m/z
         # example scan filter: MS2: ITMS + p MALDI Z ms2 907.73@cid60.00 [500.00-700.00]
-        ## example scan filter: MS1: FTMS + p MALDI Full ms [850.00-1000.00]
+        # example scan filter: MS1: FTMS + p MALDI Full ms [850.00-1000.00]
 
         scan_params = []
 
         for scan_idx, scantype in enumerate(self.scan_types):
 
-            #MSnValueOfN
+            # msn_value_of_n
             n = filter(None, re.findall('(?<=ms)\d*', scantype))
             if n:
-                MSnValueOfN = int(n[0])
+                msn_value_of_n = int(n[0])
             else:
-                MSnValueOfN = 1
+                msn_value_of_n = 1
 
-            #precursor
+            # precursor
             ms2pre = filter(None, re.findall('[\d.]+(?=@)', scantype))
             if ms2pre:
                 ms2_precursor = float(ms2pre[0])
             else:
                 ms2_precursor = 0
-            #dissociation type
+
+            # dissociation type
             dissot = filter(None, re.findall('(?<=\d@)[A-z]*', scantype))
             if dissot:
-                dissociationtype = dissot[0]
+                dissociation_type = dissot[0]
             else:
-                dissociationtype = 'None'
-            #dissociation energy
-            dissoe = filter(None, re.findall('(?<='+dissociationtype+')'+'[\d.]+', scantype))
+                dissociation_type = 'None'
+
+            # dissociation energy
+            dissoe = filter(None, re.findall('(?<='+dissociation_type+')'+'[\d.]+', scantype))
             if dissoe:
-                dissociationenergy = float(dissoe[0])
+                dissociation_energy = float(dissoe[0])
             else:
-                dissociationenergy = 0
-            #polarity
+                dissociation_energy = 0
+
+            # polarity
             pol = filter(None, re.findall('([+][ ]p)', scantype))
             if pol:
                 polarity = 'pos'
@@ -261,19 +267,20 @@ class mzml_file(file_reader_base_multidata):
                     polarity = 'neg'
                 else:
                     polarity = 'unk'
-            #put all params in dictionary
-            paramdict = {'MSnValueOfN': MSnValueOfN,
-                          'DissociationEnergy': dissociationenergy,
-                          'MSnPrecursorMZ': ms2_precursor,
-                          'DissociationType': dissociationtype,
-                          'Polarity': polarity}
+
+            # put all params in dictionary
+            paramdict = {'MSNValueOfN': msn_value_of_n,
+                         'DissociationEnergy': dissociation_energy,
+                         'MSnPrecursorMZ': ms2_precursor,
+                         'DissociationType': dissociation_type,
+                         'Polarity': polarity}
 
             scan_params.append(paramdict)
 
         return scan_params
 
     @staticmethod
-    def __compute_scan_dependencies(scan_types=None):  #Why is the "self" arg needed here & below?
+    def __compute_scan_dependencies(scan_types=None):
         """
         Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
         """
@@ -284,13 +291,13 @@ class mzml_file(file_reader_base_multidata):
         ms1scanlist = []
 
         for ind, stype in enumerate(scan_types):
-            if stype.find('Full ms') != -1:    #Regular
+            if stype.find('Full ms') != -1:    # Regular
                 ms1scanlist.append(ind)
 
-        #make MS2 scans dependent on MS1 scans
+        # make MS2 scans dependent on MS1 scans
         for ms1scan in ms1scanlist:
             for ind2, stype in enumerate(scan_types):
-                if stype.find('ms2') != -1:     #MS2 scan filter strings from thermo contain the string 'ms2'
+                if stype.find('ms2') != -1:     # MS2 scan filter strings from thermo contain the string 'ms2'
                     dependencies.append((ms1scan, ind2))
 
         return dependencies
@@ -426,3 +433,18 @@ class mzml_file(file_reader_base_multidata):
         other datasets stored in the current file.
         """
         return self.scan_dependencies
+
+    def get_dataset_metadata(self):
+        """
+        Get dict of additional metadata associated with the current dataset.
+
+        Inherited from file_reader_base.
+
+        :return: Dict where keys are strings and associated values to be stored as
+            metadata with the dataset.
+
+        """
+        if self.select_dataset is not None:
+            return self.scan_params[self.select_dataset]
+        else:
+            return self.scan_params
