@@ -437,5 +437,19 @@ class mzml_file(file_reader_base_multidata):
         Get the dependencies between the current dataset and any of the
         other datasets stored in the current file.
         """
-        # TODO We need to implement the creation of dependencies between the current dataset given by self.select_dataset and all other datasets
-        return []
+        return self.scan_dependencies
+
+    def get_dataset_metadata(self):
+        """
+        Get dict of additional metadata associated with the current dataset.
+
+        Inherited from file_reader_base.
+
+        :return: Dict where keys are strings and associated values to be stored as
+            metadata with the dataset.
+
+        """
+        if self.select_dataset is not None:
+            return self.scan_params[self.select_dataset]
+        else:
+            return self.scan_params
