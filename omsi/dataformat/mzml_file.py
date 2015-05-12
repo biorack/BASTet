@@ -394,7 +394,7 @@ class mzml_file(file_reader_base_multidata):
                 num_scans = int(filesize/scansize)
             mz_axis_len = cls.__compute_mz_axis(filename=basename,
                                                 mzml_filetype=cls.__compute_filetype(filename=basename),
-                                                scan_types=self.scan_types).shape[0]
+                                                scan_types=cls.__compute_scan_types(filename=basename)).shape[0]
             return num_scans*mz_axis_len
 
             # temp_mzml_file = cls(basename=basename, readdata=False)
