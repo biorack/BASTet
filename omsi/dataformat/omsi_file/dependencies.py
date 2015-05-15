@@ -42,7 +42,12 @@ class omsi_dependencies_manager(omsi_file_object_manager):
 
     def create_dependencies(self, dependencies_data_list=None, use_relative_links=True):
         """
-        Create a managed group for storing data dependencies
+        Create a managed group for storing data dependencies if none exists and store
+        the given set of dependencies in it. If a self.dependencies object already
+        exists, then the given dependencies will be added.
+
+        This is effectively a shortcut to omsi_file_dependencies.__create___(...) with specific
+        settings for the current dependencies object managed by self.
 
         :param parent_group: The h5py.Group for which the dependencies group should be initialized.
         :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
@@ -53,9 +58,15 @@ class omsi_dependencies_manager(omsi_file_object_manager):
 
         :returns: omsi_file_dependencies object created by the function.
         """
-        return omsi_file_dependencies.__create__(parent_group=self.dependencies_parent,
-                                                 dependencies_data_list=dependencies_data_list,
-                                                 use_relative_links=use_relative_links)
+        # If we don't have any dependency group then create it and all dependencies
+        if not self.dependencies:
+            self.dependencies =  omsi_file_dependencies.__create__(parent_group=self.dependencies_parent,
+                                                                   dependencies_data_list=dependencies_data_list)
+        # Otherwise add all dependencies to the current dependency group
+        else:
+            for dependency in dependencies_data_list:
+                self.add_dependency(dependency=dependency)
+        return self.dependencies
 
     def add_dependency(self, dependency, flush_io=True):
         """
@@ -83,6 +94,10 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         """
         Get all direct dependencies associated with the data object.
 
+        This is convenience function providing access to
+        self.dependencies.get_all_dependency_data(...) which is a function
+        of omsi_file_dependencies class.
+
         :param omsi_dependency_format: Should the dependencies be retrieved as omsi_analysis_dependency object (True)
                                        or as an omsi_file_dependencydata object (False).
 
@@ -94,22 +109,125 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         else:
             return []
 
-    def get_all_dependency_data_recursive(self, omsi_dependency_format=True):
+    def get_all_dependency_data_recursive(self,
+                                          omsi_dependency_format=True,
+                                          omsi_main_parent=None,
+                                          dependency_list=None):
         """
         Get all direct and indirect dependencies associated with the data object.
 
-        NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+        This is convenience function providing access to
+        self.dependencies.get_all_dependency_data_recursive(...) which is a function
+        of omsi_file_dependencies class.
+
+        **NOTE:** omsi_main_parent and omsi_main_parent are used primarily to ensure that the
+        case of circular dependencies are supported properly. Circular dependencies may
+        occur in the case of semantic dependencies (rather than pure use dependencies), e.g.,
+        two datasets that are related modalities may reference each other, e.g., MS1 pointing
+        to related MS2 data and the MS2 datasets referencing the corresponding MS1 datasets.
 
         :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True)
                or as an omsi_file_dependencydata object (False)
+
+        :param omsi_main_parent: The main parent for which the dependencies are calculated. This is needed
+            to avoid recursion back into the main parent for which we are computing dependencies and avoiding
+            that it is added itself as a dependency for itself. If set to None, then we will use our own
+            self.dependencies_parent object
+
+        :param dependency_list: List of previously visited/created dependencies. This is needed only
+            to avoid deep recursion and duplication due to circular dependencies
 
         :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py
                   objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         if self.dependencies is not None:
-            return self.dependencies.get_all_dependency_data_recursive(omsi_dependency_format=omsi_dependency_format)
+            if omsi_main_parent is None:
+                omsi_main_parent = omsi_file_common.get_omsi_object(self.dependencies_parent)
+            return self.dependencies.get_all_dependency_data_recursive(
+                omsi_dependency_format=omsi_dependency_format,
+                omsi_main_parent=omsi_main_parent,
+                dependency_list=dependency_list)
         else:
             return []
+
+    def get_all_dependency_data_graph(self,
+                                      include_omsi_dependency=False,
+                                      include_omsi_file_dependencydata=False,
+                                      recursive=True,
+                                      level=0,
+                                      name_key='name',
+                                      prev_nodes=None,
+                                      prev_links=None,
+                                      parent_index=None,
+                                      metadata_generator=None,
+                                      metadata_generator_kwargs=None):
+        """
+        Get all direct and indirect dependencies associated with the analysis in form of a graph describing
+        all nodes and links in the provenance hierarchy.
+
+        This is convenience function providing access to
+        self.dependencies.get_all_dependency_data_graph(...) which is a function
+        of omsi_file_dependencies class.
+
+        :param include_omsi_dependency: Should the omsi_dependency object be included in the entries
+                    in the nodes dict?
+        :param include_omsi_file_dependencydata: Should the omsi_file_dependencydata object be included in
+                    the entries in the nodes dict?
+        :param recursive: Should we trace dependencies recursively to construct the full graph, or only the
+                    direct dependencies. Default true (ie., trace recursively)
+        :param name_key: Which key should be used in the dicts to indicate the name of the object?
+                    Default value is 'name'
+        :param level: Integer used to indicated the recursion level. Default value is 0.
+        :param prev_nodes: List of nodes that have been previously generated. Note, this list will be
+                    modified by the call. Note, each node is represented by a dict which is expected to
+                    have at least the following keys defined, path, name_key, level (name_key refers to the key
+                    defined by the input parameter name_key.
+        :param prev_links: Previouly established links in the list of nodes. Note, this list will be
+                    modified by the call.
+        :param parent_index: Index of the parent node in the list of prev_nodes for this call.
+        :param metadata_generator: Optional parameter. Pass in a function that generates additional metadata
+                    about a given omsi API object. Note, the key's level and path and name (i.e., name_key) are
+                    already set by this function. The metadata_generator may overwrite these key's, however,
+                    the path has to be unique as it is used to identify duplicate nodes. Overwriting the path
+                    with a non-unique value, hence, will lead to errors (missing entries) when generating the graph.
+                    Note, the metadata_generator function needs to support the following keyword arguments:
+
+                          * inDict : The dictionary to which the metadata should be added to.
+                          * obj : The omsi file API object for which metadata should be generated
+                          * name : A qualifying name for the object
+                          * name_key : The key to be used for storing the name
+        :param metadata_generator_kwargs: Dictionary of additional keyword arguments that should be passed to
+                    the metadata_generator function.
+
+        :returns: Dictionary containing two lists. 1) nodes : List of dictionaries, describing the elements
+                  in the dependency graph. 2) links : List of tuples with the links in the graph. Each
+                  tuple consists of two integer indices for the nodes list. For each node the following
+                  entries are given:
+
+                * omsi_dependency: Optional key used to store the corresponding omsi_dependency object.
+                        Used only of include_omsi_dependency is True.
+                * omsi_file_dependencydata: Optional key used to store the corresponding
+                        omsi_file_dependencydata object. Used only of include_omsi_file_dependencydata is True.
+                * name : Name of the dependency. The actual key is sepecified by name_key
+                * level : The recursion level at which the object occurs.
+                * ... : Any other key/value pairs from the omsi_dependency dict.
+
+        """
+        if self.dependencies:
+            return self.dependencies.get_all_dependency_data_graph(
+                include_omsi_dependency=include_omsi_dependency,
+                include_omsi_file_dependencydata=include_omsi_file_dependencydata,
+                recursive=recursive,
+                level=level,
+                name_key=name_key,
+                prev_nodes=prev_nodes,
+                prev_links=prev_links,
+                parent_index=parent_index,
+                metadata_generator=metadata_generator,
+                metadata_generator_kwargs=metadata_generator_kwargs)
+        else:
+            empty_graph = {'nodes': [], 'links': []}
+            return empty_graph
 
     def has_dependencies(self):
         """
@@ -212,13 +330,13 @@ class omsi_file_dependencies(omsi_file_common):
 
     def get_all_dependency_data(self, omsi_dependency_format=True):
         """
-        Get all direct dependencies associdated with the analysis.
+        Get all direct dependencies associated with the analysis.
 
-        :param omsi_dependency_format: Should the dependcies be retrieved as omsi_analysis_dependency object
+        :param omsi_dependency_format: Should the dependencies be retrieved as omsi_analysis_dependency object
                 (True) or as an omsi_file_dependencydata object (False).
 
         :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for
-                the dependcies. Access using [index]['name'] and [index]['data'].
+                the dependencies. Access using [index]['name'] and [index]['data'].
         """
         output_list = []
         for item_obj in self.managed_group.items():
@@ -229,38 +347,81 @@ class omsi_file_dependencies(omsi_file_common):
                 output_list.append(omsi_object)
         return output_list
 
-    def get_all_dependency_data_recursive(self, omsi_dependency_format=True):
+    def get_all_dependency_data_recursive(self,
+                                          omsi_dependency_format=True,
+                                          omsi_main_parent=None,
+                                          dependency_list=None):
         """
-        Get all direct and indirect dependencies associdated with the analysis.
+        Get all direct and indirect dependencies associated with the analysis.
 
-        NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
+        **NOTE:** omsi_main_parent and omsi_main_parent are used primarily to ensure that the
+        case of circular dependencies are supported properly. Circular dependencies may
+        occur in the case of semantic dependencies (rather than pure use dependencies), e.g.,
+        two datasets that are related modalities may reference each other, e.g., MS1 pointing
+        to related MS2 data and the MS2 datasets referencing the corresponding MS1 datasets.
 
         :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True)
                 or as an omsi_file_dependencydata object (False)
+
+        :param omsi_main_parent: The main parent for which the dependencies are calculated. This is needed
+            to avoid recursion back into the main parent for which we are computing dependencies and avoiding
+            that it is added itself as a dependency for itself. If set to None, then we will use the omsi_object
+            associated with the parent group of the dependency group.
+
+        :param dependency_list: List of previously visited/created dependencies. This is needed only
+            to avoid deep recursion and duplication due to circular dependencies
 
         :returns: List omsi_analysis_data objects containing either omsi file API interface objects or
                 h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
+        if omsi_main_parent is None:
+            omsi_main_parent = omsi_file_common.get_omsi_object(self.managed_group.parent)
+        if dependency_list is None:
+            dependency_list = []
         output_list = []
         for item_obj in self.managed_group.items():
+            # omsi_obj is a omsi_file_dependencydata object
             omsi_obj = omsi_file_common.get_omsi_object(self.managed_group[item_obj[0]])
-            # If we can have recusive dependencies
-            if isinstance(omsi_obj, omsi_file_analysis):
-                it_depend = omsi_obj.get_all_dependency_data_recursive(
-                    omsi_dependency_format=omsi_dependency_format)
-                output_list = output_list + it_depend
+            # dependency_omsi_obj is the instance of the omsi API object we are depending on
+            dependency_omsi_obj = omsi_obj.get_dependency_omsiobject()
+
+            # Add the object to the list of dependencies
             try:
-                omsi_object = omsi_file_dependencydata(
-                    self.managed_group[unicode(item_obj[0])])
+                omsi_object = omsi_file_dependencydata(self.managed_group[unicode(item_obj[0])])
                 if omsi_dependency_format:
                     output_list.append(omsi_object.get_omsi_dependency())
                 else:
                     output_list.append(omsi_object)
             except:
                 import sys
-                print "WARNING: Error occured in omsi_file_dependencies::get_all_dependency_data_recursive(...):  " + \
+                print "WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_recursive(...):  " + \
                       unicode(item_obj[0]) + "   :" + str(sys.exc_info())
+
+            # If we can have recursive dependencies then follow them
+            if isinstance(dependency_omsi_obj, omsi_dependencies_manager):
+                # Check if the same omsi_object is already in the list of dependencies. If yes,
+                # then we do not need to do the recursion any more
+                check_dependencies_recursively = dependency_omsi_obj != omsi_main_parent
+                curr_full_dependency_list = dependency_list+output_list
+                if omsi_dependency_format:
+                    for prior_dependency in curr_full_dependency_list:
+                        if prior_dependency['omsi_object'] == dependency_omsi_obj:
+                            check_dependencies_recursively = False
+                            break
+                else:
+                    for prior_dependency in curr_full_dependency_list:
+                        if prior_dependency.get_dependency_omsiobject() == dependency_omsi_obj:
+                            check_dependencies_recursively = False
+                            break
+                #print (check_dependencies_recursively, dependency_omsi_obj.name, omsi_main_parent.name, output_list+dependency_list)
+                if check_dependencies_recursively:
+                    it_depend = dependency_omsi_obj.get_all_dependency_data_recursive(
+                        omsi_dependency_format=omsi_dependency_format,
+                        omsi_main_parent=omsi_main_parent,
+                        dependency_list=curr_full_dependency_list)
+                    output_list = output_list + it_depend
+
         return output_list
 
     def get_all_dependency_data_graph(self,
@@ -275,10 +436,8 @@ class omsi_file_dependencies(omsi_file_common):
                                       metadata_generator=None,
                                       metadata_generator_kwargs=None):
         """
-        Get all direct and indirect dependencies associdated with the analysis in form of a graph describing
+        Get all direct and indirect dependencies associated with the analysis in form of a graph describing
         all nodes and links in the provenance hierarchy.
-
-        NOTE: Circular dependcies are not supported and should not be possible in practice anyways.
 
         :param include_omsi_dependency: Should the omsi_dependency object be included in the entries
                     in the nodes dict?
@@ -293,9 +452,11 @@ class omsi_file_dependencies(omsi_file_common):
                     modified by the call. Note, each node is represented by a dict which is expected to
                     have at least the following keys defined, path, name_key, level (name_key refers to the key
                     defined by the input parameter name_key.
-        :param prev_links: Previouly established links in the list of nodes. Note, this list will be
+        :param prev_links: Previously established links in the list of nodes. Note, this list will be
                     modified by the call.
-        :param parent_index: Index of the parent node in the list of prev_nodes for this call.
+        :param parent_index: Index of the parent node in the list of prev_nodes for this call. May be
+            None in case the parent we are calling this function for is not yet in the list. If None,
+            then we will add our own parent that contains the dependencies to the list.
         :param metadata_generator: Optional parameter. Pass in a function that generates additional metadata
                     about a given omsi API object. Note, the key's level and path and name (i.e., name_key) are
                     already set by this function. The metadata_generator may overwrite these key's, however,
@@ -303,7 +464,7 @@ class omsi_file_dependencies(omsi_file_common):
                     with a non-unique value, hence, will lead to errors (missing entries) when generating the graph.
                     Note, the metadata_generator function needs to support the following keyword arguments:
 
-                          * inDict : The dictionary to which the metadata should be added to.
+                          * in_dict : The dictionary to which the metadata should be added to.
                           * obj : The omsi file API object for which metadata should be generated
                           * name : A qualifying name for the object
                           * name_key : The key to be used for storing the name
@@ -321,13 +482,14 @@ class omsi_file_dependencies(omsi_file_common):
                         omsi_file_dependencydata object. Used only of include_omsi_file_dependencydata is True.
                 * name : Name of the dependency. The actual key is sepecified by name_key
                 * level : The recursion level at which the object occurs.
+                * path : The full path to the object
+                * filename : The full path to the file
                 * ... : Any other key/value pairs from the omsi_dependency dict.
 
         """
-        from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
-        from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-
         import os
+
+        # 1) Initialize the nodes and the links
         if prev_nodes:
             nodes = prev_nodes
         else:
@@ -341,82 +503,130 @@ class omsi_file_dependencies(omsi_file_common):
         else:
             metagenkwargs = {}
 
-        def find_node_index(path_string):
+        # 2) Define internal helper functions
+        # 2.1) Define a helper function to search the graph for a particular node
+        def find_node_index(path_string, filename_string):
             """
-            Internal helper funtion used to check whether a node already exists in the graph
+            Internal helper function used to check whether a node already exists in the graph
 
             :param path_string: The path to object used for comparison.
             """
-            if prev_nodes:
-                for i in range(len(prev_nodes)):
+            # NOTE: The variable nodes is defined in the closure of the find_node_index(..) function, i.e.,
+            #       nodes is defined at the beginning of the get_all_dependency_data_graph(...) that this
+            #       function is contained in.
+            if nodes:
+                for i in range(len(nodes)):
                     if nodes[i]['path'] == path_string:
-                        return i
+                        if omsi_file_common.same_file(nodes[i]['filename'], filename_string):
+                            return i
             return None
 
-        # Iterate through all dependencies
+        # 2.2) Define a helper function to create a new node for the graph
+        def create_node(cn_level, cn_name, cn_path, cn_dep_obj, cn_omsi_obj):
+            """
+            Internal helper function used to create a new node in the graph
+
+            :param cn_level: The recursion level at which the node exists
+            :param cn_name: The name of the node
+            :param cn_path: The path of the node
+            :param cn_dep_obj: The omsi_file_dependencydata object. May be None in case a node
+                to a specific object is set
+            :param cn_omsi_obj: The OpenMSI file API object. This is required and may NOT be None.
+
+            :return: Dict describing the new node, containing the 'name', 'level', and 'path' and
+                optionally 'omsi_dependency' and/or 'omsi_file_dependencydata' and any additional
+                data generated by the metadata_generator function
+            """
+            new_node = {}
+            new_node['level'] = cn_level
+            new_node[name_key] = cn_name
+            new_node['path'] = cn_path
+            new_node['filename'] = os.path.abspath(cn_omsi_obj.file.filename)
+            if include_omsi_dependency:
+                if cn_dep_obj:
+                    new_node['omsi_dependency'] = cn_dep_obj.get_omsi_dependency()
+                else:
+                    new_node['omsi_dependency'] = None
+            if include_omsi_file_dependencydata:
+                new_node['omsi_file_dependencydata'] = cn_dep_obj
+            #  Expand the metadata dict for the current object with  any user-defined metadata
+            #  using the metadata generator function defined by the user
+            if metadata_generator:
+                metadata_generator(in_dict=new_node,
+                                   obj=cn_omsi_obj,
+                                   name=os.path.basename(cn_omsi_obj.name),
+                                   name_key=name_key,
+                                   **metagenkwargs)
+            return new_node
+
+        # 3) Add the original parent for which we are computing the graph if necessary
+        if parent_index is None:
+            omsi_main_parent = omsi_file_common.get_omsi_object(self.managed_group.parent)
+            if not find_node_index(omsi_main_parent.name, omsi_main_parent.file.filename):
+                nodes.append(create_node(cn_level=level,
+                                         cn_name=os.path.basename(omsi_main_parent.name),
+                                         cn_path=omsi_main_parent.name,
+                                         cn_dep_obj=None,
+                                         cn_omsi_obj=omsi_main_parent))
+                level += 1
+                curr_index = len(nodes)-1
+                parent_index = len(nodes)-1
+
+        # 3) Iterate through all dependencies
         for item_obj in self.managed_group.items():
             try:
-                # 1) Check if a node exists that represents the current
-                # dependency
-                dep_obj = omsi_file_dependencydata(
-                    self.managed_group[unicode(item_obj[0])])
+                # 3.1) Check if a node exists that represents the current dependency
+                dep_obj = omsi_file_dependencydata(self.managed_group[unicode(item_obj[0])])
                 omsi_obj = dep_obj.get_dependency_omsiobject(recursive=True)
                 curr_path = omsi_obj.name
                 curr_name = os.path.basename(curr_path)
-                curr_index = find_node_index(omsi_obj.name)
-                # 2) If no node exists for the current dependency then add a new node
-                if not curr_index:
-                    # 2.1)Add a new node with the basic metadata
-                    nodes.append({})
-                    curr_index = len(nodes) - 1
-                    curr_node = nodes[curr_index]
-                    curr_node['level'] = level
-                    curr_node[name_key] = curr_name
-                    curr_node['path'] = curr_path
-                    # print curr_path
-                    if include_omsi_dependency:
-                        curr_node[
-                            'omsi_dependency'] = dep_obj.get_omsi_dependency()
-                    if include_omsi_file_dependencydata:
-                        curr_node['omsi_file_dependencydata'] = dep_obj
-                    # 2.2) Expand the metadata dict for the current object with
-                    # any user-defined metadata
-                    if metadata_generator:
-                        metadata_generator(inDict=curr_node,
-                                           obj=omsi_obj,
-                                           name=os.path.basename(omsi_obj.name),
-                                           name_key=name_key,
-                                           **metagenkwargs)
+                curr_index = find_node_index(omsi_obj.name, omsi_obj.file.filename)
+                new_node = curr_index is None
+                #print (curr_path, curr_index, new_node, [i['path'] for i in nodes])
 
-                # print "PARENT:"+str(parent_index)
+                # 3.2) If no node exists for the current dependency then add a new node
+                if new_node:
+                    # 3.2.1)Add a new node with the basic metadata
+                    nodes.append(create_node(cn_level=level,
+                                             cn_name=curr_name,
+                                             cn_path=curr_path,
+                                             cn_dep_obj=dep_obj,
+                                             cn_omsi_obj=omsi_obj))
+                    curr_index = len(nodes) - 1
+
                 # 3) Add a link from the current node to its parent
                 if parent_index is not None:
-                    templink = {'source': parent_index, 'target': curr_index}
+                    templink = {'source': parent_index,
+                                'target': curr_index,
+                                'link_type': dep_obj.get_dependency_type()}
+                    # print templink
                     links.append(templink)
-                    # print "LINK: "+str(templink)
 
-                # 4) If we can have recusive dependencies that we should trace,
-                # then trace them back and add them to the nodes and links
-                # lists
-                if recursive:
-                    if isinstance(omsi_obj, omsi_file_analysis) or isinstance(omsi_obj, omsi_file_msidata):
-                        if omsi_obj.dependencies:
-                            omsi_obj.dependencies.get_all_dependency_data_graph(
-                                include_omsi_dependency=include_omsi_dependency,
-                                include_omsi_file_dependencydata=include_omsi_file_dependencydata,
-                                level=level +
-                                1,
-                                name_key=name_key,
-                                prev_nodes=nodes,
-                                prev_links=prev_links,
-                                parent_index=curr_index,
-                                metadata_generator=metadata_generator,
-                                metadata_generator_kwargs=metagenkwargs
-                            )
-                # print "-----B----"+str(links)
+                # 4) If we can have recursive dependencies that we should trace,
+                #    then trace them back and add them to the nodes and links lists
+                #    NOTE: By checking for new_node we guarantee that the recursion
+                #          is only performed the first time we encounter a particular node
+                #    NOTE: By checking for the recursive parameter we ensure that recursion
+                #          is only done if the user requests it
+                if recursive and new_node:
+                    # 4.1) We have a manager of dependencies and the manager has dependencies
+                    if isinstance(omsi_obj, omsi_dependencies_manager) and omsi_obj.dependencies is not None:
+                        # Recursively evaluate the dependencies to create the graph
+                        nodes, links = omsi_obj.get_all_dependency_data_graph(
+                            include_omsi_dependency=include_omsi_dependency,
+                            include_omsi_file_dependencydata=include_omsi_file_dependencydata,
+                            level=level + 1,
+                            name_key=name_key,
+                            prev_nodes=nodes,
+                            prev_links=links,
+                            parent_index=curr_index,
+                            metadata_generator=metadata_generator,
+                            metadata_generator_kwargs=metagenkwargs
+                        )
             except:
+                raise
                 import sys
-                print "WARNING: Error occured in omsi_file_dependencies::get_all_dependency_data_graph(...):" \
+                print "WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_graph(...):" \
                       + str(sys.exc_info())
 
         return nodes, links
@@ -477,10 +687,12 @@ class omsi_file_dependencydata(omsi_file_common):
         :returns: omsi_file_dependencydata object for management of the newly created object
 
         """
+        from omsi.shared.omsi_dependency import omsi_dependency
         dep_group = dependency_group
         # 1) Save the name of the parameter
-        param_name_data = dep_group.require_dataset(name=unicode(
-            omsi_format_dependencydata.dependency_parameter), shape=(1,), dtype=omsi_format_common.str_type)
+        param_name_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_parameter),
+                                                    shape=(1,),
+                                                    dtype=omsi_format_common.str_type)
         help_attr = omsi_format_dependencydata.dependency_parameter_help_attr
         if omsi_format_common.str_type_unicode:
             param_name_data[0] = dependency_data['param_name']
@@ -539,11 +751,21 @@ class omsi_file_dependencydata(omsi_file_common):
             omsi_format_dependencydata.dependency_datasetname), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['dataname']:
             if omsi_format_common.str_type_unicode:
-                dataset_data[0] = dependency_data['dataname']
+                dataset_data[0] = unicode(dependency_data['dataname'])
             else:
                 dataset_data[0] = str(dependency_data['dataname'])
         else:
             dataset_data[0] = u'' if omsi_format_common.str_type_unicode else ''
+
+        # Save the dependency type if specified
+        if dependency_data['dependency_type'] != omsi_dependency.dependency_types['undefined']:
+            dependency_type_data = dep_group.require_dataset(
+                name=unicode(omsi_format_dependencydata.dependency_typename),
+                shape=(1,),
+                dtype=omsi_format_common.str_type)
+            dependency_type_data[0] = dependency_data['dependency_type'] if \
+                omsi_format_common.str_type_unicode else \
+                str(dependency_data['dependency_type'])
 
         return omsi_file_dependencydata(dep_group)
 
@@ -583,7 +805,7 @@ class omsi_file_dependencydata(omsi_file_common):
             else:
                 return omsi_object[key]
 
-    def get_dependency_type(self, recursive=True):
+    def get_dependency_objecttype(self, recursive=True):
         """
         Indicated the type of the object the dependency is pointing to.
 
@@ -643,6 +865,24 @@ class omsi_file_dependencydata(omsi_file_common):
         :return: String indicating the main name of the object that we link to
         """
         return self.managed_group[unicode(omsi_format_dependencydata.dependency_mainname)][0]
+
+    def get_dependency_type(self):
+        """
+        Get the string describing the type of the dependency
+
+        NOTE: If the type is missing in the file but we have a parameter name specified,
+        then the default type 'parameter' will be returned other None is returned.
+
+        :return: String indicating the type of the dependency or None if the type is not known.
+        """
+        if omsi_format_dependencydata.dependency_typename in self.managed_group.keys():
+            return self.managed_group[unicode(omsi_format_dependencydata.dependency_typename)][0]
+        else:
+            from omsi.shared.omsi_dependency import omsi_dependency
+            param_name = self.get_parameter_name()
+            if param_name is not None and len(param_name) > 0:
+                return omsi_dependency.dependency_types['parameter']
+            return None
 
     def get_dependency_omsiobject(self, recursive=True, external_mode=None):
         """
@@ -716,6 +956,10 @@ class omsi_file_dependencydata(omsi_file_common):
             output_dependency['selection'] = self.get_selection_string()
         except:
             output_dependency['selection'] = None
+        try:
+            output_dependency['dependency_type'] = self.get_dependency_type()
+        except:
+            output_dependency['dependency_type'] = None
         #try:
         output_dependency['omsi_object'] = self.get_dependency_omsiobject()
         #except:
