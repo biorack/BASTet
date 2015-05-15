@@ -17,10 +17,10 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_analysis_data` Module
+:mod:`analysis_data` Module
 --------------------------------
 
-.. automodule:: omsi.analysis.omsi_analysis_data
+.. automodule:: omsi.analysis.analysis_data
     :members:
     :undoc-members:
     :show-inheritance:

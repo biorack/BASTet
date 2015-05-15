@@ -14,7 +14,7 @@ import numpy as np
 from omsi.dataformat.omsi_file.format import omsi_format_common
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
+from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
 from omsi.shared.dependency_data import dependency_dict
 
 try:
@@ -67,10 +67,10 @@ class omsi_analysis_base(object):
     **Instance Variables:**
 
     :ivar analysis_identifier: Define the name for the analysis used as key in search operations
-    :ivar __data_list: Dictonary of omsi_analysis_data to be written to the HDF5 file. Derived classes
+    :ivar __data_list: Dictonary of analysis_data to be written to the HDF5 file. Derived classes
         need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary.
-        See omsi.analysis.omsi_analysis_data for details.
-    :ivar parameters: List of omsi_parameter_data objects of all  analysis parameters
+        See omsi.analysis.analysis_data for details.
+    :ivar parameters: List of parameter_data objects of all  analysis parameters
          (including those that may have dependencies).
     :ivar data_names: List of strings of all names of analysis output datasets. These are the
          target keys for __data_list.
@@ -148,7 +148,7 @@ class omsi_analysis_base(object):
     """
 
     def __init__(self):
-        """Initalize the basic data members"""
+        """Initialize the basic data members"""
         self.analysis_identifier = "undefined"
         self.__data_list = []
         self.parameters = []
@@ -202,11 +202,11 @@ class omsi_analysis_base(object):
         elif key in self.data_names:
             if 'numpy' not in str(type(value)):
                 temp_value = np.asarray(value)
-                self.__data_list.append(omsi_analysis_data(name=key,
+                self.__data_list.append(analysis_data(name=key,
                                                            data=temp_value,
                                                            dtype=temp_value.dtype))
             else:
-                self.__data_list.append(omsi_analysis_data(name=key,
+                self.__data_list.append(analysis_data(name=key,
                                                            data=value,
                                                            dtype=value.dtype))
             self.omsi_analysis_storage = []
@@ -875,9 +875,9 @@ class omsi_analysis_base(object):
     def get_default_dtypes():
         """
         Get a list of available default dtypes used for analyses.
-        Same as `omsi_analysis_dtypes.get_dtypes()`.
+        Same as `analysis_dtypes.get_dtypes()`.
         """
-        return omsi_analysis_dtypes.get_dtypes()
+        return analysis_dtypes.get_dtypes()
 
     @staticmethod
     def get_default_parameter_groups():
@@ -1067,11 +1067,11 @@ class omsi_analysis_base(object):
     def get_analysis_data_by_name(self,
                                   dataname):
         """
-        Given the key name of the data return the associated omsi_analysis_data object.
+        Given the key name of the data return the associated analysis_data object.
 
         :param dataname: Name of the analysis data requested from the private __data_list member.
 
-        :returns: The omsi_analysis_data object or None if not found.
+        :returns: The analysis_data object or None if not found.
         """
         for i in self.__data_list:
             if i['name'] == dataname:
@@ -1081,11 +1081,11 @@ class omsi_analysis_base(object):
     def get_parameter_data_by_name(self,
                                    dataname):
         """
-        Given the key name of the data return the associated omsi_parameter_data object.
+        Given the key name of the data return the associated parameter_data object.
 
         :param dataname: Name of the parameter requested from the parameters member.
 
-        :returns: The omsi_parameter_data object or None if not found
+        :returns: The parameter_data object or None if not found
         """
         for i in self.parameters:
             if i['name'] == dataname:
@@ -1121,7 +1121,7 @@ class omsi_analysis_base(object):
         Use  get_all_dependency_data_recursive(..) to also get the indirect decencies of
         the analysis due to dependencies of the decencies themselves.
 
-        :returns: List of omsi_parameter_data objects that define dependencies.
+        :returns: List of parameter_data objects that define dependencies.
 
         """
         dependency_list = []
@@ -1202,7 +1202,7 @@ class omsi_analysis_base(object):
                                         selection=selection,
                                         help=curr_parameter['help'],
                                         dependency_type=dependency_dict.dependency_types['parameter'])
-                # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
+                # dtype = analysis_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, dependency_dict):
                 # Set any possibly missing parameters
                 value['param_name'] = name
@@ -1251,7 +1251,7 @@ class omsi_analysis_base(object):
             else:  # If used correctly this should not happen. Ensures that we don't omit any data
                 warnings.warn('Parameter ' + name + " not found in omsi_analysis_base.set_parameter_values(). " +
                               "Adding a new parameter.")
-                self.parameters.append(omsi_parameter_data(name=name,
+                self.parameters.append(parameter_data(name=name,
                                                            help='',
                                                            dtype=dtype,
                                                            required=False,
@@ -1284,7 +1284,7 @@ class omsi_analysis_base(object):
         """
         if self.get_parameter_data_by_name(name) is not None:
             raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
-        self.parameters.append(omsi_parameter_data(name=name,
+        self.parameters.append(parameter_data(name=name,
                                                    help=help,
                                                    dtype=dtype,
                                                    required=required,
@@ -1296,7 +1296,7 @@ class omsi_analysis_base(object):
 #    def add_analysis_data(self , name, data, dtype ) :
 #        """Add a new dataset to the list of data to be written to the HDF5 file
 #
-#          The input parameters will be transformed into a omsi_analysis_data dictionary.
+#          The input parameters will be transformed into a analysis_data dictionary.
 #
 #          :param name: The name for the dataset in the HDF5 format
 #          :param data: The numpy array to be written to HDF5. The data write function
@@ -1309,14 +1309,14 @@ class omsi_analysis_base(object):
 #                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are:
 #
 #                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
-#                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
+#                 * To generate data links: ana_hdf5link   (analysis_data)
 #        """
-#        self.__data_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
+#        self.__data_list.append( analysis_data(name=name, data=data, dtype=dtype) )
 
 #    def add_parameter_data(self , name, data, dtype ) :
 #        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
 #
-#           The input parameters will be transformed into a omsi_analysis_data dictionary.
+#           The input parameters will be transformed into a analysis_data dictionary.
 #
 #          :param name: The name for the dataset in the HDF5 format
 #          :param data: The numpy array to be written to HDF5. The data write function
@@ -1329,10 +1329,10 @@ class omsi_analysis_base(object):
 #                 the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are:
 #
 #                 * For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
-#                 * To generate data links: ana_hdf5link   (omsi_analysis_data)
+#                 * To generate data links: ana_hdf5link   (analysis_data)
 #
 #        """
-#        self.__parameter_list.append( omsi_analysis_data(name=name, data=data, dtype=dtype) )
+#        self.__parameter_list.append( analysis_data(name=name, data=data, dtype=dtype) )
 #
 
 #    def add_dependency_data(self , dependency ) :

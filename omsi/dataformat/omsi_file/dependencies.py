@@ -137,7 +137,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         :param dependency_list: List of previously visited/created dependencies. This is needed only
             to avoid deep recursion and duplication due to circular dependencies
 
-        :returns: List omsi_analysis_data objects containing either omsi file API interface objects or h5py
+        :returns: List analysis_data objects containing either omsi file API interface objects or h5py
                   objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         if self.dependencies is not None:
@@ -371,7 +371,7 @@ class omsi_file_dependencies(omsi_file_common):
         :param dependency_list: List of previously visited/created dependencies. This is needed only
             to avoid deep recursion and duplication due to circular dependencies
 
-        :returns: List omsi_analysis_data objects containing either omsi file API interface objects or
+        :returns: List analysis_data objects containing either omsi file API interface objects or
                 h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis

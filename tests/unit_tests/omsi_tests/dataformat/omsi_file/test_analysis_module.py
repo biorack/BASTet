@@ -13,7 +13,7 @@ from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.dataformat.omsi_file.instrument import omsi_file_instrument
 from omsi.dataformat.omsi_file.methods import omsi_file_methods
 from omsi.analysis.omsi_analysis_generic import omsi_analysis_generic
-from omsi.analysis.omsi_analysis_data import omsi_analysis_data
+from omsi.analysis.analysis_data import analysis_data
 
 
 class test_omsi_file_analysis(unittest.TestCase):
@@ -41,7 +41,7 @@ class test_omsi_file_analysis(unittest.TestCase):
     testanaidname = "Peak Finding 123"
     testana = omsi_analysis_generic(name_key=testanaidname)
     print "Creating dummy analysis data"
-    testanadata = omsi_analysis_data()
+    testanadata = analysis_data()
     testanadata['name'] = 'peakcube'
     testanadata['data'] = np.zeros(shape=(5, 5, 5), dtype='float32')
     testanadata['dtype'] = 'float32'

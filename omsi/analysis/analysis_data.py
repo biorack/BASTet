@@ -11,7 +11,7 @@ import ast
 import h5py
 
 
-class omsi_analysis_dtypes(dict):
+class analysis_dtypes(dict):
     """
     Class specifying basic function for specifying common
     data types used as part of an analysis.
@@ -28,7 +28,7 @@ class omsi_analysis_dtypes(dict):
                   'bool': bool,
                   'str': str,
                   'unicode': unicode,
-                  'ndarray': omsi_analysis_dtypes.ndarray}
+                  'ndarray': analysis_dtypes.ndarray}
         return dtypes
 
     @staticmethod
@@ -83,7 +83,7 @@ class omsi_analysis_dtypes(dict):
     #     return np.asarray(argument)
 
 
-class omsi_analysis_data(dict):
+class analysis_data(dict):
     """
     Define an output dataset for the analysis that should be written to the omsi HDF5 file
     """
@@ -111,10 +111,10 @@ class omsi_analysis_data(dict):
              the dtype  of the dataset, i.e., ['data'].dtype. Other allowed datatypes are:
 
              - For string:  omsi_format.str_type (omsi_format is located in omsi.dataformat.omsi_file )
-             - To generate data links: ana_hdf5link   (omsi_analysis_data)
+             - To generate data links: ana_hdf5link   (analysis_data)
 
         """
-        super(omsi_analysis_data, self).__init__()
+        super(analysis_data, self).__init__()
         if data is None:
             data = np.empty(shape=(0,), dtype=dtype)
         dict.__setitem__(self, 'name', name)
@@ -129,10 +129,10 @@ class omsi_analysis_data(dict):
         if key in self:
             dict.__setitem__(self, key, value)
         else:
-            raise KeyError("\'"+str(key)+'\' key not in default key set of omsi_analysis_data')
+            raise KeyError("\'"+str(key)+'\' key not in default key set of analysis_data')
 
 
-class omsi_parameter_data(dict):
+class parameter_data(dict):
     """
     Define a single input parameter for an analysis.
 
@@ -201,7 +201,7 @@ class omsi_parameter_data(dict):
 
         """
         # Initialize the dict
-        super(omsi_parameter_data, self).__init__()
+        super(parameter_data, self).__init__()
 
         # Assign required keyword arguments
         self['name'] = name
@@ -236,11 +236,11 @@ class omsi_parameter_data(dict):
 
     def copy(self):
         """
-        Return a new omsi_parameter_data object with the same data as stored in the current object
+        Return a new parameter_data object with the same data as stored in the current object
 
         :return: dependency_dict object
         """
-        new_parameter = omsi_parameter_data('')
+        new_parameter = parameter_data('')
         new_parameter.update(self)
         return new_parameter
 
@@ -333,7 +333,7 @@ class omsi_parameter_data(dict):
 
         # Convert to ndarray if needed
         try:
-            is_array_type = self['dtype'] == omsi_analysis_dtypes.ndarray
+            is_array_type = self['dtype'] == analysis_dtypes.ndarray
         except:
             try:
                 is_array_type = self['dtype'] == 'ndarray'

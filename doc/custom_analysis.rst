@@ -39,9 +39,9 @@ Important Member Variables
 """"""""""""""""""""""""""
 
 * ``analysis_identifier`` defines the name for the analysis used as key in search operations.
-* ``__data_list`` defines a dictonary of ``omsi_analysis_data`` to be written to the HDF5 file. Derived classes need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.omsi_analysis_data`` for details.
-* ``__parameter_list``  defines a dictionary of ``omsi_analysis_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
-* ``__dependency_list`` defines a dictionary of ``dependency_dict`` to be written to the HDF5 file. Derived classes need to add all dependencies data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.omsi_analysis_data`` for details.
+* ``__data_list`` defines a list of ``omsi.analysis.analysis_data.analysis_data`` objects to be written to the HDF5 file. Derived classes need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.analysis_data`` for details.
+* ``parameters``  List of ``parameter_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary using the provided ``add_parameter(...)`` function. See ``omsi.analysis.analysis_data`` and ``add_parameter(..)`` function of ``omsi_analysis_base`` for details.
+* ``data_names`` is a list of strings of all names of analysis output datasets. These are the target names for __data_list. **NOTE** Names of parameters specified in ``parameters`` and ``data_names`` should be distinct.
 
 I/O functions
 """""""""""""
