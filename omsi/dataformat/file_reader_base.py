@@ -288,7 +288,21 @@ class file_reader_base_multidata(file_reader_base):
     def get_dataset_dependencies(self):
         """
         Get the dependencies between the current dataset and any of the
-        other datasets stored in the current file.
+        other datasets stored in the current file. If self.select_dataset
+        is not set, then the function is expexted to behave the same way
+        as get_all_dataset_dependencies.
+
+        :return: List of dependencies where each dependency is a dict of the
+            following form:
+                {
+                    'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
+                    'link_name': ms2_link_name,  # Name for the dependency link to be used
+                    'basename': basename,        # Basename of the file
+                    'region': None,              # Index of the region in the dataset or None
+                    'dataset': ind2,             # Index of the dataset withing the file or None
+                    'help':scan_types[ms1scan],  # Help describing the depdency
+                    dependency_type': ... }      # Type of dependency see omsi_dependency.dependency_type
+                                                 # for available types
         """
         raise NotImplementedError('Determine the dependencies to other data blocks for the the current block')
 

@@ -16,6 +16,7 @@ from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
 from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
 from omsi.shared.omsi_web_helper import WebHelper
 from omsi.shared.omsi_web_helper import UserInput
+from omsi.shared.omsi_dependency import omsi_dependency
 import time
 import numpy as np
 import math
@@ -23,6 +24,7 @@ import sys
 import os
 import warnings
 import getpass
+
 
 # Imports for thumbnail image rendering
 try:
@@ -333,6 +335,8 @@ class ConvertSettings(object):
                               * 1, 2,3...   : Integer value indicating the index of the experiment to be used.
                 * 'region' : Optional key with index of the region to be converted. None to merge all regions.
                 * 'dataset' : Optional key with index of the dataset to be converted.
+                * 'omsi_object': Optional key used to save a pointer to the omsi data object with the converted data
+                * 'dependencies': Additional dependencies that should be added for the dataset
     """
     omsi_output_file = None  # The openMSI output data file to be used.
 
@@ -937,7 +941,7 @@ class ConvertFiles(object):
         ####################################################################
         #  Convert the MSI files and compute the requested analyses       ##
         ####################################################################
-        # Iterate over all img files
+        # Iterate over all input datasets and convert them
         for curr_index, curr_dataset in enumerate(ConvertSettings.dataset_list):  # xrange(startIndex,len(argv)-1):
             ####################################################################
             #  Convert the raw data to HDF5                                   ##
@@ -1051,6 +1055,11 @@ class ConvertFiles(object):
                                         chunk_shape=chunkSpec,
                                         write_progress=(ConvertSettings.job_id is None))
                 ConvertSettings.omsi_output_file.flush()
+
+            # Save the pointer to the omsi object in the file in the dataset list
+            curr_dataset['omsi_object'] = data
+            if isinstance(input_file, file_reader_base.file_reader_base_multidata):
+                curr_dataset['dependencies'] = input_file.get_dataset_dependencies()
 
             # Close the input data file and free up any allocated memory
             input_file.close_file()
@@ -1249,6 +1258,42 @@ class ConvertFiles(object):
                 print "ERROR: Thumbnail generation failed. Unexpected error:", sys.exc_info()[0]
                 warnings.warn("ERROR: Thumbnail generation failed. Unexpected error. " + str(sys.exc_info()))
                 pass
+
+        ####################################################################
+        # Generate any dependencies the datasets may have                  #
+        ####################################################################
+        for curr_index, curr_dataset in enumerate(ConvertSettings.dataset_list):
+            if 'dependencies' in curr_dataset:
+                if len(curr_dataset['dependencies']) > 0:
+                    for dependency in curr_dataset['dependencies']:
+                        # Find the corresponding dataset that we converted if necessary
+                        if 'omsi_object' not in dependency or  dependency['omsi_object'] is None:
+                            for dep_dataset in ConvertSettings.dataset_list:
+                                match_found = dep_dataset['basename'] == dependency['basename']
+                                if 'dataset' in dependency and dependency['dataset'] is not None:
+                                    if 'dataset' in dep_dataset:
+                                        match_found &= dep_dataset['dataset'] == dependency['dataset']
+                                    else:
+                                        continue
+                                if 'region' in dependency and dependency['region'] is not None:
+                                    if 'region' in dep_dataset:
+                                        match_found &= dep_dataset['region'] == dependency['region']
+                                    else:
+                                        continue
+                                if match_found:
+                                    dependency['omsi_object'] = dep_dataset['omsi_object']
+                                    break
+                        dependency.pop('basename')
+                        dependency.pop('region')
+                        dependency.pop('dataset')
+                        new_omsi_dependency = omsi_dependency()
+                        new_omsi_dependency.update(dependency)
+                        # Define and save the dependency
+                        #new_omsi_dependency = omsi_dependency(link_name=dependency['link_name'],
+                        #                                      omsi_object=dependency['omsi_object'],
+                        #                                      help=dependency['help'],
+                        #                                      dependency_type=dependency['dependency_type'])
+                        curr_dataset['omsi_object'].add_dependency(new_omsi_dependency)
 
         ####################################################################
         #  Generate the XDMF header file for the HDF5 file                ##

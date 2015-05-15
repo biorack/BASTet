@@ -10,6 +10,7 @@ from pyteomics import mzml
 import re
 import os
 from omsi.dataformat.file_reader_base import file_reader_base_multidata
+from omsi.shared.omsi_dependency import omsi_dependency
 
 
 class mzml_file(file_reader_base_multidata):
@@ -54,7 +55,8 @@ class mzml_file(file_reader_base_multidata):
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         print 'Read %s scans from mzML file.' % self.num_scans
         self.scan_types = self.__compute_scan_types(filename=self.basename)
-        self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
+        self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types,
+                                                                  basename=basename)
         print 'Found %s different scan types in mzML file.' % len(self.scan_types)
         self.coordinates = self.__compute_coordinates()
         self.scan_params = self.__parse_scan_parameters(self)
@@ -284,11 +286,12 @@ class mzml_file(file_reader_base_multidata):
         return scan_params
 
     @staticmethod
-    def __compute_scan_dependencies(scan_types=None):  #Why is the "self" arg needed here & below?
+    def __compute_scan_dependencies(scan_types=None,
+                                    basename=None):
         """
         Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
         """
-        dependencies = []
+        dependencies = [[] for i in range(len(scan_types))]
 
         #find MS1 scans   # TODO this algorithm could be much smarter; now will work only on single MS scans
 
@@ -302,7 +305,25 @@ class mzml_file(file_reader_base_multidata):
         for ms1scan in ms1scanlist:
             for ind2, stype in enumerate(scan_types):
                 if stype.find('ms2') != -1:     #MS2 scan filter strings from thermo contain the string 'ms2'
-                    dependencies.append((ms1scan, ind2))
+                    ms2_to_ms1_dependency = {
+                        'omsi_object': None,
+                        'link_name': 'MS1',
+                        'basename': basename,
+                        'region': None,
+                        'dataset': ms1scan,
+                        'help': scan_types[ms1scan],
+                        'dependency_type': omsi_dependency.dependency_types['co_modality']}
+                    ms2_link_name = 'MS2_' + scan_types[ind2].split('ms2')[-1].lstrip(' ').rstrip(' ').replace(' ', '_')
+                    ms1_to_ms2_dependency = {
+                        'omsi_object': None,
+                        'link_name': ms2_link_name,
+                        'basename': basename,
+                        'region': None,
+                        'dataset': ind2,
+                        'help':scan_types[ms1scan],
+                        'dependency_type': omsi_dependency.dependency_types['co_modality']}
+                    dependencies[ind2].append(ms2_to_ms1_dependency)
+                    dependencies[ms1scan].append(ms1_to_ms2_dependency)
 
         return dependencies
 
@@ -437,7 +458,10 @@ class mzml_file(file_reader_base_multidata):
         Get the dependencies between the current dataset and any of the
         other datasets stored in the current file.
         """
-        return self.scan_dependencies
+        if self.select_dataset is not None:
+            return self.scan_dependencies[self.select_dataset]
+        else:
+            return self.scan_dependencies
 
     def get_dataset_metadata(self):
         """
