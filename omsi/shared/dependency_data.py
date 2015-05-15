@@ -126,7 +126,7 @@ class dependency_dict(dict):
                 if value is None or (isinstance(value, basestring) and len(value) == 0):
                     new_value = None
                 else:
-                    from omsi.shared.omsi_data_selection import selection_to_string
+                    from omsi.shared.data_selection import selection_to_string
                     new_value = unicode(selection_to_string(selection=value))
                 dict.__setitem__(self, key, new_value)
                 dict.__setitem__(self, '_data', None)  # Any previously loaded data may be invalid (delete)
@@ -215,7 +215,7 @@ class dependency_dict(dict):
                     # self['_data'] = data_object
                     return data_object
                 else:
-                    from omsi.shared.omsi_data_selection import selection_string_to_object
+                    from omsi.shared.data_selection import selection_string_to_object
                     current_selection = selection_string_to_object(self['selection'])
                     if current_selection is not None:
                         dict.__setitem__(self, '_data', data_object[current_selection])

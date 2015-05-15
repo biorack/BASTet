@@ -128,7 +128,7 @@ class omsi_cx(omsi_analysis_base):
 
         """
         # Convert the z selection to a python selection
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         z_select = selection_string_to_object(z)  # Convert the selection string to a python selection
 
         """EDIT_ME Specify the number of custom  viewer_options you are going to provide for qslice"""
@@ -201,7 +201,7 @@ class omsi_cx(omsi_analysis_base):
         """
 
         # Convert the x,y selection to a python selection
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         x_select = selection_string_to_object(x)  # Convert the selection string to a python selection
         y_select = selection_string_to_object(y)  # Convert the selection string to a python selection
 

@@ -1,7 +1,7 @@
 """
-Module with helper functions for interactions with the web. E.g. update job status.
-Explicitly add a file to the OpenMSI database, update file permissions so that
-Apache can access it etc.
+Module with helper functions for interactions with the OpenMSI web infrastructure,
+e.g. update job status, explicitly add a file to the OpenMSI database,
+update file permissions so that Apache can access it etc.
 """
 import os
 import warnings

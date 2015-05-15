@@ -109,7 +109,7 @@ class omsi_npg(omsi_analysis_base):
     @classmethod
     def v_qslice(cls, analysis_object, z, viewer_option=0):
         """Implement support for qslice URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
 
         if viewer_option == 0:
             pl = analysis_object['npg_peaks_labels']
@@ -135,7 +135,7 @@ class omsi_npg(omsi_analysis_base):
         data = None
         customMZ = None
         if viewer_option == 0:
-            from omsi.shared.omsi_data_selection import selection_string_to_object
+            from omsi.shared.data_selection import selection_string_to_object
 
             pl = analysis_object['npg_peaks_labels']
             ll = analysis_object['npg_labels_list']

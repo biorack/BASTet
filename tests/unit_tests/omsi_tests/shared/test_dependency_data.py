@@ -97,7 +97,7 @@ class test_omsi_dependency(unittest.TestCase):
 
     def test__setitem__selection_string_index(self):
         # Test setting an index-based selection string
-        from omsi.shared.omsi_data_selection import selection_to_string
+        from omsi.shared.data_selection import selection_to_string
         dependency_object = dependency_dict()
         selection_string = selection_to_string(5)
         dependency_object['selection'] = selection_string
@@ -105,7 +105,7 @@ class test_omsi_dependency(unittest.TestCase):
 
     def test__setitem__selection_string_list(self):
         # Test setting an list-based selection string
-        from omsi.shared.omsi_data_selection import selection_to_string
+        from omsi.shared.data_selection import selection_to_string
         dependency_object = dependency_dict()
         selection_string = selection_to_string([0,1,2,3])
         dependency_object['selection'] = selection_string
@@ -113,7 +113,7 @@ class test_omsi_dependency(unittest.TestCase):
 
     def test__setitem__selection_string_slice(self):
         # Test setting an slice-based selection string
-        from omsi.shared.omsi_data_selection import selection_to_string
+        from omsi.shared.data_selection import selection_to_string
         dependency_object = dependency_dict()
         selection_string = selection_to_string(slice(0,10,1))
         dependency_object['selection'] = selection_string
@@ -121,7 +121,7 @@ class test_omsi_dependency(unittest.TestCase):
 
     def test__setitem__selection_string_multi_axis(self):
         # Test setting an index-based selection string
-        from omsi.shared.omsi_data_selection import selection_to_string
+        from omsi.shared.data_selection import selection_to_string
         dependency_object = dependency_dict()
         selection_string = selection_to_string((5,[0,1,3],slice(0,1,4)))
         dependency_object['selection'] = selection_string

@@ -1,8 +1,9 @@
-"""Module for defining and processing data selections. This includes the definition of
-   selections using strings as well as transformation and reduction of data.
+"""
+Module for defining and processing data selections. This includes the definition of
+selections using strings as well as transformation and reduction of data.
 
 TODO: We may want to expose some of the following numpy functions currently not yet
-      supported through the transform and reduce data opeations:
+      supported through the transform and reduce data operations:
 
     * array2string
     * array_equal

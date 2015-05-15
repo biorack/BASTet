@@ -87,7 +87,7 @@ class omsi_findpeaks_local(omsi_analysis_base):
         # Retrieve the h5py objects for the requried datasets from the local peak finding
         if viewer_option == 0:
 
-            from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
+            from omsi.shared.data_selection import check_selection_string, selection_type, selection_to_indexlist
             import numpy as np
             peak_mz = analysis_object['peak_mz']
             peak_values = analysis_object['peak_value']

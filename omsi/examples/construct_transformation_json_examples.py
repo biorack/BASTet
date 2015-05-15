@@ -1,4 +1,4 @@
-from omsi.shared.omsi_data_selection import *
+from omsi.shared.data_selection import *
 import numpy as np
 
 def main(argv=None):

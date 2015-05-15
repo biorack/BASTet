@@ -705,7 +705,7 @@ class omsi_file_dependencydata(omsi_file_common):
         selection_data = dep_group.require_dataset(name=unicode(
             omsi_format_dependencydata.dependency_selection), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['selection'] is not None:
-            from omsi.shared.omsi_data_selection import check_selection_string
+            from omsi.shared.data_selection import check_selection_string
             # This should always be True since dependency_dict checks for this
             # but we need to be sure.
             if check_selection_string(dependency_data['selection']):

@@ -600,7 +600,7 @@ class omsi_analysis_base(object):
         :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
-        from omsi.shared.omsi_data_selection import check_selection_string, \
+        from omsi.shared.data_selection import check_selection_string, \
             selection_type, \
             selection_string_to_object
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index = \
@@ -660,7 +660,7 @@ class omsi_analysis_base(object):
                 at different m/z values.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
-        from omsi.shared.omsi_data_selection import \
+        from omsi.shared.data_selection import \
             check_selection_string, \
             selection_type, \
             selection_string_to_object   # , selection_to_indexlist

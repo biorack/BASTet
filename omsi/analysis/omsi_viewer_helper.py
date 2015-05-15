@@ -7,7 +7,7 @@ up modules by name and interact with them directly.
 """
 # from omsi.dataformat.omsi_file import *
 # from omsi.shared.omsi_data_selection import *
-from omsi.shared.omsi_data_selection import transform_and_reduce_data
+from omsi.shared.data_selection import transform_and_reduce_data
 from omsi.analysis import *
 
 

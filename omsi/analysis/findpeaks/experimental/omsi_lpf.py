@@ -77,7 +77,7 @@ def v_qspectrum(cls, analysis_object, x, y, viewer_option=0):
     # Retrieve the h5py objects for the requried datasets from the local peak finding
     if viewer_option == 0:
 
-        from omsi.shared.omsi_data_selection import check_selection_string, selection_type, selection_to_indexlist
+        from omsi.shared.data_selection import check_selection_string, selection_type, selection_to_indexlist
         import numpy as np
 
         peak_mz = analysis_object['LPF_Peaks_MZ']

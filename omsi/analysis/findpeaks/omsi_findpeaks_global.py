@@ -63,7 +63,7 @@ class omsi_findpeaks_global(omsi_analysis_base):
                  z,
                  viewer_option=0):
         """Implement support for qslice URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         if viewer_option == 0:
             dataset = analysis_object['peak_cube']
             try:
@@ -89,7 +89,7 @@ class omsi_findpeaks_global(omsi_analysis_base):
         data = None
         custom_mz = None
         if viewer_option == 0:
-            from omsi.shared.omsi_data_selection import check_selection_string, \
+            from omsi.shared.data_selection import check_selection_string, \
                 selection_type, \
                 selection_string_to_object
             x_select = selection_string_to_object(selection_string=x)

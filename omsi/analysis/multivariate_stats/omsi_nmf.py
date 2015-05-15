@@ -49,7 +49,7 @@ class omsi_nmf(omsi_analysis_base):
     @classmethod
     def v_qslice(cls, analysis_object, z, viewer_option=0):
         """Implement support for qslice URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         if viewer_option == 0:
             dataset = analysis_object['ho']
             z_select = selection_string_to_object(selection_string=z)
@@ -61,7 +61,7 @@ class omsi_nmf(omsi_analysis_base):
     @classmethod
     def v_qspectrum(cls, analysis_object, x, y, viewer_option=0):
         """Implement support for qspectrum URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         data = None
         custom_mz = None
         if viewer_option == 0:  # Loadings

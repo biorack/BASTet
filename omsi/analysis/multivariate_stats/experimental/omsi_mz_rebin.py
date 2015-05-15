@@ -180,7 +180,7 @@ class omsi_mz_rebin(omsi_analysis_base):
         """
 
         # Convert the z selection to a python selection
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         zselect = selection_string_to_object(z)  # Convert the selection string to a python selection
 
         num_custom_viewer_options = 1
@@ -231,7 +231,7 @@ class omsi_mz_rebin(omsi_analysis_base):
         """
 
         # Convert the x,y selection to a python selection
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
         x_select = selection_string_to_object(x)  # Convert the selection string to a python selection
         y_select = selection_string_to_object(y)  # Convert the selection string to a python selection
 

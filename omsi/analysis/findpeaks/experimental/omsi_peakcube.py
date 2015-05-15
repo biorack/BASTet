@@ -55,7 +55,7 @@ class omsi_peakcube(omsi_analysis_base):
     @classmethod
     def v_qslice(cls, analysis_object, z, viewer_option=0):
         """Implement support for qslice URL requests for the viewer"""
-        from omsi.shared.omsi_data_selection import selection_string_to_object
+        from omsi.shared.data_selection import selection_string_to_object
 
         if viewer_option == 0:
             dataset = analysis_object['npg_peak_cube_mz']
@@ -78,7 +78,7 @@ class omsi_peakcube(omsi_analysis_base):
         data = None
         customMZ = None
         if viewer_option == 0:
-            from omsi.shared.omsi_data_selection import check_selection_string, selection_type, \
+            from omsi.shared.data_selection import check_selection_string, selection_type, \
                 selection_string_to_object
 
             dataset = analysis_object['npg_peak_cube_mz']
