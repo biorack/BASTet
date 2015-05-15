@@ -301,7 +301,7 @@ class file_reader_base_multidata(file_reader_base):
                     'region': None,              # Index of the region in the dataset or None
                     'dataset': ind2,             # Index of the dataset withing the file or None
                     'help':scan_types[ms1scan],  # Help describing the depdency
-                    dependency_type': ... }      # Type of dependency see omsi_dependency.dependency_type
+                    dependency_type': ... }      # Type of dependency see dependency_dict.dependency_type
                                                  # for available types
         """
         raise NotImplementedError('Determine the dependencies to other data blocks for the the current block')

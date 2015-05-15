@@ -6,7 +6,7 @@ import h5py
 import warnings
 
 
-class omsi_dependency(dict):
+class dependency_dict(dict):
     """
     Define a dependency to another omsi file-based data object
 
@@ -58,7 +58,7 @@ class omsi_dependency(dict):
         :param help: Optional string describing the object
 
         """
-        super(omsi_dependency, self).__init__()
+        super(dependency_dict, self).__init__()
         # Add all the keys first
         dict.__setitem__(self, 'param_name', param_name)
         dict.__setitem__(self, 'link_name', link_name)
@@ -83,11 +83,11 @@ class omsi_dependency(dict):
 
     def copy(self):
         """
-        Return a new omsi_dependency object with the same data as stored in the current object
+        Return a new dependency_dict object with the same data as stored in the current object
 
-        :return: omsi_dependency object
+        :return: dependency_dict object
         """
-        new_dependency = omsi_dependency()
+        new_dependency = dependency_dict()
         for key, value in self.iteritems():
             if key == '_data':
                 new_dependency._force_set_data(value)
@@ -111,7 +111,7 @@ class omsi_dependency(dict):
                     if omsi_file_common.is_managed(parent):
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
                         dict.__setitem__(self, 'dataname', unicode(value.name.split('/')[-1]))
-                        # print super(omsi_dependency,self).__str__()
+                        # print super(dependency_dict,self).__str__()
                     else:
                         warnings.warn("The generated dependency does not point to a managed object.")
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
@@ -121,7 +121,7 @@ class omsi_dependency(dict):
                 else:
                     raise ValueError(str(value) +
                                      " invalid omsi_object parameter for "
-                                     + "omsi_dependency without valid data dependency.")
+                                     + "dependency_dict without valid data dependency.")
             elif key == 'selection':
                 if value is None or (isinstance(value, basestring) and len(value) == 0):
                     new_value = None
@@ -144,7 +144,7 @@ class omsi_dependency(dict):
                     raise ValueError('link_name must be a string')
                 dict.__setitem__(self, 'link_name', unicode(value))
             elif key == '_data':
-                raise KeyError('_data key is managed by omsi_dependency. Explicit definition of _data not permitted.')
+                raise KeyError('_data key is managed by dependency_dict. Explicit definition of _data not permitted.')
             elif key == 'help':
                 if isinstance(value, basestring):
                     dict.__setitem__(self, 'help', unicode(value))
@@ -156,9 +156,9 @@ class omsi_dependency(dict):
                                      str(self.dependency_types))
             else:
                 dict.__setitem__(self, key, value)
-            # print super(omsi_dependency,self).__str__()
+            # print super(dependency_dict,self).__str__()
         else:
-            raise KeyError("\'"+str(key)+'\' key not in default key set of omsi_dependency')
+            raise KeyError("\'"+str(key)+'\' key not in default key set of dependency_dict')
 
     def __getitem__(self,
                     key):
@@ -174,7 +174,7 @@ class omsi_dependency(dict):
             return dict.__getitem__(self, key)
         else:
             data_ref = self.get_data()
-            if isinstance(data_ref, omsi_dependency):
+            if isinstance(data_ref, dependency_dict):
                return None
             else:
                 return self.get_data()[key]
@@ -204,7 +204,7 @@ class omsi_dependency(dict):
                 # Ensure that the dependency can actually be resolved. E.g, if the data the dependency points to
                 # is not ready yet then we may get a dependency back that points to the same object as we do,
                 # which in turn could result in an endless recursion
-                if isinstance(data_object, omsi_dependency):
+                if isinstance(data_object, dependency_dict):
                     if data_object['omsi_object'] is self['omsi_object']:
                         return self
             else:

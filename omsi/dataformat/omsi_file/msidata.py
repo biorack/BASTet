@@ -817,7 +817,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         Other optional parameters
 
-        :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
+        :param dependencies_data_list: List of dependency_dict objects to be stored as dependencies.
                                        Default is empty list []
 
         :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to
@@ -899,7 +899,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         Other optional parameters
 
-        :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
+        :param dependencies_data_list: List of dependency_dict objects to be stored as dependencies.
                                        Default is empty None which is mapped to an empty list []
 
         :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order to
@@ -1028,7 +1028,7 @@ class omsi_file_msidata(omsi_dependencies_manager,
 
         Other optional parameters
 
-        :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
+        :param dependencies_data_list: List of dependency_dict objects to be stored as dependencies.
                                        Default is empty list []
 
         :returns: The following two empty (but approbriatelu sized) h5py datasets are returned in order

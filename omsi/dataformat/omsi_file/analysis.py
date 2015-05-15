@@ -692,7 +692,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  [index]['name'] and [index]['data'].
         """
         from omsi.analysis.omsi_analysis_data import omsi_parameter_data
-        from omsi.shared.omsi_dependency import omsi_dependency
+        from omsi.shared.dependency_data import dependency_dict
         output_list = []
         if self.parameter is not None:
             for item_obj in self.parameter.items():
@@ -714,7 +714,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 curr_parameter = omsi_parameter_data(name=dep.get_parameter_name(),
                                                      help='')
                 curr_parameter['data'] = dep.get_omsi_dependency()
-                curr_parameter['dtype'] = omsi_dependency
+                curr_parameter['dtype'] = dependency_dict
                 output_list.append(curr_parameter)
 
         return output_list

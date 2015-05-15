@@ -1,6 +1,6 @@
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data
-from omsi.shared.omsi_dependency import *
+from omsi.shared.dependency_data import *
 from omsi.dataformat.omsi_file.main_file import omsi_file
 
 from time import time, ctime

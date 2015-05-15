@@ -40,8 +40,8 @@ Important Member Variables
 
 * ``analysis_identifier`` defines the name for the analysis used as key in search operations.
 * ``__data_list`` defines a dictonary of ``omsi_analysis_data`` to be written to the HDF5 file. Derived classes need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.omsi_analysis_data`` for details.
-* ``__parameter_list``  defines a dictonary of ``omsi_analysis_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
-* ``__dependency_list`` defines a dictonary of ``omsi_dependency`` to be written to the HDF5 file. Derived classes need to add all dependencies data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.omsi_analysis_data`` for details.
+* ``__parameter_list``  defines a dictionary of ``omsi_analysis_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See omsi.analysis.omsi_analysis_data for details.
+* ``__dependency_list`` defines a dictionary of ``dependency_dict`` to be written to the HDF5 file. Derived classes need to add all dependencies data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.omsi_analysis_data`` for details.
 
 I/O functions
 """""""""""""

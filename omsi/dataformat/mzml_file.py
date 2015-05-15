@@ -10,7 +10,8 @@ from pyteomics import mzml
 import re
 import os
 from omsi.dataformat.file_reader_base import file_reader_base_multidata
-from omsi.shared.omsi_dependency import omsi_dependency
+from omsi.shared.dependency_data import dependency_dict
+from omsi.shared.metadata_data import metadata_dict, metadata_value
 
 
 class mzml_file(file_reader_base_multidata):
@@ -251,7 +252,7 @@ class mzml_file(file_reader_base_multidata):
             if ms2pre:
                 ms2_precursor = float(ms2pre[0])
             else:
-                ms2_precursor = 0
+                ms2_precursor = None
             #dissociation type
             dissot = filter(None, re.findall('(?<=\d@)[A-z]*', scantype))
             if dissot:
@@ -263,7 +264,7 @@ class mzml_file(file_reader_base_multidata):
             if dissoe:
                 dissociationenergy = float(dissoe[0])
             else:
-                dissociationenergy = 0
+                dissociationenergy = None
             #polarity
             pol = filter(None, re.findall('([+][ ]p)', scantype))
             if pol:
@@ -275,12 +276,24 @@ class mzml_file(file_reader_base_multidata):
                 else:
                     polarity = 'unk'
             #put all params in dictionary
-            paramdict = {'MSnValueOfN': MSnValueOfN,
-                          'DissociationEnergy': dissociationenergy,
-                          'MSnPrecursorMZ': ms2_precursor,
-                          'DissociationType': dissociationtype,
-                          'Polarity': polarity}
-
+            paramdict = metadata_dict()
+            paramdict['msn_value_of_n'] = metadata_value(value=MSnValueOfN,
+                                                         unit='level',
+                                                         description='The level n of MS^n mass spectrometry')
+            if dissociationenergy:
+                paramdict['dissociation_energy'] = metadata_value(value=dissociationenergy,
+                                                                 unit='V',
+                                                                 description='Dissociation energy')
+            if ms2_precursor is not None:
+                paramdict['msn_precursor_mz'] = metadata_value(value=ms2_precursor,
+                                                               unit='m/z',
+                                                               description='The precursor m/z value')
+            paramdict['dissociation_type'] = metadata_value(value=dissociationtype,
+                                                            unit=None,
+                                                            description='Dissociation type')
+            paramdict['polarity'] = metadata_value(value=polarity,
+                                                   unit=None,
+                                                   description='Polarity')
             scan_params.append(paramdict)
 
         return scan_params
@@ -312,7 +325,7 @@ class mzml_file(file_reader_base_multidata):
                         'region': None,
                         'dataset': ms1scan,
                         'help': scan_types[ms1scan],
-                        'dependency_type': omsi_dependency.dependency_types['co_modality']}
+                        'dependency_type': dependency_dict.dependency_types['co_modality']}
                     ms2_link_name = 'MS2_' + scan_types[ind2].split('ms2')[-1].lstrip(' ').rstrip(' ').replace(' ', '_')
                     ms1_to_ms2_dependency = {
                         'omsi_object': None,
@@ -321,7 +334,7 @@ class mzml_file(file_reader_base_multidata):
                         'region': None,
                         'dataset': ind2,
                         'help':scan_types[ms1scan],
-                        'dependency_type': omsi_dependency.dependency_types['co_modality']}
+                        'dependency_type': dependency_dict.dependency_types['co_modality']}
                     dependencies[ind2].append(ms2_to_ms1_dependency)
                     dependencies[ms1scan].append(ms1_to_ms2_dependency)
 

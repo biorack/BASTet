@@ -15,7 +15,7 @@ from omsi.dataformat.omsi_file.format import omsi_format_common
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data, omsi_parameter_data, omsi_analysis_dtypes
-from omsi.shared.omsi_dependency import omsi_dependency
+from omsi.shared.dependency_data import dependency_dict
 
 try:
     from mpi4py import MPI
@@ -177,7 +177,7 @@ class omsi_analysis_base(object):
                 if i['name'] == key:
                     return i.get_data_or_default()
             if key in self.data_names:
-                return omsi_dependency(param_name=None,
+                return dependency_dict(param_name=None,
                                        link_name=None,
                                        dataname=key,
                                        omsi_object=self,
@@ -243,7 +243,7 @@ class omsi_analysis_base(object):
         :param include_parameters: Boolean indicating whether also input parameters should be considered
             in the search in addition to the outputs of an analysis
 
-        :return: omsi_dependency pointing to the relevant object or None in case the
+        :return: dependency_dict pointing to the relevant object or None in case the
             object was not found.
         """
         for ana_obj in cls.get_analysis_instances():
@@ -254,7 +254,7 @@ class omsi_analysis_base(object):
                 obj = ana_obj[dataname]
                 if obj is data_object:
                     if type(obj) not in (float, int, bool, long, complex, str, unicode):
-                        return omsi_dependency(param_name=None,
+                        return dependency_dict(param_name=None,
                                                link_name=None,
                                                dataname=dataname,
                                                omsi_object=ana_obj,
@@ -1171,7 +1171,7 @@ class omsi_analysis_base(object):
         are placed in the self.parameters list. If the parameter refers
         to an existing h5py.Dataset, h5py.Group,  managed h5py object,
         or is an instance of an existing omis_analysi_base object, then
-        a omsi_dependency will be created and stored as value instead.
+        a dependency_dict will be created and stored as value instead.
 
         :param kwargs: Dictionary of keyword arguments. All keys are
                expected to be strings. All values are expected to be
@@ -1196,19 +1196,19 @@ class omsi_analysis_base(object):
                     isinstance(value, h5py.Group) or \
                     omsi_file_common.is_managed(value) or \
                     isinstance(value, omsi_analysis_base):
-                value = omsi_dependency(param_name=name,
+                value = dependency_dict(param_name=name,
                                         link_name=name,
                                         omsi_object=value,
                                         selection=selection,
                                         help=curr_parameter['help'],
-                                        dependency_type=omsi_dependency.dependency_types['parameter'])
+                                        dependency_type=dependency_dict.dependency_types['parameter'])
                 # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
-            elif isinstance(value, omsi_dependency):
+            elif isinstance(value, dependency_dict):
                 # Set any possibly missing parameters
                 value['param_name'] = name
                 value['link_name'] = name
                 value['help'] = curr_parameter['help']
-                value['dependency_type'] = omsi_dependency.dependency_types['parameter']
+                value['dependency_type'] = dependency_dict.dependency_types['parameter']
             else:
                 # Try to locate the input parameter to see if it is an output of another analysis
                 check_param = self.locate_analysis(value)
@@ -1339,11 +1339,11 @@ class omsi_analysis_base(object):
 #        """Add a new analysis parameter dataset to the list of data to be written to the HDF5 file
 #
 #          :param dependency: The data that should be added to __dependency_list member to be written to HDF5.
-#          :type data: omsi_dependency
+#          :type data: dependency_dict
 #
-#          :raises: ValueError in case data is not of omsi_dependency object.
+#          :raises: ValueError in case data is not of dependency_dict object.
 #        """
-#        if isinstance( dependency , omsi_dependency ) :
+#        if isinstance( dependency , dependency_dict ) :
 #            self.__dependency_list.append( dependency )
 #        else :
 #             raise ValueError( "Invalid input for add_data_dependency function" )

@@ -50,7 +50,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         settings for the current dependencies object managed by self.
 
         :param parent_group: The h5py.Group for which the dependencies group should be initialized.
-        :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
+        :param dependencies_data_list: List of dependency_dict objects to be stored as dependencies.
                Default is None which is mapped to an empty list []
         :param use_relative_links: Should we use relative links to external files if possible. Default value
             is True.
@@ -72,7 +72,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         """
         Create a new dependency for this dataset
 
-        :param dependency: omsi.shared.omsi_dependency object describing the data dependency
+        :param dependency: omsi.shared.dependency_dict object describing the data dependency
 
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed
                          so that all data has been written to file
@@ -101,7 +101,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         :param omsi_dependency_format: Should the dependencies be retrieved as omsi_analysis_dependency object (True)
                                        or as an omsi_file_dependencydata object (False).
 
-        :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for the
+        :returns: List dependency_dict objects containing either omsi file API objects or h5py objects for the
                   dependencies. Access using [index]['name'] and [index]['data'].
         """
         if self.dependencies is not None:
@@ -126,7 +126,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         two datasets that are related modalities may reference each other, e.g., MS1 pointing
         to related MS2 data and the MS2 datasets referencing the corresponding MS1 datasets.
 
-        :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True)
+        :param omsi_dependency_format: Should the dependencies be retrieved as dependency_dict object (True)
                or as an omsi_file_dependencydata object (False)
 
         :param omsi_main_parent: The main parent for which the dependencies are calculated. This is needed
@@ -169,7 +169,7 @@ class omsi_dependencies_manager(omsi_file_object_manager):
         self.dependencies.get_all_dependency_data_graph(...) which is a function
         of omsi_file_dependencies class.
 
-        :param include_omsi_dependency: Should the omsi_dependency object be included in the entries
+        :param include_omsi_dependency: Should the dependency_dict object be included in the entries
                     in the nodes dict?
         :param include_omsi_file_dependencydata: Should the omsi_file_dependencydata object be included in
                     the entries in the nodes dict?
@@ -204,13 +204,13 @@ class omsi_dependencies_manager(omsi_file_object_manager):
                   tuple consists of two integer indices for the nodes list. For each node the following
                   entries are given:
 
-                * omsi_dependency: Optional key used to store the corresponding omsi_dependency object.
+                * dependency_dict: Optional key used to store the corresponding dependency_dict object.
                         Used only of include_omsi_dependency is True.
                 * omsi_file_dependencydata: Optional key used to store the corresponding
                         omsi_file_dependencydata object. Used only of include_omsi_file_dependencydata is True.
                 * name : Name of the dependency. The actual key is sepecified by name_key
                 * level : The recursion level at which the object occurs.
-                * ... : Any other key/value pairs from the omsi_dependency dict.
+                * ... : Any other key/value pairs from the dependency_dict dict.
 
         """
         if self.dependencies:
@@ -258,7 +258,7 @@ class omsi_file_dependencies(omsi_file_common):
         Create a managed group for storing data dependencies
 
         :param parent_group: The h5py.Group for which the dependencies group should be initialized.
-        :param dependencies_data_list: List of omsi_dependency objects to be stored as dependencies.
+        :param dependencies_data_list: List of dependency_dict objects to be stored as dependencies.
                Default is None which is mapped to an empty list []
 
         :returns: omsi_file_dependencies object created by the function.
@@ -335,7 +335,7 @@ class omsi_file_dependencies(omsi_file_common):
         :param omsi_dependency_format: Should the dependencies be retrieved as omsi_analysis_dependency object
                 (True) or as an omsi_file_dependencydata object (False).
 
-        :returns: List omsi_dependency objects containing either omsi file API objects or h5py objects for
+        :returns: List dependency_dict objects containing either omsi file API objects or h5py objects for
                 the dependencies. Access using [index]['name'] and [index]['data'].
         """
         output_list = []
@@ -360,7 +360,7 @@ class omsi_file_dependencies(omsi_file_common):
         two datasets that are related modalities may reference each other, e.g., MS1 pointing
         to related MS2 data and the MS2 datasets referencing the corresponding MS1 datasets.
 
-        :param omsi_dependency_format: Should the dependencies be retrieved as omsi_dependency object (True)
+        :param omsi_dependency_format: Should the dependencies be retrieved as dependency_dict object (True)
                 or as an omsi_file_dependencydata object (False)
 
         :param omsi_main_parent: The main parent for which the dependencies are calculated. This is needed
@@ -439,7 +439,7 @@ class omsi_file_dependencies(omsi_file_common):
         Get all direct and indirect dependencies associated with the analysis in form of a graph describing
         all nodes and links in the provenance hierarchy.
 
-        :param include_omsi_dependency: Should the omsi_dependency object be included in the entries
+        :param include_omsi_dependency: Should the dependency_dict object be included in the entries
                     in the nodes dict?
         :param include_omsi_file_dependencydata: Should the omsi_file_dependencydata object be included in
                     the entries in the nodes dict?
@@ -476,7 +476,7 @@ class omsi_file_dependencies(omsi_file_common):
                   tuple consists of two integer indices for the nodes list. For each node the following
                   entries are given:
 
-                * omsi_dependency: Optional key used to store the corresponding omsi_dependency object.
+                * dependency_dict: Optional key used to store the corresponding dependency_dict object.
                         Used only of include_omsi_dependency is True.
                 * omsi_file_dependencydata: Optional key used to store the corresponding
                         omsi_file_dependencydata object. Used only of include_omsi_file_dependencydata is True.
@@ -484,7 +484,7 @@ class omsi_file_dependencies(omsi_file_common):
                 * level : The recursion level at which the object occurs.
                 * path : The full path to the object
                 * filename : The full path to the file
-                * ... : Any other key/value pairs from the omsi_dependency dict.
+                * ... : Any other key/value pairs from the dependency_dict dict.
 
         """
         import os
@@ -534,7 +534,7 @@ class omsi_file_dependencies(omsi_file_common):
             :param cn_omsi_obj: The OpenMSI file API object. This is required and may NOT be None.
 
             :return: Dict describing the new node, containing the 'name', 'level', and 'path' and
-                optionally 'omsi_dependency' and/or 'omsi_file_dependencydata' and any additional
+                optionally 'dependency_dict' and/or 'omsi_file_dependencydata' and any additional
                 data generated by the metadata_generator function
             """
             new_node = {}
@@ -544,9 +544,9 @@ class omsi_file_dependencies(omsi_file_common):
             new_node['filename'] = os.path.abspath(cn_omsi_obj.file.filename)
             if include_omsi_dependency:
                 if cn_dep_obj:
-                    new_node['omsi_dependency'] = cn_dep_obj.get_omsi_dependency()
+                    new_node['dependency_dict'] = cn_dep_obj.get_omsi_dependency()
                 else:
-                    new_node['omsi_dependency'] = None
+                    new_node['dependency_dict'] = None
             if include_omsi_file_dependencydata:
                 new_node['omsi_file_dependencydata'] = cn_dep_obj
             #  Expand the metadata dict for the current object with  any user-defined metadata
@@ -679,7 +679,7 @@ class omsi_file_dependencydata(omsi_file_common):
         :param dependency_group: The h5py group opbject to which the dependency dataset should be added
         :type dependency_group: h5py.Group
         :param dependency_data: The analysis dependency specification.
-        :type dependency_data: omsi.shared.omsi_dependency
+        :type dependency_data: omsi.shared.dependency_data
         :param use_relative_links: Should we use relative links to external files if possible. Default value
             is True.
         :type use_relative_links: bool
@@ -687,7 +687,7 @@ class omsi_file_dependencydata(omsi_file_common):
         :returns: omsi_file_dependencydata object for management of the newly created object
 
         """
-        from omsi.shared.omsi_dependency import omsi_dependency
+        from omsi.shared.dependency_data import dependency_dict
         dep_group = dependency_group
         # 1) Save the name of the parameter
         param_name_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_parameter),
@@ -706,7 +706,7 @@ class omsi_file_dependencydata(omsi_file_common):
             omsi_format_dependencydata.dependency_selection), shape=(1,), dtype=omsi_format_common.str_type)
         if dependency_data['selection'] is not None:
             from omsi.shared.omsi_data_selection import check_selection_string
-            # This should always be True since omsi_dependency checks for this
+            # This should always be True since dependency_dict checks for this
             # but we need to be sure.
             if check_selection_string(dependency_data['selection']):
                 if omsi_format_common.str_type_unicode:
@@ -758,7 +758,7 @@ class omsi_file_dependencydata(omsi_file_common):
             dataset_data[0] = u'' if omsi_format_common.str_type_unicode else ''
 
         # Save the dependency type if specified
-        if dependency_data['dependency_type'] != omsi_dependency.dependency_types['undefined']:
+        if dependency_data['dependency_type'] != dependency_dict.dependency_types['undefined']:
             dependency_type_data = dep_group.require_dataset(
                 name=unicode(omsi_format_dependencydata.dependency_typename),
                 shape=(1,),
@@ -878,10 +878,10 @@ class omsi_file_dependencydata(omsi_file_common):
         if omsi_format_dependencydata.dependency_typename in self.managed_group.keys():
             return self.managed_group[unicode(omsi_format_dependencydata.dependency_typename)][0]
         else:
-            from omsi.shared.omsi_dependency import omsi_dependency
+            from omsi.shared.dependency_data import dependency_dict
             param_name = self.get_parameter_name()
             if param_name is not None and len(param_name) > 0:
-                return omsi_dependency.dependency_types['parameter']
+                return dependency_dict.dependency_types['parameter']
             return None
 
     def get_dependency_omsiobject(self, recursive=True, external_mode=None):
@@ -937,13 +937,13 @@ class omsi_file_dependencydata(omsi_file_common):
 
     def get_omsi_dependency(self):
         """
-        Get the dependency information as an omsi.shared.omsi_dependency object
-        (as defined in the omsi.shared.omsi_dependency module)
+        Get the dependency information as an omsi.shared.dependency_dict object
+        (as defined in the omsi.shared.dependency_dict module)
 
-        :returns: omsi_dependency object with all the dependency data.
+        :returns: dependency_dict object with all the dependency data.
         """
-        from omsi.shared.omsi_dependency import omsi_dependency
-        output_dependency = omsi_dependency()
+        from omsi.shared.dependency_data import dependency_dict
+        output_dependency = dependency_dict()
         try:
             output_dependency['param_name'] = self.get_parameter_name()
         except:

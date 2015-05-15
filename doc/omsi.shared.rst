@@ -9,10 +9,10 @@ shared Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_dependency` Module
+:mod:`dependency_dict` Module
 -----------------------------
 
-.. automodule:: omsi.shared.omsi_dependency
+.. automodule:: omsi.shared.dependency_dict
     :members:
     :undoc-members:
     :show-inheritance:

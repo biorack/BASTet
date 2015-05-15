@@ -1,6 +1,6 @@
 from omsi.analysis.omsi_analysis_base import omsi_analysis_base
 from omsi.analysis.omsi_analysis_data import omsi_analysis_data
-from omsi.shared.omsi_dependency import *
+from omsi.shared.dependency_data import *
 from omsi.dataformat.omsi_file.main_file import omsi_file
 
 from time import time, ctime
@@ -182,22 +182,22 @@ class omsi_peakcube(omsi_analysis_base):
 
         #		#Save the analysis dependencies to the __dependency_list so that the data can be saved automatically by the omsi HDF5 file API
         #		if npgdata_dependency is not None :
-        #			# if isinstance( npgdata_dependency , omsi_dependency ) :
+        #			# if isinstance( npgdata_dependency , dependency_dict ) :
         #			# 	#Add the depency as given by the user
         #			# 	self.add_dependency_data( npgdata_dependency )
-        #			# elif isinstance( lpfdata_dependency, omsi_dependency):
+        #			# elif isinstance( lpfdata_dependency, dependency_dict):
         #			# 	self.add_dependency_data( lpfdata_dependency )
         #
         #			# else :
         #			# 	#The user only gave us the object that we depend on so we need to construct the
-        #			self.add_dependency_data( omsi_dependency( param_name = 'HCpeaksLabels', link_name='HCpeaksLabels', omsi_object=npgdata_dependency['npghc_peaks_labels'], selection=None ) )
-        #			self.add_dependency_data( omsi_dependency( param_name = 'HCLabelsList', link_name='HCLabelsList', omsi_object=npgdata_dependency['npghc_labels_list'], selection=None ) )
+        #			self.add_dependency_data( dependency_dict( param_name = 'HCpeaksLabels', link_name='HCpeaksLabels', omsi_object=npgdata_dependency['npghc_peaks_labels'], selection=None ) )
+        #			self.add_dependency_data( dependency_dict( param_name = 'HCLabelsList', link_name='HCLabelsList', omsi_object=npgdata_dependency['npghc_labels_list'], selection=None ) )
         #
         #		if lpfdata_dependency is not None :
         #
-        #			self.add_dependency_data( omsi_dependency( param_name = 'peaksBins', link_name='peaksBins', omsi_object=lpfdata_dependency['LPF_Peaks_MZ'], selection=None ) )
-        #			self.add_dependency_data( omsi_dependency( param_name = 'peaksIntensities', link_name='peaksIntensities', omsi_object=lpfdata_dependency['LPF_Peaks_Vals'], selection=None ) )
-        #			self.add_dependency_data( omsi_dependency( param_name = 'peaksArrayIndex', link_name='peaksArrayIndex', omsi_object=lpfdata_dependency['LPF_Peaks_ArrayIndex'], selection=None ) )
+        #			self.add_dependency_data( dependency_dict( param_name = 'peaksBins', link_name='peaksBins', omsi_object=lpfdata_dependency['LPF_Peaks_MZ'], selection=None ) )
+        #			self.add_dependency_data( dependency_dict( param_name = 'peaksIntensities', link_name='peaksIntensities', omsi_object=lpfdata_dependency['LPF_Peaks_Vals'], selection=None ) )
+        #			self.add_dependency_data( dependency_dict( param_name = 'peaksArrayIndex', link_name='peaksArrayIndex', omsi_object=lpfdata_dependency['LPF_Peaks_ArrayIndex'], selection=None ) )
 
         print "Collecting done."
         print "--- finished ---"

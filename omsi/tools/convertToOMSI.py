@@ -16,7 +16,7 @@ from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
 from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
 from omsi.shared.omsi_web_helper import WebHelper
 from omsi.shared.omsi_web_helper import UserInput
-from omsi.shared.omsi_dependency import omsi_dependency
+from omsi.shared.dependency_data import dependency_dict
 import time
 import numpy as np
 import math
@@ -1286,10 +1286,10 @@ class ConvertFiles(object):
                         dependency.pop('basename')
                         dependency.pop('region')
                         dependency.pop('dataset')
-                        new_omsi_dependency = omsi_dependency()
+                        new_omsi_dependency = dependency_dict()
                         new_omsi_dependency.update(dependency)
                         # Define and save the dependency
-                        #new_omsi_dependency = omsi_dependency(link_name=dependency['link_name'],
+                        #new_omsi_dependency = dependency_dict(link_name=dependency['link_name'],
                         #                                      omsi_object=dependency['omsi_object'],
                         #                                      help=dependency['help'],
                         #                                      dependency_type=dependency['dependency_type'])

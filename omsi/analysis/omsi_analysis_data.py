@@ -3,7 +3,7 @@ Helper module with data structures for managing analysis-related data.
 """
 
 import numpy as np
-from omsi.shared.omsi_dependency import omsi_dependency
+from omsi.shared.dependency_data import dependency_dict
 
 import warnings
 import sys
@@ -52,7 +52,7 @@ class omsi_analysis_dtypes(dict):
                 else:
                     raise ValueError('String could not be converted to valid ndarray. This may be ' +
                                      'due to, e.g., a syntax error or the file may not exists')
-        elif isinstance(argument, omsi_dependency) or \
+        elif isinstance(argument, dependency_dict) or \
                 isinstance(argument, h5py.Dataset) or \
                 isinstance(argument, omsi_file_analysis) or \
                 isinstance(argument, omsi_file_msidata):
@@ -76,7 +76,7 @@ class omsi_analysis_dtypes(dict):
     #             pass
     #         except SyntaxError:
     #             pass
-    #     if isinstance(argument, omsi_dependency):
+    #     if isinstance(argument, dependency_dict):
     #         return argument.get_data()
     #     if isinstance(argument, omsi_file_analysis) or isinstance(argument, omsi_file_msidata):
     #         return argument[:]
@@ -238,7 +238,7 @@ class omsi_parameter_data(dict):
         """
         Return a new omsi_parameter_data object with the same data as stored in the current object
 
-        :return: omsi_dependency object
+        :return: dependency_dict object
         """
         new_parameter = omsi_parameter_data('')
         new_parameter.update(self)
@@ -256,7 +256,7 @@ class omsi_parameter_data(dict):
         resolved or not
         """
         if self.is_dependency():
-            if isinstance(self['data'].get_data(), omsi_dependency):
+            if isinstance(self['data'].get_data(), dependency_dict):
                 return False
         return True
 
@@ -266,7 +266,7 @@ class omsi_parameter_data(dict):
 
         :return: Boolean indicating whether the parameter defines a dependency.
         """
-        return isinstance(self['data'], omsi_dependency)
+        return isinstance(self['data'], dependency_dict)
 
     def get_group_name(self):
         """
@@ -309,7 +309,7 @@ class omsi_parameter_data(dict):
             raise KeyError('No data or default setting available for the parameter ' + self['name'])
 
         if get_data:
-            if isinstance(self['data'], omsi_dependency):
+            if isinstance(self['data'], dependency_dict):
                 outdata = self['data'].get_data()
             else:
                 outdata = self['data']
