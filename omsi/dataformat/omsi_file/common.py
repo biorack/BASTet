@@ -413,6 +413,7 @@ class omsi_file_common(object):
         """
         try:
             equal = (value.name == self.name)
+            equal &= self.same_file(value.file.filename, self.file.filename)
             return equal
         except:
             return False
