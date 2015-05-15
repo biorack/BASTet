@@ -236,7 +236,7 @@ class omsi_analysis_base(object):
                         data_object,
                         include_parameters=False):
         """
-        Given a data_object try to locate the analysis that create the object as an
+        Given a data_object try to locate the analysis that creates the object as an
         output of its execution.
 
         :param data_object: The data object of interest.
@@ -813,7 +813,7 @@ class omsi_analysis_base(object):
     def __construct_dependent_viewer_options__(cls,
                                                analysis_object):
         """
-        Internal helper function to construc the viewer options for analysis depencies.
+        Internal helper function to construct the viewer options for analysis dependencies.
 
         :returns: The following 4 lists:
 
@@ -836,7 +836,10 @@ class omsi_analysis_base(object):
         re_spectrumdata = []
         re_spectrum_option_index = []
 
-        all_dependencies = analysis_object.get_all_dependency_data_recursive()
+        # We don't need to use get_all_dependency_data_recursive here, because when we call
+        # omsi_viewer_helper.get_qslice_ .. (spectrum etc.) the recursion to dependent options
+        # occurs automatically.
+        all_dependencies = analysis_object.get_all_dependency_data()
         for di in all_dependencies:
             # Check if we can slice the data
             if isinstance(di['omsi_object'], omsi_file_msidata):
@@ -1197,13 +1200,15 @@ class omsi_analysis_base(object):
                                         link_name=name,
                                         omsi_object=value,
                                         selection=selection,
-                                        help=curr_parameter['help'])
+                                        help=curr_parameter['help'],
+                                        dependency_type=omsi_dependency.dependency_types['parameter'])
                 # dtype = omsi_analysis_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, omsi_dependency):
                 # Set any possibly missing parameters
                 value['param_name'] = name
                 value['link_name'] = name
                 value['help'] = curr_parameter['help']
+                value['dependency_type'] = omsi_dependency.dependency_types['parameter']
             else:
                 # Try to locate the input parameter to see if it is an output of another analysis
                 check_param = self.locate_analysis(value)
