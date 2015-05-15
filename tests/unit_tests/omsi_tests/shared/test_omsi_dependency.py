@@ -25,6 +25,20 @@ class test_omsi_dependency(unittest.TestCase):
         dependency_object = omsi_dependency()
         self.assertIsInstance(dependency_object, omsi_dependency)
 
+    def test__setitem__dependency_type(self):
+        # Test setting the dependency type
+        dependency_object = omsi_dependency()
+        my_dependency_type = omsi_dependency.dependency_types['co_modality']
+        dependency_object['dependency_type'] = my_dependency_type
+        self.assertEquals(dependency_object['dependency_type'], omsi_dependency.dependency_types['co_modality'])
+
+    def test__setitem__illegal_dependency_type(self):
+        # Test setting the dependency type
+        dependency_object = omsi_dependency()
+        my_dependency_type = 'illegal_dependency_type'
+        with self.assertRaises(ValueError):
+            dependency_object['dependency_type'] = my_dependency_type
+
     def test__setitem__param_name(self):
         # Test setting the parameter name
         dependency_object = omsi_dependency()

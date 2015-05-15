@@ -23,14 +23,26 @@ class omsi_dependency(dict):
         up into the parent object and dataname.
     :ivar _data: Private key used to store the data associated with the dependency object.
 
+    **Optional Keyword arguments**:
+
+    :ivar dependency_type: The type of the dependency being modeled. If not defined then
+        the default value of 'parameter' is assumed.
+
     """
+    dependency_types = {'parameter' : 'parameter',    # Default value, defining that this dependency defines a parameter
+                        'link': 'link',               # A not further defined link to a related dataset
+                        'co_modality': 'co_modality', # Data acquired from a related data modality
+                        'undefined': None             # Undefined dependency type
+                        }
+
     def __init__(self,
                  param_name=None,
                  link_name=None,
                  omsi_object=None,
                  selection=None,
                  dataname=None,
-                 help=None):
+                 help=None,
+                 dependency_type=None):
         """
         Initialize the allowed set of keys.
 
@@ -38,7 +50,7 @@ class omsi_dependency(dict):
         :param link_name: The name of for the link to be created in the HDF5 file.
         :param omsi_object: The object to which a link should be established to. This
             must be either an h5py.Dataset or the omsi_file_analysis or omsi_file_msidata
-            or any of the other omsi_file API  interface ojects.
+            or any of the other omsi_file API  interface objects.
         :param selection: Optional string type parameter indicating a python selection for the dependency
         :param dataname: String indicating the dataset within the omsi_object. If the omsi_object
             is an h5py object within a managed Group, then the omsi_object is automatically split
@@ -57,13 +69,14 @@ class omsi_dependency(dict):
         dict.__setitem__(self, 'selection', None)
         dict.__setitem__(self, '_data', None)
         dict.__setitem__(self, 'help', '')
+        dict.__setitem__(self, 'dependency_type', dependency_type)
 
         # Set all the dataname and omsi_object keys to their appropriate values
         if omsi_object is not None:
             self.__setitem__('omsi_object', omsi_object)
         if dataname is not None:
             self.__setitem__('dataname', dataname)
-        if selection is not None and len(selection) > 0:  # Ignore None and empty string
+        if selection is not None and len(str(selection)) > 0:  # Ignore None and empty string
             self.__setitem__('selection', selection)
         if help is not None:
             self.__setitem__('help', help)
@@ -88,6 +101,7 @@ class omsi_dependency(dict):
         """Overwrite the __setitem__ function inherited from dict to ensure that only elements with a specific
            set of keys can be modified"""
         from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+        from omsi.dataformat.file_reader_base import file_reader_base
         if key in self:
             if key == "omsi_object":
                 if omsi_file_common.is_managed(value):
@@ -115,12 +129,12 @@ class omsi_dependency(dict):
                     from omsi.shared.omsi_data_selection import selection_to_string
                     new_value = unicode(selection_to_string(selection=value))
                 dict.__setitem__(self, key, new_value)
-                dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
+                dict.__setitem__(self, '_data', None)  # Any previously loaded data may be invalid (delete)
             elif key == 'dataname':
                 if not isinstance(value, basestring):
                     raise ValueError('Dataname must be a string')
                 dict.__setitem__(self, 'dataname', unicode(value))
-                dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
+                dict.__setitem__(self, '_data', None)  # Any previously loaded data may be invalid (delete)
             elif key == 'param_name':
                 if not isinstance(value, basestring):
                     raise ValueError('param_name must be a string')
@@ -134,6 +148,12 @@ class omsi_dependency(dict):
             elif key == 'help':
                 if isinstance(value, basestring):
                     dict.__setitem__(self, 'help', unicode(value))
+            elif key == 'dependency_type':
+                if value in self.dependency_types.values():
+                    dict.__setitem__(self, 'dependency_type', value)
+                else:
+                    raise ValueError('Unknown dependency type specified. Valid types are: ' +
+                                     str(self.dependency_types))
             else:
                 dict.__setitem__(self, key, value)
             # print super(omsi_dependency,self).__str__()
@@ -158,7 +178,6 @@ class omsi_dependency(dict):
                return None
             else:
                 return self.get_data()[key]
-
 
     def _force_set_data(self, data):
         """
