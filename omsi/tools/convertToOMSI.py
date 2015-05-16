@@ -10,6 +10,7 @@
 
 from omsi.dataformat.omsi_file import *
 from omsi.dataformat import *
+from omsi.dataformat import file_reader_base
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
 from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
@@ -1058,7 +1059,8 @@ class ConvertFiles(object):
 
             # Save the pointer to the omsi object in the file in the dataset list
             curr_dataset['omsi_object'] = data
-            if isinstance(input_file, file_reader_base.file_reader_base_multidata):
+            if isinstance(input_file, file_reader_base.file_reader_base_multidata) or \
+                    isinstance(input_file, file_reader_base.file_reader_base_with_regions):
                 curr_dataset['dependencies'] = input_file.get_dataset_dependencies()
 
             # Close the input data file and free up any allocated memory
@@ -1283,17 +1285,21 @@ class ConvertFiles(object):
                                 if match_found:
                                     dependency['omsi_object'] = dep_dataset['omsi_object']
                                     break
-                        dependency.pop('basename')
-                        dependency.pop('region')
-                        dependency.pop('dataset')
-                        new_omsi_dependency = dependency_dict()
-                        new_omsi_dependency.update(dependency)
-                        # Define and save the dependency
-                        #new_omsi_dependency = dependency_dict(link_name=dependency['link_name'],
-                        #                                      omsi_object=dependency['omsi_object'],
-                        #                                      help=dependency['help'],
-                        #                                      dependency_type=dependency['dependency_type'])
-                        curr_dataset['omsi_object'].add_dependency(new_omsi_dependency)
+
+                        # We may not have converted all datasets so we need to check whether we found
+                        # the corresponding omsi_object for the current dependency
+                        if dependency['omsi_object'] is not None:
+                            dependency.pop('basename')
+                            dependency.pop('region')
+                            dependency.pop('dataset')
+                            new_omsi_dependency = dependency_dict()
+                            new_omsi_dependency.update(dependency)
+                            # Define and save the dependency
+                            #new_omsi_dependency = dependency_dict(link_name=dependency['link_name'],
+                            #                                      omsi_object=dependency['omsi_object'],
+                            #                                      help=dependency['help'],
+                            #                                      dependency_type=dependency['dependency_type'])
+                            curr_dataset['omsi_object'].add_dependency(new_omsi_dependency)
 
         ####################################################################
         #  Generate the XDMF header file for the HDF5 file                ##

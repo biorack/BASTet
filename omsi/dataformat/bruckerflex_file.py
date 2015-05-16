@@ -49,6 +49,7 @@ a = bruckerflex_file( dirname )
 import os
 import numpy as np
 import math
+from omsi.shared.dependency_data import dependency_dict
 from omsi.dataformat.file_reader_base import file_reader_base_with_regions
 
 
@@ -125,12 +126,13 @@ class bruckerflex_file(file_reader_base_with_regions):
         # ToDo this reads a single spectrum (ie., fid file) to figure out the
         # length of the spectra. This obviously means that we assume a single
         # m/z axis for all spectra
-        temp_spectrum = self.s_read_fid(
-            self.pixel_dict['fid'].compressed()[0], self.data_type)
+        temp_spectrum = self.s_read_fid(self.pixel_dict['fid'].compressed()[0],
+                                        self.data_type)
         self.full_shape = [self.pixel_dict['regions'].shape[0],
                            self.pixel_dict['regions'].shape[1], temp_spectrum.shape[0]]
-        self.shape = [self.pixel_dict['regions'].shape[0], self.pixel_dict[
-            'regions'].shape[1], temp_spectrum.shape[0]]  # Number of pixels in x,y, and z
+        self.shape = [self.pixel_dict['regions'].shape[0],
+                      self.pixel_dict['regions'].shape[1],
+                      temp_spectrum.shape[0]]  # Number of pixels in x,y, and z
 
         # ToDo this reads a single acqu metadata file to figure out the m/z
         # axis. This obviously means that we assume a single m/z axis for all
@@ -219,9 +221,46 @@ class bruckerflex_file(file_reader_base_with_regions):
         """Close the img file"""
         pass
 
-    # def __del__(self) :
-    #    """Close the file before garbage collection"""
-    #    self.close_file()
+    def get_dataset_dependencies(self):
+        """
+        Get the dependencies between the current region and any of the
+        other region datasets stored in the current file. If self.select_region
+        is not set, then the function is expected to return a list of lists
+        with all dependencies for all datasets.
+
+        :return: List of dependencies (or list of lists of dependencies if self.select_dataset is None)
+            where each dependency is a dict of the following form:
+                {
+                    'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
+                    'link_name': ms2_link_name,  # Name for the dependency link to be used
+                    'basename': basename,        # Basename of the file
+                    'region': None,              # Index of the region in the dataset or None
+                    'dataset': ind2,             # Index of the dataset withing the file or None
+                    'help':scan_types[ms1scan],  # Help describing the depdency
+                    dependency_type': ... }      # Type of dependency see dependency_dict.dependency_type
+                                                 # for available types
+        """
+        dependency_list = []
+        if self.select_region is None:
+            for region_index, region in enumerate(self.region_dicts):
+                main_to_region = {'omsi_object': None,
+                                  'link_name': 'msi_region_' + str(region_index),
+                                  'basename': self.basename,
+                                  'region': region_index,
+                                  'dataset': None,
+                                  'help': 'Dependency pointing to a subregion of the MSI dataset',
+                                  'dependency_type': dependency_dict.dependency_types['contains']}
+                dependency_list.append(main_to_region)
+        else:
+            region_to_main = {'omsi_object': None,
+                              'link_name': 'msi_full',
+                              'basename': self.basename,
+                              'region': None,
+                              'dataset': None,
+                              'help': 'Dependency pointing to the full MSI dataset this dataset is a sub-region of',
+                              'dependency_type': dependency_dict.dependency_types['subset']}
+            dependency_list.append(region_to_main)
+        return dependency_list
 
     def __read_spectrum__(self, filename, selection):
         """Read data from a single fid file with the intensities.

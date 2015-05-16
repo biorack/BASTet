@@ -32,6 +32,8 @@ class dependency_dict(dict):
     dependency_types = {'parameter' : 'parameter',    # Default value, defining that this dependency defines a parameter
                         'link': 'link',               # A not further defined link to a related dataset
                         'co_modality': 'co_modality', # Data acquired from a related data modality
+                        'subset': 'subset',           # The source is a subset of the object we link to
+                        'contains': 'contains',       # The dataset we link to is contained in the source
                         'undefined': None             # Undefined dependency type
                         }
 
