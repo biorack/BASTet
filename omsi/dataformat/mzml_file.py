@@ -470,6 +470,8 @@ class mzml_file(file_reader_base_multidata):
         """
         Get the dependencies between the current dataset and any of the
         other datasets stored in the current file.
+
+        Inherited from
         """
         if self.select_dataset is not None:
             return self.scan_dependencies[self.select_dataset]
@@ -480,7 +482,7 @@ class mzml_file(file_reader_base_multidata):
         """
         Get dict of additional metadata associated with the current dataset.
 
-        Inherited from file_reader_base.
+        Inherited from file_reader_base.file_reader_base_multidata.
 
         :return: Dict where keys are strings and associated values to be stored as
             metadata with the dataset.

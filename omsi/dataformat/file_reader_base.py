@@ -245,15 +245,14 @@ class file_reader_base_with_regions(file_reader_base):
 
         :return: List of dependencies (or list of lists of dependencies if self.select_dataset is None)
             where each dependency is a dict of the following form:
-                {
-                    'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
-                    'link_name': ms2_link_name,  # Name for the dependency link to be used
-                    'basename': basename,        # Basename of the file
-                    'region': None,              # Index of the region in the dataset or None
-                    'dataset': ind2,             # Index of the dataset withing the file or None
-                    'help':scan_types[ms1scan],  # Help describing the depdency
-                    dependency_type': ... }      # Type of dependency see dependency_dict.dependency_type
-                                                 # for available types
+
+            * 'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
+            * 'link_name': ms2_link_name,  # Name for the dependency link to be used
+            * 'basename': basename,        # Basename of the file
+            * 'region': None,              # Index of the region in the dataset or None
+            * 'dataset': ind2,             # Index of the dataset withing the file or None
+            * 'help':scan_types[ms1scan],  # Help describing the depdency
+            *  dependency_type': ... }     # Type of dependency see dependency_dict.dependency_type for available types
         """
         raise NotImplementedError('Determine the dependencies to other data blocks for the the current block')
 
@@ -315,15 +314,15 @@ class file_reader_base_multidata(file_reader_base):
 
         :return: List of dependencies (or list of lists of dependencies if self.select_dataset is None)
             where each dependency is a dict of the following form:
-                {
-                    'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
-                    'link_name': ms2_link_name,  # Name for the dependency link to be used
-                    'basename': basename,        # Basename of the file
-                    'region': None,              # Index of the region in the dataset or None
-                    'dataset': ind2,             # Index of the dataset withing the file or None
-                    'help':scan_types[ms1scan],  # Help describing the depdency
-                    dependency_type': ... }      # Type of dependency see dependency_dict.dependency_type
-                                                 # for available types
+
+            * 'omsi_object': None,         # The omsi file API object where the data is stored. Often None.
+            * 'link_name': ms2_link_name,  # Name for the dependency link to be used
+            * 'basename': basename,        # Basename of the file
+            * 'region': None,              # Index of the region in the dataset or None
+            * 'dataset': ind2,             # Index of the dataset withing the file or None
+            * 'help':scan_types[ms1scan],  # Help describing the depdency
+            *  dependency_type': ... }     # Type of dependency see dependency_dict.dependency_type for available types
+
         """
         raise NotImplementedError('Determine the dependencies to other data blocks for the the current block')
 

@@ -220,7 +220,7 @@ class omsi_file_instrument(omsi_file_common):
     def set_instrument_name(self,
                             name):
         """
-        Overwrite the current identfier string for the experiment with the given string.
+        Overwrite the current identifier string for the experiment with the given string.
 
         :param name: The new instrument name.
         :type name: string.
