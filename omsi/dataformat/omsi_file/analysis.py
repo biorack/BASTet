@@ -762,16 +762,16 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :return: Instance of the specific analysis object (e.g, omsi_nmf) that inherits from
                  omsi.analysis.analysis_base with the input parameters, output result,
                  and dependencies restored. We can call execute(..) on the returned object
-                 to rerun an analysis. May return omsi_analysis_generic in case that the
+                 to rerun an analysis. May return analysis_generic in case that the
                  specific analysis is not known.
         """
         from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
-        from omsi.analysis.omsi_analysis_generic import omsi_analysis_generic
+        from omsi.analysis.generic import analysis_generic
         try:
             analysis_class = omsi_viewer_helper.analysis_name_to_class(self.get_analysis_type()[0])
             ignore_type_conflict = False
         except:
-            analysis_class = omsi_analysis_generic
+            analysis_class = analysis_generic
             ignore_type_conflict = True
         analysis_instance = analysis_class()
         analysis_instance.read_from_omsi_file(analysis_object=self,
@@ -795,9 +795,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  re-executing the analysis. None is returned in case the analysis object
                  cannot be created.
         """
-        from omsi.analysis import omsi_analysis_generic
+        from omsi.analysis import analysis_generic
         analysis_instance = self.restore_analysis(**kwargs)
-        if isinstance(analysis_instance, omsi_analysis_generic):
+        if isinstance(analysis_instance, analysis_generic):
             return None
         else:
             analysis_instance.execute()

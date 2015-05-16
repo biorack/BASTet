@@ -1,18 +1,18 @@
 shared Package
 ==============
 
-:mod:`omsi_data_selection` Module
+:mod:`data_selection` Module
 ---------------------------------
 
-.. automodule:: omsi.shared.omsi_data_selection
+.. automodule:: omsi.shared.data_selection
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`dependency_dict` Module
+:mod:`dependency_data` Module
 -----------------------------
 
-.. automodule:: omsi.shared.dependency_dict
+.. automodule:: omsi.shared.dependency_data
     :members:
     :undoc-members:
     :show-inheritance:

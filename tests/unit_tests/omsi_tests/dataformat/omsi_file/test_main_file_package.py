@@ -5,7 +5,7 @@ This includes functionality across many of the modules.
 import unittest
 import tempfile
 from omsi.dataformat.omsi_file.main_file import omsi_file
-from omsi.analysis.omsi_analysis_generic import omsi_analysis_generic
+from omsi.analysis.generic import analysis_generic
 from omsi.analysis.analysis_data import analysis_data
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 import numpy as np
@@ -32,7 +32,7 @@ class test_omsi_file(unittest.TestCase):
     def test_create_analysis(self):
         # Testing the creation of derived analysis
         testanaidname = "Peak Finding 123"
-        testana = omsi_analysis_generic(name_key=testanaidname)
+        testana = analysis_generic(name_key=testanaidname)
         testanadata = analysis_data()
         testanadata['name'] = 'peakcube'
         testanadata['data'] = np.zeros(shape=(5, 5, 5), dtype='float32')

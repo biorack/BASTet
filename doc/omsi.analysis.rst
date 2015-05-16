@@ -9,10 +9,10 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_analysis_base` Module
+:mod:`base` Module
 --------------------------------
 
-.. automodule:: omsi.analysis.omsi_analysis_base
+.. automodule:: omsi.analysis.base
     :members:
     :undoc-members:
     :show-inheritance:
@@ -25,18 +25,10 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_analysis_driver` Module
-----------------------------------
-
-.. automodule:: omsi.analysis.omsi_analysis_driver
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`omsi_analysis_generic` Module
+:mod:`generic` Module
 -----------------------------------
 
-.. automodule:: omsi.analysis.omsi_analysis_generic
+.. automodule:: omsi.analysis.generic
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,4 +48,5 @@ Subpackages
 
     omsi.analysis.findpeaks
     omsi.analysis.multivariate_stats
+    omsi.analysis.msi_filtering
 

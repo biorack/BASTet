@@ -7,7 +7,7 @@ to load and investigate the data.
 from omsi.analysis.base import analysis_base
 
 
-class omsi_analysis_generic(analysis_base):
+class analysis_generic(analysis_base):
     """
     This analysis class is used if the specific anlaysis type is unknown, e.g., when loading
     custom user-defined analysis data that may have not be available in the standard
@@ -19,7 +19,7 @@ class omsi_analysis_generic(analysis_base):
 
         :param name_key: The name for the analysis
         """
-        super(omsi_analysis_generic, self).__init__()
+        super(analysis_generic, self).__init__()
         self.analysis_identifier = name_key
         self.real_analysis_type = None  # This is the analysis type indicated in the HDF5 file
 
@@ -27,7 +27,7 @@ class omsi_analysis_generic(analysis_base):
         """
         Nothing to do here.
         """
-        raise NotImplementedError("We cannot run this analysis. omsi_analysis_generic cannot run an analysis.")
+        raise NotImplementedError("We cannot run this analysis. analysis_generic cannot run an analysis.")
 
     @classmethod
     def v_qslice(cls,
@@ -48,7 +48,7 @@ class omsi_analysis_generic(analysis_base):
         """
         Implement support for qspectrum URL requests for the viewer
         """
-        super(omsi_analysis_generic, cls).v_qspectrum(analysis_object, x, y, viewer_option)
+        super(analysis_generic, cls).v_qspectrum(analysis_object, x, y, viewer_option)
 
     @classmethod
     def v_qmz(cls,
@@ -58,7 +58,7 @@ class omsi_analysis_generic(analysis_base):
         """
         Implement support for qmz URL requests for the viewer
         """
-        super(omsi_analysis_generic, cls).v_qmz(analysis_object, qslice_viewer_option, qspectrum_viewer_option)
+        super(analysis_generic, cls).v_qmz(analysis_object, qslice_viewer_option, qspectrum_viewer_option)
 
     @classmethod
     def v_qspectrum_viewer_options(cls,
@@ -66,7 +66,7 @@ class omsi_analysis_generic(analysis_base):
         """
         Define which viewer_options are supported for qspectrum URL's
         """
-        return super(omsi_analysis_generic, cls).v_qspectrum_viewer_options(analysis_object)
+        return super(analysis_generic, cls).v_qspectrum_viewer_options(analysis_object)
 
     @classmethod
     def v_qslice_viewer_options(cls,
@@ -74,7 +74,7 @@ class omsi_analysis_generic(analysis_base):
         """
         Define which viewer_options are supported for qspectrum URL's
         """
-        return super(omsi_analysis_generic, cls).v_qslice_viewer_options(analysis_object)
+        return super(analysis_generic, cls).v_qslice_viewer_options(analysis_object)
 
     @classmethod
     def get_analysis_type(cls):
@@ -96,7 +96,7 @@ class omsi_analysis_generic(analysis_base):
         instance variable but otherwise uses the default behavior.
 
         """
-        output_val = super(omsi_analysis_generic, self).read_from_omsi_file(
+        output_val = super(analysis_generic, self).read_from_omsi_file(
             analysis_object=analysis_object,
             load_data=load_data,
             load_parameters=load_parameters,

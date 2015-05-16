@@ -11,8 +11,9 @@ and implements various basic file readers for third-party formats, e.g,
 
     omsi.dataformat.omsi_file
 
-:mod: `file_reader_base` Module
--------------------------------
+
+:mod:`file_reader_base` Module
+------------------------------
 
 .. automodule:: omsi.dataformat.file_reader_base
     :members:

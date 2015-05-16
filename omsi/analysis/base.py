@@ -1400,7 +1400,7 @@ class analysis_base(object):
                current analysis object even if the type indicated in the file does not match the
                class. Default value is False. This behavior can be useful when different analysis
                have compatible data structures or when we want to load the data in to a generic
-               analysis container, e.g, omsi_analysis_generic.
+               analysis container, e.g, analysis_generic.
 
         :returns bool: Boolean indicating whether the data was read successfully
 

@@ -8,7 +8,7 @@ from omsi.analysis.multivariate_stats import *
 from omsi.analysis.msi_filtering import *
 from omsi.analysis.base import *
 from omsi.analysis.analysis_data import *
-from omsi.analysis.omsi_analysis_generic import *
+from omsi.analysis.generic import *
 import omsi.analysis.findpeaks
 import omsi.analysis.multivariate_stats
 import omsi.analysis.msi_filtering
@@ -19,5 +19,5 @@ __all__ = ["findpeaks",
            "analysis_data",
            "analysis_base",
            "AnalysisReadyError",
-           "omsi_analysis_generic"] + findpeaks.all__ + multivariate_stats.all__ + msi_filtering.all__
+           "analysis_generic"] + findpeaks.all__ + multivariate_stats.all__ + msi_filtering.all__
 
