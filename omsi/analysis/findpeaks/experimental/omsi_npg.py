@@ -1,4 +1,4 @@
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 from omsi.analysis.analysis_data import analysis_data
 from omsi.shared.dependency_data import *
 from omsi.dataformat.omsi_file.main_file import omsi_file
@@ -26,7 +26,7 @@ class Node:
         return str(self.label)
 
 
-class omsi_npg(omsi_analysis_base):
+class omsi_npg(analysis_base):
     # class attributes: LPF data
     # set on start of omsi_npg_exec
     ##These have been replace by the parameters infrastrucutre

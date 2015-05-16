@@ -56,15 +56,15 @@ class omsi_analysis_manager(omsi_file_object_manager):
         creating of multiple other dependent analyses if they have not been saved before.
 
 
-        :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
-        :type analysis: omsi.analysis.omsi_analysis_base:
+        :param analysis: Instance of omsi.analysis.analysis_base defining the analysis
+        :type analysis: omsi.analysis.analysis_base:
 
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed
                        so that all data has been written to file
         :type flush_io: bool
 
         :param force_save: Should we save the analysis even if it has been saved before for the same parent?
-            If force_save is False (default) and the self.omsi_analysis_storage parameter of the omsi_analysis_base
+            If force_save is False (default) and the self.omsi_analysis_storage parameter of the analysis_base
             object given as the analysis input parameter is not empty, then we will try to locate the appropriate
             object first and return it instead, rather than saving the analysis again. Note, only if the prior
             storage location is within the current self.analysis_parent will we return the previous storage object,
@@ -181,15 +181,15 @@ class omsi_file_analysis(omsi_dependencies_manager,
                          function should determine the index automatically.
         :type analysis_index: int or None
 
-        :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
-        :type analysis: omsi.analysis.omsi_analysis_base:
+        :param analysis: Instance of omsi.analysis.analysis_base defining the analysis
+        :type analysis: omsi.analysis.analysis_base:
 
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 bufferes are flushed
                        so that all data has been written to file
         :type flush_io: True
 
         :param force_save: Should we save the analysis even if it has been saved before? If force_save is
-            False (default) and the self.omsi_analysis_storage parameter of the omsi_analysis_base object
+            False (default) and the self.omsi_analysis_storage parameter of the analysis_base object
             given as the analysis input parameter is not None, then the analysis will not be saved again.
             If force_save is True, then the analysis will be saved either way and the self.omsi_analysis_storage
             parameter will be extended.
@@ -208,14 +208,14 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :raises: IndexError is raised in case that an analysis with the given index already exists.
         """
         # 1 Import required modules
-        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+        from omsi.analysis.base import analysis_base
         import time
 
         # 2 Check if input values are correct
         # 2.1 Confirm that we have a valid analysis object
-        if not isinstance(analysis, omsi_analysis_base):
+        if not isinstance(analysis, analysis_base):
             errormessage = "Could not write the analysis. The input object was of type " + \
-                str(type(analysis)) + " not of omsi_analysis_base as expected."
+                str(type(analysis)) + " not of analysis_base as expected."
             raise NameError(errormessage)
 
         # 2.2 Create a name for the group and check if it is valid
@@ -248,7 +248,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         if save_unsaved_dependencies:
             save_extra_dependencies = []
             for dependency in analysis.get_all_dependency_data():
-                if isinstance(dependency['data']['omsi_object'], omsi_analysis_base):
+                if isinstance(dependency['data']['omsi_object'], analysis_base):
                     if not dependency['data']['omsi_object'].has_omsi_analysis_storage():
                         save_extra_dependencies.append(dependency)
             if len(save_extra_dependencies) > 0:  # Same as 'if save_extra_dependencies:'
@@ -282,8 +282,8 @@ class omsi_file_analysis(omsi_dependencies_manager,
         then the raw data associated with the given parameter will be saved instead.
 
         :param analysis_group: h5py group in which the analysis data should be stored.
-        :param analysis: Instance of omsi.analysis.omsi_analysis_base defining the analysis
-        :type analysis: omsi.analysis.omsi_analysis_base:
+        :param analysis: Instance of omsi.analysis.analysis_base defining the analysis
+        :type analysis: omsi.analysis.analysis_base:
 
         :returns: The omsi_file_analysis object for the newly created analysis group. The analysis data is
                   automatically written to file by this function so no addition work is required.
@@ -291,7 +291,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         from omsi.analysis.analysis_data import analysis_data
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
-        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+        from omsi.analysis.base import analysis_base
 
         # 1. Write the analysis name
         analysis_identifier_data = analysis_group.require_dataset(
@@ -322,7 +322,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # 4.1 Resolve in-memory dependencies if possible
         for dependent_parameter in analysis.get_all_dependency_data():
             # 4.1.1 We have an in-memory dependency
-            if isinstance(dependent_parameter['data']['omsi_object'], omsi_analysis_base):
+            if isinstance(dependent_parameter['data']['omsi_object'], analysis_base):
                 # 4.1.1.1 We can resolve the dependency to an object in an HDF5 file
                 if dependent_parameter['data']['omsi_object'].has_omsi_analysis_storage():
                     # Create a new dependency that points to the approbriate file location
@@ -751,7 +751,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         Load an analysis from file and create an instance of the appropriate
         analysis object defined by the analysis type (i.e., a derived class
-        of `omsi.analysis. omsi_analysis_base`)
+        of `omsi.analysis. analysis_base`)
 
         :param load_data: Should the analysis data be loaded from file (default) or just stored as h5py data objects
         :param load_parameters: Should parameters be loaded from file (default) or just stored as h5py data objects.
@@ -760,7 +760,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
             or just as h5py objects.
 
         :return: Instance of the specific analysis object (e.g, omsi_nmf) that inherits from
-                 omsi.analysis.omsi_analysis_base with the input parameters, output result,
+                 omsi.analysis.analysis_base with the input parameters, output result,
                  and dependencies restored. We can call execute(..) on the returned object
                  to rerun an analysis. May return omsi_analysis_generic in case that the
                  specific analysis is not known.
@@ -790,7 +790,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param kwargs: Additional keyword arguments to be passed to the execute function of the analysis
 
         :return: Instance of the specific analysis object (e.g, omsi_nmf) that inherits from
-                 omsi.analysis.omsi_analysis_base with the input parameters and
+                 omsi.analysis.analysis_base with the input parameters and
                  dependencies restored from file. The output, however, is the result from
                  re-executing the analysis. None is returned in case the analysis object
                  cannot be created.

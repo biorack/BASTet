@@ -220,19 +220,19 @@ class omsi_viewer_helper(object):
     def available_analysis(cls):
         """
         Get all available analysis, i.e., all analysis that are subclasses of
-        omsi_analysis_base.
+        analysis_base.
 
         :return: Dictionary where the dict-keys are the full qualified name of the
                 module and the values are the analysis class corresponding to that
                 module.
         """
-        return {sub.__module__: sub for sub in omsi_analysis_base.__subclasses__()}
+        return {sub.__module__: sub for sub in analysis_base.__subclasses__()}
 
     @classmethod
     def available_analysis_descriptions(cls):
         """
         Get all available analysis, i.e., all analysis that are subclasses of
-        omsi_analysis_base. For each analysis compile the list of input parameters,
+        analysis_base. For each analysis compile the list of input parameters,
         outputs, the corresponding class etc.
 
         :return: Dictionary where the dict-keys are the full qualified name of the
@@ -243,5 +243,5 @@ class omsi_viewer_helper(object):
                                  'parameters': sub().get_parameter_names(),
                                  'outputs': sub().get_analysis_data_names(),
                                  'help': sub.__doc__ + "\n\n" + sub.execute_analysis.__doc__}
-                for sub in omsi_analysis_base.__subclasses__()}
+                for sub in analysis_base.__subclasses__()}
 

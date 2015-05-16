@@ -1,4 +1,4 @@
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 from omsi.analysis.analysis_data import analysis_data
 from omsi.shared.dependency_data import *
 from omsi.dataformat.omsi_file.main_file import omsi_file
@@ -9,7 +9,7 @@ import numpy as np
 import os, sys
 
 
-class omsi_peakcube(omsi_analysis_base):
+class omsi_peakcube(analysis_base):
     def __init__(self, name_key="undefined"):
         """Initalize the basic data members"""
         super(omsi_peakcube, self).__init__()

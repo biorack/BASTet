@@ -2,10 +2,10 @@
 Local peak finding analysis module.
 """
 
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 
-class omsi_findpeaks_local(omsi_analysis_base):
+class omsi_findpeaks_local(analysis_base):
     """
     Class defining a basic gloabl peak finding. The default implementation computes the peaks on the average
     spectrum and then computes the peak-cube data, i.e., the values for the detected peaks at each pixel.

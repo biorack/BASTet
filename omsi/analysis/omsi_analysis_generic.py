@@ -4,10 +4,10 @@ a custom user-defined analysis from file for which the indicate class may not be
 available with the local installation. In this case we want to at least be able
 to load and investigate the data.
 """
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 
-class omsi_analysis_generic(omsi_analysis_base):
+class omsi_analysis_generic(analysis_base):
     """
     This analysis class is used if the specific anlaysis type is unknown, e.g., when loading
     custom user-defined analysis data that may have not be available in the standard
@@ -91,7 +91,7 @@ class omsi_analysis_generic(omsi_analysis_base):
                             dependencies_omsi_format=True,
                             ignore_type_conflict=False):
         """
-        See `omsi.analysis.omsi_analysis_base.read_from_omsi_file(...)` for details.
+        See `omsi.analysis.analysis_base.read_from_omsi_file(...)` for details.
         The function is overwritten here mainly to initialize the self.real_analysis_type
         instance variable but otherwise uses the default behavior.
 

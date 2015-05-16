@@ -3,14 +3,14 @@ Module for performing CX factorization on MSI data.
 """
 import numpy as np
 
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_cx(omsi_analysis_base):
+class omsi_cx(analysis_base):
     """
     Class used to implement CX factorization on MSI data.
     """
@@ -50,7 +50,7 @@ class omsi_cx(omsi_analysis_base):
             Describe what your analysis does and how a user can use it. Note, a user will
             call the function execute(...) which takes care of storing parameters, collecting
             execution data etc., so that you only need to implement your analysis, the rest
-            is taken care of by omsi_analysis_base. omsi uses Sphynx syntax for the
+            is taken care of by analysis_base. omsi uses Sphynx syntax for the
             documentation.
 
             Keyword Arguments:

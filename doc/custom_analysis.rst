@@ -26,21 +26,21 @@ Once the basic integration is complete, you may want integrate your analysis ful
 This step makes your analysis "self-sufficient" in that it allows you to execute your analysis from the command-line.
 
 
-Some important features of ``omsi_analysis_base``
+Some important features of ``analysis_base``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``omsi.analysis.omsi_analysis_base`` is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) integration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), iii) support for data provenance, and iv) in combination with the `omsi_analysis_driver` module enable the direct execution of analysis, e.g, from the command line
+``omsi.analysis.analysis_base`` is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) integration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), iii) support for data provenance, and iv) in combination with the `omsi_analysis_driver` module enable the direct execution of analysis, e.g, from the command line
 
 Slicing
 """""""
-``omsi_analysis_base`` implements basic slicing to access data stored in the main member variables. By default the data is retrieved from __data_list by the __getitem__(key) function, which implements the [..] operator, i.e., the functions returns __data_list[key]['data']. The key is a string indicating the name of the paramter to be retrieved. If the key is not found in the __data_list then the function will try to retrieve the data from __parameter_list instead. By adding "parameter/key" or "dependency/key" one may also explicitly retrieve values from the __parameter_list and __dependency_list.
+``analysis_base`` implements basic slicing to access data stored in the main member variables. By default the data is retrieved from __data_list by the __getitem__(key) function, which implements the [..] operator, i.e., the functions returns __data_list[key]['data']. The key is a string indicating the name of the paramter to be retrieved. If the key is not found in the __data_list then the function will try to retrieve the data from __parameter_list instead. By adding "parameter/key" or "dependency/key" one may also explicitly retrieve values from the __parameter_list and __dependency_list.
 
 Important Member Variables
 """"""""""""""""""""""""""
 
 * ``analysis_identifier`` defines the name for the analysis used as key in search operations.
 * ``__data_list`` defines a list of ``omsi.analysis.analysis_data.analysis_data`` objects to be written to the HDF5 file. Derived classes need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary. See ``omsi.analysis.analysis_data`` for details.
-* ``parameters``  List of ``parameter_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary using the provided ``add_parameter(...)`` function. See ``omsi.analysis.analysis_data`` and ``add_parameter(..)`` function of ``omsi_analysis_base`` for details.
+* ``parameters``  List of ``parameter_data`` to be written to the HDF5 file. Derived classes need to add all parameter data that should be saved for the analysis in the omsi HDF5 file to this dictionary using the provided ``add_parameter(...)`` function. See ``omsi.analysis.analysis_data`` and ``add_parameter(..)`` function of ``analysis_base`` for details.
 * ``data_names`` is a list of strings of all names of analysis output datasets. These are the target names for __data_list. **NOTE** Names of parameters specified in ``parameters`` and ``data_names`` should be distinct.
 
 I/O functions
@@ -57,7 +57,7 @@ Web API Functions
 
 Several convenient functions are used to allow the OpenMSI online viewer to interact with the analysis and to visualize it. The default implementations provided here simply indicate that the analysis does not support the data access operations required by the online viewer. Overwrite these functions in the derived analysis classes in order to interface them with the viewer. All viewer-related functions start with ``v\_...`` .
 
-NOTE: the default implementation of the viewer functions defined in ``omsi_analysis_base`` are designed to take care of the common requirement for providing viewer access to data from all depencies of an analysis. In many cases, the default implementation is often sill called at the end of custom viewer functions.
+NOTE: the default implementation of the viewer functions defined in ``analysis_base`` are designed to take care of the common requirement for providing viewer access to data from all depencies of an analysis. In many cases, the default implementation is often sill called at the end of custom viewer functions.
 
 NOTE: The viewer functions typically support a viewerOption parameter. viewerOption=0 is expected to refer to the analysis itself.
 
@@ -85,7 +85,7 @@ E.g. to execute a non-negative matrix factorization (NMF) using the `omsi.analys
         --msidata "test_brain_convert.h5:/entry_0/data_0"
         --save "test_ana_save.h5"
 
-Any analysis based on the infrastructure provided by ``omsi_analysis_base`` is fully integrated with OpenMSI file API provided by``omsi.dataformat.omsi_file``. This means the analysis can be directly saved to an OMSI HDF5 file and  the saved analysis can be restored from file. In OMSI files, analyses are generally associated with experiments, so that we use the ``omsi.dataformat.omsi_file.omsi_file_experiment`` API here.
+Any analysis based on the infrastructure provided by ``analysis_base`` is fully integrated with OpenMSI file API provided by``omsi.dataformat.omsi_file``. This means the analysis can be directly saved to an OMSI HDF5 file and  the saved analysis can be restored from file. In OMSI files, analyses are generally associated with experiments, so that we use the ``omsi.dataformat.omsi_file.omsi_file_experiment`` API here.
 
 .. code-block:: python
     :linenos:
@@ -113,7 +113,7 @@ Any analysis based on the infrastructure provided by ``omsi_analysis_base`` is f
 
     # To restore an analysis from file, i.e., read all the analysis data from file
     # and store it in a corresponding analysis object we can do the following.
-    # Similar to the read_from_omsi_file(...) function of omsi_analysis_base
+    # Similar to the read_from_omsi_file(...) function of analysis_base
     # mentioned below, we can decide via parameter settings of the function,
     # which portions of the analysis should be loaded into memory
     a2 = analysis_object.restore_analysis()
@@ -166,7 +166,7 @@ The simple steps outlined below provide you now with full integration of your an
     :linenos:
     :emphasize-lines: 6,7,27,28,29
 
-    class omsi_mypeakfinder(omsi_analysis_base) :
+    class omsi_mypeakfinder(analysis_base) :
 
         def __init__(self, name_key="undefined"):
             """Initalize the basic data members"""
@@ -313,7 +313,7 @@ In the ``__init__`` function specify the names of the input parameters of your a
 1.3: Implementing the ``execute_analysis`` function
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
-**1.3.1** Document your execute_analysis function. OpenMSI typically uses Sphynx notation in the doc-string. The doc-string of the execute_analysis(..) function and the class are used by the analysis driver modules to provide a description of your analysis as part of the help and will also be included in the help string generated by the `get_help_string()` inherited via `omsi_analysis_base` function.
+**1.3.1** Document your execute_analysis function. OpenMSI typically uses Sphynx notation in the doc-string. The doc-string of the execute_analysis(..) function and the class are used by the analysis driver modules to provide a description of your analysis as part of the help and will also be included in the help string generated by the `get_help_string()` inherited via `analysis_base` function.
 
 .. code-block:: python
     :linenos:
@@ -344,7 +344,7 @@ Step 2) Integrating the Analysis with the OpenMSI Web API:
 
 Once the analysis is stored in the OMSI file format, integration with ``qmetadata`` and ``qcube`` calls of the web API is automatic. The ``qmetadata`` and ``qcube`` functions provide general purpose access to the data so that we can immediatly start to program against our analysis.
 
-Some applications---such as the OpenMSI web-based viewer---utilize the simplified, special data access patterns ``qslice``, ``qspectrum``, and ``qmz`` in order to interact with the data. The default implementation of these function available in ``omsi.analysis.omsi_analysis_base`` exposes the data from all depencdencies of the analysis that support these patterns. For full integration with the web API, however, we need to implement this functionality in our analysis class. The ``qmz`` pattern in particular is relevant to both the ``qslice`` and ``qspectrum`` pattern and should be always implemented as soon as one of the two patterns is defined.
+Some applications---such as the OpenMSI web-based viewer---utilize the simplified, special data access patterns ``qslice``, ``qspectrum``, and ``qmz`` in order to interact with the data. The default implementation of these function available in ``omsi.analysis.analysis_base`` exposes the data from all depencdencies of the analysis that support these patterns. For full integration with the web API, however, we need to implement this functionality in our analysis class. The ``qmz`` pattern in particular is relevant to both the ``qslice`` and ``qspectrum`` pattern and should be always implemented as soon as one of the two patterns is defined.
 
 2.1 Implementing the ``qslice`` pattern
 """""""""""""""""""""""""""""""""""""""
@@ -353,7 +353,7 @@ Some applications---such as the OpenMSI web-based viewer---utilize the simplifie
     :linenos:
     :emphasize-lines: 4,5,18,20,21,22,23,30,31,32,33,38,39,42,44,45
 
-    class omsi_myanalysis(omsi_analysis_base) :
+    class omsi_myanalysis(analysis_base) :
         ...
 
         @classmethod
@@ -381,7 +381,7 @@ Some applications---such as the OpenMSI web-based viewer---utilize the simplifie
             #to allow one to trace back data and generate comlex visualizations involving
             #multiple different data sources that have some from of dependency in that they
             #led to the generation of this anlaysis. This behavior is already provided by
-            #the default implementation of this function ins omsi_analysis_base.
+            #the default implementation of this function ins analysis_base.
             elif viewer_option >= 0 :
                 #Note, the base class does not know out out viewer_options so we need to adjust
                 #the vieweOption accordingly by substracting the number of our custom options.
@@ -411,7 +411,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
     :linenos:
     :emphasize-lines: 3,4,38,39,40,41,47,48,49,54,55,56,58,64,67,72,75,77,78
 
-    class omsi_myanalysis(omsi_analysis_base) :
+    class omsi_myanalysis(analysis_base) :
         ...
         @classmethod
         def v_qspectrum( cls, anaObj , x, y , viewer_option=0) :
@@ -473,7 +473,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
             #to allow one to trace back data and generate comlex visualizations involving
             #multiple different data sources that have some from of dependency in that they
             #led to the generation of this anlaysis. This behavior is already provided by
-            #the default implementation of this function ins omsi_analysis_base.
+            #the default implementation of this function ins analysis_base.
             elif viewer_option >= 0 :
                 #Note, the base class does not know out out viewer_options so we need to adjust
                 #the vieweOption accordingly by substracting the number of our custom options.
@@ -497,7 +497,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
     :linenos:
     :emphasize-lines: 5,6,41,42,43,45,46,47,48,50,51,52,53,54,55,57,58,59,60,61,62,64
 
-    class omsi_myanalysis(omsi_analysis_base) :
+    class omsi_myanalysis(analysis_base) :
         ...
 
         @classmethod
@@ -675,7 +675,7 @@ Advanced: Customizing core features
 Custom data save
 ^^^^^^^^^^^^^^^^
 
-In most cases the default data save and restore functions should be sufficient. However, the ``omsi_analysis_base`` API also supports implementation of custom HDF5 write. To extend the existing data write code, simple implement the following function provided by ``omsi_analysis_base`` .
+In most cases the default data save and restore functions should be sufficient. However, the ``analysis_base`` API also supports implementation of custom HDF5 write. To extend the existing data write code, simple implement the following function provided by ``analysis_base`` .
 
 .. code-block:: python
     :linenos:
@@ -709,34 +709,34 @@ In most cases the default data save and restore functions should be sufficient. 
 Custom analysis restore
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Similarly in order implement custom data restore behavior we can overwrite the default implementation of :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.read_from_omsi_file` . In this case one will usually call the default implementation via ``super(omsi_myanalysis,self).read_from_omsi_file(...)`` first and then add any additional behavior.
+Similarly in order implement custom data restore behavior we can overwrite the default implementation of :py:meth:`omsi.analysis.analysis_base.analysis_base.read_from_omsi_file` . In this case one will usually call the default implementation via ``super(omsi_myanalysis,self).read_from_omsi_file(...)`` first and then add any additional behavior.
 
 
 Custom analysis execution
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Analysis are typically executed using the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.execute` function we inherit from py:class:`omsi.analysis.omsi_analysis_base.omsi_analysis_base`. The ``execute()`` function controls many pieces, from recording and defining input parameters and outputs to executing the actual analysis. We, therefore, for NOT recommend to overwrite the ``exceute(..)`` function, but rather to customize specific portions of the execution. To do this, `execute()` is broken into a number of functions which are called in a specific order. In this way we can easily overwrite select functions to customize a particular feature without having to overwrite the complete ``execute(..)`` function.
+Analysis are typically executed using the :py:meth:`omsi.analysis.analysis_base.analysis_base.execute` function we inherit from py:class:`omsi.analysis.analysis_base.analysis_base`. The ``execute()`` function controls many pieces, from recording and defining input parameters and outputs to executing the actual analysis. We, therefore, for NOT recommend to overwrite the ``exceute(..)`` function, but rather to customize specific portions of the execution. To do this, `execute()` is broken into a number of functions which are called in a specific order. In this way we can easily overwrite select functions to customize a particular feature without having to overwrite the complete ``execute(..)`` function.
 
 Customizing setting of parameters
 """""""""""""""""""""""""""""""""
 
-First, the execute function uses :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.update_analysis_parameters` to set all parameters that have been passed to execute accordingly. The default implementation of ``update_analysis_parameters(..)``, hence, simply calls ``self.set_parameter_values(...)`` to set all parameter values. We can customize this behavior simply by overwriting the ``update_analysis_parameters(...)`` function.
+First, the execute function uses :py:meth:`omsi.analysis.analysis_base.analysis_base.update_analysis_parameters` to set all parameters that have been passed to execute accordingly. The default implementation of ``update_analysis_parameters(..)``, hence, simply calls ``self.set_parameter_values(...)`` to set all parameter values. We can customize this behavior simply by overwriting the ``update_analysis_parameters(...)`` function.
 
 Customizing setting of default settings
 """""""""""""""""""""""""""""""""""""""
-Second, the execute function uses the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.define_missing_parameters` function to set any required parameters that have not been set by the user to their respective values. Overwrite this function to customize how default parameter values are determined/set.
+Second, the execute function uses the :py:meth:`omsi.analysis.analysis_base.analysis_base.define_missing_parameters` function to set any required parameters that have not been set by the user to their respective values. Overwrite this function to customize how default parameter values are determined/set.
 
 Customizing the recording of runtime information
 """"""""""""""""""""""""""""""""""""""""""""""""
-The recording of runtime information is performed using the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_record_preexecute` and :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_record_postexecute` functions. As the names indicate, the preexecute function is called before the ``execute_analysis`` function is called and records basic system information, and the postexecute function is called after the analysis is completed to record additional information, e.g, the time and duration of the analysis. The function py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.runinfo_clean_up` is then called to clean up the recorded runtime information (which is stored in `self.run_info`). By default, ``runinfo_clean_up()`` removes any empty entries, i.e., key/value pairs where the value is either None or an empty string. We can customize the clean-up process by overwriting ``runinfo_clean_up()``
+The recording of runtime information is performed using the :py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_record_preexecute` and :py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_record_postexecute` functions. As the names indicate, the preexecute function is called before the ``execute_analysis`` function is called and records basic system information, and the postexecute function is called after the analysis is completed to record additional information, e.g, the time and duration of the analysis. The function py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_clean_up` is then called to clean up the recorded runtime information (which is stored in `self.run_info`). By default, ``runinfo_clean_up()`` removes any empty entries, i.e., key/value pairs where the value is either None or an empty string. We can customize the clean-up process by overwriting ``runinfo_clean_up()``
 
 Customizing the analysis execution
 """"""""""""""""""""""""""""""""""
-The analysis is completely implemented in the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.execute_analysis` function, which we have to implement in our derived class, i.e, running the analysis is fully custom anyways.
+The analysis is completely implemented in the :py:meth:`omsi.analysis.analysis_base.analysis_base.execute_analysis` function, which we have to implement in our derived class, i.e, running the analysis is fully custom anyways.
 
 Customizing the recording of analysis outputs
 """""""""""""""""""""""""""""""""""""""""""""
-Finally (i.e., right before returning analysis results), ``execute(..)`` uses the :py:meth:`omsi.analysis.omsi_analysis_base.omsi_analysis_base.record_execute_analysis_outputs` function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., `self[output_name] = my_output`. By overwriting `record_execute_analysis_outputs(...)` we can customize the recording of data outputs.
+Finally (i.e., right before returning analysis results), ``execute(..)`` uses the :py:meth:`omsi.analysis.analysis_base.analysis_base.record_execute_analysis_outputs` function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., `self[output_name] = my_output`. By overwriting `record_execute_analysis_outputs(...)` we can customize the recording of data outputs.
 
 
 

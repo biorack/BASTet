@@ -100,7 +100,7 @@ class dependency_dict(dict):
                     value):
         """Overwrite the __setitem__ function inherited from dict to ensure that only elements with a specific
            set of keys can be modified"""
-        from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+        from omsi.analysis.base import analysis_base
         from omsi.dataformat.file_reader_base import file_reader_base
         if key in self:
             if key == "omsi_object":
@@ -116,7 +116,7 @@ class dependency_dict(dict):
                         warnings.warn("The generated dependency does not point to a managed object.")
                         dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
                     dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
-                elif isinstance(value, omsi_analysis_base):
+                elif isinstance(value, analysis_base):
                     dict.__setitem__(self, 'omsi_object', value)
                 else:
                     raise ValueError(str(value) +

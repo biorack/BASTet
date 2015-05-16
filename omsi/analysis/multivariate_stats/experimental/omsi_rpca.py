@@ -4,12 +4,12 @@ File defining classes and methods for randomized PCA analysis of OMSI images via
 import numpy as np
 import time
 from sklearn import decomposition
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_rpca(omsi_analysis_base):
+class omsi_rpca(analysis_base):
     """
     Class representing Randomized PCA analysis
     REF: http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html

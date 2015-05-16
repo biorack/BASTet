@@ -3,7 +3,7 @@ Module used to help with driving the execution of omsi-based analyses.
 """
 import sys
 import argparse
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.main_file import omsi_file
 from omsi.workflow.analysis_driver.base import omsi_driver_base
@@ -38,7 +38,7 @@ class omsi_cl_driver(omsi_driver_base):
     :cvar profile_mem_arg_name: Name of the keyword argument used to enable profiling of memory usage of an analysis
 
 
-    :ivar analysis_class: The class (subclass of omsi_analysis_base) defining the analysis to be executed
+    :ivar analysis_class: The class (subclass of analysis_base) defining the analysis to be executed
     :ivar add_analysis_class_arg: Boolean indicating whether an optional positional command line argument
         should be used to determine the analysis class (or whether the analysis class will be set explicitly)
     :ivar add_output_arg: Boolean indicating whether an optional keyword argument should be added to define
@@ -73,10 +73,10 @@ class omsi_cl_driver(omsi_driver_base):
         """
 
         :param analysis_class: The analysis class for which we want to execute the analysis.
-            The analysis class must derive from omsi.analysis.omsi_analysis_base. May be None
+            The analysis class must derive from omsi.analysis.analysis_base. May be None
             in case that we use the command-line to define the analysis class via the optional
             positional argument for the command class (i.e., set add_analysis_class_arg to True).
-        :type analysis_class: omsi.analysis.omsi_analysis_base
+        :type analysis_class: omsi.analysis.base
         :param add_analysis_class_arg: Boolean indicating whether we will use the positional
             command-line argument to determine the analysis class name
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
@@ -419,9 +419,9 @@ class omsi_cl_driver(omsi_driver_base):
         if self.analysis_class is None:
             print self.parser.print_help
             raise ValueError('Could not determine the analysis class.')
-        if not issubclass(self.analysis_class, omsi_analysis_base):
+        if not issubclass(self.analysis_class, analysis_base):
             print self.parser.print_help
-            raise ValueError('Analysis class is not a subclass of omsi_analysis_base.')
+            raise ValueError('Analysis class is not a subclass of analysis_base.')
 
         # Initialize the argument parser
         if self.parser is None:

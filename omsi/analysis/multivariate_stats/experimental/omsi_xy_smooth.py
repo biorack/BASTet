@@ -1,10 +1,10 @@
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 import numpy as np
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_xy_smooth(omsi_analysis_base):
+class omsi_xy_smooth(analysis_base):
     """
     Class representing x,y smoothing of an image with a 2D-gaussian kernel.
     """

@@ -1,4 +1,4 @@
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 from omsi.analysis.analysis_data import analysis_data
 from omsi.shared.dependency_data import *
 from omsi.dataformat.omsi_file.main_file import omsi_file
@@ -17,8 +17,8 @@ PKSDET_ARR_SIZE = 4000  # limit of total of peaks that can be stored (C array si
 SET_MEM_CAP = 1200000000  # 1200000000 bytes = 1.12 gb :: max size of data per cl gate
 openCLfpFile = "opencl_findpeaks.cl"  # file name of the findpeaks opencl code
 
-# class omsi_findpeaks_local(omsi_analysis_base) :
-class omsi_lpf(omsi_analysis_base):
+# class omsi_findpeaks_local(analysis_base) :
+class omsi_lpf(analysis_base):
     def __init__(self, name_key="undefined"):
         super(omsi_lpf, self).__init__()
         self.analysis_identifier = name_key

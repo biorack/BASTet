@@ -1,9 +1,9 @@
 """
 Making the scipy.signal.find_peaks_cwt() method available as an omsi analysis method
 """
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
-class omsi_findpeaks_cwt(omsi_analysis_base):
+class omsi_findpeaks_cwt(analysis_base):
     """
     Class defining a local (pixel by pixel) peak-finding for profile-mode data.  Default arguments
      are the same as in scipy.signal.find_peaks_cwt().

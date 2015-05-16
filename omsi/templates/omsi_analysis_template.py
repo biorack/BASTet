@@ -1,13 +1,13 @@
 """
 Template intended to help with the development of new analysis modules.
 """
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_analysis_template(omsi_analysis_base):
+class omsi_analysis_template(analysis_base):
     """
     Template intended to help with the development of new analysis classes.
 
@@ -26,7 +26,7 @@ class omsi_analysis_template(omsi_analysis_base):
         EDIT_ME
 
         Change the class-name to your class to call the init function of
-        omsi_analysis_base. If you did a replace all then this should be done already.
+        analysis_base. If you did a replace all then this should be done already.
         """
         super(omsi_analysis_template, self).__init__()
         dtypes = self.get_default_dtypes()
@@ -69,7 +69,7 @@ class omsi_analysis_template(omsi_analysis_base):
         Describe what your analysis does and how a user can use it. Note, a user will
         call the function execute(...) which takes care of storing parameters, collecting
         execution data etc., so that you only need to implement your analysis, the rest
-        is taken care of by omsi_analysis_base.
+        is taken care of by analysis_base.
 
         Keyword Arguments:
 
@@ -110,7 +110,7 @@ class omsi_analysis_template(omsi_analysis_base):
            If we don't want to automatically record all outputs or otherwise
            need to customize the recording of outputs, then overwrite the
            self.record_execute_analysis_outputs() function inherited from
-           omsi_analysis_base. In this case we need to record our outputs
+           analysis_base. In this case we need to record our outputs
            manually via:
 
            self['my_result'] = my_output

@@ -48,7 +48,7 @@ class AnalysisReadyError(Exception):
         super(AnalysisReadyError, self).__init__(repr(message))
 
 
-class omsi_analysis_base(object):
+class analysis_base(object):
     """
     Base class for omsi analysis functionality. The class provides a large set of functionality designed
     to facilitate storage of analysis data in the omsi HDF5 file format. The class also provides a set
@@ -87,7 +87,7 @@ class omsi_analysis_base(object):
     **Execution Functions:**
 
     * ``execute`` : Then main function the user needs to call in order to execute the analysis
-    * ``execute_analysis: This function needs to be implemented by child classes of `omsi_analysis_base` \
+    * ``execute_analysis: This function needs to be implemented by child classes of `analysis_base` \
         to implement the specifics of executing the analysis.
 
     **I/O functions:**
@@ -113,7 +113,7 @@ class omsi_analysis_base(object):
     support the data access operations required by the online viewer. Overwrite these functions in the derived \
     analysis classes in order to interface them with the viewer. All viewer-related functions start with ``v\_...`` .
 
-    NOTE: the default implementation of the viewer functions defined in ``omsi_analysis_base`` are \
+    NOTE: the default implementation of the viewer functions defined in ``analysis_base`` are \
     designed to take care of the common requirement for providing viewer access to data from all dependencies \
     of an analysis. In many cases, the default implementation is often sill called at the end of custom \
     viewer functions.
@@ -144,7 +144,7 @@ class omsi_analysis_base(object):
 
     _analysis_instances = set()
     """
-    Class variable used to track all instances of omsi_analysis_base
+    Class variable used to track all instances of analysis_base
     """
 
     def __init__(self):
@@ -216,11 +216,11 @@ class omsi_analysis_base(object):
     @classmethod
     def get_analysis_instances(cls):
         """
-        Generator function used to iterate through all instances of omsi_analysis_base.
+        Generator function used to iterate through all instances of analysis_base.
         The function creates references for all weak references stored in cls._analysis_instances
         and returns the references if it exists and cleans up the any invalid references after the
         iteration is complete.
-        :return: References to omsi_analysis_base objects
+        :return: References to analysis_base objects
         """
         invalid_references = set()
         for ref in cls._analysis_instances:
@@ -1195,7 +1195,7 @@ class omsi_analysis_base(object):
             if isinstance(value, h5py.Dataset) or \
                     isinstance(value, h5py.Group) or \
                     omsi_file_common.is_managed(value) or \
-                    isinstance(value, omsi_analysis_base):
+                    isinstance(value, analysis_base):
                 value = dependency_dict(param_name=name,
                                         link_name=name,
                                         omsi_object=value,
@@ -1249,7 +1249,7 @@ class omsi_analysis_base(object):
                 # curr_parameter['dtype'] = dtype
                 curr_parameter['data'] = value
             else:  # If used correctly this should not happen. Ensures that we don't omit any data
-                warnings.warn('Parameter ' + name + " not found in omsi_analysis_base.set_parameter_values(). " +
+                warnings.warn('Parameter ' + name + " not found in analysis_base.set_parameter_values(). " +
                               "Adding a new parameter.")
                 self.parameters.append(parameter_data(name=name,
                                                            help='',

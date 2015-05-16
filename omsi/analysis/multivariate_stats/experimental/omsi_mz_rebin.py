@@ -1,10 +1,10 @@
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 import numpy as np
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_mz_rebin(omsi_analysis_base):
+class omsi_mz_rebin(analysis_base):
     """
     Class representing rebinning of the m/z dimension of MSI data by rehistogramming and gaussian convolution.
     """

@@ -3,9 +3,9 @@ Module for performing making a mask from cluster matrix for MSI data.
 """
 import numpy as np
 
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
-class omsi_mask_by_cluster(omsi_analysis_base):
+class omsi_mask_by_cluster(analysis_base):
     """Class defining a basic mask creation a 2D MSI data file or slice of the data"""
 
     def __init__(self, name_key="undefined"):

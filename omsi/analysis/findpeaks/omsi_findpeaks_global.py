@@ -2,9 +2,9 @@
 Global peak finder computing peaks and associated ion-images
 for the full MSI data.
 """
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
-class omsi_findpeaks_global(omsi_analysis_base):
+class omsi_findpeaks_global(analysis_base):
     """
     Basic global peak detection analysis. The default implementation
     computes the peaks on the average spectrum and then computes the peak-cube data,

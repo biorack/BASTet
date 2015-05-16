@@ -5,14 +5,14 @@ from tempfile import TemporaryFile
 
 import numpy as np
 
-from omsi.analysis.omsi_analysis_base import omsi_analysis_base
+from omsi.analysis.base import analysis_base
 
 
 
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_tic_norm(omsi_analysis_base):
+class omsi_tic_norm(analysis_base):
 
     """
     TIC Normalization analysis.
