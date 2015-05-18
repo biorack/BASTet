@@ -202,6 +202,9 @@ class mzml_file(file_reader_base_multidata):
 
     @classmethod
     def test(cls):
+        """
+        Test method
+        """
         pass
 
     @staticmethod
