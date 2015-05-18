@@ -50,6 +50,7 @@ METADATA_ONTOLOGIES['msn_value_of_n'] = {'name': 'bo_msn_value_of_n',
                                          'version': '0.1.0',
                                          'URI': None}
 
+
 class metadata_ontologies(dict):
     """
     Helper class for interacting with ontologies

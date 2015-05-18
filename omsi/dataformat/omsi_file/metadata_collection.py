@@ -11,6 +11,7 @@ import time
 from numpy import nan as float_nan
 import json
 
+
 class omsi_metadata_collection_manager(omsi_file_object_manager):
     """
     This is a file format manager helper class
@@ -42,7 +43,7 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
 
         :returns: `omsi_file_metadata_collection` object
         """
-        return omsi_file_metadata_collection.___create___(self.method_parent,
+        return omsi_file_metadata_collection.___create___(self.metadata_parent,
                                                           group_name=group_name,
                                                           metadata=metadata,
                                                           flush_io=flush_io)
@@ -147,7 +148,7 @@ class omsi_file_metadata_collection(omsi_file_common):
                      group_name=None,
                      metadata=None,
                      type_attr_value="omsi_file_metadata_collection",
-                     version_attr_value = omsi_format_metadata_collection.current_version,
+                     version_attr_value=omsi_format_metadata_collection.current_version,
                      flush_io=True):
         """
         Add a metadata management group to the given parent_group and populate it with
@@ -184,7 +185,7 @@ class omsi_file_metadata_collection(omsi_file_common):
         else:
             metadata_group = parent_group.require_group(metadata_group_name)
             metadata_group.attrs[omsi_format_common.type_attribute] = type_attr_value
-            metadata_group.attrs[omsi_format_common.version_attribute] =  version_attr_value
+            metadata_group.attrs[omsi_format_common.version_attribute] = version_attr_value
             metadata_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
             out_metadata_collection = omsi_file_metadata_collection.__create_metadata_collection__(
                 metadata_group=metadata_group,
@@ -255,18 +256,34 @@ class omsi_file_metadata_collection(omsi_file_common):
 
         :raises: KeyError is raised in case that the specified key does not exist
         """
-        output_meta_dict = metadata_dict()
         descr_attr = omsi_format_metadata_collection.description_value_attribute
         unit_attr = omsi_format_metadata_collection.unit_value_attribute
         ontology_attr = omsi_format_metadata_collection.ontology_value_attribute
-        for metadata_name, metadata_dataset in self.managed_group.iteritems():
-            output_meta_dict[metadata_name] = metadata_value(
-                name=metadata_name,
+        if key is None:
+            output_meta_dict = metadata_dict()
+            for metadata_name, metadata_dataset in self.managed_group.iteritems():
+                output_meta_dict[metadata_name] = metadata_value(
+                    name=metadata_name,
+                    value=metadata_dataset[:],
+                    description=None if descr_attr not in metadata_dataset.attrs else
+                                metadata_dataset.attrs[descr_attr],
+                    unit=None if unit_attr not in metadata_dataset.attrs else
+                         metadata_dataset.attrs[unit_attr],
+                    ontology=None if ontology_attr not in metadata_dataset.attrs else
+                             json.loads(metadata_dataset.attrs[ontology_attr]))
+            return output_meta_dict
+        else:
+            metadata_dataset = self.managed_group[key]
+            metadata_value(
+                name=key,
                 value=metadata_dataset[:],
-                description=None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr],
-                unit=None if unit_attr not in metadata_dataset.attrs else metadata_dataset.attrs[unit_attr],
-                ontology=None if ontology_attr not in metadata_dataset.attrs else json.loads(metadata_dataset.attrs[ontology_attr]))
-        return output_meta_dict
+                description=None if descr_attr not in metadata_dataset.attrs else
+                            metadata_dataset.attrs[descr_attr],
+                unit=None if unit_attr not in metadata_dataset.attrs else
+                     metadata_dataset.attrs[unit_attr],
+                ontology=None if ontology_attr not in metadata_dataset.attrs else
+                         json.loads(metadata_dataset.attrs[ontology_attr]))
+            return  metadata_value
 
     def add_metadata(self, metadata):
         """
