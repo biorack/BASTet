@@ -18,6 +18,7 @@ from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
 from omsi.shared.omsi_web_helper import WebHelper
 from omsi.shared.omsi_web_helper import UserInput
 from omsi.shared.dependency_data import dependency_dict
+from omsi.shared.metadata_data import metadata_value
 import time
 import numpy as np
 import math
@@ -429,7 +430,7 @@ class ConvertSettings(object):
     ####################################################################
     #  Define metadata options                                        ##
     ####################################################################
-    metadata = {}   # Dictionary with keys --method, --instrument, --notes for experiment-level metdata and
+    metadata = {}   # Dictionary with keys --method, --instrument, --notes for experiment-level metadata and
                     # --method#, instrument#, notes# for dataset-level metadata
 
     @classmethod
@@ -1006,7 +1007,7 @@ class ConvertFiles(object):
             # Get the mz data
             mzdata = input_file.mz
 
-            # Define the layout for the img data in the HDF5
+            # Define the layout for the data in the HDF5
             # Create a new experiment for the img file using the basefile as
             # identifer string
             # Create a new experiment for this dataset
@@ -1015,8 +1016,7 @@ class ConvertFiles(object):
                 # Create an empty method description
                 sample = exp.create_method_info()
                 # Create an empty instrument description
-                instrument = exp.create_instrument_info(
-                    instrument_name="undefined", mzdata=mzdata)
+                instrument = exp.create_instrument_info(instrument_name="undefined", mzdata=mzdata)
             # Store this dataset in combination with the previous one
             elif curr_dataset['exp'] == 'previous':
                 exp = ConvertSettings.omsi_output_file.get_experiment(ConvertSettings.omsi_output_file.get_num_experiments() - 1)
@@ -1063,30 +1063,50 @@ class ConvertFiles(object):
                     isinstance(input_file, file_reader_base.file_reader_base_with_regions):
                 curr_dataset['dependencies'] = input_file.get_dataset_dependencies()
 
-            # Close the input data file and free up any allocated memory
+            ####################################################################
+            #  Add the metadata from the file-reader for the dataset          ##
+            ####################################################################
+            dataset_metadata_from_reader = input_file.get_dataset_metadata()
+            if dataset_metadata_from_reader is not None:
+                curr_dataset['omsi_object'].create_metadata_collection(metadata=dataset_metadata_from_reader)
+
+            ####################################################################
+            # Close the input data file and free up any allocated memory      ##
+            ####################################################################
             input_file.close_file()
 
             ####################################################################
-            #  Add the metadata for the dataset                               ##
+            #  Add the user-defined metadata for the dataset                  ##
             ####################################################################
             method_meta_key = '--methods'+str(curr_index)
             notes_meta_key = '--notes'+str(curr_index)
             instrument_meta_key = '--instrument'+str(curr_index)
             if method_meta_key in ConvertSettings.metadata or notes_meta_key in ConvertSettings.metadata:
-                if not data.has_method_info():
-                    sample_info = data.create_method_info()
-                else:
-                    sample_info = data.get_method_info()
+                methods_info = data.create_method_info()  # Create will return the existing one if one exists
                 if method_meta_key in ConvertSettings.metadata:
-                    sample_info['methods'] = unicode(ConvertSettings.metadata[method_meta_key])
+                    methods_info.add_metadata(metadata=metadata_value(
+                        name='methods',
+                        value=unicode(ConvertSettings.metadata[method_meta_key]),
+                        description='Description of the experimental methods'))
                 if notes_meta_key in ConvertSettings.metadata:
-                    sample_info['notes'] = unicode(ConvertSettings.metadata[notes_meta_key])
+                    methods_info.add_metadata(metadata=metadata_value(
+                        name='notes',
+                        value=unicode(ConvertSettings.metadata[notes_meta_key]),
+                        description='Additional notes about the methods'))
+
             if instrument_meta_key in ConvertSettings.metadata:
-                if not data.has_instrument_info():
-                    instrument_info = data.create_instrument_info()
+                parent_instrument_info = exp.get_instrument_info()
+                if parent_instrument_info and parent_instrument_info.get_instrument_name():
+                    inst_name = parent_instrument_info.get_instrument_name()[0]
                 else:
-                    instrument_info = data.get_instrument_info()
-                instrument_info['description'] = unicode(ConvertSettings.metadata[instrument_meta_key])
+                    inst_name = None
+                instrument_info = data.create_instrument_info(
+                    instrument_name=inst_name)
+                    # mzdata=mzdata)  # Create will return the existing one if one exists
+                instrument_info.add_metadata(metadata=metadata_value(
+                        name='description',
+                        value=unicode(ConvertSettings.metadata[instrument_meta_key]),
+                        description='Description of the instrument'))
 
             ####################################################################
             #  Execute the requested analyses                                 ##

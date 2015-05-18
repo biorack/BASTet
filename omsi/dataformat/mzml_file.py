@@ -12,6 +12,7 @@ import os
 from omsi.dataformat.file_reader_base import file_reader_base_multidata
 from omsi.shared.dependency_data import dependency_dict
 from omsi.shared.metadata_data import metadata_dict, metadata_value
+from omsi.shared.metadata_ontologies import METADATA_ONTOLOGIES
 
 
 class mzml_file(file_reader_base_multidata):
@@ -277,23 +278,33 @@ class mzml_file(file_reader_base_multidata):
                     polarity = 'unk'
             #put all params in dictionary
             paramdict = metadata_dict()
-            paramdict['msn_value_of_n'] = metadata_value(value=MSnValueOfN,
-                                                         unit='level',
-                                                         description='The level n of MS^n mass spectrometry')
+            msn_von_ontology = METADATA_ONTOLOGIES['msn_value_of_n']
+            paramdict['msn_value_of_n'] = metadata_value(name='msn_value_of_n',
+                                                         value=MSnValueOfN,
+                                                         unit=msn_von_ontology['unit'],
+                                                         description=msn_von_ontology['description'],
+                                                         ontology=msn_von_ontology)
             if dissociationenergy:
-                paramdict['dissociation_energy'] = metadata_value(value=dissociationenergy,
-                                                                 unit='V',
-                                                                 description='Dissociation energy')
+                paramdict['dissociation_energy'] = metadata_value(name='dissociation_energy',
+                                                                  value=dissociationenergy,
+                                                                  unit='V',
+                                                                  description='Dissociation energy')
             if ms2_precursor is not None:
-                paramdict['msn_precursor_mz'] = metadata_value(value=ms2_precursor,
+                paramdict['msn_precursor_mz'] = metadata_value(name='msn_precursor_mz',
+                                                               value=ms2_precursor,
                                                                unit='m/z',
                                                                description='The precursor m/z value')
-            paramdict['dissociation_type'] = metadata_value(value=dissociationtype,
+            paramdict['dissociation_type'] = metadata_value(name='dissociation_type',
+                                                            value=dissociationtype,
                                                             unit=None,
                                                             description='Dissociation type')
-            paramdict['polarity'] = metadata_value(value=polarity,
-                                                   unit=None,
-                                                   description='Polarity')
+            polarity_ontology = METADATA_ONTOLOGIES['polarity']
+            paramdict['polarity'] = metadata_value(name='polarity',
+                                                   value=polarity,
+                                                   unit=polarity_ontology['unit'],
+                                                   description=polarity_ontology['description'],
+                                                   ontology=polarity_ontology)
+
             scan_params.append(paramdict)
 
         return scan_params

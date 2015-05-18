@@ -55,8 +55,28 @@ class omsi_format_experiment(omsi_format_common):
     exp_identifier_name = "experiment_identifier"
     current_version = "0.1"
 
+class omsi_format_metadata_collection(omsi_format_common):
+    """
+    Specification of the basic format for a general-purpose metadata storage
 
-class omsi_format_methods(omsi_format_common):
+    :var metadata_collection_groupname_default: Default name for the group where
+        the collection of metadata is stored.
+    :var description_value_attribute: The attribute to be associated with each
+        metadata value describing the content in a human-readable form
+    :var unit_value_attribute: The attribute to be associated with each metatdata
+        value describing the unit
+    :var ontology_value_attribute: Optional ontology associated with a metadata value
+    """
+    def __init__(self):
+        super(omsi_format_metadata_collection, self).__init__()
+
+    metadata_collection_groupname_default = 'metadata'
+    description_value_attribute = 'description'
+    unit_value_attribute = 'unit'
+    ontology_value_attribute = 'ontology'
+    current_version = "0.1"
+
+class omsi_format_methods(omsi_format_metadata_collection):
 
     """
     Specification of the basic format for storing method-related information
@@ -73,10 +93,10 @@ class omsi_format_methods(omsi_format_common):
     methods_groupname = "methods"
     methods_old_groupname = "sample"
     methods_name = "name"
-    current_version = "0.2"
+    current_version = "0.3"
 
 
-class omsi_format_instrument(omsi_format_common):
+class omsi_format_instrument(omsi_format_metadata_collection):
 
     """
     Specification for storing instrument related information
@@ -92,7 +112,7 @@ class omsi_format_instrument(omsi_format_common):
     instrument_groupname = "instrument"
     instrument_mz_name = "mz"
     instrument_name = "name"
-    current_version = "0.1"
+    current_version = "0.2"
 
 
 class omsi_format_analysis(omsi_format_common):

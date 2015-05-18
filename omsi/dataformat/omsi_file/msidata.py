@@ -11,6 +11,7 @@ from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_
 from omsi.dataformat.omsi_file.dependencies import omsi_dependencies_manager
 from omsi.dataformat.omsi_file.methods import omsi_methods_manager
 from omsi.dataformat.omsi_file.instrument import omsi_instrument_manager
+from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
 import numpy as np
 
 
@@ -276,6 +277,7 @@ class omsi_msidata_manager(omsi_file_object_manager):
 class omsi_file_msidata(omsi_dependencies_manager,
                         omsi_methods_manager,
                         omsi_instrument_manager,
+                        omsi_metadata_collection_manager,
                         omsi_file_common):
     """
     Interface for interacting with mass spectrometry imaging datasets stored in omis HDF5 files.

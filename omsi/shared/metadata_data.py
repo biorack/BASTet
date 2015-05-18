@@ -1,6 +1,7 @@
 """
-Define a dict for describing metadata
+Define infrastructure for describing metadata (in memory)
 """
+
 
 class metadata_dict(dict):
     """
@@ -15,39 +16,83 @@ class metadata_dict(dict):
             raise KeyError('Metadata keys must be string names')
         if not isinstance(value, metadata_value):
             raise ValueError('Metadata values must be defined via metadata_value dicts')
+        if value['name'] is None:
+            value['name'] = key
         dict.__setitem__(self, key, value)
 
     def get_metadata_values(self):
         """
         Get a list of all metadata values.
         """
-        return [metadata_value['value'] for metadata_value in self.values()]
+        return [metadata_val['value'] for metadata_val in self.values()]
 
     def get_metadata_descriptions(self):
         """
         Get a list of all metadata descriptions
         """
-        return [metadata_value['description'] for metadata_value in self.values()]
+        return [metadata_val['description'] for metadata_val in self.values()]
 
     def get_metadata_units(self):
         """
         Get a list of all metadata units
         """
-        return [metadata_value['unit'] for metadata_value in self.values()]
+        return [metadata_val['unit'] for metadata_val in self.values()]
 
 
 class metadata_value(dict):
     """
     A single metadata value
+
+    Allowed keys:
+    -------------
+
+    * `name` The name of the metadata value
+    * `value` The actual value associated with the metadata object
+    * `description` The text description of the metadata object
+    * `unit` The unit string
+    * `ontology` Optional ontology
+
     """
-    def __init__(self, value, description, unit=None):
+    def __init__(self,
+                 name,
+                 value,
+                 description,
+                 unit=None,
+                 ontology=None):
+        """
+
+        :param name: The name of the metadata value. Name may be None if the metadata_value
+            is added to a metadata_dict as it will be set (if missing) when adding it to the
+            metadata_dict
+        :param value: The actual value associated with the metadata object
+        :param description: The text description of the metadata object
+        :param unit: The unit string
+        :param ontology: Optional ontology
+
+        """
         super(metadata_value, self).__init__()
-        dict.__setitem__(self, 'value', value)
-        dict.__setitem__(self, 'description', description)
-        dict.__setitem__(self, 'unit', unit)
+        # Initalize all the keys
+        dict.__setitem__(self, 'value', None)
+        dict.__setitem__(self, 'description', None)
+        dict.__setitem__(self, 'unit', None)
+        dict.__setitem__(self, 'ontology', None)
+        dict.__setitem__(self, 'name', None)
+
+        # Set all the values for the keys
+        self['value'] = value
+        self['description'] = description
+        self['unit'] = unit
+        self['ontology'] = ontology
+        self['name'] = name
 
     def __setitem__(self, key, value):
         if key in self.keys():
+            if key == 'name' and not (isinstance(value, basestring) or value is None):
+                raise ValueError('The name value must be a string')
+            elif key == 'description' and not (isinstance(value, basestring) or value is None):
+                raise ValueError('The description value must be a string')
+            elif key == 'unit' and not (isinstance(value, basestring) or value is None):
+                raise ValueError('The unit must be a string')
             dict.__setitem__(self, key, value)
         else:
             raise KeyError('Illegal key ' + str(key) + ' given. Valid keys are ' + str(self.keys()))

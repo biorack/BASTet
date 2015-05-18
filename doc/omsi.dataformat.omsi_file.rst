@@ -90,6 +90,15 @@ To simplify the use and ensure stability we use the following conventions:
     :undoc-members:
     :show-inheritance:
 
+:mod:`metadata_collection` Module
+---------------------------------
+
+.. automodule:: omsi.dataformat.omsi_file.metadata_collection
+    :members:
+    :private-members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`instrument` Module
 ------------------------
 

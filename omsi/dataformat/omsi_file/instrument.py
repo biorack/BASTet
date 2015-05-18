@@ -2,10 +2,13 @@
 Module for managing instrument related data in OMSI files.
 """
 from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_instrument
-from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
+from omsi.dataformat.omsi_file.common import omsi_file_common
+from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
+from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
+from omsi.shared.metadata_data import metadata_value, metadata_dict
 
 
-class omsi_instrument_manager(omsi_file_object_manager):
+class omsi_instrument_manager(omsi_metadata_collection_manager):
     """
     Instrument manager helper class
     used to define common functionality needed for instrument-related data.
@@ -39,7 +42,7 @@ class omsi_instrument_manager(omsi_file_object_manager):
         :returns: The function returns the h5py HDF5 handler to the instrument info group created for the experiment.
 
         """
-        return omsi_file_instrument.__create__(instrument_parent=self.instrument_parent,
+        return omsi_file_instrument.__create__(parent_group=self.instrument_parent,
                                                instrument_name=instrument_name,
                                                mzdata=mzdata,
                                                flush_io=flush_io)
@@ -81,8 +84,9 @@ class omsi_instrument_manager(omsi_file_object_manager):
         return self.get_instrument_info(check_parent=check_parent) is not None
 
 
-class omsi_file_instrument(omsi_file_common):
-    """Class for managing instrument specific data
+class omsi_file_instrument(omsi_file_metadata_collection):
+    """
+    Class for managing instrument specific data
 
     **Use of super():**
 
@@ -101,15 +105,15 @@ class omsi_file_instrument(omsi_file_common):
 
     @classmethod
     def __create__(cls,
-                   instrument_parent,
+                   parent_group,
                    instrument_name=None,
                    mzdata=None,
                    flush_io=True):
         """
         Create an instrument group and populate it with the given data.
 
-        :param instrument_parent: The parent h5py group where the instrument group should be created in.
-        :type instrument_parent. h5py.Group
+        :param parent_group: The parent h5py group where the instrument group should be created in.
+        :type parent_group. h5py.Group
         :param instrument_name: The name of the instrument
         :type instrument_name: string, None
         :param mzdata: Numpy array of the mz data values of the instrument
@@ -120,25 +124,39 @@ class omsi_file_instrument(omsi_file_common):
         :returns: The function returns the h5py HDF5 handler to the instrument info group created for the experiment.
 
         """
-        import time
-        # Create the group for instrument specific data
-        instrument_group = instrument_parent.require_group(omsi_format_instrument.instrument_groupname)
-        instrument_group.attrs[omsi_format_common.type_attribute] = "omsi_file_instrument"
-        instrument_group.attrs[omsi_format_common.version_attribute] = omsi_format_instrument.current_version
-        instrument_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
+        if instrument_name is not None or mzdata is not None:
+            all_meta = metadata_dict()
+            if instrument_name is not None:
+                all_meta[omsi_format_instrument.instrument_name] = \
+                    metadata_value(value=instrument_name,
+                                   name=omsi_format_instrument.instrument_name,
+                                   description='Name of the instrument')
+            if mzdata is not None:
+                all_meta[omsi_format_instrument.instrument_name] = \
+                    metadata_value(value=mzdata,
+                                   name=omsi_format_instrument.instrument_mz_name,
+                                   description='The global m/z axis for the recordings')
 
-        instrument_object = omsi_file_instrument.__create_instrument_info___(instrument_group=instrument_group,
-                                                                             instrument_name=instrument_name,
-                                                                             mzdata=mzdata)
+        else:
+            all_meta = None
+
+        # Initialize the group and populate the data using the create method of the parent class
+        metadata_obj = omsi_file_metadata_collection.___create___(
+            parent_group=parent_group,
+            group_name=omsi_format_instrument.instrument_groupname,
+            metadata=all_meta,
+            type_attr_value="omsi_file_instrument",
+            version_attr_value=omsi_format_instrument.current_version,
+            flush_io=flush_io)
+
         if flush_io:
-            instrument_parent.file.flush()
-        return instrument_object
+            parent_group.file.flush()
+        return omsi_file_instrument.__create_instrument_info___(instrument_group=metadata_obj.managed_group)
+
 
     @classmethod
     def __create_instrument_info___(cls,
-                                    instrument_group,
-                                    instrument_name=None,
-                                    mzdata=None):
+                                    instrument_group):
         """
         Populate the empty instrument group with the given data.
 
@@ -146,27 +164,8 @@ class omsi_file_instrument(omsi_file_common):
         Use the corresponding omsi_file_experiment.create_instrument_info(...) function to  \
         generate a new instrument information data in HDF5
 
-        :param instrument_group: The h5py group to which the instrument group data should be written to.
-        :param instrument_name: The name of the instrument used.
-        :param mzdata: The mz data for the instrument.
+        :return: omsi_file_instrument object that manages the given instrument_group
         """
-        # Name of the instrument
-        instrumentnamedata = instrument_group.require_dataset(name=unicode(
-            omsi_format_instrument.instrument_name), shape=(1,), dtype=omsi_format_common.str_type)
-        if instrument_name is None:
-            if len(instrumentnamedata[0]) == 0:
-                instrumentnamedata[0] = "undefined"
-        else:
-            if omsi_format_common.str_type_unicode:
-                instrumentnamedata[0] = instrument_name
-            else:
-                instrumentnamedata[0] = str(instrument_name)
-        # MZ data for the instrument
-        if mzdata is not None:
-            instrumentmzdata = instrument_group.require_dataset(
-                name=omsi_format_instrument.instrument_mz_name, shape=mzdata.shape, dtype=mzdata.dtype)
-            instrumentmzdata[:] = mzdata[:]
-
         return omsi_file_instrument(instrument_group)
 
     def __init__(self,
@@ -225,14 +224,8 @@ class omsi_file_instrument(omsi_file_common):
         :param name: The new instrument name.
         :type name: string.
         """
-
-        # Get the name of the intrument
-        namedataset = self.get_instrument_name()
-        # Create the dataset for the id name if it does not exist
-        if namedataset is None:
-            namedataset = self.managed_group.require_dataset(name=unicode(
-                omsi_format_instrument.instrument_name), shape=(1,), dtype=omsi_format_common.str_type)
-        if omsi_format_common.str_type_unicode:
-            namedataset[0] = name
-        else:
-            namedataset[0] = str(name)
+        self.add_metadata(metadata=metadata_value(value=name,
+                                                  name=omsi_format_instrument.instrument_name,
+                                                  description='Name of the instrument',
+                                                  unit=None,
+                                                  ontology=None))

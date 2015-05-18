@@ -2,10 +2,13 @@
 Module for management of method specific data in OMSI data files
 """
 from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_methods
-from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
+from omsi.dataformat.omsi_file.common import omsi_file_common
+from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
+from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
+from omsi.shared.metadata_data import metadata_value
 
 
-class omsi_methods_manager(omsi_file_object_manager):
+class omsi_methods_manager(omsi_metadata_collection_manager):
     """
     This is a file format manager helper class
     used to define common functionality needed for methods-related data.
@@ -22,7 +25,7 @@ class omsi_methods_manager(omsi_file_object_manager):
         super(omsi_methods_manager, self).__init__(methods_parent)
         self.method_parent = methods_parent
 
-    def create_method_info(self, method_name=None, flush_io=True):
+    def create_method_info(self, method_name=None, metadata=None, flush_io=True):
         """
         Add information about the method imaged to the experiment.
         Note, if a methods group already exists, then that group
@@ -31,6 +34,8 @@ class omsi_methods_manager(omsi_file_object_manager):
 
         :param method_name: Optional name of the method
         :type method_name: str, None
+        :param metadata: Additional metadata to be stored with the methods
+        :type metadata: metadata_value, metadata_dict
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 buffers are
                          flushed so that all data has been written to file
 
@@ -38,6 +43,7 @@ class omsi_methods_manager(omsi_file_object_manager):
         """
         return omsi_file_methods.___create___(self.method_parent,
                                               method_name=method_name,
+                                              metadata=metadata,
                                               flush_io=flush_io)
 
     def get_method_info(self, check_parent=True):
@@ -78,7 +84,7 @@ class omsi_methods_manager(omsi_file_object_manager):
         return self.get_method_info(check_parent=check_parent) is not None
 
 
-class omsi_file_methods(omsi_file_common):
+class omsi_file_methods(omsi_file_metadata_collection):
     """
     Class for managing method specific data.
 
@@ -97,7 +103,7 @@ class omsi_file_methods(omsi_file_common):
 
     """
     @classmethod
-    def ___create___(cls, parent_group, method_name=None, flush_io=True):
+    def ___create___(cls, parent_group, method_name=None, metadata=None, flush_io=True):
         """
         Add information about the method imaged to the experiment.
         If method_name is not None, then the existing
@@ -105,30 +111,45 @@ class omsi_file_methods(omsi_file_common):
 
         :param parent_group: The h5py.Group where the method object should be created
         :type parent_group: h5py.Group
+        :param metadata: Additional metadata to be stored with the methods
+        :type metadata: metadata_value, metadata_dict
         :param method_name: Optional name of the method
         :type method_name: str, None
         :param flush_io: Call flush on the HDF5 file to ensure all HDF5 buffers are
                          flushed so that all data has been written to file
 
-        :returns: h5py object of the newly created method group.
+        :returns: omsi_file_methods object that manges the method_group
+
         """
-        if omsi_format_methods.methods_groupname in parent_group.items():
-            out_method = omsi_file_methods(methods_group=parent_group[omsi_format_methods.methods_groupname])
-            if method_name is not None:
-                out_method.set_method_name(method_name)
+        # Create the metadata_value dict for the method_name
+        if method_name:
+            method_name_meta = metadata_value(value=method_name,
+                                              name=omsi_format_methods.methods_name,
+                                              description='The name of the method',
+                                              unit=None,
+                                              ontology=None)
         else:
-            import time
-            method_group = parent_group.require_group(omsi_format_methods.methods_groupname)
-            method_group.attrs[omsi_format_common.type_attribute] = "omsi_file_methods"
-            method_group.attrs[omsi_format_common.version_attribute] = omsi_format_methods.current_version
-            method_group.attrs[omsi_format_common.timestamp_attribute] = str(time.ctime())
-            out_method = omsi_file_methods.__create_method_info__(method_group=method_group, method_name=method_name)
-        if flush_io:
-            parent_group.file.flush()
+            method_name_meta = None
+        # Create the collection of all metadata to be added
+        all_meta = method_name_meta
+        if metadata is not None:
+            all_meta = metadata
+            if method_name_meta is not None:
+                all_meta[omsi_format_methods.methods_groupname] = method_name_meta
+        # Initialize the group and populate the data using the create method of the parent class
+        metadata_obj = omsi_file_metadata_collection.___create___(
+            parent_group=parent_group,
+            group_name=omsi_format_methods.methods_groupname,
+            metadata=all_meta,
+            type_attr_value="omsi_file_methods",
+            version_attr_value=omsi_format_methods.current_version,
+            flush_io=flush_io)
+        # Create the omsi_file_methods object for the group and return
+        out_method = omsi_file_methods.__create_method_info__(method_group=metadata_obj.managed_group)
         return out_method
 
     @classmethod
-    def __create_method_info__(cls, method_group, method_name=None):
+    def __create_method_info__(cls, method_group):
         """
         Add information about the method  imaged to the experiment
 
@@ -138,31 +159,21 @@ class omsi_file_methods(omsi_file_common):
 
         :param method_group: h5py group object that should be populated with the method data.
         :param method_name: Optional name of the method
-        :type method_name: string, None
 
-        :returns: h5py object of the newly created method group.
+        :returns: omsi_file_methods object that manges the method_group
+
         """
-        methodnamedata = method_group.require_dataset(name=unicode(
-            omsi_format_methods.methods_name), shape=(1,), dtype=omsi_format_common.str_type)
-        if method_name is None:
-            if len(methodnamedata[0]) == 0:
-                methodnamedata[0] = "undefined"
-        else:
-            if omsi_format_common.str_type_unicode:
-                methodnamedata[0] = method_name
-            else:
-                methodnamedata[0] = str(method_name)
-        return omsi_file_methods(method_group)
+        return omsi_file_methods(method_group=method_group)
 
-    def __init__(self, methods_group):
+    def __init__(self, method_group):
         """
             Initialize the method object given the h5py object of the method group
 
-            :param methods_group: The h5py object with the method group of the omsi hdf5 file.
+            :param method_group: The h5py object with the method group of the omsi hdf5 file.
             """
-        super(omsi_file_methods, self).__init__(methods_group)
+        super(omsi_file_methods, self).__init__(method_group)
         # Initialized by super call
-        # self.managed_group = methods_group
+        # self.managed_group = method_group
         # self.name = self.managed_group.name
 
     def get_method_name(self):
@@ -189,15 +200,9 @@ class omsi_file_methods(omsi_file_common):
         :param name_string: The new method name.
         :type name_string: string
         """
-        # Get the name of the intrument
-        name = self.get_method_name()
-        # Create the dataset for the instrument name if it does not exist
-        if name is None:
-            name = self.managed_group.require_dataset(name=unicode(
-                omsi_format_methods.methods_name), shape=(1,), dtype=omsi_format_common.str_type)
-
-        if omsi_format_common.str_type_unicode:
-            name[0] = name_string
-        else:
-            name[0] = str(name_string)
-
+        # Get the name of the method
+        self.add_metadata(metadata=metadata_value(value=name_string,
+                                                  name=omsi_format_methods.methods_name,
+                                                  description='The name of the method',
+                                                  unit=None,
+                                                  ontology=None))

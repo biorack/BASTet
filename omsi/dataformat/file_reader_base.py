@@ -9,7 +9,7 @@ ToDo:
 * Need to implement new file format for combined raw data file (ie., multiple raw files in one folder).
 
 """
-
+from omsi.shared.metadata_data import metadata_dict
 
 class file_reader_base(object):
     """
@@ -80,10 +80,9 @@ class file_reader_base(object):
         dataset only. If no particular dataset is selected, then all should
         be returned.
 
-        :return: Dict where keys are strings and associated values to be stored as
-            metadata with the dataset.
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
         """
-        return {}
+        return metadata_dict()
 
     @classmethod
     def is_valid_dataset(cls, name):
