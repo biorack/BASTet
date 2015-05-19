@@ -102,7 +102,7 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
         """
         Get the default metadata collection object if it exists
 
-        :param omsi_object: he omsi file API object or h5py.Group object that we should check.
+        :param omsi_object: The omsi file API object or h5py.Group object that we should check.
             If set to None (default) then the self.metadata_parent will be used
         :return: None, omsi_file_metadata_collection
         """
@@ -121,7 +121,8 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
 
         :returns: bool
         """
-        pass
+        default_meta_collection = self.get_default_metadata_collection(omsi_object=omsi_object)
+        return default_meta_collection is not None
 
 
 class omsi_file_metadata_collection(omsi_file_common):
@@ -176,7 +177,7 @@ class omsi_file_metadata_collection(omsi_file_common):
         metadata_group_name = group_name if \
             group_name is not None else \
             omsi_format_metadata_collection.metadata_collection_groupname_default
-        out_metadata_collection = None   # Created in both if and else block
+        # out_metadata_collection = None   # Created in both if and else block
         if metadata_group_name in parent_group.keys():
             out_metadata_collection = omsi_file_metadata_collection(metadata_group=parent_group[metadata_group_name])
             out_metadata_collection.add_metadata(metadata)
@@ -262,28 +263,30 @@ class omsi_file_metadata_collection(omsi_file_common):
         if key is None:
             output_meta_dict = metadata_dict()
             for metadata_name, metadata_dataset in self.managed_group.iteritems():
+                unit = None if unit_attr not in metadata_dataset.attrs else metadata_dataset.attrs[unit_attr]
+                description = None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr]
+                ontology = None if ontology_attr not in metadata_dataset.attrs else \
+                    json.loads(metadata_dataset.attrs[ontology_attr])
                 output_meta_dict[metadata_name] = metadata_value(
                     name=metadata_name,
                     value=metadata_dataset[:],
-                    description=None if descr_attr not in metadata_dataset.attrs else
-                                metadata_dataset.attrs[descr_attr],
-                    unit=None if unit_attr not in metadata_dataset.attrs else
-                         metadata_dataset.attrs[unit_attr],
-                    ontology=None if ontology_attr not in metadata_dataset.attrs else
-                             json.loads(metadata_dataset.attrs[ontology_attr]))
+                    description=description,
+                    unit=unit,
+                    ontology=ontology)
             return output_meta_dict
         else:
             metadata_dataset = self.managed_group[key]
+            unit = None if unit_attr not in metadata_dataset.attrs else metadata_dataset.attrs[unit_attr]
+            description = None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr]
+            ontology = None if ontology_attr not in metadata_dataset.attrs else \
+                json.loads(metadata_dataset.attrs[ontology_attr])
             metadata_value(
                 name=key,
                 value=metadata_dataset[:],
-                description=None if descr_attr not in metadata_dataset.attrs else
-                            metadata_dataset.attrs[descr_attr],
-                unit=None if unit_attr not in metadata_dataset.attrs else
-                     metadata_dataset.attrs[unit_attr],
-                ontology=None if ontology_attr not in metadata_dataset.attrs else
-                         json.loads(metadata_dataset.attrs[ontology_attr]))
-            return  metadata_value
+                description=description,
+                unit=unit,
+                ontology=ontology)
+            return metadata_value
 
     def add_metadata(self, metadata):
         """

@@ -1,8 +1,8 @@
 """
 Module for common data format classes and functionality.
 """
-
 from omsi.dataformat.omsi_file.format import *
+
 
 class omsi_file_object_manager(object):
     """
@@ -378,9 +378,8 @@ class omsi_file_common(object):
         :param file_group: The h5py object to be examined
         :param basename: The name that should be searched for.
 
-        :returns: Number of objexts with the given basename at the given path
+        :returns: Number of objects with the given basename at the given path
         """
-
         numitems = 0
         # Iterate through all groups of the root folder
         for item_obj in file_group.items():

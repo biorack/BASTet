@@ -1,7 +1,7 @@
 """
 Module for managing instrument related data in OMSI files.
 """
-from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_instrument
+from omsi.dataformat.omsi_file.format import omsi_format_instrument
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
 from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
@@ -61,13 +61,12 @@ class omsi_instrument_manager(omsi_metadata_collection_manager):
         """
         try:
             return omsi_file_instrument(self.instrument_parent[unicode(omsi_format_instrument.instrument_groupname)])
-        except:
+        except KeyError:
             # Check whether the parent group has information about the instrument
             if check_parent:
-                try:
-                    return omsi_file_common.get_omsi_object(self.instrument_parent.parent).get_instrument_info()
-                except:
-                    pass
+                return omsi_file_common.get_omsi_object(self.instrument_parent.parent).get_instrument_info()
+        except:
+            pass
         return None
 
     def has_instrument_info(self,
@@ -153,7 +152,6 @@ class omsi_file_instrument(omsi_file_metadata_collection):
             parent_group.file.flush()
         return omsi_file_instrument.__create_instrument_info___(instrument_group=metadata_obj.managed_group)
 
-
     @classmethod
     def __create_instrument_info___(cls,
                                     instrument_group):
@@ -194,7 +192,7 @@ class omsi_file_instrument(omsi_file_metadata_collection):
             return None
         try:
             instrument_name = self.managed_group[unicode(omsi_format_instrument.instrument_name)]
-        except:
+        except KeyError:
             instrument_name = None
         return instrument_name
 
@@ -211,9 +209,8 @@ class omsi_file_instrument(omsi_file_metadata_collection):
         if self.managed_group is None:
             return None
         try:
-            return self.managed_group[
-                unicode(omsi_format_instrument.instrument_mz_name)]
-        except:
+            return self.managed_group[unicode(omsi_format_instrument.instrument_mz_name)]
+        except KeyError:
             return None
 
     def set_instrument_name(self,

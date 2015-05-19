@@ -1,7 +1,7 @@
 """
 Module for management of method specific data in OMSI data files
 """
-from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_methods
+from omsi.dataformat.omsi_file.format import omsi_format_methods
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
 from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
@@ -61,15 +61,14 @@ class omsi_methods_manager(omsi_metadata_collection_manager):
         if self.method_parent is not None:
             try:
                 return omsi_file_methods(self.method_parent[unicode(omsi_format_methods.methods_groupname)])
-            except:
+            except KeyError:
                 try:
                     return omsi_file_methods(self.method_parent[unicode(omsi_format_methods.methods_old_groupname)])
-                except:
+                except KeyError:
                     if check_parent:
-                        try:
-                            return omsi_file_common.get_omsi_object(self.method_parent.parent).get_method_info()
-                        except:
-                            pass
+                        return omsi_file_common.get_omsi_object(self.method_parent.parent).get_method_info()
+            except:
+                pass
         return None
 
     def has_method_info(self, check_parent=False):
@@ -103,7 +102,11 @@ class omsi_file_methods(omsi_file_metadata_collection):
 
     """
     @classmethod
-    def ___create___(cls, parent_group, method_name=None, metadata=None, flush_io=True):
+    def ___create___(cls,
+                     parent_group,
+                     method_name=None,
+                     metadata=None,
+                     flush_io=True):
         """
         Add information about the method imaged to the experiment.
         If method_name is not None, then the existing
@@ -158,7 +161,7 @@ class omsi_file_methods(omsi_file_metadata_collection):
         to create a new method group and populate it with data.
 
         :param method_group: h5py group object that should be populated with the method data.
-        :param method_name: Optional name of the method
+        :param method_group Optional name of the method group
 
         :returns: omsi_file_methods object that manges the method_group
 
@@ -189,7 +192,7 @@ class omsi_file_methods(omsi_file_metadata_collection):
             return None
         try:
             method_name = self.managed_group[unicode(omsi_format_methods.methods_name)]
-        except:
+        except KeyError:
             method_name = None
         return method_name
 
