@@ -8,9 +8,9 @@ import os
 
 # import xml parser
 from pyimzml.ImzMLParser import ImzMLParser  ## TODO: install pyimzml at NERSC
-from omsi.dataformat.file_reader_base import file_reader_base_multidata
+from omsi.dataformat.file_reader_base import *
 
-class imzml_file(file_reader_base_multidata):
+class imzml_file(file_reader_base):
     """
     Interface for reading a single 2D imzml file with a single distinct scan types.
     :ivar available_imzml_types: Dict of available mzml flavors.
@@ -71,11 +71,16 @@ class imzml_file(file_reader_base_multidata):
         self.shape_all_data = [len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz_all)]
         self.shape = None
         self.mz = None
+        self.select_dataset = None  # Used only for *.img files?
 
         # Read the data into memory
         self.data = None
         if readdata:
             self.__read_all(filename=basename)
+
+        # Re-populate shape and mz fields
+        self.shape = self.data.shape
+        self.mz = self.mz_all
 
     def __read_all(self, filename):
         """
@@ -232,7 +237,7 @@ class imzml_file(file_reader_base_multidata):
         else:
             try:
                 # Try to open the file
-                ImzMLParser(filename)
+                ImzMLParser(name)
                 return True
             except RuntimeError('pyimzml could not parse your file.'):
                 return False
