@@ -988,7 +988,8 @@ class ConvertFiles(object):
                     raise
 
             if ConvertSettings.auto_chunk:
-
+                print input_file.shape
+                print input_file
                 spec_chunks, img_chunks, temp_chunks = ConvertFiles.suggest_chunking(
                     xsize=input_file.shape[0],
                     ysize=input_file.shape[1],
