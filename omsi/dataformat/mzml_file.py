@@ -1,7 +1,6 @@
 """
 This module provides functionality for reading mzml mass spectrometry image files.
 
-
 filename = '/Users/oruebel/Devel/openmsi-data/mzML_Data/N2A2_Serratia_spots_extract_TI.mzML'
 """
 import numpy as np
