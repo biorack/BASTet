@@ -178,6 +178,14 @@ class omsi_file_instrument(omsi_file_metadata_collection):
         # self.managed_group = instrument_group
         # self.name = self.managed_group.name
 
+    def has_instrument_name(self):
+        """
+        Check whether a name has been saved for the instrument
+
+        :return: bool
+        """
+        return self.get_instrument_name() is not None
+
     def get_instrument_name(self):
         """
         Get the HDF5 dataset with the name of the instrument.

@@ -179,6 +179,14 @@ class omsi_file_methods(omsi_file_metadata_collection):
         # self.managed_group = method_group
         # self.name = self.managed_group.name
 
+    def has_method_name(self):
+        """
+        Check whether an object has a method name
+
+        :return: bool
+        """
+        return self.get_method_name() is not None
+
     def get_method_name(self):
         """
         Get the HDF5 dataset with the name of the method.
