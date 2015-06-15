@@ -400,6 +400,7 @@ class analysis_base(object):
         multiple processes when running using MPI on a single process
 
         :param root: The process where the runtime information should be collected
+
         :return: If we have more then one processes then this function returns a
             dictionary with the same keys as usual for the run_info but the
             values are now lists with one entry per mpi processes. If we only have
@@ -414,8 +415,8 @@ class analysis_base(object):
                 comm = self.comm = None if not MPI_AVAILABLE else MPI.COMM_WORLD
             if self.comm.Get_size() > 1:
                 self.run_info['mpi_rank'] = self.comm.Get_rank()
-                run_data = self.comm.gather(self.run_info, root=0)
-                if self.comm.Get_rank() == 0:
+                run_data = self.comm.gather(self.run_info, root=root)
+                if self.comm.Get_rank() == root:
                     merged_run_data = {}
                     for run_dict in run_data:
                         for key in run_dict:
@@ -560,6 +561,10 @@ class analysis_base(object):
         execution_time = time.time() - start_time
         self.runinfo_record_postexecute(execution_time=execution_time)
         self.runinfo_clean_up()
+
+        # If we ran the analysis in parallel, then collect all runtime information
+        if MPI_AVAILABLE:
+            self.gather_run_info()
 
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
