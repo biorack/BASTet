@@ -189,6 +189,12 @@ class omsi_findpeaks_global(analysis_base):
 
         # Load the input data
         data = msidata[:]
+        # Ensure the our MSI dataset has sufficient numbers of dimensions
+        if len(msidata.shape) == 1:
+            data = data[:][np.newaxis, np.newaxis, :]
+        elif len(msidata.shape) == 2:
+            data = data[:][np.newaxis, :]
+
         # Determine the data dimensions
         shape_x, shape_y, shape_z = data.shape
         # Linearize the spectral data

@@ -226,6 +226,12 @@ class omsi_findpeaks_local(analysis_base):
         if print_status:
             import sys
 
+        # Ensure the our MSI dataset has sufficient numbers of dimensions
+        if len(msidata.shape) == 1:
+            msidata = msidata[:][np.newaxis, np.newaxis, :]
+        elif len(msidata.shape) == 2:
+            msidata = msidata[:][np.newaxis, :]
+
         # Determine the data dimensions
         shape_x = msidata.shape[0]
         shape_y = msidata.shape[1]
