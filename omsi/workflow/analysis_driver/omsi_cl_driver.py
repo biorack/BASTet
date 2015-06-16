@@ -7,6 +7,7 @@ from omsi.analysis.base import analysis_base
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.main_file import omsi_file
 from omsi.workflow.analysis_driver.base import omsi_driver_base
+import omsi.shared.mpi_helper as mpi_helper
 import os
 
 
@@ -111,6 +112,7 @@ class omsi_cl_driver(omsi_driver_base):
         self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
+        self.mpi_root = 0
 
     def get_analysis_class_from_cl(self):
         """
@@ -270,7 +272,7 @@ class omsi_cl_driver(omsi_driver_base):
             parsed_arguments.pop(self.analysis_class_arg_name)
 
         # Process the --save argument to determine where we should save the output
-        if self.output_save_arg_name in parsed_arguments:
+        if self.output_save_arg_name in parsed_arguments and  mpi_helper.get_rank() == self.mpi_root:
             # Determine the filename and experiment group from the path
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
             if self.output_target is not None:
@@ -437,7 +439,8 @@ class omsi_cl_driver(omsi_driver_base):
             raise
 
         # Print the analysis settings
-        self.print_settings()
+        if mpi_helper.get_rank() == self.mpi_root:
+            self.print_settings()
 
         # Call the execute function of the analysis
         try:
@@ -463,30 +466,39 @@ class omsi_cl_driver(omsi_driver_base):
             self.remove_output_target()
             raise
 
-        # Print the profiling results of time and usage
-        if self.profile_analysis:
-            print ""
-            print "PROFILING DATA: TIME AND USAGE"
-            print ""
-            analysis_object.get_profile_stats_object(consolidate=True).print_stats()
+        # Finalize the saving of results on rank 0
+        if mpi_helper.get_rank() == self.mpi_root:
+            # Print the profiling results of time and usage
+            if self.profile_analysis:
+                print ""
+                print "PROFILING DATA: TIME AND USAGE"
+                print ""
+                analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
-        # Print the profiling results for memory usage
-        if self.profile_analysis_mem:
-            print ""
-            print "PROFILING DATA: MEMORY"
-            print ""
-            print analysis_object.get_memory_profile_info()
+            # Print the profiling results for memory usage
+            if self.profile_analysis_mem:
+                print ""
+                print "PROFILING DATA: MEMORY"
+                print ""
+                print analysis_object.get_memory_profile_info()
 
-        # Print the time it took to run the analysis
-        try:
-            print ""
-            print "Time to execute analysis: " + analysis_object.run_info['execution_time'] + " s"
-        except:
-            pass
+            # Print the time it took to run the analysis
+            try:
+                print ""
+                if isinstance(analysis_object.run_info['execution_time'] , list):
+                    print ""
+                    print "Time in seconds for each analysis process: " + \
+                          str(analysis_object.run_info['execution_time'])
+                    exec_time_string = str(analysis_object.run_info['execution_time'][self.mpi_root])
+                else:
+                    exec_time_string = str(analysis_object.run_info['execution_time'])
+                print "Time to execute analysis: " + exec_time_string + " s"
+            except:
+                raise
 
-        # Save the analysis to file
-        if self.output_target is not None:
-            self.output_target.create_analysis(analysis_object)
+            # Save the analysis to file
+            if self.output_target is not None:
+                self.output_target.create_analysis(analysis_object)
 
 
 if __name__ == "__main__":
