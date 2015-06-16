@@ -469,10 +469,16 @@ class omsi_file_analysis(omsi_dependencies_manager,
             if ana_data['data'].size > 1000:
                 chunks = True
             # Write the current analysis dataset
-            tempdata = data_group.require_dataset(name=ana_data['name'],
-                                                  shape=ana_data['data'].shape,
-                                                  dtype=ana_data['data'].dtype,
-                                                  chunks=chunks)
+            if ana_data['data'].dtype.type in [np.string_, np.unicode_]:
+                tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                          shape=ana_data['data'].shape,
+                                                          dtype=omsi_format_common.str_type,
+                                                          chunks=chunks)
+            else:
+                tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                      shape=ana_data['data'].shape,
+                                                      dtype=ana_data['data'].dtype,
+                                                      chunks=chunks)
             if ana_data['data'].size > 0:
                 tempdata[:] = ana_data['data']
             else:
@@ -490,10 +496,12 @@ class omsi_file_analysis(omsi_dependencies_manager,
             try:
                 dat = np.asarray(ana_data['data'])
                 if len(dat.shape) == 0:
-                    dat = np.asarray([ana_data['data']])
-                tempdata = data_group.require_dataset(
-                    name=ana_data['name'], shape=dat.shape, dtype=str(dat.dtype))
+                    dat = dat[np.newaxis]  # np.asarray([ana_data['data']])
+                tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                       shape=dat.shape,
+                                                       dtype=str(dat.dtype))
                 if dat.size > 0:
+                    # data_group[ana_data['name']] = dat
                     tempdata[:] = dat
                 else:
                     warnings.warn(ana_data['name'] + " dataset generated but not written. The given dataset was empty.")
