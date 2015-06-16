@@ -90,7 +90,11 @@ class parallel_over_axes(object):
 
         The data is divided into sub-blocks along the largest split_axis
 
-        :return: The result from all local executions of the task_function
+        :return: i) The result from the local execution of the task_function and
+            ii) The selection of the sub-block that was processed. If collect_data
+            is True and we are the self.root rank, then the result will be a list
+            of the results from all ranks and the sub_block index will be a list of
+            all the sub_block indexes used.
         """
         # Get MPI parameters
         rank = get_rank()
@@ -109,7 +113,7 @@ class parallel_over_axes(object):
         if split_axis_size < size:
             raise NotImplementedError("STATIC scheduling currently parallelizes only over one axis, " +
                                       "and the largest axis is too small to fill all MPI tasks")
-        block_size = split_axis_size / size
+        block_size = int(split_axis_size / float(size) + 0.5)
 
         # Compute a block for every rank
         my_block = [slice(None)] * len(self.main_data.shape)
@@ -130,11 +134,13 @@ class parallel_over_axes(object):
         # Collect the output
         if self.collect_output:
             collected_data = self.comm.gather(self.result, root=self.root)
+            collected_blocks = self.comm.gather(my_block, root=self.root)
             if rank == self.root:
                 self.result = collected_data
+                my_block = collected_blocks
 
         # Return the output
-        return self.result
+        return self.result, my_block
 
     def run_dynamic(self):
         """
@@ -176,7 +182,7 @@ class parallel_over_axes(object):
                                dest=request_rank,
                                tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 block_index += 1
-                print(block_index, total_num_subblocks)
+                # print (block_index, total_num_subblocks, request_rank)
 
             # Terminate all ranks and receive all data from the different ranks if requested
             all_ranks_status = np.zeros(size, 'bool')
@@ -224,10 +230,13 @@ def imports_mpi(python_object):
     import inspect
     import re
     code = inspect.getsource(python_object)
-    object_imports_mpi = re.search('import\s+mpi4py', code)
-    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi4py\s+import', code)
-    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi', code)
-    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi\s+import', code)
+    object_imports_mpi = re.search('import\s+mpi4py', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi4py\s+import', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi4py', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi\s+import', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+omsi.shared.mpi_helper\s+import', code) is not  None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+omsi.shared.mpi_helper', code) is not  None
     return object_imports_mpi
 
 
