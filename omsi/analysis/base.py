@@ -16,12 +16,9 @@ from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
 from omsi.shared.dependency_data import dependency_dict
+import omsi.shared.mpi_helper as mpi_helper
 
-try:
-    from mpi4py import MPI
-    MPI_AVAILABLE = True
-except ImportError:
-    MPI_AVAILABLE = False
+
 
 
 class AnalysisReadyError(Exception):
@@ -83,6 +80,11 @@ class analysis_base(object):
         executing the execute_analysis(...) function. The default value is false. Use the
         enable_time_and_usage_profiling(..) function to determine which profiling should be performed.
     :ivar omsi_analysis_storage: List of omsi_file_analysis object where the analysis is stored. The list may be empty.
+    :ivar mpi_comm: In case we are running with MPI, this is the MPI communicator used for runnign the analysis.
+        Default is MPI.Comm_world/
+    :ivar mpi_root: In case we are running with MPI, this is the root rank where data is collected to (e.g., runtime
+        data and analysis results)
+
 
     **Execution Functions:**
 
@@ -158,6 +160,8 @@ class analysis_base(object):
         self.profile_memory = False
         self.omsi_analysis_storage = []
         self._analysis_instances.add(weakref.ref(self))
+        self.mpi_comm = mpi_helper.get_comm_world()
+        self.mpi_root = 0
 
     def __getitem__(self,
                     key):
@@ -394,12 +398,16 @@ class analysis_base(object):
             except:
                 pass
 
-    def gather_run_info(self, root=0, comm=None):
+    def gather_run_info(self, root=None, comm=None):
         """
         Simple helper function to gather the runtime information collected on
         multiple processes when running using MPI on a single process
 
-        :param root: The process where the runtime information should be collected
+        :param root: The process where the runtime information should be collected.
+            Default is None in which case self.root is used
+
+        :param comm: The MPI communicator to be used. Default value is None,
+            in which case self.mpi_comm is used.
 
         :return: If we have more then one processes then this function returns a
             dictionary with the same keys as usual for the run_info but the
@@ -410,13 +418,15 @@ class analysis_base(object):
             own private runtime information.
 
         """
-        if MPI_AVAILABLE:
+        if mpi_helper.MPI_AVAILABLE:
             if not comm:
-                comm = self.comm = None if not MPI_AVAILABLE else MPI.COMM_WORLD
-            if self.comm.Get_size() > 1:
-                self.run_info['mpi_rank'] = self.comm.Get_rank()
-                run_data = self.comm.gather(self.run_info, root=root)
-                if self.comm.Get_rank() == root:
+                comm = self.mpi_comm
+            if not root:
+                root = self.mpi_root
+            if comm.Get_size() > 1:
+                self.run_info['mpi_rank'] = comm.Get_rank()
+                run_data = comm.gather(self.run_info, root=root)
+                if comm.Get_rank() == root:
                     merged_run_data = {}
                     for run_dict in run_data:
                         for key in run_dict:
@@ -563,8 +573,8 @@ class analysis_base(object):
         self.runinfo_clean_up()
 
         # If we ran the analysis in parallel, then collect all runtime information
-        if MPI_AVAILABLE:
-            self.gather_run_info()
+        if mpi_helper.MPI_AVAILABLE:
+            self.run_info = self.gather_run_info()
 
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
@@ -577,8 +587,13 @@ class analysis_base(object):
         Implement this function to implement the execution of the actual analysis.
 
         This function may not require any input parameters. All input parameters are
-        recoded in the parameters and dependencies lists and should be retrieved
+        recorded in the parameters and dependencies lists and should be retrieved
         from there, e.g, using basic slicing self[ paramName ]
+
+        Input parameters may be added for internal use ONLY. E.g, we may add parameters that
+        are used internally to help with parallelization of the execute_analysis function.
+        Such parameters are not recorded and must be strictly optional so that analysis_base.execute(...)
+        can call the function.
 
         :returns: This function may return any developer-defined data. Note, all
                  output that should be recorded must be put into the data list.
@@ -971,16 +986,15 @@ class analysis_base(object):
         from pstats import Stats
         from ast import literal_eval
         if 'profile' in self.run_info:
-            # Parse the profile data (which is stored as a string)
-            try:
-                profile_data = literal_eval(self.run_info['profile'])
-            except:
-                return None
-
-            # If we only have a single stat, then convert our data to a list, so that we can
-            # handle the single and multiple statistics case in the same way in the remainder of this function
-            if not isinstance(profile_data, list):
-                profile_data = [profile_data, ]
+            # Parse the profile data (which is stored as a string) or in the case of MPI we may
+            # have a list of strings from each MPI processes
+            if isinstance(self.run_info['profile'], list):
+                # Convert the profile from each MPI process independently
+                profile_data = [literal_eval(profile) for profile in self.run_info['profile']]
+            else:
+                # If we only have a single stat, then convert our data to a list, so that we can
+                # handle the single and multiple statistics case in the same way in the remainder of this function
+                profile_data = [literal_eval(self.run_info['profile']), ]
 
             # Create a list of profile objects that the pstats.Stats class understands
             profile_dummies = []
