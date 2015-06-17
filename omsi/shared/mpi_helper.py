@@ -192,14 +192,15 @@ class parallel_over_axes(object):
             # Terminate all ranks and receive all data from the different ranks if requested
             all_ranks_status = np.zeros(size, 'bool')
             all_ranks_status[self.root] = True
-            collected_data = {}
+            collected_data = []
+            block_selections = []
             while not np.all(all_ranks_status):
 
                 request_rank = self.comm.recv(source=MPI.ANY_SOURCE, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 self.comm.send((None, None), dest=request_rank, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if self.collect_output:
-                    rank_data = self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                    collected_data.update(rank_data)
+                    collected_data += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
+                    block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                 all_ranks_status[request_rank] = True
 
             self.result = collected_data
@@ -207,21 +208,25 @@ class parallel_over_axes(object):
         # We are a rank that has to run tasks
         else:
             # Request a new data block
-            self.result = {}
+            self.result = []
+            block_selections = []
+
             while True:
                 self.comm.send(rank, dest=self.root, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 block_index, block_selection = self.comm.recv(source=self.root, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if block_index is None:
                     if self.collect_output:
                         self.comm.send(self.result, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
+                        self.comm.send(block_selections, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                     break
                 # Execute the task_function on the given data block
                 task_params = self.task_function_params
                 task_params[self.main_data_param_name] = self.main_data[block_selection]
-                self.result[block_index] = self.task_function(**task_params)
+                self.result.append(self.task_function(**task_params))
+                block_selections.append(block_selection)
 
         # Return the result
-        return self.result
+        return self.result, block_selections
 
 
 
