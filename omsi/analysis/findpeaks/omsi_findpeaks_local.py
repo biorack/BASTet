@@ -87,7 +87,6 @@ class omsi_findpeaks_local(analysis_base):
         """Implement support for qspectrum URL requests for the viewer"""
         # Retrieve the h5py objects for the requried datasets from the local peak finding
         if viewer_option == 0:
-
             from omsi.shared.data_selection import check_selection_string, selection_type, selection_to_indexlist
             import numpy as np
             peak_mz = analysis_object['peak_mz']
@@ -121,11 +120,17 @@ class omsi_findpeaks_local(analysis_base):
             shape_x = len(items)
             shape_y = 1
             shape_z = num_mz
-            # Initalize the data cube to be returned
+            # Initialize the data cube to be returned
             data = np.zeros((shape_x, shape_y, shape_z), dtype=peak_values.dtype)
             # Fill the non-zero locations for the data cube with data
-            for ni in xrange(0, len(items)):
-                current_index = (items[ni][0]*num_y + items[ni][1])
+            for ni, ci in enumerate(items):
+                try:
+                    # Pixel indices may be out of order (e.g, when we use MPI) so we look up the pixel location
+                    current_index = np.nonzero(np.logical_and(array_indices[0] == ci[0],
+                                                              array_indices[1] == ci[1]))[0][0]
+                except:
+                    print "Requested pixel not found: " + str(items[ni])
+                    continue
                 current_dx = ni
                 current_dy = 0
                 start_index = array_indices[current_index][2]
@@ -243,14 +248,13 @@ class omsi_findpeaks_local(analysis_base):
         if mpi_helper.get_size() > 1 and len(self['msidata'].shape) > 1:
             if msidata_subblock is None:
                 split_axis = range(len(self['msidata'].shape)-1)
-                # TODO Implement the data collection to also allow the use of the DYNAMIC scheduler
                 scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,
                                                           task_function_params={},
                                                           main_data=self['msidata'],
                                                           split_axes=split_axis,
                                                           main_data_param_name='msidata_subblock',
                                                           root=self.mpi_root,
-                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['STATIC_1D'],
+                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'],
                                                           collect_output=True,
                                                           comm=self.mpi_comm)
                 result = scheduler.run()
