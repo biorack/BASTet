@@ -28,7 +28,8 @@ class parallel_over_axes(object):
     :ivar comm: The MPI communicator used for the parallelization. Default value is MPI.COMM_WORLD
 
     """
-    SCHEDULES = {'STATIC': 'STATIC',
+    SCHEDULES = {'STATIC_1D': 'STATIC_1D',
+                 'STATIC_2D': 'STATIC_2D',
                  'DYNAMIC': 'DYNAMIC'}
 
     MPI_MESSAGE_TAGS = {'RANK_MSG': 11,
@@ -41,7 +42,7 @@ class parallel_over_axes(object):
                  main_data,
                  split_axes,
                  main_data_param_name,
-                 schedule=SCHEDULES['STATIC'],
+                 schedule=SCHEDULES['STATIC_1D'],
                  collect_output=True,
                  root=0,
                  comm=None):
@@ -81,10 +82,10 @@ class parallel_over_axes(object):
         """
         if self.schedule == self.SCHEDULES['DYNAMIC']:
             return self.run_dynamic()
-        elif self.schedule == self.SCHEDULES['STATIC']:
-            return self.run_static()
+        elif self.schedule == self.SCHEDULES['STATIC_1D']:
+            return self.run_static_1D()
 
-    def run_static(self):
+    def run_static_1D(self):
         """
         Run the task function using a static task decomposition schema.
 
@@ -101,6 +102,7 @@ class parallel_over_axes(object):
         size = get_size()
 
         # Get data shape parameters and compute the data blocks
+        # Determine the longest axis along which we can split the data
         axes_shapes = np.asarray(self.main_data.shape)[self.split_axes]
         total_num_subblocks = np.prod(axes_shapes)
         if total_num_subblocks < size:
@@ -108,12 +110,15 @@ class parallel_over_axes(object):
             if rank == self.root:
                 print "Insufficient number of blocks for number of MPI ranks. Some ranks will remain idle"
         axes_sort_index = np.argsort(axes_shapes)[::-1]
-        split_axis = axes_sort_index[0]
+        split_axis = self.split_axes[axes_sort_index[0]]
         split_axis_size = axes_shapes[split_axis]
         if split_axis_size < size:
             raise NotImplementedError("STATIC scheduling currently parallelizes only over one axis, " +
                                       "and the largest axis is too small to fill all MPI tasks")
+        # Determine the size of 1D block
         block_size = int(split_axis_size / float(size) + 0.5)
+        if block_size * size > split_axis_size and block_size > 1:
+            block_size -= 1
 
         # Compute a block for every rank
         my_block = [slice(None)] * len(self.main_data.shape)
@@ -156,7 +161,7 @@ class parallel_over_axes(object):
 
         if size < 2:
             warnings.warn('DYNAMIC task scheduling requires at least 2 MPI ranks. Using STATIC scheduling instead.')
-            return self.run_static()
+            return self.run_static_1D()
 
         # We are the controlling rank
         if rank == self.root:

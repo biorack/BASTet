@@ -250,7 +250,7 @@ class omsi_findpeaks_local(analysis_base):
                                                           split_axes=split_axis,
                                                           main_data_param_name='msidata_subblock',
                                                           root=self.mpi_root,
-                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['STATIC'],
+                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['STATIC_1D'],
                                                           collect_output=True,
                                                           comm=self.mpi_comm)
                 result = scheduler.run()
