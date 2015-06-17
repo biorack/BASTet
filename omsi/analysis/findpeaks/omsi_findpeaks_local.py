@@ -57,6 +57,7 @@ class omsi_findpeaks_local(analysis_base):
                            required=True)
         self.add_parameter(name='printStatus',
                            help='Print progress status during the analysis',
+                           dtype=bool,
                            required=True,
                            group=groups['settings'],
                            default=False)
@@ -207,25 +208,68 @@ class omsi_findpeaks_local(analysis_base):
         """Define which viewer_options are supported for qspectrum URL's"""
         return super(omsi_findpeaks_local, cls).v_qslice_viewer_options(analysis_object)
 
-    def execute_analysis(self):
+    def execute_analysis(self, msidata_subblock=None):
         """
-        Execute the nmf for the given msidata
+        Execute the local peak finder for the given msidata.
+
+        :param msidata_subblock: Optional input parameter used for parallel execution of the
+            analysis only. If msidata_subblock is set, then the given subblock will be processed
+            in SERIAL instead of processing self['msidata'] in PARALLEL (if available). This
+            parameter is strictly optional and intended for internal use only.
+
         """
-        # Assign paramters to local variables for convenience
-        msidata = self['msidata']
+        # Make sure needed imports are available
+        from omsi.analysis.findpeaks.third_party.findpeaks import findpeaks
+        import omsi.shared.mpi_helper as mpi_helper
+        import numpy as np
+
+        # Assign parameters to local variables for convenience
+        msidata =  self['msidata']
+        if msidata_subblock is not None:
+            msidata = msidata_subblock
         mzdata = self['mzdata']
         integration_width = self['integration_width']
         peakheight = self['peakheight']
         slwindow = self['slwindow']
         smoothwidth = self['smoothwidth']
         print_status = self['printStatus']
-
-        # Make sure needed imports are available
-        from omsi.analysis.findpeaks.third_party.findpeaks import findpeaks
-        import numpy as np
         if print_status:
             import sys
 
+        #############################################################
+        # Parallel execution using MPI
+        #############################################################
+        import omsi.shared.mpi_helper as mpi_helper
+        if mpi_helper.get_size() > 1 and len(self['msidata'].shape) > 1:
+            if msidata_subblock is None:
+                split_axis = range(len(self['msidata'].shape)-1)
+                # TODO Implement the data collection to also allow the use of the DYNAMIC scheduler
+                scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,
+                                                          task_function_params={},
+                                                          main_data=self['msidata'],
+                                                          split_axes=split_axis,
+                                                          main_data_param_name='msidata_subblock',
+                                                          root=self.mpi_root,
+                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['STATIC'],
+                                                          collect_output=True,
+                                                          comm=self.mpi_comm)
+                result = scheduler.run()
+
+                # Return the output result as is if we are a "worker" rank
+                if mpi_helper.get_rank() != self.mpi_root:
+                    return result[0]
+                else:
+                    # Compile the results from all ranks if we are on the "main" rank
+                    peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
+                    peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
+                    peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
+                    mzdata = result[0][0][3]
+                    return peak_mz, peak_values, peak_arrayindex, mzdata
+
+
+        #############################################################
+        # Serial processing of the current data block
+        #############################################################
         # Ensure the our MSI dataset has sufficient numbers of dimensions
         if len(msidata.shape) == 1:
             msidata = msidata[:][np.newaxis, np.newaxis, :]
