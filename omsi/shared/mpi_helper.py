@@ -225,8 +225,9 @@ class parallel_over_axes(object):
                 start_time = time.time()
                 #self.result += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                 #block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                self.result = list(self.comm.gather(None, root=self.root))
-                block_selections = list(self.comm.gather(None, root=self.root))
+                empty_message = []
+                self.result = list(self.comm.gather(empty_message, root=self.root))
+                block_selections = list(self.comm.gather(empty_message, root=self.root))
                 self.result.pop(self.root)
                 block_selections.pop(self.root)
                 self.result = tuple(self.result)
