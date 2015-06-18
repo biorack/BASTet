@@ -217,10 +217,10 @@ class parallel_over_axes(object):
                 request_rank = self.comm.recv(source=MPI.ANY_SOURCE, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 self.comm.send((None, None), dest=request_rank, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if self.collect_output:
-                    print "COLLECTING DATA FROM: " + str(request_rank)
+                    # print "COLLECTING DATA FROM: " + str(request_rank)
                     collected_data += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                     block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                    print "SIZE: " + str((sys.getsizeof(collected_data), sys.getsizeof(block_selections)))
+                    # print "SIZE: " + str((sys.getsizeof(collected_data), sys.getsizeof(block_selections)))
                 all_ranks_status[request_rank] = True
             self.result = collected_data
             end_time = time.time()
