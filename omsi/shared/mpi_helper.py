@@ -6,7 +6,7 @@ except ImportError:
 import numpy as np
 import itertools
 import warnings
-
+import sys
 
 class parallel_over_axes(object):
     """
@@ -97,6 +97,8 @@ class parallel_over_axes(object):
             of the results from all ranks and the sub_block index will be a list of
             all the sub_block indexes used.
         """
+        import time
+        start_time = time.time()
         # Get MPI parameters
         rank = get_rank()
         size = get_size()
@@ -136,13 +138,21 @@ class parallel_over_axes(object):
         task_params[self.main_data_param_name] = self.main_data[my_block]
         self.result = self.task_function(**task_params)
 
+        end_time = time.time()
+        run_time = end_time - start_time
+        print "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time)
+
         # Collect the output
+        start_time = time.time()
         if self.collect_output:
             collected_data = self.comm.gather(self.result, root=self.root)
             collected_blocks = self.comm.gather(my_block, root=self.root)
             if rank == self.root:
                 self.result = collected_data
                 my_block = collected_blocks
+        end_time = time.time()
+        run_time = end_time - start_time
+        print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
 
         # Return the output
         return self.result, my_block
@@ -156,6 +166,7 @@ class parallel_over_axes(object):
 
         :return: The result from all local executions of the tast_function
         """
+        import time
         rank = get_rank()
         size = get_size()
 
@@ -180,6 +191,8 @@ class parallel_over_axes(object):
             block_tuples = itertools.product(*base_blocks)
 
             # Communicate blocks with task ranks
+            print "PROCESSING DATA BLOCKS"
+            start_time = time.time()
             block_index = 0
             for block_selection in block_tuples:
                 request_rank = self.comm.recv(source=MPI.ANY_SOURCE, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
@@ -187,8 +200,13 @@ class parallel_over_axes(object):
                                dest=request_rank,
                                tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 block_index += 1
-                # print (block_index, total_num_subblocks, request_rank)
-
+                if (block_index % 1000) == 0:
+                    print (block_index, total_num_subblocks, request_rank)
+            end_time = time.time()
+            run_time = end_time - start_time
+            print "TIME FOR RUNNING TASK FUNCTION: " + str(run_time)
+            start_time = time.time()
+            print "FINALIZING AND COLLECTING DATA"
             # Terminate all ranks and receive all data from the different ranks if requested
             all_ranks_status = np.zeros(size, 'bool')
             all_ranks_status[self.root] = True
@@ -199,11 +217,16 @@ class parallel_over_axes(object):
                 request_rank = self.comm.recv(source=MPI.ANY_SOURCE, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 self.comm.send((None, None), dest=request_rank, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if self.collect_output:
+                    print "COLLECTING DATA FROM: " + str(request_rank)
                     collected_data += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                     block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
+                    print "SIZE: " + str((sys.getsizeof(collected_data), sys.getsizeof(block_selections)))
                 all_ranks_status[request_rank] = True
-
             self.result = collected_data
+            end_time = time.time()
+            run_time = end_time - start_time
+            print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
+            print "DONE COLLECTING DATA"
 
         # We are a rank that has to run tasks
         else:
@@ -218,6 +241,10 @@ class parallel_over_axes(object):
                     if self.collect_output:
                         self.comm.send(self.result, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                         self.comm.send(block_selections, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
+                        # del self.result
+                        # self.result=None
+                        # del block_selections
+                        # block_selections = None
                     break
                 # Execute the task_function on the given data block
                 task_params = self.task_function_params
