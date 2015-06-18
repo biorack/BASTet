@@ -225,13 +225,15 @@ class parallel_over_axes(object):
                 start_time = time.time()
                 #self.result += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
                 #block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                empty_message = []
-                self.result = list(self.comm.gather(empty_message, root=self.root))
-                block_selections = list(self.comm.gather(empty_message, root=self.root))
-                self.result.pop(self.root)
-                block_selections.pop(self.root)
-                self.result = tuple(self.result)
-                block_selections = tuple(block_selections)
+                empty_message = [1,2,3,4,5]
+                res_data = self.comm.gather(empty_message, root=self.root)
+                block_data = self.comm.gather(empty_message, root=self.root)
+                res_data = list(res_data)
+                block_data = list(block_data)
+                res_data.pop(self.root)
+                block_data.pop(self.root)
+                self.result = tuple(res_data)
+                block_selections = tuple(block_data)
                 end_time = time.time()
                 run_time = end_time - start_time
                 print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
@@ -262,8 +264,8 @@ class parallel_over_axes(object):
                 self.result.append(self.task_function(**task_params))
                 block_selections.append(block_selection)
             if self.collect_output:
-                _ = self.comm.gather(self.result, root=self.root)
-                _ = self.comm.gather(block_selections, root=self.root)
+                temp1 = self.comm.gather(self.result, root=self.root)
+                temp2 = self.comm.gather(block_selections, root=self.root)
 
         # Return the result
         return self.result, block_selections
