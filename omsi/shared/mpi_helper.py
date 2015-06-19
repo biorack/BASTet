@@ -6,7 +6,8 @@ except ImportError:
 import numpy as np
 import itertools
 import warnings
-import sys
+import time
+
 
 class parallel_over_axes(object):
     """
@@ -29,7 +30,6 @@ class parallel_over_axes(object):
 
     """
     SCHEDULES = {'STATIC_1D': 'STATIC_1D',
-                 'STATIC_2D': 'STATIC_2D',
                  'DYNAMIC': 'DYNAMIC'}
 
     MPI_MESSAGE_TAGS = {'RANK_MSG': 11,
@@ -43,7 +43,6 @@ class parallel_over_axes(object):
                  split_axes,
                  main_data_param_name,
                  schedule=SCHEDULES['STATIC_1D'],
-                 collect_output=True,
                  root=0,
                  comm=None):
         """
@@ -56,7 +55,6 @@ class parallel_over_axes(object):
         :param main_data_param_name: The name of data input parameter of the task function
         :param root: The master MPI rank (Default=0)
         :param schedule: The task scheduling schema to be used (see parallel_over_axes.SCHEDULES
-        :param collect_output: Should we collect all the output from the ranks on the master rank?
         :param comm: The MPI communicator used for the parallelization. Default value is None, in which case
             MPI.COMM_WORLD is used
 
@@ -64,7 +62,6 @@ class parallel_over_axes(object):
         if not is_mpi_available():
             raise ValueError("MPI is not available. MPI is required for parallel execution.")
         self.task_function = task_function
-        self.collect_output = collect_output
         self.schedule = schedule
         self.split_axes = split_axes
         self.main_data = main_data
@@ -74,6 +71,7 @@ class parallel_over_axes(object):
             self.task_function_params = {}
         self.root = root
         self.result = None
+        self.blocks = None
         self.comm = get_comm_world() if comm is None else comm
 
     def run(self):
@@ -81,11 +79,41 @@ class parallel_over_axes(object):
         Call this function to run the function in parallel
         """
         if self.schedule == self.SCHEDULES['DYNAMIC']:
-            return self.run_dynamic()
+            return self.__run_dynamic()
         elif self.schedule == self.SCHEDULES['STATIC_1D']:
-            return self.run_static_1D()
+            return self.__run_static_1D()
 
-    def run_static_1D(self):
+    def collect_data(self):
+        """
+        Collect the results from the parallel execution to the self.root rank.
+
+        :return: self.result and self.blocks, i.e, the collected output and
+            the data blocks each result refers to
+        """
+         # Collect the output
+        rank = get_rank()
+        start_time = time.time()
+        if rank == self.root:
+            print "COLLECTING RESULTS"
+        collected_data = self.comm.gather(self.result, root=self.root)
+        collected_blocks = self.comm.gather(self.blocks, root=self.root)
+        if rank == self.root:
+            self.result = collected_data
+            self.blocks = collected_blocks
+        if self.schedule == self.SCHEDULES['DYNAMIC']:
+            temp = list(self.result)
+            temp.pop(self.root)
+            self.result = temp
+            temp = list(self.blocks)
+            temp.pop(self.root)
+            self.blocks = temp
+        end_time = time.time()
+        run_time = end_time - start_time
+        if rank == self.root:
+            print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
+        return self.result, self.blocks
+
+    def __run_static_1D(self):
         """
         Run the task function using a static task decomposition schema.
 
@@ -97,7 +125,6 @@ class parallel_over_axes(object):
             of the results from all ranks and the sub_block index will be a list of
             all the sub_block indexes used.
         """
-        import time
         start_time = time.time()
         # Get MPI parameters
         rank = get_rank()
@@ -123,41 +150,29 @@ class parallel_over_axes(object):
             block_size -= 1
 
         # Compute a block for every rank
-        my_block = [slice(None)] * len(self.main_data.shape)
+        self.blocks = [slice(None)] * len(self.main_data.shape)
         start_index = rank * block_size
         stop_index = start_index + block_size
         if rank == (size-1):
             if stop_index != split_axis_size:
                 stop_index = split_axis_size
-        my_block[axes_sort_index[0]] = slice(start_index, stop_index)
-        my_block = tuple(my_block)
-        print "Rank: " + str(rank) + " Block: " + str(my_block)
+        self.blocks[axes_sort_index[0]] = slice(start_index, stop_index)
+        self.blocks = tuple(self.blocks)
+        print "Rank: " + str(rank) + " Block: " + str(self.blocks)
 
         # Execute the task_function on the given data block
         task_params = self.task_function_params
-        task_params[self.main_data_param_name] = self.main_data[my_block]
+        task_params[self.main_data_param_name] = self.main_data[self.blocks]
         self.result = self.task_function(**task_params)
 
         end_time = time.time()
         run_time = end_time - start_time
         print "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time)
 
-        # Collect the output
-        start_time = time.time()
-        if self.collect_output:
-            collected_data = self.comm.gather(self.result, root=self.root)
-            collected_blocks = self.comm.gather(my_block, root=self.root)
-            if rank == self.root:
-                self.result = collected_data
-                my_block = collected_blocks
-        end_time = time.time()
-        run_time = end_time - start_time
-        print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
-
         # Return the output
-        return self.result, my_block
+        return self.result, self.blocks
 
-    def run_dynamic(self):
+    def __run_dynamic(self):
         """
         Run the task function using dynamic task scheduling.
 
@@ -172,10 +187,12 @@ class parallel_over_axes(object):
 
         if size < 2:
             warnings.warn('DYNAMIC task scheduling requires at least 2 MPI ranks. Using STATIC scheduling instead.')
-            return self.run_static_1D()
+            return self.__run_static_1D()
 
         # We are the controlling rank
         if rank == self.root:
+            self.result = []
+            self.blocks = []
             # Get data shape parameters and compute the data blocks
             axes_shapes = np.asarray(self.main_data.shape)[self.split_axes]
             total_num_subblocks = np.prod(axes_shapes)
@@ -206,54 +223,39 @@ class parallel_over_axes(object):
             run_time = end_time - start_time
             print "TIME FOR RUNNING TASK FUNCTION: " + str(run_time)
             start_time = time.time()
-            print "FINALIZING AND COLLECTING DATA"
+            print "FINALIZING"
             # Terminate all ranks and receive all data from the different ranks if requested
             all_ranks_status = np.zeros(size, 'bool')
             all_ranks_status[self.root] = True
-            collected_data = []
-            block_selections = []
             while not np.all(all_ranks_status):
 
                 request_rank = self.comm.recv(source=MPI.ANY_SOURCE, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 self.comm.send((None, None), dest=request_rank, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
-                if self.collect_output:
-                    # print "COLLECTING DATA FROM: " + str(request_rank)
-                    collected_data += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                    block_selections += self.comm.recv(source=request_rank, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                    # print "SIZE: " + str((sys.getsizeof(collected_data), sys.getsizeof(block_selections)))
                 all_ranks_status[request_rank] = True
-            self.result = collected_data
+
             end_time = time.time()
             run_time = end_time - start_time
-            print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
-            print "DONE COLLECTING DATA"
+            print "TIME FOR FINALIZING TASKS: " + str(run_time)
 
         # We are a rank that has to run tasks
         else:
             # Request a new data block
             self.result = []
-            block_selections = []
+            self.blocks = []
 
             while True:
                 self.comm.send(rank, dest=self.root, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 block_index, block_selection = self.comm.recv(source=self.root, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if block_index is None:
-                    if self.collect_output:
-                        self.comm.send(self.result, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                        self.comm.send(block_selections, dest=self.root, tag=self.MPI_MESSAGE_TAGS['COLLECT_MSG'])
-                        # del self.result
-                        # self.result=None
-                        # del block_selections
-                        # block_selections = None
                     break
                 # Execute the task_function on the given data block
                 task_params = self.task_function_params
                 task_params[self.main_data_param_name] = self.main_data[block_selection]
                 self.result.append(self.task_function(**task_params))
-                block_selections.append(block_selection)
+                self.blocks.append(block_selection)
 
         # Return the result
-        return self.result, block_selections
+        return self.result, self.blocks
 
 
 

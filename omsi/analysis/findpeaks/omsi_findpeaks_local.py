@@ -3,6 +3,7 @@ Local peak finding analysis module.
 """
 
 from omsi.analysis.base import analysis_base
+import omsi.shared.mpi_helper as mpi_helper
 
 
 class omsi_findpeaks_local(analysis_base):
@@ -57,8 +58,21 @@ class omsi_findpeaks_local(analysis_base):
                            required=True)
         self.add_parameter(name='printStatus',
                            help='Print progress status during the analysis',
-                           dtype=bool,
+                           dtype=dtypes['bool'],
                            required=True,
+                           group=groups['settings'],
+                           default=False)
+        self.add_parameter(name='schedule',
+                           help='Scheduling to be used for parallel MPI runs',
+                           dtype=str,
+                           required=False,
+                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           group=groups['settings'],
+                           default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
+        self.add_parameter(name='collect',
+                           help='Collect results to the MPI root rank when running in parallel',
+                           dtype=dtypes['bool'],
+                           required=False,
                            group=groups['settings'],
                            default=False)
         self.data_names = ['peak_mz',
@@ -225,7 +239,6 @@ class omsi_findpeaks_local(analysis_base):
         """
         # Make sure needed imports are available
         from omsi.analysis.findpeaks.third_party.findpeaks import findpeaks
-        import omsi.shared.mpi_helper as mpi_helper
         import numpy as np
 
         # Assign parameters to local variables for convenience
@@ -254,13 +267,15 @@ class omsi_findpeaks_local(analysis_base):
                                                           split_axes=split_axis,
                                                           main_data_param_name='msidata_subblock',
                                                           root=self.mpi_root,
-                                                          schedule=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'],
-                                                          collect_output=True,
+                                                          schedule=self['schedule'],
                                                           comm=self.mpi_comm)
                 result = scheduler.run()
+                if self['collect']:
+                    result = scheduler.collect_data()
 
-                # Return the output result as is if we are a "worker" rank
-                if mpi_helper.get_rank() != self.mpi_root:
+                # Return the output result as is if we are a "worker" rank or we are not
+                # collecting the data to our root rank
+                if mpi_helper.get_rank() != self.mpi_root or not self['collect']:
                     return result[0]
                 else:
                     # Compile the results from all ranks if we are on the "main" rank
