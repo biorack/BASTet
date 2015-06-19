@@ -279,6 +279,18 @@ def imports_mpi(python_object):
     return object_imports_mpi
 
 
+def barrier(comm=None):
+    """
+    MPI barrier operation or no-op when running without MPI
+
+    :param comm: MPI communicator. If None, then MPI.COMM_WORLD will be used.
+    """
+    if MPI_AVAILABLE:
+        my_comm = comm if comm is not None else MPI.COMM_WORLD
+        my_comm.barrier()
+    else:
+        pass
+
 def get_rank(comm=None):
     """
     Get the current process rank

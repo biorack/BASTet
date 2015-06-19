@@ -313,8 +313,11 @@ class omsi_file_analysis(omsi_dependencies_manager,
             analysis_type_data[0] = str(analysis.get_analysis_type())
 
         # 3. Write the analysis data
-        for ana_data in analysis.get_all_analysis_data():
-            cls.__write_omsi_analysis_data__(analysis_group, ana_data)
+        try:
+            analysis.write_analysis_data(analysis_group=analysis_group)
+        except NotImplementedError:
+            for ana_data in analysis.get_all_analysis_data():
+                cls.__write_omsi_analysis_data__(analysis_group, ana_data)
 
         # 4. Determine all dependencies and parameters that we need to write
         dependencies = []  # [dep['data'] for dep in analysis.get_all_dependency_data()]
@@ -401,7 +404,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                           dependencies_data_list=dependencies)
 
         # 8. Execute the custom data write for the analysis
-        analysis.write_to_omsi_file(analysis_group)
+        analysis.add_custom_data_to_omsi_file(analysis_group)
 
         # 9. Create the output object
         re = omsi_file_analysis(analysis_group)

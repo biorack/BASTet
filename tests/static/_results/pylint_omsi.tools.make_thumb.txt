@@ -284,7 +284,7 @@ R:  1, 0: Similar lines in 2 files
         This function can be optionally overwritten to implement a custom data read.
 
         The default implementation tries to reconstruct the original data as far
-        as possible, however, in particular in case that a custom write_to_omsi_file
+        as possible, however, in particular in case that a custom add_custom_data_to_omsi_file
         function has been implemented, the default implementation may not be sufficient. (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.dataformat.img_file:214

@@ -48,9 +48,11 @@ I/O functions
 
 These functions can be optionally overwritten to control how the analysis data should be written/read from the omsi HDF5 file. Default implementations are provided here, which should be sufficient for most cases.
 
-* ``write_to_omsi_file``: The default implementation is empty as the default data write is  managed by the omsi_file_experiment.create_analysis() function.  Overwrite this function, in case that the analysis needs to write data to the HDF5 omsi file beyond what the defualt omsi data API does.
+* ``write_analysis_data`` By default all data is written by ``omsi.dataformat.omsi_file.analysis.omsi_file_analysis``. By implementing this function we can implement the write for the main data (i.e., what is stored in self.__data_list) ourselves. In practice (at least in the serial case) this should not be needed. However, overwriting the function can be useful when implementing an analysis using MPI and we want to avoid gathering the data on rank the root rank (usually rank 0).
 
-* ``read_from_omsi_file``: The default implementation tries to reconstruct the original data as far  as possible, however, in particular in case that a custom write_to_omsi_file            funtion has been implemented, the default implementation may not be sufficien. The default implementation reconstructs: i) analysis_identifier and reads all custom data into ii)__data_list. Note, an error will be raised in case that the analysis type specified in the HDF5 file does not match the analysis type specified by get_analysis_type(). This function can be optionally overwritten to implement a custom data read.
+* ``add_custom_data_to_omsi_file``: The default implementation is empty as the default data write is  managed by the omsi_file_experiment.create_analysis() function.  Overwrite this function, in case that the analysis needs to write data to the HDF5 omsi file beyond what the defualt omsi data API does.
+
+* ``read_from_omsi_file``: The default implementation tries to reconstruct the original data as far  as possible, however, in particular in case that a custom add_custom_data_to_omsi_file            funtion has been implemented, the default implementation may not be sufficien. The default implementation reconstructs: i) analysis_identifier and reads all custom data into ii)__data_list. Note, an error will be raised in case that the analysis type specified in the HDF5 file does not match the analysis type specified by get_analysis_type(). This function can be optionally overwritten to implement a custom data read.
 
 Web API Functions
 """""""""""""""""
@@ -681,7 +683,7 @@ In most cases the default data save and restore functions should be sufficient. 
     :linenos:
     :emphasize-lines: 1
 
-    def write_to_omsi_file(self , analysisGroup) :
+    def add_custom_data_to_omsi_file(self , analysisGroup) :
         """This function can be optionally overwritten to implement a custom data write
            function for the analysis to be used by the omsi_file API.
 

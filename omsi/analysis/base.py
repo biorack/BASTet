@@ -97,12 +97,12 @@ class analysis_base(object):
     These functions can be optionally overwritten to control how the analysis data should be written/read
     from the omsi HDF5 file. Default implementations are provided here, which should be sufficient for most cases.
 
-    * ``write_to_omsi_file``: The default implementation is empty as the default data write is  managed by the \
+    * ``add_custom_data_to_omsi_file``: The default implementation is empty as the default data write is  managed by the \
     `omsi_file_experiment.create_analysis()` function.  Overwrite this function, in case that the analysis needs \
     to write data to the HDF5 omsi file beyond what the defualt omsi data API does.
 
     * ``read_from_omsi_file``: The default implementation tries to reconstruct the original data as far as possible, \
-    however, in particular in case that a custom write_to_omsi_file function has been implemented, the \
+    however, in particular in case that a custom add_custom_data_to_omsi_file function has been implemented, the \
     default implementation may not be sufficien. The default implementation reconstructs: i) analysis_identifier \
     and reads all custom data into ii)__data_list. Note, an error will be raised in case that the analysis type \
     specified in the HDF5 file does not match the analysis type specified by get_analysis_type(). This function \
@@ -1367,13 +1367,27 @@ class analysis_base(object):
 #        else :
 #             raise ValueError( "Invalid input for add_data_dependency function" )
 
-    def write_to_omsi_file(self, analysis_object):
+    def write_analysis_data(self, analysis_group):
+        """
+        This function used to write the actual analysis data to file. If not implemented, then the
+        omsi_file_analysis API's default behavior is used instead.
+
+        :param analysis_group: The h5py.Group object where the analysis is stored.
+
+        """
+        # The default implementation does roughly the following
+        # from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
+        # for ana_data in self..get_all_analysis_data():
+        #        omsi_file_analysis.__write_omsi_analysis_data__(analysis_group, ana_data)
+        raise NotImplementedError
+
+    def add_custom_data_to_omsi_file(self, analysis_group):
         """
         This function can be optionally overwritten to implement a custom data write
         function for the analysis to be used by the omsi_file API.
 
         Note, this function should be used only to add additional data to the analysis
-        group. The data that is written by default is typically still written by
+        group. The data that is written by default is still written by
         the `omsi_file_experiment.create_analysis()` function, i.e., the following data is
         written by default: i) analysis_identifier ,ii) get_analysis_type, iii)__data_list,
         iv) parameters, v) runinfo . Since the `omsi_file.experiment.create_analysis()`
@@ -1384,8 +1398,7 @@ class analysis_base(object):
         `omsi_file_analysis.__populate_analysis__(..)` so that this function typically does not need to
         be called explicitly.
 
-        :param analysis_object: The `omsi_file_analysis` object of the group for the analysis that
-            can be used for writing.
+        :param analysis_group: The h5py.Group object where the analysis is stored.
 
         """
         pass
@@ -1401,7 +1414,7 @@ class analysis_base(object):
         This function can be optionally overwritten to implement a custom data read.
 
         The default implementation tries to reconstruct the original data as far
-        as possible, however, in particular in case that a custom write_to_omsi_file
+        as possible, however, in particular in case that a custom add_custom_data_to_omsi_file
         function has been implemented, the default implementation may not be sufficient.
         The default implementation reconstructs: i) analysis_identifier and reads all
         custom data into iii)__data_list. Note, an error will be raised in case that

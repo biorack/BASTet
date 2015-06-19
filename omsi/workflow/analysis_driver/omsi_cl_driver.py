@@ -8,6 +8,7 @@ from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.main_file import omsi_file
 from omsi.workflow.analysis_driver.base import omsi_driver_base
 import omsi.shared.mpi_helper as mpi_helper
+import numpy as np
 import os
 
 
@@ -466,7 +467,9 @@ class omsi_cl_driver(omsi_driver_base):
             self.remove_output_target()
             raise
 
-        # Finalize the saving of results on rank 0
+        # Finalize the saving of results on rank our mpi root rank. NOTE: When running in serial
+        # the condition of  mpi_helper.get_rank() ==  self.mpi_root evaluates to True because
+        # our mpi_root is 0 and the mpi_helper returns 0 for the rank when running in serial.
         if mpi_helper.get_rank() == self.mpi_root:
             # Print the profiling results of time and usage
             if self.profile_analysis:
@@ -484,21 +487,39 @@ class omsi_cl_driver(omsi_driver_base):
 
             # Print the time it took to run the analysis
             try:
-                print ""
+                # Parallel case: We need to compile/collect timing data from all cores
                 if isinstance(analysis_object.run_info['execution_time'] , list):
+                    # Time for each task to execute
                     print ""
                     print "Time in seconds for each analysis process: " + \
                           str(analysis_object.run_info['execution_time'])
-                    exec_time_string = str(analysis_object.run_info['execution_time'][self.mpi_root])
+                    # Start times of each task
+                    print ""
+                    print "Time when each of the processes started: " + str(analysis_object.run_info['start_time'])
+                    # Stop times for each task
+                    print ""
+                    print "Time when each of the processes finished: " + str(analysis_object.run_info['end_time'])
+
+                    # Compile the time to execute string
+                    exec_time_array = np.asarray(analysis_object.run_info['execution_time'], dtype=float)
+                    max_exec_time = str(exec_time_array.max())
+                    min_exec_time = str(exec_time_array.min())
+                    mean_exec_time = str(exec_time_array.mean())
+                    exec_time_string = max_exec_time + " s " + \
+                                       "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
+                # Serial case: We only have a single time to worry about
                 else:
-                    exec_time_string = str(analysis_object.run_info['execution_time'])
-                print "Time to execute analysis: " + exec_time_string + " s"
+                    exec_time_string = str(analysis_object.run_info['execution_time']) + " s"
+                print ""
+                print "Time to execute analysis: " + exec_time_string
             except:
                 raise
 
             # Save the analysis to file
             if self.output_target is not None:
                 self.output_target.create_analysis(analysis_object)
+
+            # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
 
 
 if __name__ == "__main__":
