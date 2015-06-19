@@ -275,9 +275,11 @@ class omsi_findpeaks_local(analysis_base):
 
                 # Return the output result as is if we are a "worker" rank or we are not
                 # collecting the data to our root rank
-                if mpi_helper.get_rank() != self.mpi_root or not self['collect']:
+                if mpi_helper.get_rank() != self.mpi_root:
                     return result[0]
-                else:
+                if not self['collect']:  # we are on the root rank and we did not collect the data
+                    return None, None, None, mzdata
+                else:  # we are on the root rank and we collected the data
                     # Compile the results from all ranks if we are on the "main" rank
                     peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
                     peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
