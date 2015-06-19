@@ -25,11 +25,31 @@ class analysis_dtypes(dict):
                   'float': float,
                   'long': long,
                   'complex': complex,
-                  'bool': bool,
+                  'bool': analysis_dtypes.bool_type,
                   'str': str,
                   'unicode': unicode,
                   'ndarray': analysis_dtypes.ndarray}
         return dtypes
+
+    @staticmethod
+    def bool_type(argument):
+        """
+        Implement conversion of boolean input parameters since
+        arparse (or bool, depending on the point of view), do not
+        handle bool as a type in an intuitive fashion.
+
+        :param argument: The argument to be parsed to a boolean
+        :return: The converted value
+        """
+        try:
+            bool(int(argument))
+        except ValueError:
+            if argument in ('TRUE', 'true', 'True', 't', 'T'):
+               return True
+            elif argument in ('FALSE', 'false', 'False', 'f', 'F'):
+               return False
+            else:
+               raise ValueError('Parameter could not be converted to type bool')
 
     @staticmethod
     def ndarray(argument):
@@ -38,6 +58,8 @@ class analysis_dtypes(dict):
         well as h5py arrays or omsi_dependencies
 
         :param argument: The argument to be parsed to ndarray
+
+        :return: The converted ndarray
         """
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
         from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
