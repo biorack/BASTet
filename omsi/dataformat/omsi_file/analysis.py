@@ -433,6 +433,11 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 curr_dtype = ana_data['data'].dtype
         except TypeError:
             pass
+        try:
+            if curr_dtype == analysis_dtypes.get_dtypes()['bool']:
+                curr_dtype = bool
+        except TypeError:
+            pass
 
         # Create link in HDF5 to an existing dataset within the file
         if isinstance(ana_data, analysis_data) and isinstance(ana_data['dtype'], int):

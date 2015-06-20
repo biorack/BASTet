@@ -227,6 +227,25 @@ class omsi_findpeaks_local(analysis_base):
         """Define which viewer_options are supported for qspectrum URL's"""
         return super(omsi_findpeaks_local, cls).v_qslice_viewer_options(analysis_object)
 
+    def write_analysis_data(self, analysis_group):
+        """
+        This function used to write the actual analysis data to file. If not implemented, then the
+        omsi_file_analysis API's default behavior is used instead.
+
+        :param analysis_group: The h5py.Group object where the analysis is stored.
+
+        """
+        # Serial no MPI, single rank SERIAL with MPI, or we are on the mpi root rank where we have all the data
+        # This is a purely serial write using the standard mechanism
+        if not mpi_helper.MPI_AVAILABLE or \
+                mpi_helper.get_size()==1 or \
+                (self['collect'] and mpi_helper.get_rank() == self.mpi_root):  #
+            raise NotImplementedError   # Just let the default implementation of omsi_file_analysis handle this
+        else:
+            # Collect the data one-by-one and write it to file
+            # TODO Implement the data write when the data is distributed
+            raise NotImplementedError
+
     def execute_analysis(self, msidata_subblock=None):
         """
         Execute the local peak finder for the given msidata.
