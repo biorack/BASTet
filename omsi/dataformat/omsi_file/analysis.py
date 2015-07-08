@@ -479,9 +479,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
             # Write the current analysis dataset
             if ana_data['data'].dtype.type in [np.string_, np.unicode_]:
                 tempdata = data_group.require_dataset(name=ana_data['name'],
-                                                          shape=ana_data['data'].shape,
-                                                          dtype=omsi_format_common.str_type,
-                                                          chunks=chunks)
+                                                      shape=ana_data['data'].shape,
+                                                      dtype=omsi_format_common.str_type,
+                                                      chunks=chunks)
             else:
                 tempdata = data_group.require_dataset(name=ana_data['name'],
                                                       shape=ana_data['data'].shape,

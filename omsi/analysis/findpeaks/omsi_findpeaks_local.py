@@ -227,7 +227,7 @@ class omsi_findpeaks_local(analysis_base):
         """Define which viewer_options are supported for qspectrum URL's"""
         return super(omsi_findpeaks_local, cls).v_qslice_viewer_options(analysis_object)
 
-    def write_analysis_data(self, analysis_group):
+    def write_analysis_data(self, analysis_group=None):
         """
         This function used to write the actual analysis data to file. If not implemented, then the
         omsi_file_analysis API's default behavior is used instead.
@@ -235,6 +235,10 @@ class omsi_findpeaks_local(analysis_base):
         :param analysis_group: The h5py.Group object where the analysis is stored.
 
         """
+        raise NotImplementedError
+        """
+        import numpy as np
+
         # Serial no MPI, single rank SERIAL with MPI, or we are on the mpi root rank where we have all the data
         # This is a purely serial write using the standard mechanism
         if not mpi_helper.MPI_AVAILABLE or \
@@ -242,9 +246,58 @@ class omsi_findpeaks_local(analysis_base):
                 (self['collect'] and mpi_helper.get_rank() == self.mpi_root):  #
             raise NotImplementedError   # Just let the default implementation of omsi_file_analysis handle this
         else:
-            # Collect the data one-by-one and write it to file
             # TODO Implement the data write when the data is distributed
-            raise NotImplementedError
+            rank = mpi_helper.get_rank(comm=self.mpi_comm)
+            #if rank > 0:    # FIXE REMOVE this if statement when all is done
+            #    dat = np.ones(5,dtype=float)
+            #    dat = dat * rank
+            #    self['peak_mz'] = dat
+            #    self['peak_value'] = dat
+            #    dat2  = np.ones(5*3, dtype='i').reshape(5,3)
+            #    dat2 *= rank
+            #    self['peak_arrayindex'] = dat2
+            rank_empty = len(self['peak_mz'].shape) == 0
+            if rank ==  self.mpi_root:
+                if analysis_group is None:
+                    raise ValueError("Not file open at the MPI root for writing")
+                for dataset_name in ['peak_mz', 'peak_value']: # , 'peak_arrayindex']:
+                    if rank_empty:
+                        num_values = np.array(0, dtype='i')
+                    else:
+                        num_values = np.array(self[dataset_name].size, dtype='i')
+                    rank_sizes = np.zeros(self.mpi_comm.size, dtype='i')
+                    self.mpi_comm.Gather(num_values, rank_sizes, root=self.mpi_root)
+                    total_num_values = rank_sizes.sum()
+                    rank_displ = [0] + np.cumsum(rank_sizes[0:-1]).tolist()
+                    rank_sizes = rank_sizes.tolist()
+
+                    my_dataset = self[dataset_name] if not rank_empty else np.empty(0, dtype='float')
+                    send_buff = (my_dataset, num_values[()])
+                    # print total_num_values
+                    target_buff = np.zeros(total_num_values, dtype=float)
+                    recv_buff = [target_buff, rank_sizes, rank_displ, mpi_helper.mpi_type_from_dtype(np.dtype(float))]
+                    self.mpi_comm.Gatherv(send_buff, recv_buff, root=self.mpi_root)
+                    analysis_group[dataset_name] = target_buff
+                    analysis_group.file.flush()
+                    # print analysis_group[dataset_name][:]
+                    del target_buff
+                # TODO Add collecting and saving of peak_arrayindex
+                # TODO Write mzdata from the raw file (which we have on all cores, i.e, no gather needed)
+            else:
+                for dataset_name in ['peak_mz', 'peak_value']: #, 'peak_arrayindex']:
+                    if rank_empty:
+                        num_values = np.array(0, dtype='i')
+                    else:
+                        num_values = np.array(self[dataset_name].size, dtype='i')
+                    self.mpi_comm.Gather(num_values, None, root=self.mpi_root)
+                    my_dataset = self[dataset_name] if not rank_empty else np.empty(0, dtype='float')
+                    if dataset_name == 'peak_arrayindex':
+                        send_buff = (my_dataset, num_values[()]*3)
+                    else:
+                        send_buff = (my_dataset, num_values[()])
+                    recv_buff = None
+                    self.mpi_comm.Gatherv(send_buff, recv_buff, root=self.mpi_root)
+        """
 
     def execute_analysis(self, msidata_subblock=None):
         """
@@ -261,7 +314,7 @@ class omsi_findpeaks_local(analysis_base):
         import numpy as np
 
         # Assign parameters to local variables for convenience
-        msidata =  self['msidata']
+        msidata = self['msidata']
         if msidata_subblock is not None:
             msidata = msidata_subblock
         mzdata = self['mzdata']
@@ -276,30 +329,44 @@ class omsi_findpeaks_local(analysis_base):
         #############################################################
         # Parallel execution using MPI
         #############################################################
-        import omsi.shared.mpi_helper as mpi_helper
+        # We have more than a single core AND we have multiple spectra to process
         if mpi_helper.get_size() > 1 and len(self['msidata'].shape) > 1:
+            # We were not asked to process a specific data subblock from a parallel process
+            # but we need to initiate the parallel processing.
             if msidata_subblock is None:
-                split_axis = range(len(self['msidata'].shape)-1)
-                scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,
-                                                          task_function_params={},
-                                                          main_data=self['msidata'],
-                                                          split_axes=split_axis,
-                                                          main_data_param_name='msidata_subblock',
-                                                          root=self.mpi_root,
-                                                          schedule=self['schedule'],
-                                                          comm=self.mpi_comm)
+                # Setup the parallel processing using mpi_helper.parallel_over_axes
+                split_axis = range(len(self['msidata'].shape)-1)  # The axes along which we can split the data
+                scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,  # Execute this function
+                                                          task_function_params={},              # No added parameters
+                                                          main_data=self['msidata'],            # Process the msidata
+                                                          split_axes=split_axis,                # Split along axes
+                                                          main_data_param_name='msidata_subblock',  # data input param
+                                                          root=self.mpi_root,                   # The root MPI task
+                                                          schedule=self['schedule'],            # Parallel schedule
+                                                          comm=self.mpi_comm)                   # MPI communicator
+                # Execute the analysis in parallel
                 result = scheduler.run()
+                # Collect the output data to the root rank if requested
                 if self['collect']:
                     result = scheduler.collect_data()
 
                 # Return the output result as is if we are a "worker" rank or we are not
                 # collecting the data to our root rank
-                if mpi_helper.get_rank() != self.mpi_root and self['schedule'] != mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
+                if mpi_helper.get_rank() != self.mpi_root and \
+                        self['schedule'] != mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
                     return result[0]
-                if mpi_helper.get_rank() == self.mpi_root and not self['collect']:  # we are on the root rank and we did not collect the data
-                    return None, None, None, mzdata
-                else:  # we are on the root rank and we collected the data or we are on a worker rank and we used DYNAMIC scheduling
-                    # Compile the results from all ranks if we are on the "main" rank
+                # we are on the root rank and we did not collect the data
+                elif mpi_helper.get_rank() == self.mpi_root and not self['collect']:
+                    # We did not process any data on the root if DYNAMIC schedulign was used
+                    if self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
+                        return None, None, None, mzdata
+                    # We processed a data block using dynamic scheduling
+                    else:
+                        return result[0]
+                # we are on the root rank and we collected the data or we are on a worker rank
+                # and we used DYNAMIC scheduling
+                else:
+                    # Compile the results from all processing task (on workers) or from all workers (on the root)
                     peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
                     peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
                     peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
@@ -379,53 +446,4 @@ class omsi_findpeaks_local(analysis_base):
 if __name__ == "__main__":
     from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
     omsi_cl_driver(analysis_class=omsi_findpeaks_local).main()
-
-
-# def main(argv=None):
-#     """Then main function"""
-#
-#     import sys
-#     from omsi.dataformat.omsi_file.main_file import omsi_file
-#
-#     if argv is None:
-#         argv = sys.argv
-#
-#     # Check for correct usage
-#     if len(argv) < 2:
-#         print "USAGE: Call \"omsi_findpeaks_global OMSI_FILE [expperiment_index data_index]   \" "
-#         print "\n"
-#         print "This is a simple test function to test the peak finding on a given omsi HDF5 file"
-#         exit(0)
-#
-#     # Read the input arguments
-#     omsi_input_filename = argv[1]
-#     expperiment_index = 0
-#     data_index = 0
-#     if len(argv) == 4:
-#         expperiment_index = int(argv[2])
-#         data_index = int(argv[3])
-#
-#     # Open the input HDF5 file
-#     omsi_input_file = omsi_file(omsi_input_filename, 'r')  # Open file in read only mode
-#
-#     # Get the experiment and dataset
-#     exp = omsi_input_file.get_experiment(expperiment_index)
-#     data = exp.get_msidata(data_index)
-#     mzdata = exp.get_instrument_info().get_instrument_mz()
-#
-#     # Execute the peak finding
-#     test_omsi_fpl = omsi_findpeaks_local()
-#     print "Executing peakfinding analysis"
-#     test_omsi_fpl.execute(msidata=data, mzdata=mzdata)
-#     print "Getting peak finding analysis results"
-#     pmz = test_omsi_fpl['peak_mz']['data']
-#     print pmz
-#     pv = test_omsi_fpl['peak_value']['data']
-#     print pv
-#     pai = test_omsi_fpl['peak_arrayindex']['data']
-#     print pai
-#
-#
-# if __name__ == "__main__":
-#     main()
 

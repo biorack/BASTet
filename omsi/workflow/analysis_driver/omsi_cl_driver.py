@@ -78,7 +78,7 @@ class omsi_cl_driver(omsi_driver_base):
             The analysis class must derive from omsi.analysis.analysis_base. May be None
             in case that we use the command-line to define the analysis class via the optional
             positional argument for the command class (i.e., set add_analysis_class_arg to True).
-        :type analysis_class: omsi.analysis.base
+        :type analysis_class: omsi.analysis.base.analysis_base
         :param add_analysis_class_arg: Boolean indicating whether we will use the positional
             command-line argument to determine the analysis class name
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
@@ -297,7 +297,7 @@ class omsi_cl_driver(omsi_driver_base):
                         else:
                             self.output_target = out_file.create_experiment()
         else:
-            self.output_target = None
+            self.output_target = parsed_arguments.pop(self.output_save_arg_name)
 
         # Process the --profile profiling argument
         if self.profile_arg_name in parsed_arguments:
@@ -356,8 +356,11 @@ class omsi_cl_driver(omsi_driver_base):
                             action='help',
                             default=argparse.SUPPRESS,
                             help='show this help message and exit')
-
-        parsed_arguments = vars(self.parser.parse_args())
+        if mpi_helper.get_rank() != self.mpi_root:
+            with mpi_helper.suppress_stdout_and_stderr():
+                parsed_arguments = vars(self.parser.parse_args())
+        else:
+            parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
         parsed_arguments.pop(self.profile_arg_name, None)
         parsed_arguments.pop(self.output_save_arg_name, None)
@@ -515,11 +518,18 @@ class omsi_cl_driver(omsi_driver_base):
             except:
                 raise
 
-            # Save the analysis to file
-            if self.output_target is not None:
+        # Save the analysis to file
+        # TODO Add a save function to the analysis base class so that we can call the save on a single object and do the fork to the two functions in a central place
+        if self.output_target is not None:
+            if mpi_helper.get_rank() == self.mpi_root:
                 self.output_target.create_analysis(analysis_object)
-
+            else:
+                try:
+                    analysis_object.write_analysis_data()
+                except NotImplementedError:
+                    pass
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
+            # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
 
 if __name__ == "__main__":

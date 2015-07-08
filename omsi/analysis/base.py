@@ -19,8 +19,6 @@ from omsi.shared.dependency_data import dependency_dict
 import omsi.shared.mpi_helper as mpi_helper
 
 
-
-
 class AnalysisReadyError(Exception):
     """
     Custom exception used to indicate that an analysis is not ready to execute.
@@ -206,13 +204,22 @@ class analysis_base(object):
         elif key in self.data_names:
             if 'numpy' not in str(type(value)):
                 temp_value = np.asarray(value)
-                self.__data_list.append(analysis_data(name=key,
-                                                           data=temp_value,
-                                                           dtype=temp_value.dtype))
+                ana_data = analysis_data(name=key,
+                                         data=temp_value,
+                                         dtype=temp_value.dtype)
             else:
-                self.__data_list.append(analysis_data(name=key,
-                                                           data=value,
-                                                           dtype=value.dtype))
+                ana_data = analysis_data(name=key,
+                                         data=value,
+                                         dtype=value.dtype)
+            index = None
+            for obj_index, ana_data_obj in enumerate(self.__data_list):
+                if ana_data_obj['name'] == key:
+                    index = obj_index
+                    break
+            if index is None:
+                self.__data_list.append(ana_data)
+            else:
+                self.__data_list[index] = ana_data
             self.omsi_analysis_storage = []
         else:
             raise KeyError('Invalid key. The given key was not found as part of the analysis parameters nor output.')
@@ -1271,10 +1278,10 @@ class analysis_base(object):
                 warnings.warn('Parameter ' + name + " not found in analysis_base.set_parameter_values(). " +
                               "Adding a new parameter.")
                 self.parameters.append(parameter_data(name=name,
-                                                           help='',
-                                                           dtype=dtype,
-                                                           required=False,
-                                                           data=value))
+                                                      help='',
+                                                      dtype=dtype,
+                                                      required=False,
+                                                      data=value))
 
     def add_parameter(self,
                       name,
@@ -1304,13 +1311,13 @@ class analysis_base(object):
         if self.get_parameter_data_by_name(name) is not None:
             raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
         self.parameters.append(parameter_data(name=name,
-                                                   help=help,
-                                                   dtype=dtype,
-                                                   required=required,
-                                                   default=default,
-                                                   choices=choices,
-                                                   data=data,
-                                                   group=group))
+                                              help=help,
+                                              dtype=dtype,
+                                              required=required,
+                                              default=default,
+                                              choices=choices,
+                                              data=data,
+                                              group=group))
 
 #    def add_analysis_data(self , name, data, dtype ) :
 #        """Add a new dataset to the list of data to be written to the HDF5 file
