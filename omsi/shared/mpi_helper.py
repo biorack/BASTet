@@ -7,6 +7,7 @@ import numpy as np
 import itertools
 import warnings
 import time
+import os
 
 
 class parallel_over_axes(object):
@@ -339,7 +340,58 @@ def is_mpi_available():
     """
     return MPI_AVAILABLE
 
+def mpi_type_from_dtype(dtype):
+    """
+    Ge the the corresponding MPI type for the given basic numpy dtype
 
+    :param dtype: Basic numpy dtype to be mapped to the MPI type
+    :return: The MPI type or None if not found
+    """
+    if MPI_AVAILABLE:
+        try:
+            return MPI.__TypeDict__[dtype.char]
+        except AttributeError:  # Older versions of mpi4py use _typedict
+            return MPI._typedict[dtype.char]
+        except KeyError:
+            return None
+        except:
+            return None
+    else:
+        return None
+
+
+class suppress_stdout_and_stderr(object):
+    """
+    Simple context manager that can be used to suppress the output to stdout and stderr.
+
+    To suppress the output for a set of calls use:
+
+    >>> with suppress_stdout_and_stderr():
+    >>>     my_function(...)
+
+    """
+
+    def __init__(self):
+        # Open a pair of null files
+        self.null_out_files = {'stdout': os.open(os.devnull,os.O_RDWR),
+                               'stderr': os.open(os.devnull,os.O_RDWR)}
+        # Save the original output streams
+        self.orginal_out_files = {'stdout': os.dup(1),
+                                  'stderr': os.dup(2)}
+
+    def __enter__(self):
+        # Suppress the output to stdout and stderr by assigning null-fiules to the outputs
+        os.dup2(self.null_out_files['stdout'], 1)
+        os.dup2(self.null_out_files['stderr'], 2)
+
+    def __exit__(self, *_):
+        # Restore the stdout and stderr to the original function
+        os.dup2(self.original_out_files['stdout'], 1)
+        os.dup2(self.original_out_files['stderr'], 2)
+        # Close the null files
+        for nullfile in self.null_out_files.values():
+            os.close(nullfile)
+        self.null_out_files = {'stdout': None, 'stderr': None}
 
 
 
