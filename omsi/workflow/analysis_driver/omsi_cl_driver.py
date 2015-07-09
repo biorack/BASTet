@@ -353,14 +353,10 @@ class omsi_cl_driver(omsi_driver_base):
                                             dest=arg_dest)          #     Automatically determined by the name
         # Add the help argument
         self.parser.add_argument('-h', '--help',
-                            action='help',
-                            default=argparse.SUPPRESS,
-                            help='show this help message and exit')
-        if mpi_helper.get_rank() != self.mpi_root:
-            with mpi_helper.suppress_stdout_and_stderr():
-                parsed_arguments = vars(self.parser.parse_args())
-        else:
-            parsed_arguments = vars(self.parser.parse_args())
+                                action='help',
+                                default=argparse.SUPPRESS,
+                                help='show this help message and exit')
+        parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
         parsed_arguments.pop(self.profile_arg_name, None)
         parsed_arguments.pop(self.output_save_arg_name, None)
@@ -467,7 +463,8 @@ class omsi_cl_driver(omsi_driver_base):
             # Execute the analysis
             analysis_object.execute(**self.analysis_arguments)
         except:
-            self.remove_output_target()
+            if mpi_helper.get_rank() == self.mpi_root:
+                self.remove_output_target()
             raise
 
         # Finalize the saving of results on rank our mpi root rank. NOTE: When running in serial
