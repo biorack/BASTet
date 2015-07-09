@@ -80,23 +80,8 @@ class omsi_file_common(object):
         :param in_object: The object to be checked
         :type in_object: Any omsi_file API object or h5py.Dataset or h5py.Group or h5py.File object.
         """
-        from omsi.dataformat.omsi_file.experiment import omsi_file_experiment
-        from omsi.dataformat.omsi_file.main_file import omsi_file
-        from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies, omsi_file_dependencydata
-        from omsi.dataformat.omsi_file.instrument import omsi_file_instrument
-        from omsi.dataformat.omsi_file.methods import omsi_file_methods
-        from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
-        from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-
         managed_object = omsi_file_common.get_omsi_object(in_object)
-        if isinstance(managed_object, omsi_file) or \
-           isinstance(managed_object, omsi_file_experiment) or \
-           isinstance(managed_object, omsi_file_methods) or\
-           isinstance(managed_object, omsi_file_instrument) or \
-           isinstance(managed_object, omsi_file_analysis) or \
-           isinstance(managed_object, omsi_file_msidata) or \
-           isinstance(managed_object, omsi_file_dependencies) or \
-           isinstance(managed_object, omsi_file_dependencydata):
+        if isinstance(managed_object, omsi_file_common):
             return True
         else:
             return False
@@ -180,16 +165,18 @@ class omsi_file_common(object):
         from omsi.dataformat.omsi_file.methods import omsi_file_methods
         from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
         from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
+        from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
 
         # If the input object is already an omsi API object then return it as is
         if isinstance(h5py_object, omsi_file) or \
-           isinstance(h5py_object, omsi_file_experiment) or \
-           isinstance(h5py_object, omsi_file_methods) or\
-           isinstance(h5py_object, omsi_file_instrument) or \
-           isinstance(h5py_object, omsi_file_analysis) or \
-           isinstance(h5py_object, omsi_file_msidata) or \
-           isinstance(h5py_object, omsi_file_dependencies) or \
-           isinstance(h5py_object, omsi_file_dependencydata):
+                isinstance(h5py_object, omsi_file_experiment) or \
+                isinstance(h5py_object, omsi_file_methods) or\
+                isinstance(h5py_object, omsi_file_instrument) or \
+                isinstance(h5py_object, omsi_file_analysis) or \
+                isinstance(h5py_object, omsi_file_msidata) or \
+                isinstance(h5py_object, omsi_file_dependencies) or \
+                isinstance(h5py_object, omsi_file_dependencydata) or \
+                isinstance(h5py_object, omsi_file_metadata_collection):
             return h5py_object
         # IF we have an h5py.File then create and omsi_file
         if isinstance(h5py_object, h5py.File):
@@ -223,6 +210,8 @@ class omsi_file_common(object):
                         return omsiobject
                 elif type_attribute == "omsi_file_dependencies":
                     return omsi_file_dependencies(h5py_object)
+                elif type_attribute == 'omsi_file_metadata_collection':
+                    return omsi_file_metadata_collection(h5py_object)
                 else:
                     return None
             except:
@@ -251,6 +240,8 @@ class omsi_file_common(object):
                                                              resolve_dependencies))
                     else:
                         return omsiobject
+                elif parentgroupname.startswith(omsi_format_metadata_collection.metadata_collection_groupname_default):
+                    return omsi_file_metadata_collection(h5py_object)
                 elif groupname == "":  # We are at the root group
                     return omsi_file(h5py_object.file)
                 else:

@@ -63,7 +63,7 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
         metadata_collections = []
         use_omsi_object = self.metadata_parent if omsi_object is None else omsi_object
         h5py_group = None
-        if not isinstance(use_omsi_object, omsi_file_common):
+        if isinstance(use_omsi_object, omsi_file_common):
             h5py_group = use_omsi_object.managed_group
         elif isinstance(use_omsi_object, h5py.Group):
             h5py_group = use_omsi_object
@@ -98,7 +98,7 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
             found_metadata_collection = len(collections) > 0
         return found_metadata_collection
 
-    def get_default_metadata_collection(self, omsi_object):
+    def get_default_metadata_collection(self, omsi_object=None):
         """
         Get the default metadata collection object if it exists
 
@@ -269,7 +269,7 @@ class omsi_file_metadata_collection(omsi_file_common):
                     json.loads(metadata_dataset.attrs[ontology_attr])
                 output_meta_dict[metadata_name] = metadata_value(
                     name=metadata_name,
-                    value=metadata_dataset[:],
+                    value=metadata_dataset[:] if len(metadata_dataset.shape) > 0 else metadata_dataset[()],
                     description=description,
                     unit=unit,
                     ontology=ontology)
