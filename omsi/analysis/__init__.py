@@ -9,12 +9,15 @@ from omsi.analysis.msi_filtering import *
 from omsi.analysis.base import *
 from omsi.analysis.analysis_data import *
 from omsi.analysis.generic import *
+from omsi.analysis.compound_stats import *
 import omsi.analysis.findpeaks
 import omsi.analysis.multivariate_stats
 import omsi.analysis.msi_filtering
+import omsi.analysis.compound_stats
 # from omsi_viewer_helper import *
 __all__ = ["findpeaks",
            "multivariate_stats",
+           "compound_stats",
            "msi_filtering",
            "analysis_data",
            "analysis_base",
