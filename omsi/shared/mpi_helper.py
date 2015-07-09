@@ -218,7 +218,7 @@ class parallel_over_axes(object):
                                dest=request_rank,
                                tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 block_index += 1
-                if (block_index % 1000) == 0:
+                if (block_index % 100) == 0:
                     print (block_index, total_num_subblocks, request_rank)
             end_time = time.time()
             run_time = end_time - start_time
@@ -279,6 +279,21 @@ def imports_mpi(python_object):
     object_imports_mpi = object_imports_mpi or re.search('import\s+omsi.shared.mpi_helper', code) is not  None
     return object_imports_mpi
 
+
+def gather(data, comm=None, root=0):
+    """
+    MPI gather operation or return a list with just [data,] if MPI is not available
+
+    :param data: The data to be gathered
+    :param comm: MPI communicator. If None, then MPI.COMM_WORLD will be used.
+    :param root: The rank where the data should be collected to. Default value is 0
+    :return: List of data objects from all the ranks
+    """
+    if MPI_AVAILABLE:
+        my_comm = comm if comm is not None else MPI.COMM_WORLD
+        return comm.gather(data, root)
+    else:
+        return [data, ]
 
 def barrier(comm=None):
     """
@@ -360,38 +375,38 @@ def mpi_type_from_dtype(dtype):
         return None
 
 
-class suppress_stdout_and_stderr(object):
-    """
-    Simple context manager that can be used to suppress the output to stdout and stderr.
-
-    To suppress the output for a set of calls use:
-
-    >>> with suppress_stdout_and_stderr():
-    >>>     my_function(...)
-
-    """
-
-    def __init__(self):
-        # Open a pair of null files
-        self.null_out_files = {'stdout': os.open(os.devnull,os.O_RDWR),
-                               'stderr': os.open(os.devnull,os.O_RDWR)}
-        # Save the original output streams
-        self.orginal_out_files = {'stdout': os.dup(1),
-                                  'stderr': os.dup(2)}
-
-    def __enter__(self):
-        # Suppress the output to stdout and stderr by assigning null-fiules to the outputs
-        os.dup2(self.null_out_files['stdout'], 1)
-        os.dup2(self.null_out_files['stderr'], 2)
-
-    def __exit__(self, *_):
-        # Restore the stdout and stderr to the original function
-        os.dup2(self.original_out_files['stdout'], 1)
-        os.dup2(self.original_out_files['stderr'], 2)
-        # Close the null files
-        for nullfile in self.null_out_files.values():
-            os.close(nullfile)
-        self.null_out_files = {'stdout': None, 'stderr': None}
+# class suppress_stdout_and_stderr(object):
+#     """
+#     Simple context manager that can be used to suppress the output to stdout and stderr.
+#
+#     To suppress the output for a set of calls use:
+#
+#     >>> with suppress_stdout_and_stderr():
+#     >>>     my_function(...)
+#
+#     """
+#
+#     def __init__(self):
+#         # Open a pair of null files
+#         self.null_out_files = {'stdout': os.open(os.devnull,os.O_RDWR),
+#                                'stderr': os.open(os.devnull,os.O_RDWR)}
+#         # Save the original output streams
+#         self.orginal_out_files = {'stdout': os.dup(1),
+#                                   'stderr': os.dup(2)}
+#
+#     def __enter__(self):
+#         # Suppress the output to stdout and stderr by assigning null-fiules to the outputs
+#         os.dup2(self.null_out_files['stdout'], 1)
+#         os.dup2(self.null_out_files['stderr'], 2)
+#
+#     def __exit__(self, *_):
+#         # Restore the stdout and stderr to the original function
+#         os.dup2(self.original_out_files['stdout'], 1)
+#         os.dup2(self.original_out_files['stderr'], 2)
+#         # Close the null files
+#         for nullfile in self.null_out_files.values():
+#             os.close(nullfile)
+#         self.null_out_files = {'stdout': None, 'stderr': None}
 
 
 
