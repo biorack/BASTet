@@ -67,13 +67,13 @@ class omsi_findpeaks_local(analysis_base):
                            dtype=str,
                            required=False,
                            choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
-                           group=groups['settings'],
+                           group=groups['parallel'],
                            default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
         self.add_parameter(name='collect',
                            help='Collect results to the MPI root rank when running in parallel',
                            dtype=dtypes['bool'],
                            required=False,
-                           group=groups['settings'],
+                           group=groups['parallel'],
                            default=True)
         self.data_names = ['peak_mz',
                            'peak_value',

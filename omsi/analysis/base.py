@@ -923,7 +923,9 @@ class analysis_base(object):
                 'input': {'name': 'input data',
                           'description': 'Input data to be analyzed'},
                 'settings': {'name': 'analysis settings',
-                             'description': 'Analysis settings'}}
+                             'description': 'Analysis settings'},
+                'parallel': {'name': 'parallel settings',
+                             'description': 'Parallel execution settings'}}
 
     def enable_time_and_usage_profiling(self, enable=True):
         """
