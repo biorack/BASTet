@@ -74,7 +74,7 @@ class omsi_findpeaks_local(analysis_base):
                            dtype=dtypes['bool'],
                            required=False,
                            group=groups['settings'],
-                           default=False)
+                           default=True)
         self.data_names = ['peak_mz',
                            'peak_value',
                            'peak_arrayindex',
@@ -229,12 +229,21 @@ class omsi_findpeaks_local(analysis_base):
 
     def write_analysis_data(self, analysis_group=None):
         """
-        This function used to write the actual analysis data to file. If not implemented, then the
+        This function is used to write the actual analysis data to file. If not implemented, then the
         omsi_file_analysis API's default behavior is used instead.
 
         :param analysis_group: The h5py.Group object where the analysis is stored.
 
         """
+        # Check if a user attempts to do parallel I/O with collect being disabled
+        if mpi_helper.get_size() > 1 and not self['collect']:
+            # Check if any of the other ranks have data
+            num_elements = self['peak_arrayindex'].shape[0] if len(self['peak_arrayindex'].shape) == 2 else 0
+            result_sizes = mpi_helper.gather(num_elements, comm=self.mpi_comm, root=self.mpi_root)
+            if mpi_helper.get_rank() == self.mpi_root:
+                for element_size in result_sizes[1:]:
+                    if element_size > 0:
+                        raise ValueError('Parallel I/O with collect parameter set to false not supported')
         raise NotImplementedError
         """
         import numpy as np
@@ -314,7 +323,7 @@ class omsi_findpeaks_local(analysis_base):
         import numpy as np
 
         # Assign parameters to local variables for convenience
-        msidata = self['msidata']
+        msidata = self['msidata'][34:40, 44:50, :]
         if msidata_subblock is not None:
             msidata = msidata_subblock
         mzdata = self['mzdata']
@@ -338,7 +347,7 @@ class omsi_findpeaks_local(analysis_base):
                 split_axis = range(len(self['msidata'].shape)-1)  # The axes along which we can split the data
                 scheduler = mpi_helper.parallel_over_axes(task_function=self.execute_analysis,  # Execute this function
                                                           task_function_params={},              # No added parameters
-                                                          main_data=self['msidata'],            # Process the msidata
+                                                          main_data=msidata,                    # Process the msidata
                                                           split_axes=split_axis,                # Split along axes
                                                           main_data_param_name='msidata_subblock',  # data input param
                                                           root=self.mpi_root,                   # The root MPI task
@@ -350,27 +359,61 @@ class omsi_findpeaks_local(analysis_base):
                 if self['collect']:
                     result = scheduler.collect_data()
 
-                # Return the output result as is if we are a "worker" rank or we are not
-                # collecting the data to our root rank
+                # Compile the data from the parallel execution
+                # Case Table:
+                #                       root    worker
+                # collect + STATIC_1D    4        1
+                #           STATIC_1D    2        1
+                # collect + DYNAMIC      5        3
+                #           DYNAMIC      2        3
+
+                # Case 1: STATIC scheduling on a worker task
                 if mpi_helper.get_rank() != self.mpi_root and \
                         self['schedule'] != mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
+                    # Return the output result as is if we are a "worker" rank or we are not
+                    # collecting the data to our root rank
                     return result[0]
-                # we are on the root rank and we did not collect the data
+                # Case 2: root rank without collect data disabled
                 elif mpi_helper.get_rank() == self.mpi_root and not self['collect']:
-                    # We did not process any data on the root if DYNAMIC schedulign was used
+                    # We did not process any data on the root if DYNAMIC scheduling was used
                     if self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
                         return None, None, None, mzdata
                     # We processed a data block using dynamic scheduling
                     else:
                         return result[0]
-                # we are on the root rank and we collected the data or we are on a worker rank
-                # and we used DYNAMIC scheduling
-                else:
+                # Case 3: Compile data on workers when using dynamic scheduling OR compile data on root when
+                #         using static scheduling with collect data enabled
+                elif mpi_helper.get_rank() != self.mpi_root and \
+                        self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
                     # Compile the results from all processing task (on workers) or from all workers (on the root)
                     peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
                     peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
-                    peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
+                    peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1] ])
+                    peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
                     mzdata = result[0][0][3]
+                    return peak_mz, peak_values, peak_arrayindex, mzdata
+                # Case 4: we are on the root rank and we used static scheduling
+                elif mpi_helper.get_rank() == self.mpi_root and \
+                        self['schedule'] != mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
+                    peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
+                    peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
+                    peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
+                    d = np.cumsum([0] + [len(ri[0]) for ri in result[0]])
+                    d2 = np.cumsum([0] + [len(ri[2]) for ri in result[0]])
+                    for di in range(len(d2)-1):
+                        peak_arrayindex[d2[di]:d2[di+1], 2] += d[di]
+                    mzdata = result[0][0][3]
+                    return peak_mz, peak_values, peak_arrayindex, mzdata
+                # Case 5: we are on the root rank and we used dynamic scheduling
+                elif mpi_helper.get_rank() == self.mpi_root and \
+                        self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC']:
+                    # Compile the results from all processing task (on workers) or from all workers (on the root)
+                    peak_mz = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=-1)
+                    peak_values = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=-1)
+                    peak_arrayindex = np.asarray([ [b[0], b[1], 0] for rt in result[1] for b in rt ])
+                    peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for rt in result[0] for ri in rt ])[:-1]
+                    print peak_arrayindex
+                    mzdata = result[0][0][0][3]
                     return peak_mz, peak_values, peak_arrayindex, mzdata
 
 
