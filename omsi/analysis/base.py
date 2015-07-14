@@ -1376,12 +1376,14 @@ class analysis_base(object):
 #        else :
 #             raise ValueError( "Invalid input for add_data_dependency function" )
 
-    def write_analysis_data(self, analysis_group):
+    def write_analysis_data(self, analysis_group=None):
         """
         This function used to write the actual analysis data to file. If not implemented, then the
         omsi_file_analysis API's default behavior is used instead.
 
-        :param analysis_group: The h5py.Group object where the analysis is stored.
+        :param analysis_group: The h5py.Group object where the analysis is stored. May be None on cores that
+            do not perform any writing but which need to participate in communication, e.g., to collect data
+            for writing.
 
         """
         # The default implementation does roughly the following
