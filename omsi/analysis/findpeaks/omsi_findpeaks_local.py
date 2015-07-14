@@ -362,53 +362,49 @@ class omsi_findpeaks_local(analysis_base):
                 use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
                 # Compile the data from the parallel execution
                 # Case Table:
-                #                       root    worker
-                # collect + STATIC_1D    4        1
-                #           STATIC_1D    2        1
-                # collect + DYNAMIC      5        3
-                #           DYNAMIC      2        3
+                #
+                # collect + worker       2
+                #           worker       2
+                # collect + root         3
+                #           root         1
 
-                # Case 1: STATIC scheduling on a worker task
-                if mpi_helper.get_rank() != self.mpi_root and not use_dynamic_schedule:
-                    # Return the output result as is if we are a "worker" rank or we are not
-                    # collecting the data to our root rank
-                    return result[0]
-                # Case 2: root rank without collect data disabled
-                elif mpi_helper.get_rank() == self.mpi_root and not self['collect']:
+                # Case 1: root rank without collect data disabled
+                if mpi_helper.get_rank() == self.mpi_root and not self['collect']:
                     # We did not process any data on the root if DYNAMIC scheduling was used
                     if use_dynamic_schedule:
                         return None, None, None, mzdata
                     # We processed a data block using dynamic scheduling
                     else:
-                        return result[0]
-                # Case 3: Compile data on workers when using dynamic scheduling OR compile data on root when
-                #         using static scheduling with collect data enabled
-                elif mpi_helper.get_rank() != self.mpi_root and use_dynamic_schedule:
+                        return result[0][0]
+                # Case 2: Compile the data on the worker
+                elif mpi_helper.get_rank() != self.mpi_root: # and use_dynamic_schedule:
                     # Compile the results from all processing task (on workers) or from all workers (on the root)
                     peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
                     peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
-                    peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1] ])
-                    peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
+                    if len(result[1])>1: # Correct indices from the individual runs since they all start at 0
+                        peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1] ])
+                        peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
+                    else:
+                        peak_arrayindex = result[0][0][2]
                     mzdata = result[0][0][3]
                     return peak_mz, peak_values, peak_arrayindex, mzdata
-                # Case 4: we are on the root rank and we used static scheduling
-                elif mpi_helper.get_rank() == self.mpi_root and not use_dynamic_schedule:
-                    peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
-                    peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
-                    peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
-                    d = np.cumsum([0] + [len(ri[0]) for ri in result[0]])
-                    d2 = np.cumsum([0] + [len(ri[2]) for ri in result[0]])
-                    for di in range(len(d2)-1):
-                        peak_arrayindex[d2[di]:d2[di+1], 2] += d[di]
-                    mzdata = result[0][0][3]
-                    return peak_mz, peak_values, peak_arrayindex, mzdata
-                # Case 5: we are on the root rank and we used dynamic scheduling
-                elif mpi_helper.get_rank() == self.mpi_root and use_dynamic_schedule:
+                # Case 3: Compile collected data on the root
+                elif mpi_helper.get_rank() == self.mpi_root: # and use_dynamic_schedule:
                     # Compile the results from all processing task (on workers) or from all workers (on the root)
                     peak_mz = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=-1)
                     peak_values = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=-1)
-                    peak_arrayindex = np.asarray([ [b[0], b[1], 0] for rt in result[1] for b in rt ])
-                    peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for rt in result[0] for ri in rt ])[:-1]
+                    # Dynamic scheduling uses selections of (int,int,slice) while the static
+                    # scheduling uses (slice, slice, slice), hence we need to compile the peak_arrayindex
+                    # slightly differently depending on the scheduler used
+                    if use_dynamic_schedule:
+                        peak_arrayindex = np.asarray([ [b[0], b[1], 0] for rt in result[1] for b in rt ])
+                        peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for rt in result[0] for ri in rt ])[:-1]
+                    else:
+                        peak_arrayindex = np.concatenate(tuple([ri[2] for rt in result[0] for ri in rt]), axis=0)
+                        d = np.cumsum([0] + [len(ri[0]) for rt in result[0] for ri in rt])
+                        d2 = np.cumsum([0] + [len(ri[2]) for rt in result[0] for ri in rt])
+                        for di in range(len(d2)-1):
+                            peak_arrayindex[d2[di]:d2[di+1], 2] += d[di]
                     print peak_arrayindex
                     mzdata = result[0][0][0][3]
                     return peak_mz, peak_values, peak_arrayindex, mzdata

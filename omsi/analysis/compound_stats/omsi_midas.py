@@ -46,21 +46,6 @@ class omsi_midas(analysis_base):
                            default=1,
                            required=True,
                            group=groups['settings'])
-        # FIXME In config file but not used in scoring_C
-        # self.add_parameter(name='default_polarity',
-        #                   help='The default polarity to be used. Use 1 for positive and -1 for negative',
-        #                   dtype=dtypes['int'],
-        #                   choices=[-1, 1],
-        #                   default=1,
-        #                   group=groups['settings'])
-        # FIXME In config file but not used in scoring_C
-        # self.add_parameter(name='default_charge_state',
-        #                   help='The default charge state. Use 1 for positive and -1 for negative',
-        #                   dtype=dtypes['int'],
-        #                   choices=[-1, 1],
-        #                   default=1,
-        #                   group=groups['settings'])
-        # FIXME This is not in the config file but is an input of scoring_C. Should we get this from the MS2 data?
         self.add_parameter(name='precursor_type',     # dCurrentPrecursor_type
                            help='Positive (1) or negative (-1) ion',
                            dtype=dtypes['int'],
@@ -157,8 +142,6 @@ class omsi_midas(analysis_base):
         """
         # Assign parameter settings to local variables for convenience
         metabolite_database = self['metabolite_database']
-        # default_polarity = self['default_polarity']
-        # default_charge_state = self['default_charge_state']
         precursor_type = self['precursor_type']
         parent_mass_windows = self['parent_mass_windows']
         positive_ion_fragment_mass_windows = self['positive_ion_fragment_mass_windows']
@@ -178,7 +161,7 @@ class omsi_midas(analysis_base):
         fpl_data = self['fpl_data']
         fpl_peak_mz = fpl_data['peak_mz']
         fpl_peak_value = fpl_data['peak_value']
-        fpl_peak_arrayindex = fpl_data['peak_arrayindex'][:]
+        fpl_peak_arrayindex = fpl_data['peak_arrayindex']
 
         # Get the compound list if we have not read it previously.
         if compound_list is None:
@@ -224,36 +207,20 @@ class omsi_midas(analysis_base):
                     result = scheduler.collect_data()
 
                 # Compile the data from the parallel execution
-                # Case Table:
-                #                       root    worker
-                # collect + STATIC_1D    2        1
-                #           STATIC_1D    1        1
-                # collect + DYNAMIC      3        2
-                #           DYNAMIC      3        2
                 hit_table = np.zeros((0, 0), dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)  # initialize hit_table as empty
                 pixel_index = np.zeros((0, 2), dtype='int')
                 use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
-                # Case 1: We have one big result that we can just return
-                if (mpi_helper.get_rank() != self.mpi_root and not use_dynamic_schedule) or \
-                        (mpi_helper.get_rank() == self.mpi_root and not use_dynamic_schedule and not self['collect']):
-                    hit_table = result[0][0]
-                    pixel_index = result[0][1]
-                # Case 2: We have a basic list of multiple results that we need to merge
-                elif mpi_helper.get_rank() != self.mpi_root or \
-                        (mpi_helper.get_rank() == self.mpi_root and not use_dynamic_schedule):
-                    # Compile the results from all processing task (on workers) or from all workers (on the root)
-                    if len(result[0]) > 0:
-                        hit_table = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
-                        pixel_index = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
-                # Case 3: We have a list of lists of results that we need to merge
-                elif mpi_helper.get_rank() == self.mpi_root and use_dynamic_schedule:
-                    if not self['collect']:
-                        # We did not process any data on the root process
-                        pass
-                    else:
-                        # We need to compile the output from the other processes
-                        hit_table = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=-1)
-                        pixel_index = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=-1)
+
+                if not self['collect'] and (mpi_helper.get_rank() == self.mpi_root and use_dynamic_schedule):
+                    # We did not process any data on the root process when using dynamic scheduling
+                    # and we did not collect the data to the root either
+                    pass
+                elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
+                    hit_table = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=0)
+                    pixel_index = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=0)
+                else:
+                    hit_table = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=0)
+                    pixel_index = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=0)
                 return hit_table, pixel_index
 
         #############################################################
@@ -308,6 +275,9 @@ class omsi_midas(analysis_base):
                                          dtype=current_hits.dtype)
             # Save the hits for the current pixel
             hit_table[current_index] = current_hits
+        if hit_table is None:
+            hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
+                                        dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
 
         # Return the hit_table and the index of the pixel each hit_table applies to
         return hit_table, pixel_index

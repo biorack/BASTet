@@ -31,6 +31,7 @@ class parallel_over_axes(object):
 
     """
     SCHEDULES = {'STATIC_1D': 'STATIC_1D',
+                 'STATIC': 'STATIC',
                  'DYNAMIC': 'DYNAMIC'}
 
     MPI_MESSAGE_TAGS = {'RANK_MSG': 11,
@@ -77,19 +78,34 @@ class parallel_over_axes(object):
 
     def run(self):
         """
-        Call this function to run the function in parallel
+        Call this function to run the function in parallel.
+
+        :return: Tuple with the following elements:
+
+            1) List of tuples with the results from the local execution of the task_function. Each
+              tuple is the result from one return of the task_function. In the case of static
+              execution, this is always a list of length 1.
+            2) List of block_indexes. Each block_index is a tuple with the selection used to
+               divide the data into sub-blocks. In the case of static decomposition we have
+               a range slice object along the axes used for decomposition whereas in the
+               case of dynamic scheduling we usually have single integer point selections
+               for each task.
+
         """
         if self.schedule == self.SCHEDULES['DYNAMIC']:
             return self.__run_dynamic()
-        elif self.schedule == self.SCHEDULES['STATIC_1D']:
+        elif self.schedule == self.SCHEDULES['STATIC_1D'] or self.schedule == self.SCHEDULES['STATIC']:
             return self.__run_static_1D()
 
     def collect_data(self):
         """
         Collect the results from the parallel execution to the self.root rank.
 
-        :return: self.result and self.blocks, i.e, the collected output and
-            the data blocks each result refers to
+        :return: On worker ranks (i.e., MPI_RANK!=self.root) this is simply the
+            self.result and self.blocks containing the result created by run function.
+            On the root rank (i.e., MPI_RANK!=self.root) this is a tuple of two lists
+            containing with the self.result and self.blocks from all ranks respectively.
+
         """
          # Collect the output
         rank = get_rank()
@@ -120,11 +136,15 @@ class parallel_over_axes(object):
 
         The data is divided into sub-blocks along the largest split_axis
 
-        :return: i) The result from the local execution of the task_function and
-            ii) The selection of the sub-block that was processed. If collect_data
-            is True and we are the self.root rank, then the result will be a list
-            of the results from all ranks and the sub_block index will be a list of
-            all the sub_block indexes used.
+        :return: Tuple with the following elements:
+
+            1) List of tuples with the results from the local execution of the task_function. Each
+              tuple is the result from one return of the task_function. In the case of static
+              execution, this is always a list of lenght 1.
+            2) List of block_indexes. Each block_index is a tuple with the selection used to
+               divide the data into sub-blocks. In the case of static decomposition we have
+               a range slice object along the axes used for decomposition.
+
         """
         start_time = time.time()
         # Get MPI parameters
@@ -171,6 +191,8 @@ class parallel_over_axes(object):
         print "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time)
 
         # Return the output
+        self.result = [self.result,]
+        self.blocks = [self.blocks,]
         return self.result, self.blocks
 
     def __run_dynamic(self):
@@ -180,7 +202,14 @@ class parallel_over_axes(object):
         The root rank divides the data into sub-tasks and sends the tasks to available MPI
         processes on request.
 
-        :return: The result from all local executions of the tast_function
+        :return: Tuple with the following elements:
+
+            1) List of tuples with the results from the local execution of the task_function. Each
+              tuple is the result from one return of the task_function.
+            2) List of block_indexes. Each block_index is a tuple with the selection used to
+               divide the data into sub-blocks. In the case of static decomposition we have
+               a range slice object along the axes used for decomposition.
+
         """
         import time
         rank = get_rank()
