@@ -25,8 +25,15 @@ class parallel_over_axes(object):
     :ivar schedule: The task scheduling schema to be used (see parallel_over_axes.SCHEDULES
     :ivar collect_output: Should we collect all the output from the ranks on the master rank?
     :ivar schedule: The parallelization schedule to be used. See also parallel_over_axes.schedule
-    :ivar result: The result form the task_function. If collect_output is set and we are the root
-        then this will be the output of all tasks
+    :ivar result: The result form the task_function. If self.__data_collected  is set and we are the root
+        then this will a list with the the output of all tasks
+    :ivar blocks: List with tuples describing the selected subset of data processed by the given block task.
+        If self.__data_collected is set and we are the root rank then this is a list of all the blocks
+        processed by each rank.
+    :ivar block_times: List of times in seconds used to process the data block with the given index.
+        NOTE: The block times include also any required communications and other operations to initialize
+        and complete the task, and not just the execution of the task function itself.
+    :ivar run_time: Float time in seconds for executing the run function.
     :ivar comm: The MPI communicator used for the parallelization. Default value is MPI.COMM_WORLD
 
     """
@@ -74,6 +81,9 @@ class parallel_over_axes(object):
         self.root = root
         self.result = None
         self.blocks = None
+        self.block_times = None
+        self.run_time = None
+        self.__data_collected = False
         self.comm = get_comm_world() if comm is None else comm
 
     def run(self):
@@ -92,14 +102,30 @@ class parallel_over_axes(object):
                for each task.
 
         """
+        start_time = time.time()
+        self.__data_collected = False
         if self.schedule == self.SCHEDULES['DYNAMIC']:
-            return self.__run_dynamic()
+            result = self.__run_dynamic()
         elif self.schedule == self.SCHEDULES['STATIC_1D'] or self.schedule == self.SCHEDULES['STATIC']:
-            return self.__run_static_1D()
+            result = self.__run_static_1D()
+        end_time = time.time()
+        self.run_time = end_time - start_time
+        return result
 
-    def collect_data(self):
+    def collect_data(self, force_collect=False):
         """
         Collect the results from the parallel execution to the self.root rank.
+
+        NOTE: On the root the self.result, self.blocks, and self.block_times variables are
+              updated with the collected data as well and self.__data_collected will be set
+
+        NOTE: If the data has already been collected previously (ie., collect_data has been called
+            before), then the collection will not be performed again, unless force_collect is set.
+
+        :param force_collect: Set this parameter to force that data collection is performed again.
+            By default the collect_data is performed only once for each time the run(..) function
+            is called and the results are reused to ensure consistent data structures. We can
+            force that collect will be reexecuted anyways by setting force_collect.
 
         :return: On worker ranks (i.e., MPI_RANK!=self.root) this is simply the
             self.result and self.blocks containing the result created by run function.
@@ -107,27 +133,37 @@ class parallel_over_axes(object):
             containing with the self.result and self.blocks from all ranks respectively.
 
         """
+        # If we have collected the data already then we don't need to do it again
+        if self.__data_collected and not force_collect:
+            return self.result, self.blocks
+
          # Collect the output
-        rank = get_rank()
+        rank = get_rank(comm=self.comm)
         start_time = time.time()
         if rank == self.root:
             print "COLLECTING RESULTS"
+        # Collect the data, blocks, and block_times from all ranks
         collected_data = self.comm.gather(self.result, root=self.root)
         collected_blocks = self.comm.gather(self.blocks, root=self.root)
+        # Save the data to self.result, self.block, self.block_times if we are the root
         if rank == self.root:
             self.result = collected_data
             self.blocks = collected_blocks
-        if self.schedule == self.SCHEDULES['DYNAMIC']:
-            temp = list(self.result)
-            temp.pop(self.root)
-            self.result = temp
-            temp = list(self.blocks)
-            temp.pop(self.root)
-            self.blocks = temp
+            # Remove the root entry if we used dynamic scheduling as the root did not process anything
+            if self.schedule == self.SCHEDULES['DYNAMIC']:
+                temp = list(self.result)
+                temp.pop(self.root)
+                self.result = temp
+                temp = list(self.blocks)
+                temp.pop(self.root)
+                self.blocks = temp
+        # Record the time we used to collect the data
         end_time = time.time()
         run_time = end_time - start_time
         if rank == self.root:
             print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
+        # Return the result
+        self.__data_collected = True
         return self.result, self.blocks
 
     def __run_static_1D(self):
@@ -148,8 +184,8 @@ class parallel_over_axes(object):
         """
         start_time = time.time()
         # Get MPI parameters
-        rank = get_rank()
-        size = get_size()
+        rank = get_rank(comm=self.comm)
+        size = get_size(comm=self.comm)
 
         # Get data shape parameters and compute the data blocks
         # Determine the longest axis along which we can split the data
@@ -188,6 +224,7 @@ class parallel_over_axes(object):
 
         end_time = time.time()
         run_time = end_time - start_time
+        self.block_times = [run_time, ]
         print "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time)
 
         # Return the output
@@ -212,8 +249,8 @@ class parallel_over_axes(object):
 
         """
         import time
-        rank = get_rank()
-        size = get_size()
+        rank = get_rank(comm=self.comm)
+        size = get_size(comm=self.comm)
 
         if size < 2:
             warnings.warn('DYNAMIC task scheduling requires at least 2 MPI ranks. Using STATIC scheduling instead.')
@@ -223,6 +260,7 @@ class parallel_over_axes(object):
         if rank == self.root:
             self.result = []
             self.blocks = []
+            self.block_times = []
             # Get data shape parameters and compute the data blocks
             axes_shapes = np.asarray(self.main_data.shape)[self.split_axes]
             total_num_subblocks = np.prod(axes_shapes)
@@ -272,8 +310,9 @@ class parallel_over_axes(object):
             # Request a new data block
             self.result = []
             self.blocks = []
-
+            self.block_times = []
             while True:
+                start_time = time.time()
                 self.comm.send(rank, dest=self.root, tag=self.MPI_MESSAGE_TAGS['RANK_MSG'])
                 block_index, block_selection = self.comm.recv(source=self.root, tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 if block_index is None:
@@ -283,6 +322,10 @@ class parallel_over_axes(object):
                 task_params[self.main_data_param_name] = self.main_data[block_selection]
                 self.result.append(self.task_function(**task_params))
                 self.blocks.append(block_selection)
+                # Record the timings
+                end_time = time.time()
+                run_time = end_time - start_time
+                self.block_times.append(run_time)
 
         # Return the result
         return self.result, self.blocks
