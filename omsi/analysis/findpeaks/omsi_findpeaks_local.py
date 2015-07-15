@@ -359,7 +359,12 @@ class omsi_findpeaks_local(analysis_base):
                 if self['collect']:
                     result = scheduler.collect_data()
 
-                use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
+                # TODO Record runtime information data from the scheduler in our provenance data
+                # self.run_info['SCHEDULER_blocks'] = scheduler.blocks
+                # self.run_info['SCHEDULER_block_times'] = scheduler.block_times
+                # self.run_info['SCHEDULER_run_time'] = scheduler.run_time
+                # self.run_info['SCHEDULER_schedule'] = scheduler.schedule
+
                 # Compile the data from the parallel execution
                 # Case Table:
                 #
@@ -367,7 +372,7 @@ class omsi_findpeaks_local(analysis_base):
                 #           worker       2
                 # collect + root         3
                 #           root         1
-
+                use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
                 # Case 1: root rank without collect data disabled
                 if mpi_helper.get_rank() == self.mpi_root and not self['collect']:
                     # We did not process any data on the root if DYNAMIC scheduling was used
@@ -405,7 +410,6 @@ class omsi_findpeaks_local(analysis_base):
                         d2 = np.cumsum([0] + [len(ri[2]) for rt in result[0] for ri in rt])
                         for di in range(len(d2)-1):
                             peak_arrayindex[d2[di]:d2[di+1], 2] += d[di]
-                    print peak_arrayindex
                     mzdata = result[0][0][0][3]
                     return peak_mz, peak_values, peak_arrayindex, mzdata
 
