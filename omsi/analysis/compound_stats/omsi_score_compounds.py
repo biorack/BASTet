@@ -11,7 +11,7 @@ import os
 import numpy as np
 
 
-class omsi_midas(analysis_base):
+class omsi_score_compounds(analysis_base):
     """
     Class for executing midas on an MSI or local peak finding dataset.
     """
@@ -20,7 +20,7 @@ class omsi_midas(analysis_base):
         """
         Initialize the basic data members
         """
-        super(omsi_midas, self).__init__()
+        super(omsi_score_compounds, self).__init__()
         self.analysis_identifier = name_key
         dtypes = self.get_default_dtypes()
         groups = self.get_default_parameter_groups()
@@ -216,11 +216,19 @@ class omsi_midas(analysis_base):
                     # and we did not collect the data to the root either
                     pass
                 elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
-                    hit_table = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=0)
-                    pixel_index = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=0)
+                    temp_data = [ri[0] for rt in result[0] for ri in rt]
+                    if len(temp_data) > 0:
+                        hit_table = np.concatenate(tuple(temp_data), axis=-1)
+                    temp_data = [ri[1] for rt in result[0] for ri in rt]
+                    if len(temp_data) > 0:
+                        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
                 else:
-                    hit_table = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=0)
-                    pixel_index = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=0)
+                    temp_data = [ri[0] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        hit_table = np.concatenate(tuple(temp_data), axis=-1)
+                    temp_data = [ri[1] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
                 return hit_table, pixel_index
 
         #############################################################
@@ -277,14 +285,14 @@ class omsi_midas(analysis_base):
             hit_table[current_index] = current_hits
         if hit_table is None:
             hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
-                                        dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
+                                 dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
 
         # Return the hit_table and the index of the pixel each hit_table applies to
         return hit_table, pixel_index
 
 if __name__ == "__main__":
     from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
-    omsi_cl_driver(analysis_class=omsi_midas).main()
+    omsi_cl_driver(analysis_class=omsi_score_compounds).main()
 
 
 #     @classmethod
@@ -295,7 +303,7 @@ if __name__ == "__main__":
 #         """Implement support for qslice URL requests for the viewer"""
 #         # Use the dependency data for slicing here. We do not have a native option to reconstruct
 #         # images from local peak finding data
-#         return super(omsi_midas, cls).v_qslice(analysis_object,
+#         return super(omsi_score_compounds, cls).v_qslice(analysis_object,
 #                                                          z,
 #                                                          viewer_option)
 #
@@ -308,7 +316,7 @@ if __name__ == "__main__":
 #         """Implement support for qspectrum URL requests for the viewer"""
 #         num_custom_sepctrum_options = 0
 #         if viewer_option >= num_custom_sepctrum_options:
-#             return super(omsi_midas, cls).v_qspectrum(analysis_object,
+#             return super(omsi_score_compounds, cls).v_qspectrum(analysis_object,
 #                                                       x,
 #                                                       y,
 #                                                       viewer_option-1)
@@ -333,7 +341,7 @@ if __name__ == "__main__":
 #                 and qslice_viewer_option >= num_custom_slice_viewer_options:
 #             """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
 #             mz_spectra, label_spectra, mz_slice, label_slice = \
-#                 super(omsi_midas, cls)\
+#                 super(omsi_score_compounds, cls)\
 #                     .v_qmz(analysis_object,
 #                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
 #                            qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
@@ -346,7 +354,7 @@ if __name__ == "__main__":
 #                                    analysis_object):
 #         """Define which viewer_options are supported for qspectrum URL's"""
 #         custom_options = []
-#         dependent_options = super(omsi_midas, cls).v_qspectrum_viewer_options(analysis_object)
+#         dependent_options = super(omsi_score_compounds, cls).v_qspectrum_viewer_options(analysis_object)
 #         spectrum_viewer_options = custom_options + dependent_options
 #         return spectrum_viewer_options
 #
@@ -356,7 +364,7 @@ if __name__ == "__main__":
 #         """Define which viewer_options are supported for qspectrum URL's"""
 #
 #         custom_options = []
-#         dependent_options = super(omsi_midas, cls).v_qslice_viewer_options(analysis_object)
+#         dependent_options = super(omsi_score_compounds, cls).v_qslice_viewer_options(analysis_object)
 #         slice_viewer_options = custom_options + dependent_options
 #         return slice_viewer_options
 

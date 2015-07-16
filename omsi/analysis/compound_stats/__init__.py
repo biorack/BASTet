@@ -11,5 +11,5 @@ def midas_available():
 __all__ = []
 
 if midas_available():
-    __all__ = ["omsi_midas"]
-    from omsi.analysis.compound_stats.omsi_midas import omsi_midas
+    __all__ = ["omsi_score_compounds"]
+    from omsi.analysis.compound_stats.omsi_score_compounds import omsi_score_compounds
