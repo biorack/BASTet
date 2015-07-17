@@ -323,7 +323,7 @@ class omsi_findpeaks_local(analysis_base):
         import numpy as np
 
         # Assign parameters to local variables for convenience
-        msidata = self['msidata'][50:60, 50:60,:]
+        msidata = self['msidata']
         if msidata_subblock is not None:
             msidata = msidata_subblock
         mzdata = self['mzdata']
