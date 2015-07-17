@@ -92,9 +92,9 @@ class parallel_over_axes(object):
 
         :return: Tuple with the following elements:
 
-            1) List of tuples with the results from the local execution of the task_function. Each
-              tuple is the result from one return of the task_function. In the case of static
-              execution, this is always a list of length 1.
+            1) List with the results from the local execution of the task_function. Each
+               entry is the result from one return of the task_function. In the case of static
+               execution, this is always a list of length 1.
             2) List of block_indexes. Each block_index is a tuple with the selection used to
                divide the data into sub-blocks. In the case of static decomposition we have
                a range slice object along the axes used for decomposition whereas in the
@@ -130,7 +130,7 @@ class parallel_over_axes(object):
         :return: On worker ranks (i.e., MPI_RANK!=self.root) this is simply the
             self.result and self.blocks containing the result created by run function.
             On the root rank (i.e., MPI_RANK!=self.root) this is a tuple of two lists
-            containing with the self.result and self.blocks from all ranks respectively.
+            containing the combined data of all  self.result and self.blocks from all ranks respectively.
 
         """
         # If we have collected the data already then we don't need to do it again
@@ -147,16 +147,11 @@ class parallel_over_axes(object):
         collected_blocks = self.comm.gather(self.blocks, root=self.root)
         # Save the data to self.result, self.block, self.block_times if we are the root
         if rank == self.root:
-            self.result = collected_data
-            self.blocks = collected_blocks
-            # Remove the root entry if we used dynamic scheduling as the root did not process anything
-            if self.schedule == self.SCHEDULES['DYNAMIC']:
-                temp = list(self.result)
-                temp.pop(self.root)
-                self.result = temp
-                temp = list(self.blocks)
-                temp.pop(self.root)
-                self.blocks = temp
+            # Merge the results from all the processes into a single result and blocks list
+            # rather than having a list of lists of results
+            self.result = list(itertools.chain.from_iterable(collected_data))
+            self.blocks = list(itertools.chain.from_iterable(collected_blocks))
+
         # Record the time we used to collect the data
         end_time = time.time()
         run_time = end_time - start_time
@@ -174,9 +169,9 @@ class parallel_over_axes(object):
 
         :return: Tuple with the following elements:
 
-            1) List of tuples with the results from the local execution of the task_function. Each
-              tuple is the result from one return of the task_function. In the case of static
-              execution, this is always a list of lenght 1.
+            1) List with the results from the local execution of the task_function. Each
+               entry is the result from one return of the task_function. In the case of static
+               execution, this is always a list of length 1.
             2) List of block_indexes. Each block_index is a tuple with the selection used to
                divide the data into sub-blocks. In the case of static decomposition we have
                a range slice object along the axes used for decomposition.
@@ -241,8 +236,8 @@ class parallel_over_axes(object):
 
         :return: Tuple with the following elements:
 
-            1) List of tuples with the results from the local execution of the task_function. Each
-              tuple is the result from one return of the task_function.
+            1) List with the results from the local execution of the task_function. Each
+               entry is the result from one return of the task_function.
             2) List of block_indexes. Each block_index is a tuple with the selection used to
                divide the data into sub-blocks. In the case of static decomposition we have
                a range slice object along the axes used for decomposition.

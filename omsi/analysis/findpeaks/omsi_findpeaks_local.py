@@ -323,7 +323,7 @@ class omsi_findpeaks_local(analysis_base):
         import numpy as np
 
         # Assign parameters to local variables for convenience
-        msidata = self['msidata']
+        msidata = self['msidata'][50:60, 50:60,:]
         if msidata_subblock is not None:
             msidata = msidata_subblock
         mzdata = self['mzdata']
@@ -396,21 +396,21 @@ class omsi_findpeaks_local(analysis_base):
                 # Case 3: Compile collected data on the root
                 elif mpi_helper.get_rank() == self.mpi_root: # and use_dynamic_schedule:
                     # Compile the results from all processing task (on workers) or from all workers (on the root)
-                    peak_mz = np.concatenate(tuple([ri[0] for rt in result[0] for ri in rt]), axis=-1)
-                    peak_values = np.concatenate(tuple([ri[1] for rt in result[0] for ri in rt]), axis=-1)
+                    peak_mz = np.concatenate(tuple([ri[0] for ri in result[0]]), axis=-1)
+                    peak_values = np.concatenate(tuple([ri[1] for ri in result[0]]), axis=-1)
                     # Dynamic scheduling uses selections of (int,int,slice) while the static
                     # scheduling uses (slice, slice, slice), hence we need to compile the peak_arrayindex
                     # slightly differently depending on the scheduler used
                     if use_dynamic_schedule:
-                        peak_arrayindex = np.asarray([ [b[0], b[1], 0] for rt in result[1] for b in rt ])
-                        peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for rt in result[0] for ri in rt ])[:-1]
+                        peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1]])
+                        peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0]])[:-1]
                     else:
-                        peak_arrayindex = np.concatenate(tuple([ri[2] for rt in result[0] for ri in rt]), axis=0)
-                        d = np.cumsum([0] + [len(ri[0]) for rt in result[0] for ri in rt])
-                        d2 = np.cumsum([0] + [len(ri[2]) for rt in result[0] for ri in rt])
+                        peak_arrayindex = np.concatenate(tuple([ri[2] for ri in result[0]]), axis=0)
+                        d = np.cumsum([0] + [len(ri[0]) for ri in result[0]])
+                        d2 = np.cumsum([0] + [len(ri[2]) for ri in result[0]])
                         for di in range(len(d2)-1):
                             peak_arrayindex[d2[di]:d2[di+1], 2] += d[di]
-                    mzdata = result[0][0][0][3]
+                    mzdata = result[0][0][3]
                     return peak_mz, peak_values, peak_arrayindex, mzdata
 
 

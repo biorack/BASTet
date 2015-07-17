@@ -211,17 +211,18 @@ class omsi_score_compounds(analysis_base):
                 pixel_index = np.zeros((0, 2), dtype='int')
                 use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
 
+                # TODO NEED to update since collect now returns a single list not a list of lists
                 if not self['collect'] and (mpi_helper.get_rank() == self.mpi_root and use_dynamic_schedule):
                     # We did not process any data on the root process when using dynamic scheduling
                     # and we did not collect the data to the root either
                     pass
-                elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
-                    temp_data = [ri[0] for rt in result[0] for ri in rt]
-                    if len(temp_data) > 0:
-                        hit_table = np.concatenate(tuple(temp_data), axis=-1)
-                    temp_data = [ri[1] for rt in result[0] for ri in rt]
-                    if len(temp_data) > 0:
-                        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
+                #elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
+                #    temp_data = [ri[0] for rt in result[0] for ri in rt]
+                #    if len(temp_data) > 0:
+                #        hit_table = np.concatenate(tuple(temp_data), axis=-1)
+                #    temp_data = [ri[1] for rt in result[0] for ri in rt]
+                #    if len(temp_data) > 0:
+                #        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
                 else:
                     temp_data = [ri[0] for ri in result[0]]
                     if len(temp_data) > 0:
