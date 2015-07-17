@@ -222,14 +222,14 @@ class omsi_score_compounds(analysis_base):
                 #        hit_table = np.concatenate(tuple(temp_data), axis=-1)
                 #    temp_data = [ri[1] for rt in result[0] for ri in rt]
                 #    if len(temp_data) > 0:
-                #        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
+                #        pixel_index = np.concatenate(tuple(temp_data), axis=0) # axis=-1
                 else:
                     temp_data = [ri[0] for ri in result[0]]
                     if len(temp_data) > 0:
                         hit_table = np.concatenate(tuple(temp_data), axis=-1)
                     temp_data = [ri[1] for ri in result[0]]
                     if len(temp_data) > 0:
-                        pixel_index = np.concatenate(tuple(temp_data), axis=-1)
+                        pixel_index = np.concatenate(tuple(temp_data), axis=0)
                 return hit_table, pixel_index
 
         #############################################################
@@ -237,6 +237,8 @@ class omsi_score_compounds(analysis_base):
         #############################################################
         # Initialize the output data structures
         pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
+        if len(pixel_index.shape) == 1:
+            pixel_index = pixel_index[np.newaxis, :]
         hit_table = None
         # Iterate through all the pixel we were asked to process in serial
         for current_index, spectrum_index in enumerate(spectrum_indexes):
