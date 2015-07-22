@@ -109,6 +109,9 @@ def main(argv=None):
         except urllib2.URLError as e:
             print "Update of job-status to running failed " + unicode(e)
             ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
+        except ValueError as e:
+            print "Update of job-status to running failed " + unicode(e)
+            ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
 
     ####################################################################
     # Generate the list of datasets to be converted                    #
