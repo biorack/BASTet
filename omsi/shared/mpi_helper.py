@@ -73,6 +73,8 @@ class parallel_over_axes(object):
         self.task_function = task_function
         self.schedule = schedule
         self.split_axes = split_axes
+        if isinstance(self.split_axes, int): # Make sure that split-axis is a list not just a single index
+            self.split_axes = [self.split_axes,]
         self.main_data = main_data
         self.main_data_param_name = main_data_param_name
         self.task_function_params = task_function_params
