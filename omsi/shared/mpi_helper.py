@@ -262,7 +262,6 @@ class parallel_over_axes(object):
             axes_shapes = np.asarray(self.main_data.shape)[self.split_axes]
             total_num_subblocks = np.prod(axes_shapes)
             if total_num_subblocks < size:
-                size = total_num_subblocks
                 if rank == self.root:
                     warnings.warn("Insufficient number of blocks for number of MPI ranks. Some ranks will remain idle")
 
