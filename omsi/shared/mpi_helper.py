@@ -285,7 +285,7 @@ class parallel_over_axes(object):
                     print (block_index, total_num_subblocks, request_rank)
             end_time = time.time()
             run_time = end_time - start_time
-            print "TIME FOR RUNNING TASK FUNCTION: " + str(run_time)
+            print "TIME FOR SCHEDULING ALL TASKS: " + str(run_time)
             start_time = time.time()
             print "FINALIZING"
             # Terminate all ranks and receive all data from the different ranks if requested
