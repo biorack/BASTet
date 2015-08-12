@@ -3,10 +3,8 @@ Module specifying the base analysis API for integrating new analysis with the to
 OpenMSI science gateway.
 """
 
-import platform
+
 import time
-import datetime
-import sys
 import warnings
 import weakref
 import numpy as np
@@ -17,6 +15,7 @@ from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
 from omsi.shared.dependency_data import dependency_dict
 import omsi.shared.mpi_helper as mpi_helper
+from omsi.shared.run_info_data import run_info_dict
 
 
 class AnalysisReadyError(Exception):
@@ -41,6 +40,7 @@ class AnalysisReadyError(Exception):
                 except KeyError:
                     pass
         super(AnalysisReadyError, self).__init__(repr(message))
+
 
 
 class analysis_base(object):
@@ -153,7 +153,7 @@ class analysis_base(object):
         self.__data_list = []
         self.parameters = []
         self.data_names = []
-        self.run_info = {}
+        self.run_info = run_info_dict()
         self.profile_time_and_usage = False
         self.profile_memory = False
         self.omsi_analysis_storage = []
@@ -314,136 +314,6 @@ class analysis_base(object):
                 pending_indputs.append(param)
         return pending_indputs
 
-    def runinfo_record_preexecute(self):
-        """
-        Function used to record runtime information prior to calling the
-        `execute_analysis(...)` function.
-        The function may be overwritten in child classes to add recording of
-        additional runtime information. All runtime data should be recorded in the
-        self.run_info dictionary to ensure the data is stored in the HDF5 file.
-        Data that should not be recorded in HDF5 should be placed in separate,
-        custom data structures.
-
-        When overwriting the function we should call super(...,self).runinfo_record_pretexecute()
-        last in the custom version to ensure that the start_time is properly recorded right before
-        the execution of the analysis.
-
-        """
-        # Record basic runtime environment information using the platform module
-        try:
-            self.run_info['architecture'] = unicode(platform.architecture())
-            self.run_info['java_ver'] = unicode(platform.java_ver())
-            self.run_info['libc_ver'] = unicode(platform.libc_ver())
-            self.run_info['linux_distribution'] = unicode(platform.linux_distribution())
-            self.run_info['mac_ver'] = unicode(platform.mac_ver())
-            self.run_info['machine'] = unicode(platform.machine())
-            self.run_info['node'] = unicode(platform.node())
-            self.run_info['platform'] = unicode(platform.platform())
-            self.run_info['processor'] = unicode(platform.processor())
-            self.run_info['python_branch'] = unicode(platform.python_branch())
-            self.run_info['python_build'] = unicode(platform.python_build())
-            self.run_info['python_compiler'] = unicode(platform.python_compiler())
-            self.run_info['python_implementation'] = unicode(platform.python_implementation())
-            self.run_info['python_revision'] = unicode(platform.python_revision())
-            self.run_info['python_version'] = unicode(platform.python_version())
-            self.run_info['release'] = unicode(platform.release())
-            self.run_info['system'] = unicode(platform.system())
-            self.run_info['uname'] = unicode(platform.uname())
-            self.run_info['version'] = unicode(platform.version())
-            self.run_info['win32_ver'] = unicode(platform.win32_ver())
-        except:
-            warnings.warn("WARNING: Recording of execution provenance failed: " + str(sys.exc_info()))
-
-        # Attempt to record the svn version information
-        try:
-            import subprocess
-            self.run_info['svn_ver'] = subprocess.check_output('svnversion').rstrip('\n')
-        except:
-            warnings.warn("Recording of svn version information failed: "+str(sys.exc_info()))
-
-        # Record the start time for the analysis
-        self.run_info['start_time'] = unicode(datetime.datetime.now())
-
-    def runinfo_record_postexecute(self,
-                                   execution_time):
-        """
-        Function used to record runtime information after the
-        `execute_analysis(...)` function has completed
-        The function may be overwritten in child classes to add recording of
-        additional runtime information. All runtime data should be recorded in the
-        self.run_info dictionary to ensure the data is stored in the HDF5 file.
-        Data that should not be recorded in HDF5 should be placed in separate,
-        custom data structures.
-
-        When overwriting the function we should call super(...,self).runinfo_record_postexecute(execution_time)
-        in the custom version to ensure that the execution and end_time are properly
-        recorded.
-
-        :param execution_time: The total time it took to execute the analysis.
-        """
-        # Finalize recording of post execution provenance
-        self.run_info['execution_time'] = unicode(execution_time)
-        self.run_info['end_time'] = unicode(datetime.datetime.now())
-
-    def runinfo_clean_up(self):
-        """
-        Clean up the runinfo object. In particular remove empty keys that
-        either recorded None or recorded just an empty string.
-
-        This function may be overwritten to also do clean-up needed
-        due to additional custom runtime instrumentation.
-
-        When overwriting this function we should call super(..., self).runinfo_clean_up()
-        at the end of the function to ensure that the runinfo dictionary
-        is clean, i.e., does not contain any empty entries.
-        """
-        # Remove empty items from the run_info dict
-        for ri_key, ri_value in self.run_info.items():
-            try:
-                if ri_value is None or len(ri_value) == 0:
-                    self.run_info.pop(ri_key)
-            except:
-                pass
-
-    def gather_run_info(self, root=None, comm=None):
-        """
-        Simple helper function to gather the runtime information collected on
-        multiple processes when running using MPI on a single process
-
-        :param root: The process where the runtime information should be collected.
-            Default is None in which case self.root is used
-
-        :param comm: The MPI communicator to be used. Default value is None,
-            in which case self.mpi_comm is used.
-
-        :return: If we have more then one processes then this function returns a
-            dictionary with the same keys as usual for the run_info but the
-            values are now lists with one entry per mpi processes. If we only have
-            a single process, then the run_info object will be returned without
-            changes. NOTE: Similar to mpi gather, the function only collects
-            information on the root. All other processes will return just their
-            own private runtime information.
-
-        """
-        if mpi_helper.MPI_AVAILABLE:
-            if not comm:
-                comm = self.mpi_comm
-            if not root:
-                root = self.mpi_root
-            if comm.Get_size() > 1:
-                self.run_info['mpi_rank'] = comm.Get_rank()
-                run_data = comm.gather(self.run_info, root=root)
-                if comm.Get_rank() == root:
-                    merged_run_data = {}
-                    for run_dict in run_data:
-                        for key in run_dict:
-                            try:
-                                merged_run_data[key].append(run_dict[key])
-                            except KeyError:
-                                merged_run_data[key] = [run_dict[key]]
-                    return merged_run_data
-        return self.run_info
-
     def record_execute_analysis_outputs(self, analysis_output):
         """
         Function used internally by execute to record the output
@@ -522,8 +392,8 @@ class analysis_base(object):
             raise AnalysisReadyError("The analysis is not ready.", pending_params)
 
         # 3) Record basic execution provenance information prior to running the analysis
-        self.run_info = {}
-        self.runinfo_record_preexecute()
+        self.run_info.clear()
+        self.run_info.record_preexecute()
 
         # 4) Define the start-time for the execution of our analysis
         start_time = time.time()
@@ -576,12 +446,13 @@ class analysis_base(object):
 
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
         execution_time = time.time() - start_time
-        self.runinfo_record_postexecute(execution_time=execution_time)
-        self.runinfo_clean_up()
+        self.run_info.record_postexecute(execution_time=execution_time)
+        self.run_info.clean_up()
 
         # If we ran the analysis in parallel, then collect all runtime information
         if mpi_helper.MPI_AVAILABLE:
-            self.run_info = self.gather_run_info()
+            self.run_info = self.run_info.gather(root=self.mpi_root,
+                                                 comm=self.mpi_comm)
 
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
@@ -1488,9 +1359,4 @@ class analysis_base(object):
            :type identifier: str
         """
         self.analysis_identifier = identifier
-
-
-
-
-
 

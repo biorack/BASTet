@@ -713,7 +713,6 @@ Custom analysis restore
 
 Similarly in order implement custom data restore behavior we can overwrite the default implementation of :py:meth:`omsi.analysis.analysis_base.analysis_base.read_from_omsi_file` . In this case one will usually call the default implementation via ``super(omsi_myanalysis,self).read_from_omsi_file(...)`` first and then add any additional behavior.
 
-
 Custom analysis execution
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -730,7 +729,14 @@ Second, the execute function uses the :py:meth:`omsi.analysis.analysis_base.anal
 
 Customizing the recording of runtime information
 """"""""""""""""""""""""""""""""""""""""""""""""
-The recording of runtime information is performed using the :py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_record_preexecute` and :py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_record_postexecute` functions. As the names indicate, the preexecute function is called before the ``execute_analysis`` function is called and records basic system information, and the postexecute function is called after the analysis is completed to record additional information, e.g, the time and duration of the analysis. The function py:meth:`omsi.analysis.analysis_base.analysis_base.runinfo_clean_up` is then called to clean up the recorded runtime information (which is stored in `self.run_info`). By default, ``runinfo_clean_up()`` removes any empty entries, i.e., key/value pairs where the value is either None or an empty string. We can customize the clean-up process by overwriting ``runinfo_clean_up()``
+The recording of runtime information is performed using the :py:meth:`omsi.shared.run_info_data.run_info_dict` data structure. This data structure provides a series of functions that are called in order, in particular:
+
+* :py:meth:`omsi.shared.run_info_data.run_info_dict.clear` : This function is called first to clear the runtime dictionary. This is the same as the standard dict.clear.
+* :py:meth:`omsi.shared.run_info_data.run_info_dict.record_preexecute` : This function is called before the ``execute_analysis`` function is called and records basic system information,
+* :py:meth:`omsi.shared.run_info_data.run_info_dict.record_postexecute` : This function is called after the  ``execute_analysis`` function has completed to record additional information, e.g, the time and duration of the analysis,
+* :py:meth:`omsi.shared.run_info_data.run_info_dict..runinfo_clean_up` : This function is called at the end to clean up the recorded runtime information. By default, ``runinfo_clean_up()`` removes any empty entries, i.e., key/value pairs where the value is either None or an empty string.
+
+We can customize any of these function by implementing a derived class of :py:meth:`omsi.shared.run_info_data.run_info_dict` where we can overwrite the functions. In order to use our derived class we can then assign our object to :py:meth:`omsi.analysis.analysis_base.analysis_base.run_info`. This design allows us to modularly use the runtime information tracking also for other tasks, not just with our analysis base infrastructure.
 
 Customizing the analysis execution
 """"""""""""""""""""""""""""""""""
