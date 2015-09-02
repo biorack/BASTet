@@ -171,10 +171,17 @@ class img_file(file_reader_base):
         :return: tuple of ((x , y) , intensities), i.e., the tuple of (x, y) integer index of the spectrum and
             the numpy array of the intensities
         """
+        temp_img_file = open( self.img_filename , 'rb' )
         for xindex in range(self.shape[0]):
             for yindex in range(self.shape[1]):
-                yield (xindex, yindex), self[xindex, yindex, :]   # getitem will open the file if necessary
-            self.close_file()   # Avoid the memmap to grow too large by closing the file after reading one row
+                index = xindex + (yindex*self.shape[0])
+                skip = self.shape[2] * np.dtype(self.data_type).itemsize
+                temp_img_file.seek(skip*index, 0)
+                spektrum = np.fromfile(file=temp_img_file,
+                                       dtype=self.data_type,
+                                       count=self.shape[2])
+                yield (xindex, yindex), spektrum   # getitem will open the file if necessary
+
 
     def close_file(self):
         """Close the img file"""

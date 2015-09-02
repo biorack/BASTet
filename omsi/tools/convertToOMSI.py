@@ -4,6 +4,7 @@
 
 """
 
+# TODO --io option is not used right now after the changes to convert things iteratively
 # TODO ConvertSettings.file_user Get the user from the file-path rather then from the command line
 # TODO Register all print-outs with the email message (use logging instead of print)
 # TODO add ability have --format option for each dataset to be converted
