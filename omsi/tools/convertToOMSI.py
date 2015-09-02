@@ -1057,9 +1057,9 @@ class ConvertFiles(object):
                                                           compression_opts=ConvertSettings.compression_opts,
                                                           copy_data=False,
                                                           print_status=True)
-                ConvertFiles.write_data(input_file=input_file,
+                ConvertFiles.write_data(input_file=data_dataset,
                                         data=tempdata,
-                                        data_io_option='spectrum', #ConvertSettings.io_option,
+                                        data_io_option='all', #ConvertSettings.io_option,
                                         chunk_shape=chunkSpec,
                                         write_progress=(ConvertSettings.job_id is None))
                 ConvertSettings.omsi_output_file.flush()
@@ -1613,9 +1613,9 @@ class ConvertFiles(object):
             if isinstance(input_file, file_reader_base.file_reader_base):
                 spectrum_index = 0
                 for spectrum in input_file.spectrum_iter():
-                    xindex = spectrum[0]
-                    yindex = spectrum[1]
-                    vals = spectrum[2]
+                    xindex = spectrum[0][0]
+                    yindex = spectrum[0][1]
+                    vals = spectrum[1]
                     data[xindex, yindex, :] = vals
                     spectrum_index += 1
                     if write_progress:

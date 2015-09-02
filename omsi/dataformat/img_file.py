@@ -173,7 +173,7 @@ class img_file(file_reader_base):
         """
         for xindex in range(self.shape[0]):
             for yindex in range(self.shape[1]):
-                yield self[xindex, yindex, :]   # getitem will open the file if necessary
+                yield (xindex, yindex), self[xindex, yindex, :]   # getitem will open the file if necessary
             self.close_file()   # Avoid the memmap to grow too large by closing the file after reading one row
 
     def close_file(self):
