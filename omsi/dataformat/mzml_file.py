@@ -25,7 +25,7 @@ class mzml_file(file_reader_base_multidata):
                             'bruker': 'bruker',
                             'thermo': 'thermo'}
 
-    def __init__(self, basename, readdata=True):
+    def __init__(self, basename, requires_slicing=True):
         """
         Open an img file for data reading.
 
@@ -33,9 +33,9 @@ class mzml_file(file_reader_base_multidata):
                              in the directory will be used instead.
         :type basename: string
 
-        :param readdata: Should the complete data be read into memory
+        :param requires_slicing: Should the complete data be read into memory
                              (this makes slicing easier). (default is True)
-        :type readdata: bool
+        :type requires_slicing: bool
 
         :param resolution: For profile data only, the minimum m/z spacing to use for creating the "full" reprofiled
                             data cube
@@ -50,7 +50,7 @@ class mzml_file(file_reader_base_multidata):
                 raise ValueError("No valid mzML file found in the given directory.")
 
         # Call super constructor. This sets self.basename and self.readall
-        super(mzml_file, self).__init__(basename=basename, readdata=readdata)
+        super(mzml_file, self).__init__(basename=basename, requires_slicing=requires_slicing)
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
@@ -80,7 +80,7 @@ class mzml_file(file_reader_base_multidata):
 
         # Read the data into memory
         self.data = None
-        if readdata:
+        if requires_slicing:
             self.__read_all()
 
     def __read_all(self):
@@ -479,7 +479,7 @@ class mzml_file(file_reader_base_multidata):
                                                 scan_types=cls.__compute_scan_types(filename=basename)).shape[0]
             return num_scans*mz_axis_len
 
-            # temp_mzml_file = cls(basename=basename, readdata=False)
+            # temp_mzml_file = cls(basename=basename, requires_slicing=False)
             # itemsize = np.dtype(temp_mzml_file.data_type).itemsize
             # size = np.asarray(temp_mzml_file.shape).prod() * itemsize
             # print ('MZML size', size)

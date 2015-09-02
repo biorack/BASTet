@@ -72,14 +72,14 @@ class bruckerflex_file(file_reader_base_with_regions):
 
     """
 
-    def __init__(self, basename, fid_encoding='int32', readdata=True):
+    def __init__(self, basename, fid_encoding='int32', requires_slicing=True):
         """Open an img file for data reading.
 
             :param basename: Name of the textfile with the spotlist. Alternatively this may also be the \
                                       folder with the spots.
             :type basename: string
-            :param readdata: Should the complete data be read into memory (this makes slicing easier). (default is True)
-            :type readdata: bool
+            :param requires_slicing: Should the complete data be read into memory (this makes slicing easier). (default is True)
+            :type requires_slicing: bool
             :param fid_encoding: String indicating in which binary format the intensity values (fid files) are stored. \
                                  (default value is 'int32')
             :type fid_encoding: string
@@ -104,14 +104,14 @@ class bruckerflex_file(file_reader_base_with_regions):
             :var self.full_shape: Shape of the full 3D MSI dataset including all regions imaged.
             :var self.metadata: Dictionary with metadata from the acqu file
             :var self.mz: The 1D numpy array with the m/z axis information
-            :var self.data: If readdata is set to true then this 3D array includes the complete data of the MSI data \
+            :var self.data: If requires_slicing is set to true then this 3D array includes the complete data of the MSI data \
                   cube. Missing data values (e.g., from regions not imaged during the aquistion processes) are \
                   completed with zero values.
             :var self.region_dicts: Dictionary with description of the imaging regions
 
             :raises ValueError: In case that no valid data is found.
         """
-        super(bruckerflex_file, self).__init__(basename, readdata)
+        super(bruckerflex_file, self).__init__(basename, requires_slicing)
         self.spotlist_filename = basename
         if os.path.isdir(self.spotlist_filename):
             self.spotlist_filename = None
@@ -146,7 +146,7 @@ class bruckerflex_file(file_reader_base_with_regions):
 
         # Should we read all the intensity values into memory. If so, allocate
         # space.
-        if readdata:
+        if requires_slicing:
             self.data = np.zeros(self.shape)
             dmask = self.pixel_dict['fid'].mask
             for xindex in range(0, self.shape[0]):

@@ -14,7 +14,7 @@ class img_file(file_reader_base):
        iii) img data file.
     """
 
-    def __init__(self, hdr_filename=None, t2m_filename=None, img_filename=None, basename=None, readdata=True):
+    def __init__(self, hdr_filename=None, t2m_filename=None, img_filename=None, basename=None, requires_slicing=True):
         """Open an img file for data reading.
 
             :param hdr_filename: The name of the hdr header file
@@ -31,12 +31,12 @@ class img_file(file_reader_base):
                              to load the data.
             :type basename: string
 
-            :param readdata: Unused here. Included as this is a required parameter for the base API.
-            :type readdata: Boolean
+            :param requires_slicing: Unused here. Slicing is always supported by this reader.
+            :type requires_slicing: Boolean
 
             :raises ValueError: In case that basename and hdr_filename, t2m_filename, and img_filename are specified.
         """
-        super(img_file, self).__init__(basename, readdata)
+        super(img_file, self).__init__(basename, requires_slicing)
         self.data_type = 'uint16'
         self.shape = [0, 0, 0]  # Number of pixels in x,y, and z. NOTE: Type changed to tuple later on.
         self.mz = 0  # A numpy vector with the m/z values of the instrument
@@ -164,6 +164,17 @@ class img_file(file_reader_base):
             self.m_img_file = np.memmap(
                 filename=self.img_filename, dtype=self.data_type, shape=self.shape, mode='r', order='C')
         return self.m_img_file[key]
+
+    def spectrum_iter(self):
+        """
+        Enable iteration over the spectra in the file
+        :return: tuple of ((x , y) , intensities), i.e., the tuple of (x, y) integer index of the spectrum and
+            the numpy array of the intensities
+        """
+        for xindex in range(self.shape[0]):
+            for yindex in range(self.shape[1]):
+                yield self[xindex, yindex, :]   # getitem will open the file if necessary
+            self.close_file()   # Avoid the memmap to grow too large by closing the file after reading one row
 
     def close_file(self):
         """Close the img file"""

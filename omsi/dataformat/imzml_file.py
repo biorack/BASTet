@@ -20,7 +20,7 @@ class imzml_file(file_reader_base):
 
     available_imzml_types = {'unknown': 'unknown', 'thermo': 'thermo', 'bruker': 'bruker'}
 
-    def __init__(self, basename, readdata=True):
+    def __init__(self, basename, requires_slicing=True):
         """
         Open an imzml file for data reading.
 
@@ -28,9 +28,9 @@ class imzml_file(file_reader_base):
                              in the directory will be used instead.
         :type   basename:   string
 
-        :param  readdata:   Should the complete data be read into memory
+        :param  requires_slicing:   Should the complete data be read into memory
                              (this makes slicing easier). (default is True)
-        :type   readdata:   bool
+        :type   requires_slicing:   bool
         """
         # Determine the correct base
         if os.path.isdir(basename):
@@ -41,7 +41,7 @@ class imzml_file(file_reader_base):
                 raise ValueError("No valid imzML file found in the given directory.")
 
         # Call super constructor. This sets self.basename and self.readall
-        super(imzml_file, self).__init__(basename=basename, readdata=readdata)
+        super(imzml_file, self).__init__(basename=basename, requires_slicing=requires_slicing)
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
@@ -75,7 +75,7 @@ class imzml_file(file_reader_base):
 
         # Read the data into memory
         self.data = None
-        if readdata:
+        if requires_slicing:
             self.__read_all(filename=basename)
 
         self.mz = self.mz

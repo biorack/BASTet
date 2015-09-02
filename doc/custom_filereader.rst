@@ -19,17 +19,16 @@ to implement the following functions:
 
     class formatname_file(file_reader_base):
 
-        # 1. Implement the init function which must accept basename and readdata as inputs
-        def __init__(self, basename=None, readdata=True):
+        # 1. Implement the init function which must accept basename and requires_slicing as inputs
+        def __init__(self, basename=None, requires_slicing=True):
             """
             basename : Name of the file/folder to be opened
-            readdata : Optimization flag used to indicate to the reader whether only
-                       metadata will be read  using this object (i.e., self) of whether
-                       raw data will be read as well (readdata=True). This is an optional
-                       optimization that can be useful for formats that are time-consuming
-                       to read but for which the basic metadata can be constructed quickly.
+            requires_slicing: Boolean indicating whether the user requires array slicing via
+                the __getitem__ function to work or not. This is an optimization, because many MSI
+                data formats do not easily support arbitrary slicing of data but rather only
+                iteration over spectra.
             """
-            super(formatname_file, self).__init__(basename, readdata)  # 1.1 Call super __init__
+            super(formatname_file, self).__init__(basename, requires_slicing)  # 1.1 Call super __init__
             self.data_type = 'uint16'   # 1.2 Define the data type used
             self.shape = [0, 0, 0]      # 1.3 Define the shape of the dataset
             self.mz = 0                 # 1.4 Define the m/z axis
@@ -63,9 +62,9 @@ For file formats that support multiple regions the implementation is aside from 
 
     class formatname_file(file_reader_base):
 
-        # 1. Implement the init function which must accept basename and readdata as inputs
-        def __init__(self, basename=None, readdata=True):
-            super(formatname_file, self).__init__(basename, readdata)  # 1.1 Call super __init__
+        # 1. Implement the init function which must accept basename and requires_slicing as inputs
+        def __init__(self, basename=None, requires_slicing=True):
+            super(formatname_file, self).__init__(basename, requires_slicing)  # 1.1 Call super __init__
             self.data_type = 'uint16'    # 1.2 Define the data type used
             self.shape = [0, 0, 0]       # 1.3 Define the shape of the dataset
             self.mz = 0                  # 1.4 Define the m/z axis
@@ -140,7 +139,7 @@ Using this basic feature makes it possible to easily iterate over all available 
             formatname = fname
     if filereader is not None:
         print "Using "+str(formatname)+" to read the file"
-        openfile = filereader(basename=filename, readdata=True)
+        openfile = filereader(basename=filename, requires_slicing=True)
 
 
 

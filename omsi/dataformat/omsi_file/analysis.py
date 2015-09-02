@@ -812,10 +812,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  cannot be created.
         """
         from omsi.analysis import analysis_generic
-        analysis_instance = self.restore_analysis(**kwargs)
+        analysis_instance = self.restore_analysis(load_runtime_data=False) # We don't need the runtime data
         if isinstance(analysis_instance, analysis_generic):
             return None
         else:
-            analysis_instance.execute()
+            analysis_instance.execute(**kwargs)
             return analysis_instance
 

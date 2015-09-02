@@ -852,6 +852,8 @@ class ConvertSettings(object):
         print "             i) all : Read the full data in memory and write it at once"
         print "             ii) spectrum : Read one spectrum at a time and write it to the file. "
         print "             iii) chunk : Read one chunk at a time and write it to the file."
+        print "             The io option applies only for the generation of subsequent chunkings"
+        print "             and not the initial iteration over the file to generate the first convert."
         print ""
         print "===DATABSE OPTIONS=== "
         print ""
@@ -966,7 +968,8 @@ class ConvertFiles(object):
                 curr_format = curr_dataset['format']
                 print "Input file format: " + str(curr_format)
                 if curr_format is not None:
-                    input_file = ConvertSettings.available_formats[curr_format](basename=basefile, readdata=True)
+                    input_file = ConvertSettings.available_formats[curr_format](basename=basefile,
+                                                                                requires_slicing=True)
                     if input_file.supports_regions():
                         input_file.set_region_selection(region_index=curr_dataset['region'])
                     if input_file.supports_multidata():
@@ -1041,7 +1044,7 @@ class ConvertFiles(object):
                                                preload_xy_index=False)
             ConvertFiles.write_data(input_file=input_file,
                                     data=data,
-                                    data_io_option=ConvertSettings.io_option,
+                                    data_io_option='spectrum',  # ConvertSettings.io_option,
                                     chunk_shape=ConvertSettings.chunks,
                                     write_progress=(ConvertSettings.job_id is None))
             ConvertSettings.omsi_output_file.flush()
@@ -1056,7 +1059,7 @@ class ConvertFiles(object):
                                                           print_status=True)
                 ConvertFiles.write_data(input_file=input_file,
                                         data=tempdata,
-                                        data_io_option=ConvertSettings.io_option,
+                                        data_io_option='spectrum', #ConvertSettings.io_option,
                                         chunk_shape=chunkSpec,
                                         write_progress=(ConvertSettings.job_id is None))
                 ConvertSettings.omsi_output_file.flush()
@@ -1106,11 +1109,11 @@ class ConvertFiles(object):
                     inst_name = None
                 instrument_info = data.create_instrument_info(
                     instrument_name=inst_name)
-                    # mzdata=mzdata)  # Create will return the existing one if one exists
+                # mzdata=mzdata)  # Create will return the existing one if one exists
                 instrument_info.add_metadata(metadata=metadata_value(
-                        name='description',
-                        value=unicode(ConvertSettings.metadata[instrument_meta_key]),
-                        description='Description of the instrument'))
+                                             name='description',
+                                             value=unicode(ConvertSettings.metadata[instrument_meta_key]),
+                                             description='Description of the instrument'))
 
             ####################################################################
             #  Execute the requested analyses                                 ##
@@ -1293,7 +1296,7 @@ class ConvertFiles(object):
                 if len(curr_dataset['dependencies']) > 0:
                     for dependency in curr_dataset['dependencies']:
                         # Find the corresponding dataset that we converted if necessary
-                        if 'omsi_object' not in dependency or  dependency['omsi_object'] is None:
+                        if 'omsi_object' not in dependency or dependency['omsi_object'] is None:
                             for dep_dataset in ConvertSettings.dataset_list:
                                 match_found = dep_dataset['basename'] == dependency['basename']
                                 if 'dataset' in dependency and dependency['dataset'] is not None:
@@ -1319,7 +1322,7 @@ class ConvertFiles(object):
                             new_omsi_dependency = dependency_dict()
                             new_omsi_dependency.update(dependency)
                             # Define and save the dependency
-                            #new_omsi_dependency = dependency_dict(link_name=dependency['link_name'],
+                            # new_omsi_dependency = dependency_dict(link_name=dependency['link_name'],
                             #                                      omsi_object=dependency['omsi_object'],
                             #                                      help=dependency['help'],
                             #                                      dependency_type=dependency['dependency_type'])
@@ -1392,7 +1395,7 @@ class ConvertFiles(object):
                 try:
                     tempfile = ConvertSettings.available_formats[currds['format']](
                         basename=currds['basename'],
-                        readdata=False)
+                        requires_slicing=False)
                     for dataset_index in xrange(0, tempfile.get_number_of_datasets()):
                         nds = {'basename': currds['basename'],
                                'format': currds['format'],
@@ -1418,7 +1421,7 @@ class ConvertFiles(object):
                     try:
                         tempfile = ConvertSettings.available_formats[currds['format']](
                             basename=currds['basename'],
-                            readdata=False)
+                            requires_slicing=False)
                         for ri in xrange(0, tempfile.get_number_of_regions()):
                             nds = {'basename': currds['basename'],
                                    'format': currds['format'],
@@ -1464,7 +1467,8 @@ class ConvertFiles(object):
             try:
                 print "Suggested Chunkings: " + basefile
                 currformat = currdataset["format"]
-                inputfile = ConvertSettings.available_formats[currformat](basename=basefile, readdata=False)
+                inputfile = ConvertSettings.available_formats[currformat](basename=basefile,
+                                                                          requires_slicing=False)
                 if inputfile.supports_regions():
                     inputfile.set_region_selection(currdataset["region"])
                 elif inputfile.supports_multidata():
@@ -1605,13 +1609,27 @@ class ConvertFiles(object):
 
         """
         if data_io_option == "spectrum" or (data_io_option == "chunk" and (chunk_shape is None)):
-            for xindex in xrange(0, input_file.shape[0]):
-                if write_progress:
-                    sys.stdout.write("[" + str(int(100. * float(xindex) / float(input_file.shape[0]))) + "%]" + "\r")
-                    sys.stdout.flush()
-                for yindex in xrange(0, input_file.shape[1]):
-                    # Save the spectrum to the hdf5 file
-                    data[xindex, yindex, :] = input_file[xindex, yindex, :]
+            num_spectra = float(input_file.shape[0] * input_file.shape[1])
+            if isinstance(input_file, file_reader_base.file_reader_base):
+                spectrum_index = 0
+                for spectrum in input_file.spectrum_iter():
+                    xindex = spectrum[0]
+                    yindex = spectrum[1]
+                    vals = spectrum[2]
+                    data[xindex, yindex, :] = vals
+                    spectrum_index += 1
+                    if write_progress:
+                        sys.stdout.write("[" + str(int(100. * spectrum_index / num_spectra)) + "%]" + "\r")
+                        sys.stdout.flush()
+
+            else:
+                for xindex in xrange(0, input_file.shape[0]):
+                    if write_progress:
+                        sys.stdout.write("[" + str(int(100. * float(xindex) / float(input_file.shape[0]))) + "%]" + "\r")
+                        sys.stdout.flush()
+                    for yindex in xrange(0, input_file.shape[1]):
+                        # Save the spectrum to the hdf5 file
+                        data[xindex, yindex, :] = input_file[xindex, yindex, :]
         elif data_io_option == "all":
             data[:] = input_file[:]
         elif data_io_option == "chunk":

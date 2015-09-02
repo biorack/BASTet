@@ -19,17 +19,9 @@ class file_reader_base(object):
     **__init__ interface:**
 
     To avoid the need for custom code subclasses should be able to be constructed \
-    by providing just the basename parameter and optional readall parameter. \
+    by providing just the basename parameter and optional requires_slicing parameter. \
     If additional inputs are needed, then file conversion and management scripts \
     may need to be modified to account for the custom requirements. \
-
-    * ``basename`` : Name of the directory with the files
-    * ``readdata`` : Optional parameter used for optimization. When set to false \
-                   indicates that no data will be read using the instance but  \
-                   the instance may only be used for basic metadata checking, \
-                   e.g., shape. \
-
-
 
     **Required Attributes:**
 
@@ -41,29 +33,56 @@ class file_reader_base(object):
 
     **Required Interface Functions:**
 
-    * ``__getitem__`` : Implement array slicing for files
     * ``close_file`` : Close any opened files
     * ``is_valid_dataset`` : Check whether a given dir/file is valid under the current format
+    * ``spectrum_iter`` : Generator function that iterates over all the spectra in the current data cube and yield the \
+        numpy array with the intensity and integer x, y position of the spectrum
 
     **Optional Interface Functions:**
 
+    * ``__getitem__`` : Implement array slicing for files. Reuqired if the requires_slicing parameter
+            should be supported.
     * ``supports_regions`` : Specify whether the format supports multiple regions (default=False)
+    * ``supports_multidata``: Specify whether the format supports multiple datasets (default=False)
+    * ``supports_multiexperiment``: Specify whether the format supports multiple experiments (default=False)
 
     """
 
-    def __init__(self, basename, readdata=True):
+    def __init__(self, basename, requires_slicing=True):
         """
         Construct the base class and define required attributes.
+
+        :param basename: The name of the file or directory with the file to be opened by the reader
+        :param requires_slicing: Boolean indicating whether the user requires array slicing via
+            the __getitem__ function to work or not. This is an optimization, because many MSI
+            data formats do not easily support arbitrary slicing of data but rather only
+            iteration over spectra.
         """
         self.data_type = ''
         self.shape = ()
         self.mz = None
         self.basename = basename
-        self.readdata = readdata
+        self.requires_slicing = requires_slicing
 
     def __getitem__(self, key):
         """Enable slicing of files"""
         raise NotImplementedError('Slicing not supported by the file reader.')
+
+    def spectrum_iter(self):
+        """
+        Enable iteration of the spectra of the current data cube.
+
+        Iterate over all the spectra in the current data cube and yield the
+        numpy array with the intensity and integer x, y position of the spectrum.
+
+        NOTE: As this is a generator one needs to use yield.
+
+        :returns: The function yields for each spectrum the following information:
+
+            * tuple of (x,y) or (x,y,z) position of the spectrum
+            * Numpy array with the spectrum
+        """
+        raise NotImplementedError('Iteration over spectra not supported by the file reader.')
 
     def close_file(self):
         """
@@ -203,11 +222,11 @@ class file_reader_base_with_regions(file_reader_base):
                     regions.
 
     """
-    def __init__(self, basename, readdata):
+    def __init__(self, basename, requires_slicing):
         """
         Construct the base class and define required attributes.
         """
-        super(file_reader_base_with_regions, self).__init__(basename, readdata)
+        super(file_reader_base_with_regions, self).__init__(basename, requires_slicing)
         self.select_region = None
         self.region_dicts = []
 
@@ -280,11 +299,11 @@ class file_reader_base_multidata(file_reader_base):
     :ivar select_dataset: Unsigned integer indicating the currently selected dataset
     """
 
-    def __init__(self, basename, readdata):
+    def __init__(self, basename, requires_slicing):
         """
         Construct the base class and define required attributes.
         """
-        super(file_reader_base_multidata, self).__init__(basename, readdata)
+        super(file_reader_base_multidata, self).__init__(basename, requires_slicing)
         self.select_dataset = None
 
     def set_dataset_selection(self, dataset_index):
