@@ -90,7 +90,7 @@ class imzml_file(file_reader_base):
         print 'Datacube shape is %s' % [self.data.shape]
 
         reader = ImzMLParser(filename)
-
+        print 'READING ALL DATA!! GIVE ME RAM (please)!'
         for ind in xrange(0, len(reader.coordinates)):
             xidx, yidx = reader.coordinates[ind]
             mz, intens = reader.getspectrum(ind)
