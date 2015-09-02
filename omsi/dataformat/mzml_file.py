@@ -55,7 +55,7 @@ class mzml_file(file_reader_base_multidata):
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         print 'Read %s scans from mzML file.' % self.num_scans
-        self.scan_types = self.__compute_scan_types(filename=self.basename)
+        self.scan_types, self.scan_indices = self.__compute_scan_types_and_indices(filename=self.basename)
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types,
                                                                   basename=basename)
         print 'Found %s different scan types in mzML file.' % len(self.scan_types)
@@ -68,8 +68,10 @@ class mzml_file(file_reader_base_multidata):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
-        self.mz_all = self.__compute_mz_axis(filename=self.basename, mzml_filetype=self.mzml_type,
-                                         scan_types=self.scan_types)
+        self.mz_all = self.__compute_mz_axis(filename=self.basename,
+                                             mzml_filetype=self.mzml_type,
+                                             scan_types=self.scan_types,
+                                             )
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
         self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all]
@@ -110,6 +112,36 @@ class mzml_file(file_reader_base_multidata):
                 if spectrumid%1000 == 0:
                     print 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype)
                 spectrumid += 1
+
+    def spectrum_iter(self):
+        """
+        Generator function that yields a position and associated spectrum for a selected datacube type.
+        :yield: (xidx, yidx) a tuple of ints representing x and y position in the image
+        :yield: yi,          a numpy 1D-array of floats containing spectral intensities at the given position
+                                and for the selected datacube type
+        """
+        reader = mzml.read(self.basename)
+        if self.select_dataset is None:
+           raise ValueError('Select a dataset to continue!')
+        dataset_index = self.select_dataset
+        for idx, spectrum in enumerate(reader):
+            current_scan_index = self.scan_indices[idx]
+
+            if current_scan_index == dataset_index:
+                # get the mz axis of the datacube the scan belongs to
+                mz = self.mz_all[self.scan_indices[idx]]
+                x = spectrum['m/z array']
+                try:
+                    y = spectrum['intensity array']
+                except KeyError:
+                    raise KeyError('Key "intensity array" not found in this mzml file')
+
+                yi = np.interp(mz, x, y, 0, 0)
+                xidx = np.nonzero(self.x_pos == self.coordinates[idx, 0])[0][0]
+                yidx = np.nonzero(self.y_pos == self.coordinates[idx, 1])[0][0]
+
+                yield (xidx, yidx), yi
+
 
     @classmethod
     def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
@@ -197,7 +229,6 @@ class mzml_file(file_reader_base_multidata):
                 spectrumid += 1
         return coords
 
-    # TODO: add methods for classifying scans by type: MS1 vs. MS2_precursorA vs. MS2_precursorB ?
 
     @classmethod
     def test(cls):
@@ -214,21 +245,25 @@ class mzml_file(file_reader_base_multidata):
         reader = mzml.read(filename)
         return sum(1 for _ in reader)
 
-    @staticmethod
-    def __compute_scan_types(filename=None):
+    def __compute_scan_types_and_indices(self, filename=None):
         """
         Internal helper function used to compute a list of unique scan types in the mzml file.
+        Also computes a numpy 1d array of ints which index every scan to relevant datacube.
         """
         reader = mzml.read(filename)
         scantypes = []
-        for _ in reader:
+        scan_indices = []
+        for idx, spectrum in enumerate(reader):
             try:
-                scanfilter = reader.next()['scanList']['scan'][0]['filter string']
+                scanfilter = spectrum['scanList']['scan'][0]['filter string']
                 if scanfilter not in scantypes:
                     scantypes.append(scanfilter)
+                scan_indices.append(scantypes.index(scanfilter))
             except:
-                pass
-        return scantypes
+                print idx
+
+        assert len(scan_indices) == self.num_scans
+        return scantypes, scan_indices
 
     @staticmethod
     def __parse_scan_parameters(self):
