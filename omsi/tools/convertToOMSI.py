@@ -969,7 +969,7 @@ class ConvertFiles(object):
                 print "Input file format: " + str(curr_format)
                 if curr_format is not None:
                     input_file = ConvertSettings.available_formats[curr_format](basename=basefile,
-                                                                                requires_slicing=True)
+                                                                                requires_slicing=False)
                     if input_file.supports_regions():
                         input_file.set_region_selection(region_index=curr_dataset['region'])
                     if input_file.supports_multidata():
