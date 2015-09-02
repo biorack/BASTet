@@ -78,9 +78,7 @@ class imzml_file(file_reader_base):
         if readdata:
             self.__read_all(filename=basename)
 
-        # Re-populate shape and mz fields
-        self.shape = self.data.shape
-        self.mz = self.mz_all
+        self.mz = self.mz
 
     def __read_all(self, filename):
         """
@@ -101,6 +99,23 @@ class imzml_file(file_reader_base):
             except:
                 print xidx, yidx, len(mz), len(intens)
 
+    def spectrum_iter(self):
+        """
+        Generator function that yields a position and associated spectrum for a selected datacube type.
+        :yield: (xidx, yidx) a tuple of ints representing x and y position in the image
+        :yield: yi,          a numpy 1D-array of floats containing spectral intensities at the given position
+                                and for the selected datacube type
+        """
+        reader = ImzMLParser(self.basename)
+        if self.select_dataset is None:
+            # multiple datatypes are not supported in mzML files
+            self.select_dataset = 0
+
+        for idx in xrange(0, len(reader.coordinates)):
+            xidx, yidx = reader.coordinates[idx]
+            mz, intens = reader.getspectrum(idx)
+
+            yield (xidx-1, yidx-1), intens  # -1 because pyimzML coordinates are 1-based
 
     @classmethod
     def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
