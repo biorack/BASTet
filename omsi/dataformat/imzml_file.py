@@ -7,7 +7,7 @@ import numpy as np
 import os
 
 # import xml parser
-from pyimzml.ImzMLParser import ImzMLParser  ## TODO: install pyimzml at NERSC
+from pyimzml.ImzMLParser import ImzMLParser
 from omsi.dataformat.file_reader_base import *
 
 class imzml_file(file_reader_base):
@@ -246,7 +246,7 @@ class imzml_file(file_reader_base):
 
            :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
-        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
+        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an imzML file
             filelist = cls.get_files_from_dir(name)
             return len(filelist) > 0
         else:
@@ -254,8 +254,10 @@ class imzml_file(file_reader_base):
                 # Try to open the file
                 ImzMLParser(name)
                 return True
-            except RuntimeError('pyimzml could not parse your file.'):
+            except (RuntimeError, IOError) as e:
+                print ('pyimzml could not parse your file.')
                 return False
+
 
     @classmethod
     def size(cls, name, max_num_reads=1000):
@@ -293,8 +295,13 @@ class imzml_file(file_reader_base):
         filelist = []
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l)
-            if os.path.isfile(currname) and currname.endswith(".mzML"):
-                filelist.append(currname)
+            filename_only, extension = os.path.splitext(currname)
+            if os.path.isfile(currname) and currname.endswith(".imzML"):
+                if os.path.isfile(filename_only + '.ibd'):
+                    filelist.append(currname)
+                else:
+                    print 'Could not find binary .ibd file for file %s' % currname
+                    print 'Skipping conversion of this file.'
         return filelist
 
     def get_number_of_datasets(self):
