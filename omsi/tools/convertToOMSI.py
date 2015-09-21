@@ -1668,7 +1668,6 @@ class ConvertFiles(object):
                 zend = min(zstart + chunk_shape[2], zdim)
 
                 temp_data = np.zeros(shape=(xdim, ydim, zend-zstart), dtype=dtype)
-                print 'Chunk shape is %s' % str(chunk_shape)
                 for yChunkIndex in xrange(0, num_chunks_y):
                     ystart = yChunkIndex * chunk_shape[1]
                     yend = min(ystart + chunk_shape[1], ydim)
@@ -1678,7 +1677,6 @@ class ConvertFiles(object):
                         xend = min(zstart + chunk_shape[0], xdim)
                         temp_data[xstart:xend, ystart:yend, :] = input_file[xstart:xend, ystart:yend, zstart:zend]
 
-                print 'Finished chunk %s, num_chunks_z = %s' % (zChunkIndex, num_chunks_z)
                 data[:, :, zstart:zend] = temp_data[:]
                 if write_progress:
                     sys.stdout.write("[" + str(int(100. * float(zChunkIndex) / float(num_chunks_z))) + "%]" + "\r")
