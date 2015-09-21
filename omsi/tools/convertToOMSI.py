@@ -41,6 +41,7 @@ except ImportError:
         pil_available = False
 import urllib2
 
+# TODO: get rid of hard-coded "10000" for converting spectral files to image-sized chunking
 
 ####################################################################
 ####################################################################
@@ -368,8 +369,8 @@ class ConvertSettings(object):
     ####################################################################
     # Define how the data should be written to file, one chunk at a time
     # ('chunk'), one spectrum at a time ('spectrum') or all at one once
-    # ('all')
-    io_option = "chunk"
+    # ('all'); read set of spectra and make into image ('spectrum_to_image')
+    io_option = "spectrum_to_image"
     format_option = None  # Define which file format reader should be used. None=determine automatically
     region_option = "split+merge"  # Define the region option to be used
     auto_chunk = True  # Automatically decide which chunking should be used
@@ -1058,10 +1059,15 @@ class ConvertFiles(object):
                                                           compression_opts=ConvertSettings.compression_opts,
                                                           copy_data=False,
                                                           print_status=True)
+
+                chunk_shape_write = (input_file.shape[0], input_file.shape[1], 10000) if \
+                                        ConvertSettings.io_option == "spectrum_to_image" \
+                                        else chunkSpec
+
                 ConvertFiles.write_data(input_file=data_dataset,
                                         data=tempdata,
-                                        data_io_option='all', #ConvertSettings.io_option,
-                                        chunk_shape=chunkSpec,
+                                        data_io_option=ConvertSettings.io_option,
+                                        chunk_shape=chunk_shape_write,
                                         write_progress=(ConvertSettings.job_id is None))
                 ConvertSettings.omsi_output_file.flush()
 
@@ -1633,6 +1639,42 @@ class ConvertFiles(object):
                         data[xindex, yindex, :] = input_file[xindex, yindex, :]
         elif data_io_option == "all":
             data[:] = input_file[:]
+
+        elif data_io_option == "spectrum_to_image":
+            xdim = input_file.shape[0]
+            ydim = input_file.shape[1]
+            zdim = input_file.shape[2]
+            num_chunks_x = int(math.ceil(float(xdim) / float(chunk_shape[0])))
+            num_chunks_y = int(math.ceil(float(ydim) / float(chunk_shape[1])))
+            num_chunks_z = int(math.ceil(float(zdim) / float(chunk_shape[2])))
+            num_chunks = num_chunks_x * num_chunks_y * num_chunks_z
+            itertest = 0
+
+            dtype = input_file.data_type if isinstance(input_file, file_reader_base.file_reader_base) else input_file.dtype
+
+            for zChunkIndex in xrange(0, num_chunks_z):
+                zstart = zChunkIndex * chunk_shape[2]
+                zend = min(zstart + chunk_shape[2], zdim)
+
+                temp_data = np.zeros(shape=(xdim, ydim, zend-zstart), dtype=dtype)
+                print 'Chunk shape is %s' % str(chunk_shape)
+                for yChunkIndex in xrange(0, num_chunks_y):
+                    ystart = yChunkIndex * chunk_shape[1]
+                    yend = min(ystart + chunk_shape[1], ydim)
+
+                    for xChunkIndex in xrange(0, num_chunks_x):
+                        xstart = xChunkIndex * chunk_shape[0]
+                        xend = min(zstart + chunk_shape[0], xdim)
+                        temp_data[xstart:xend, ystart:yend, :] = input_file[xstart:xend, ystart:yend, zstart:zend]
+
+                print 'Finished chunk %s, num_chunks_z = %s' % (zChunkIndex, num_chunks_z)
+                data[:, :, zstart:zend] = temp_data[:]
+                if write_progress:
+                    sys.stdout.write("[" + str(int(100. * float(zChunkIndex) / float(num_chunks_z))) + "%]" + "\r")
+                    sys.stdout.flush()
+
+
+
         elif data_io_option == "chunk":
             xdim = input_file.shape[0]
             ydim = input_file.shape[1]
