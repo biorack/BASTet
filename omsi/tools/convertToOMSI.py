@@ -4,7 +4,12 @@
 
 """
 
+# TODO Add write method to optimize the generation of optimized data chunkings by reading many spectra
+# TODO Switch job submission over to use Edison
+# TODO Test file converter and memory usage
+# TODO Make NMF/FPG/FPL etc. seperate workflows
 # TODO --io option is not used right now after the changes to convert things iteratively
+
 # TODO ConvertSettings.file_user Get the user from the file-path rather then from the command line
 # TODO Register all print-outs with the email message (use logging instead of print)
 # TODO add ability have --format option for each dataset to be converted
@@ -804,6 +809,9 @@ class ConvertSettings(object):
         print "                            add the file to the database."
         print "                   iii) continue-on-error: Ignore errors if possible and continue, even if this"
         print "                            means that some data may be missing from the output."
+        print "                   iv) spectrum-to-image: Default option when creating image chunk version from"
+        print "                            a spectrum-chunk MSI dataset. Read a block of spectra at a time to"
+        print "                            complete a set of images and then write the block of images at once."
         print "--email <email1 email2 ...>: Send notification in case of both error or success to the email address."
         print "--email-success <email1 email2 ...>>: Send notification in case of success to the given email address."
         print "--email-error <email1 email2 ...>>: Send notification in case of error to the given email address."
