@@ -1372,8 +1372,11 @@ class ConvertFiles(object):
         # if os.path.exists(name+".hdr") and os.path.exists(name+".t2m") and os.path.exists(name+".img"):
         #    return "img"
         for formatname, formatclass in ConvertSettings.available_formats.items():
-            if formatclass.is_valid_dataset(name):
-                return formatname
+            try:
+                if formatclass.is_valid_dataset(name):
+                    return formatname
+            except:
+                pass
         return None
 
     @staticmethod
