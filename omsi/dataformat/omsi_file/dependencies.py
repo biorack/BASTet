@@ -980,30 +980,29 @@ class omsi_file_dependencydata(omsi_file_common):
         try:
             output_dependency['param_name'] = self.get_parameter_name()
         except:
-            output_dependency['param_name'] = None
+            warnings.warn('Failed to retrieve param_name for: ' + self.managed_group.name)
         try:
             output_dependency['link_name'] = self.get_link_name()
         except:
-            output_dependency['link_name'] = None
+            warnings.warn('Failed to retrieve link_name for: ' + self.managed_group.name)
         try:
             output_dependency['selection'] = self.get_selection_string()
         except:
-            output_dependency['selection'] = None
+            warnings.warn('Failed to retrieve selection for: ' + self.managed_group.name)
         try:
             output_dependency['dependency_type'] = self.get_dependency_type()
         except:
-            output_dependency['dependency_type'] = None
+            warnings.warn('Failed to retrieve dependency_type for: ' + self.managed_group.name)
         try:
             output_dependency['omsi_object'] = self.get_dependency_omsiobject()
         except:
-            warnings.warn('Failed to retrieve the dependency object for: ' + self.get_mainname())
-            output_dependency['omsi_object'] = None
+            warnings.warn('Failed to retrieve omsi_object for: ' + self.managed_group.name)
         try:
             output_dependency['dataname'] = self.get_dataset_name()
         except:
-            output_dependency['dataname'] = None
+            warnings.warn('Failed to retrieve dataname for: ' + self.managed_group.name)
         try:
             output_dependency['help'] = self.get_parameter_help()
         except:
-            pass
+            warnings.warn('Failed to retrieve help for: ' + self.managed_group.name)
         return output_dependency
