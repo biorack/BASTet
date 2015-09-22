@@ -534,7 +534,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
         if self.dependencies is None:
             warnings.warn("No dependencies defined for analysis.")
         self.parameter = self.managed_group[unicode(omsi_format_analysis.analysis_parameter_group)]
-        self.runinfo_group = self.managed_group[unicode(omsi_format_analysis.analysis_runinfo_group)]
+        try:
+            self.runinfo_group = self.managed_group[unicode(omsi_format_analysis.analysis_runinfo_group)]
+        except:
+            self.runinfo_group = None
         self.name = self.managed_group.name
 
     def __getitem__(self,
