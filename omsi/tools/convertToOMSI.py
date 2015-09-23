@@ -270,7 +270,7 @@ def main(argv=None):
                                                          file_user_name=ConvertSettings.file_user,
                                                          jobid=ConvertSettings.job_id,
                                                          check_add_nersc=ConvertSettings.check_add_nersc)
-                ConvertSettings.recorded_warnings += w
+                ConvertSettings.recorded_warnings += [w]
         except ValueError:
             ConvertSettings.recorded_warnings += [sys.exc_info()]
             status = False
@@ -309,13 +309,21 @@ def main(argv=None):
     #  Send email notification if requested                            #
     ####################################################################
     if len(ConvertSettings.recorded_warnings) == 0:
+        emailbody = 'Success'
+        if ConvertSettings.job_id is not None:
+            emailbody += '\n jobid = %s' % ConvertSettings.job_id
+
         WebHelper.send_email(subject='Conversion complete: '+str(omsi_outfile),
-                             body='Success',
+                             body=emailbody,
                              email_type='success',
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
     elif len(ConvertSettings.email_error_recipients) > 0:
-        WebHelper.send_email(subject='Conversion completed with warnings: '+str(omsi_outfile),
+        emailsubject = 'Conversion completed with warnings: '+str(omsi_outfile)
+        if ConvertSettings.job_id is not None:
+            emailsubject += ' jobid = %s' % ConvertSettings.job_id
+
+        WebHelper.send_email(subject=emailsubject,
                              body=warningmsg,
                              email_type='warning',
                              email_success_recipients=ConvertSettings.email_success_recipients,
