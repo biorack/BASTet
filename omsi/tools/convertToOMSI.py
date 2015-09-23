@@ -967,7 +967,6 @@ class ConvertFiles(object):
         pass
 
     @staticmethod
-    @profile
     def convert_files():
         """Convert all files in the given list of files with their approbriate conversion options"""
         ####################################################################
