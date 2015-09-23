@@ -420,6 +420,7 @@ class mzml_file(file_reader_base_multidata):
                 reader = mzml.read(name)
                 for _ in reader:
                     pass
+                del reader
                 return True
             except:
                 return False

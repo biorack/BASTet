@@ -252,10 +252,11 @@ class imzml_file(file_reader_base):
         else:
             try:
                 # Try to open the file
-                ImzMLParser(name)
+                temp = ImzMLParser(name)
+                del temp
                 return True
             except (RuntimeError, IOError) as e:
-                print ('pyimzml could not parse your file.')
+                # print ('pyimzml could not parse your file.')
                 return False
 
 

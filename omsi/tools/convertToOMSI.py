@@ -46,7 +46,6 @@ except ImportError:
         pil_available = False
 import urllib2
 
-# TODO: get rid of hard-coded "10000" for converting spectral files to image-sized chunking
 
 ####################################################################
 ####################################################################
@@ -80,7 +79,6 @@ def main(argv=None):
                              email_type='error',
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
-        print emailmsg
         if ConvertSettings.job_id is not None:
             WebHelper.update_job_status(filepath=omsi_outfile,
                                         db_server=ConvertSettings.db_server_url,
@@ -376,6 +374,8 @@ class ConvertSettings(object):
     # ('chunk'), one spectrum at a time ('spectrum') or all at one once
     # ('all'); read set of spectra and make into image ('spectrum_to_image')
     io_option = "spectrum_to_image"
+    # When using the spectrum_to_image io option, what is the maximum block of images we should load in Byte
+    io_block_size_limit = 1024 * 1024 * 500  # 500 MB limit
     format_option = None  # Define which file format reader should be used. None=determine automatically
     region_option = "split+merge"  # Define the region option to be used
     auto_chunk = True  # Automatically decide which chunking should be used
@@ -608,6 +608,14 @@ class ConvertSettings(object):
                 except:
                     print "An error accured while parsing the --io command. Something may be wrong with the io-type."
                     input_error = True
+            elif current_arg == "--io-block-limit":
+                start_index += 2
+                try:
+                    ConvertSettings.io_block_size_limit = int(argv[i + 1]) * (1024 * 1024) # MB to Bytes
+                    print "Set io block limit to: " + str(ConvertSettings.io_block_size_limit) + "Byte"
+                except:
+                    print "An error accured while parsing the --io-block-limit command."
+                    input_error = True
             elif current_arg == "--thumbnail":
                 start_index += 1
                 ConvertSettings.generate_thumbnail = True
@@ -659,18 +667,22 @@ class ConvertSettings(object):
             elif current_arg == "--no-add-to-db":
                 start_index += 1
                 ConvertSettings.add_file_to_db = False
+                print "Disable adding to database"
             elif current_arg == "--db-server":
                 start_index += 2
                 ConvertSettings.db_server_url = str(argv[i + 1])
                 ConvertSettings.check_add_nersc = False
+                print "Set db server to: " + ConvertSettings.db_server_url
             elif current_arg == "--user":
                 start_index += 2
                 ConvertSettings.file_user = str(argv[i + 1])
+                print "Set user to: " + ConvertSettings.file_user
             elif current_arg == "--jobid":
                 start_index += 2
                 ConvertSettings.job_id = str(argv[i + 1])
                 if ConvertSettings.job_id == 'auto':
                     ConvertSettings.job_id = os.environ.get('PBS_JOBID')
+                print "Set jobid: " + ConvertSettings.job_id
             elif current_arg == "--email":
                 # Consume all email addresses that follow
                 for ni in range((i+1), len(argv)):
@@ -864,6 +876,8 @@ class ConvertSettings(object):
         print "             iv) spectrum-to-image: Default option when creating image chunk version from"
         print "             a spectrum-chunk MSI dataset. Read a block of spectra at a time to"
         print "             complete a set of images and then write the block of images at once."
+        print "--io-block-limit <MB>: When using spectrum-to-image io (default when using auto-chunking),"
+        print "             what should the maximum block in MB that we load into memory. (Default=2000MB)"
         print ""
         print "===DATABSE OPTIONS=== "
         print ""
@@ -953,6 +967,7 @@ class ConvertFiles(object):
         pass
 
     @staticmethod
+    @profile
     def convert_files():
         """Convert all files in the given list of files with their approbriate conversion options"""
         ####################################################################
@@ -1004,8 +1019,6 @@ class ConvertFiles(object):
                     raise
 
             if ConvertSettings.auto_chunk:
-                print input_file.shape
-                print input_file
                 spec_chunks, img_chunks, temp_chunks = ConvertFiles.suggest_chunking(
                     xsize=input_file.shape[0],
                     ysize=input_file.shape[1],
@@ -1068,10 +1081,16 @@ class ConvertFiles(object):
                                                           copy_data=False,
                                                           print_status=True)
 
-                chunk_shape_write = (input_file.shape[0], input_file.shape[1], 10000) if \
+                # Determine the number of images in a block when using spectrum_to_image io
+                num_images_block = ConvertSettings.io_block_size_limit / float(input_file.shape[0] *
+                                                                               input_file.shape[1] *
+                                                                               tempdata.dtype.itemsize)
+                num_images_block = int(num_images_block) if num_images_block > 1 else 1
+                # Determine the chunking parameter based on the io option
+                chunk_shape_write = (input_file.shape[0], input_file.shape[1], num_images_block) if \
                                         ConvertSettings.io_option == "spectrum_to_image" \
                                         else chunkSpec
-
+                # Write the data using the given io strategry
                 ConvertFiles.write_data(input_file=data_dataset,
                                         data=tempdata,
                                         data_io_option=ConvertSettings.io_option,
@@ -1394,7 +1413,16 @@ class ConvertFiles(object):
                         ConvertSettings.available_region_options parameter for details. By default the function will
                         do 'split+merge'.
 
-           :returns: List of dictionaries describing the various conversion jobs
+           :returns: List of dictionaries describing the various conversion jobs. Each job is described by a dict
+                with the following keys:
+
+                * 'basename' : The base name of the file or directory with the data
+                * 'format' : The data format to be used
+                * 'dataset' : The index of the dataset to be converted if the input stores multiple data cubes
+                * 'region' : The index of the region to be converted if the input defines multiple regions
+                * 'exp' : One of 'previous' or 'new', defining whether a new experiment should be created or whether \
+                          the experiment from the previous conversion(s) should be reused.
+
         """
         re_dataset_list = []
         for i in input_filenames:
@@ -1652,37 +1680,41 @@ class ConvertFiles(object):
             data[:] = input_file[:]
 
         elif data_io_option == "spectrum_to_image":
+            #Determine the I/O settings
+            print "Spectrum-to-image I/O. Write %s blocks at a time" % (chunk_shape, )
             xdim = input_file.shape[0]
             ydim = input_file.shape[1]
             zdim = input_file.shape[2]
             num_chunks_x = int(math.ceil(float(xdim) / float(chunk_shape[0])))
             num_chunks_y = int(math.ceil(float(ydim) / float(chunk_shape[1])))
             num_chunks_z = int(math.ceil(float(zdim) / float(chunk_shape[2])))
-            num_chunks = num_chunks_x * num_chunks_y * num_chunks_z
-            itertest = 0
-
             dtype = input_file.data_type if isinstance(input_file, file_reader_base.file_reader_base) else input_file.dtype
 
+            # Convert the data in image block in z-chunks of size chunk_shape[2]
             for zChunkIndex in xrange(0, num_chunks_z):
+                # Determine the start and stop of the current z block
                 zstart = zChunkIndex * chunk_shape[2]
                 zend = min(zstart + chunk_shape[2], zdim)
-
+                # Reserve space in memory for the current block of full images
                 temp_data = np.zeros(shape=(xdim, ydim, zend-zstart), dtype=dtype)
+                # Load the images for the block into memory in block of x/y chunks
                 for yChunkIndex in xrange(0, num_chunks_y):
                     ystart = yChunkIndex * chunk_shape[1]
                     yend = min(ystart + chunk_shape[1], ydim)
-
                     for xChunkIndex in xrange(0, num_chunks_x):
                         xstart = xChunkIndex * chunk_shape[0]
                         xend = min(zstart + chunk_shape[0], xdim)
                         temp_data[xstart:xend, ystart:yend, :] = input_file[xstart:xend, ystart:yend, zstart:zend]
-
+                # Write the data for the current z block the file
                 data[:, :, zstart:zend] = temp_data[:]
+                # Update the progress indicator
                 if write_progress:
                     sys.stdout.write("[" + str(int(100. * float(zChunkIndex) / float(num_chunks_z))) + "%]" + "\r")
                     sys.stdout.flush()
-
-
+                # Clean-up
+                if isinstance(data, h5py.Dataset):
+                    data.file.flush()
+                del temp_data
 
         elif data_io_option == "chunk":
             xdim = input_file.shape[0]
