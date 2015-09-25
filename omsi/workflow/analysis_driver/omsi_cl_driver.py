@@ -10,6 +10,7 @@ from omsi.workflow.analysis_driver.base import omsi_driver_base
 import omsi.shared.mpi_helper as mpi_helper
 import numpy as np
 import os
+from omsi.shared.log import log_helper
 
 
 class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFormatter,
@@ -66,10 +67,14 @@ class omsi_cl_driver(omsi_driver_base):
     profile_mem_arg_name = 'memprofile'
     """Name of the keyword argument used to enable profiling of memory usage of an analysis"""
 
+    log_level_arg_name = 'loglevel'
+    """Name of the keyword argument used to specify the level of logging to be used"""
+
     def __init__(self,
                  analysis_class,
                  add_analysis_class_arg=False,
                  add_output_arg=True,
+                 add_log_level_arg=True,
                  add_profile_arg=False,
                  add_mem_profile_arg=False):
         """
@@ -101,10 +106,13 @@ class omsi_cl_driver(omsi_driver_base):
             raise ValueError('Conflicting inputs: analysis_class set and add_analysis_class_arg set to True.')
         super(omsi_cl_driver, self).__init__(analysis_class)
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
+        #log_helper.setup_logging()
+        #log_helper.set_log_level(level=log_helper.log_levels['DEBUG'])
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
         self.add_profile_arg = add_profile_arg
         self.add_mem_profile_arg = add_mem_profile_arg
+        self.add_log_level_arg = add_log_level_arg
         self.parser = None
         self.required_argument_group = None
         self.output_target = None
@@ -146,20 +154,18 @@ class omsi_cl_driver(omsi_driver_base):
         try:
             analysis_module_object = __import__(analysis_module_name, globals(), locals(), [analysis_class_name], -1)
         except ImportError as e:
-            print e.message
-            print ""
-            print "Could not locate module " + analysis_module_name
-            print "Please check the name of the module. Maybe there is a spelling error."
+            log_helper.error(__name__, e.message)
+            log_helper.error(__name__, "Could not locate module " + analysis_module_name)
+            log_helper.error(__name__, "Please check the name of the module. Maybe there is a spelling error.")
             raise
 
         # Determine the self.analysis parameter
         try:
             self.analysis_class = getattr(analysis_module_object, analysis_class_name)
         except AttributeError as e:
-            print e.message
-            print ""
-            print "Could not locate " + analysis_class_name + " in " + analysis_module_name
-            print "Please check the name of the analysis. Maybe there is a spelling error."
+            log_helper.error(__name__, e.message)
+            log_helper.error(__name__, "Could not locate " + analysis_class_name + " in " + analysis_module_name)
+            log_helper.error(__name__, "Please check the name of the analysis. Maybe there is a spelling error.")
             raise
 
     def initialize_argument_parser(self):
@@ -174,10 +180,13 @@ class omsi_cl_driver(omsi_driver_base):
         analysis_object = None if self.analysis_class is None else self.analysis_class()
 
         # Setup the argument parser
-        parser_description = "class description: \n\n" + \
-                             self.analysis_class.__doc__ + " \n\n" + \
-                             "execution description: \n\n" + \
-                             self.analysis_class.execute_analysis.__doc__
+        if self.analysis_class is not None:
+            parser_description = "class description: \n\n" + \
+                                 self.analysis_class.__doc__ + " \n\n" + \
+                                 "execution description: \n\n" + \
+                                 self.analysis_class.execute_analysis.__doc__
+        else:
+            parser_description = "NO ANALYSIS CLASS GIVEN"
         parser_epilog = "how to specify ndarray data? \n" \
                         "---------------------------- \n" +\
                         "n-dimensional arrays stored in OpenMSI data files may be specified as \n" + \
@@ -189,7 +198,7 @@ class omsi_cl_driver(omsi_driver_base):
                         "In rear cases we may need to manually define an array (e.g., a mask)\n" + \
                         "Here we can use standard python syntax, e.g, '[1,2,3,4]' or '[[1, 3], [4, 5]]' \n" + \
                         "\n\n" + \
-                        "This command-line tool has been auto-generated using the OpenMSI Toolkit"
+                        "This command-line tool has been auto-generated using BASTet (Berkeley Analysis & Storage Toolkit)"
 
         self.parser = argparse.ArgumentParser(description=parser_description,
                                               epilog=parser_epilog,
@@ -249,6 +258,14 @@ class omsi_cl_driver(omsi_driver_base):
                                      default=False,
                                      required=False,
                                      help=profile_mem_arg_help)
+        # Add the optional logging argument
+        if self.add_log_level_arg:
+            self.parser.add_argument("--"+self.log_level_arg_name,
+                                     action='store',
+                                     default='DEBUG',
+                                     required=False,
+                                     help='Specify the level of logging to be used.',
+                                     choices=log_helper.log_levels.keys())
 
 
     def parse_cl_arguments(self):
@@ -306,6 +323,13 @@ class omsi_cl_driver(omsi_driver_base):
         # Process the --memprofile argument
         if self.profile_mem_arg_name in parsed_arguments:
             self.profile_analysis_mem = parsed_arguments.pop(self.profile_mem_arg_name)
+        # The --loglovel argument
+        if self.log_level_arg_name in parsed_arguments:
+            user_log_level = parsed_arguments.pop(self.log_level_arg_name)
+            if user_log_level in log_helper.log_levels.keys():
+                log_helper.set_log_level(level=log_helper.log_levels[user_log_level])
+            else:
+                log_helper.error(module_name=__name__, message="Invalid log level specified")
 
     def add_and_parse_analysis_arguments(self):
         """
@@ -361,21 +385,22 @@ class omsi_cl_driver(omsi_driver_base):
         parsed_arguments.pop(self.profile_arg_name, None)
         parsed_arguments.pop(self.output_save_arg_name, None)
         parsed_arguments.pop(self.profile_mem_arg_name, None)
+        parsed_arguments.pop(self.log_level_arg_name, None)
         self.analysis_arguments = parsed_arguments
 
     def print_settings(self):
         """
         Print the analysis settings.
         """
-        print "Inputs:"
+        log_helper.info(__name__, "Inputs:")
         for key, value in self.analysis_arguments.iteritems():
-            print "   " + unicode(key) + " = " + unicode(value)
+            log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
         if self.output_target is not None:
             if isinstance(self.output_target, omsi_file_common):
                 h5py_object = omsi_file_common.get_h5py_object(self.output_target)
-                print "Save to: " + unicode(h5py_object.file.filename) + u":" + unicode(h5py_object.name)
+                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename) + u":" + unicode(h5py_object.name))
             else:
-                print "Save to: " + unicode(self.output_target)
+                log_helper.info(__name__, "Save to: " + unicode(self.output_target))
 
     def remove_output_target(self):
         """
@@ -391,12 +416,14 @@ class omsi_cl_driver(omsi_driver_base):
         if self.__output_target_self is not None:
             try:
                 os.remove(self.__output_target_self)
-                print "Successfully removed output target: " + unicode(self.__output_target_self)
+                log_helper.info(__name__, "Successfully removed output target: " + unicode(self.__output_target_self))
                 success = True
             except:
-                print "Clean-up of output failed. File may be left on system: " + unicode(self.__output_target_self)
+                log_helper.error(__name__, "Clean-up of output failed. File may be left on system: "
+                                 + unicode(self.__output_target_self))
         elif self.output_target is not None:
-            print "Output target not removed because it was not created by the analysis but potentially modified by it"
+            log_helper.info(__name__, "Output target not removed because it was not created " +
+                                      "by the analysis but potentially modified by it")
         else:
             success = True
         return success
@@ -414,20 +441,20 @@ class omsi_cl_driver(omsi_driver_base):
         if self.add_analysis_class_arg:
             try:
                 self.get_analysis_class_from_cl()
-            except (ImportError, AttributeError):
-                exit()
-
-        # Check if we have a valid analysis class
-        if self.analysis_class is None:
-            print self.parser.print_help
-            raise ValueError('Could not determine the analysis class.')
-        if not issubclass(self.analysis_class, analysis_base):
-            print self.parser.print_help
-            raise ValueError('Analysis class is not a subclass of analysis_base.')
+            except (ImportError, AttributeError, ValueError):
+                pass
 
         # Initialize the argument parser
         if self.parser is None:
             self.initialize_argument_parser()
+
+        # Check if we have a valid analysis class
+        if self.analysis_class is None:
+            print self.parser.print_help()
+            raise ValueError('Could not determine the analysis class.')
+        if not issubclass(self.analysis_class, analysis_base):
+            print self.parser.print_help()
+            raise ValueError('Analysis class is not a subclass of analysis_base.')
 
         try:
             # Parse the command line arguments to determine the command line driver settings
@@ -451,16 +478,17 @@ class omsi_cl_driver(omsi_driver_base):
                 try:
                     analysis_object.enable_time_and_usage_profiling(self.profile_analysis)
                 except ImportError as e:
-                    print "Profiling of time and usage not available due to missing packages."
-                    print e.message
+                    log_helper.warning(__name__, "Profiling of time and usage not available due to missing packages.")
+                    log_helper.warning(__name__, e.message)
             # Enable memory profiling if requested
             if self.profile_analysis_mem:
                 try:
                     analysis_object.enable_memory_profiling(self.profile_analysis_mem)
                 except ImportError as e:
-                    print "Profiling of memory usage not available due to missing packages"
-                    print e.message
+                    log_helper.warning(__name__, "Profiling of memory usage not available due to missing packages")
+                    log_helper.warning(__name__, e.message)
             # Execute the analysis
+            log_helper.debug(__name__, 'Analysis arguments: ' + str(self.analysis_arguments))
             analysis_object.execute(**self.analysis_arguments)
         except:
             if mpi_helper.get_rank() == self.mpi_root:
@@ -490,15 +518,15 @@ class omsi_cl_driver(omsi_driver_base):
                 # Parallel case: We need to compile/collect timing data from all cores
                 if isinstance(analysis_object.run_info['execution_time'] , list):
                     # Time for each task to execute
-                    print ""
-                    print "Time in seconds for each analysis process: " + \
-                          str(analysis_object.run_info['execution_time'])
+                    log_helper.info(__name__, "Time in seconds for each analysis process: " +
+                                     str(analysis_object.run_info['execution_time']))
                     # Start times of each task
-                    print ""
-                    print "Time when each of the processes started: " + str(analysis_object.run_info['start_time'])
+                    log_helper.info(__name__, "Time when each of the processes started: " +
+                                              str(analysis_object.run_info['start_time']))
                     # Stop times for each task
-                    print ""
-                    print "Time when each of the processes finished: " + str(analysis_object.run_info['end_time'])
+
+                    log_helper.info(__name__, "Time when each of the processes finished: " +
+                                              str(analysis_object.run_info['end_time']))
 
                     # Compile the time to execute string
                     exec_time_array = np.asarray(analysis_object.run_info['execution_time'], dtype=float)
@@ -510,8 +538,7 @@ class omsi_cl_driver(omsi_driver_base):
                 # Serial case: We only have a single time to worry about
                 else:
                     exec_time_string = str(analysis_object.run_info['execution_time']) + " s"
-                print ""
-                print "Time to execute analysis: " + exec_time_string
+                log_helper.info(__name__, "Time to execute analysis: " + exec_time_string)
             except:
                 raise
 
