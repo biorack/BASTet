@@ -106,8 +106,6 @@ class omsi_cl_driver(omsi_driver_base):
             raise ValueError('Conflicting inputs: analysis_class set and add_analysis_class_arg set to True.')
         super(omsi_cl_driver, self).__init__(analysis_class)
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
-        #log_helper.setup_logging()
-        #log_helper.set_log_level(level=log_helper.log_levels['DEBUG'])
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
         self.add_profile_arg = add_profile_arg
@@ -262,7 +260,7 @@ class omsi_cl_driver(omsi_driver_base):
         if self.add_log_level_arg:
             self.parser.add_argument("--"+self.log_level_arg_name,
                                      action='store',
-                                     default='DEBUG',
+                                     default='INFO',
                                      required=False,
                                      help='Specify the level of logging to be used.',
                                      choices=log_helper.log_levels.keys())

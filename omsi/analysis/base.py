@@ -17,6 +17,8 @@ from omsi.shared.dependency_data import dependency_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.run_info_data import run_info_dict
 
+from omsi.shared.log import log_helper
+
 
 class AnalysisReadyError(Exception):
     """
@@ -347,6 +349,8 @@ class analysis_base(object):
             the case, e.g, when a dependent input parameter is not ready to be used.
 
         """
+        log_helper.debug(__name__, "Execute analysis. " + str(self), self.mpi_root)
+
         # Import modules for profiling if needed
         if self.profile_time_and_usage:
             try:
@@ -376,6 +380,7 @@ class analysis_base(object):
                 self.profile_time_and_usage = False
                 warnings.warn("All profiling disabled. Could not import StringIO.")
 
+        log_helper.debug(__name__, "Initializing analysis parameters and environment. " + str(self), self.mpi_root)
         # 1) Remove the saved analysis object since we are running the analysis again
         self.omsi_analysis_storage = []
 
@@ -396,6 +401,7 @@ class analysis_base(object):
         self.run_info.record_preexecute()
 
         # 4) Define the start-time for the execution of our analysis
+        log_helper.debug(__name__, "Run and profile the analysis: " + str(self), self.mpi_root)
         start_time = time.time()
 
         # 5) Run the analysis
@@ -446,6 +452,9 @@ class analysis_base(object):
 
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
         execution_time = time.time() - start_time
+
+        log_helper.debug(__name__, "Completed executing the analysis function. " + str(self), self.mpi_root)
+        log_helper.debug(__name__, "Complete recording runtime data. " + str(self), self.mpi_root)
         self.run_info.record_postexecute(execution_time=execution_time)
         self.run_info.clean_up()
 
@@ -453,6 +462,7 @@ class analysis_base(object):
         if mpi_helper.MPI_AVAILABLE:
             self.run_info = self.run_info.gather(root=self.mpi_root,
                                                  comm=self.mpi_comm)
+        log_helper.debug(__name__, "Finished the analysis. " + str(self), self.mpi_root)
 
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
@@ -810,6 +820,7 @@ class analysis_base(object):
         if enable != self.profile_time_and_usage:
             if not enable:
                 self.profile_time_and_usage = False
+                log_helper.debug(__name__, "Disabled time and usage profiling. ", self.mpi_root)
             else:
                 # Try to import all required packages for profiling
                 try:
@@ -819,7 +830,10 @@ class analysis_base(object):
                 import pstats
                 import StringIO
                 import ast
+                # Enable profiling
                 self.profile_time_and_usage = True
+                log_helper.debug(__name__, "Enabled time and usage profiling. ", self.mpi_root)
+
 
     def enable_memory_profiling(self, enable=True):
         """
@@ -833,10 +847,12 @@ class analysis_base(object):
         if enable != self.profile_memory:
             if not enable:
                 self.profile_memory = False
+                log_helper.debug(__name__, "Disabled memory profiling. ", self.mpi_root)
             else:
                 import memory_profiler
                 import StringIO
                 self.profile_memory = True
+                log_helper.debug(__name__, "Enabled memory profiling. ", self.mpi_root)
 
     def get_memory_profile_info(self):
         """
@@ -1056,15 +1072,18 @@ class analysis_base(object):
 
     def clear_analysis_data(self):
         """Clear the list of analysis data"""
+        log_helper.debug(__name__, "Clearing analysis data. ", self.mpi_root)
         self.__data_list = []
 
     def clear_parameter_data(self):
         """Clear the list of parameter data"""
+        log_helper.debug(__name__, "Clearing parameter data. ", self.mpi_root)
         for param in self.parameters:
             param.clear_data()
 
     def clear_analysis(self):
         """Clear all analysis, parameter and dependency data"""
+        log_helper.debug(__name__, "Clearing the analysis. ", self.mpi_root)
         self.clear_analysis_data()
         self.clear_parameter_data()
 
@@ -1085,6 +1104,7 @@ class analysis_base(object):
                may provide a tuple consisting of the dataobject t[0] and
                an additional selection string t[1].
         """
+        log_helper.debug(__name__, "Setting analysis parameters. " + str(kwargs), self.mpi_root)
         import h5py
         from omsi.dataformat.omsi_file.common import omsi_file_common
         for k, v in kwargs.items():
@@ -1186,7 +1206,9 @@ class analysis_base(object):
 
         :raises: ValueError is raised if the parameter with the given name already exists.
         """
+        log_helper.debug(__name__, "Adding parameter. " + str(name), self.mpi_root)
         if self.get_parameter_data_by_name(name) is not None:
+            log_helper.debug(__name__, "Parameter already exists. " + str(name), self.mpi_root)
             raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
         self.parameters.append(parameter_data(name=name,
                                               help=help,
