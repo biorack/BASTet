@@ -851,13 +851,14 @@ class analysis_base(object):
         else:
             return None
 
-    def get_profile_stats_object(self, consolidate=True):
+    def get_profile_stats_object(self, consolidate=True, stream=None):
         """
         Based on the execution profile of the execute_analysis(..) function get
         ``pstats.Stats`` object to help with the interpretation of the data.
 
         :param consolidate: Boolean flag indicating whether multiple stats (e.g., from multiple cores)
             should be consolidated into a single stats object. Default is True.
+        :param stream: The optional stream parameter to be used fo the pstats.Stats object.
 
         :return: A single pstats.Stats object if consolidate is True. Otherwise the function
             returns a list of pstats.Stats objects, one per recorded statistic. None is returned
@@ -865,6 +866,10 @@ class analysis_base(object):
         """
         from pstats import Stats
         from ast import literal_eval
+        if stream is None:
+            import sys
+            stream = sys.stdout
+
         if 'profile' in self.run_info:
             # Parse the profile data (which is stored as a string) or in the case of MPI we may
             # have a list of strings from each MPI processes
@@ -891,10 +896,10 @@ class analysis_base(object):
 
             # Create the statistics object and return it
             if consolidate:
-                profile_stats = Stats(*profile_dummies)
+                profile_stats = Stats(*profile_dummies, stream=stream)
                 return profile_stats
             else:
-                profile_stats = [Stats(profile_i) for profile_i in profile_dummies]
+                profile_stats = [Stats(profile_i, stream=stream) for profile_i in profile_dummies]
                 return profile_stats
         else:
             return None
