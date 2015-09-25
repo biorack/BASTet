@@ -33,7 +33,7 @@ Messages by category
 +----------------------------------------------+------+--------+---------+-----------+
 |omsi.shared.omsi_web_helper                   |15.79 |0.86    |2.94     |2.75       |
 +----------------------------------------------+------+--------+---------+-----------+
-|omsi.analysis.omsi_viewer_helper              |10.53 |9.48    |0.59     |0.00       |
+|omsi.analysis.analysis_views              |10.53 |9.48    |0.59     |0.00       |
 +----------------------------------------------+------+--------+---------+-----------+
 |omsi.dataformat.mzml_file                     |10.53 |3.88    |1.18     |1.83       |
 +----------------------------------------------+------+--------+---------+-----------+
@@ -237,36 +237,36 @@ External dependencies
 ::
 
     Image (omsi.tools.peakCubeOverview,omsi.tools.makeThumb,omsi.tools.convertToOMSI)
-    django 
+    django
       \-http (omsi.shared.omsi_data_selection)
-      \-utils 
+      \-utils
         \-simplejson (omsi.shared.omsi_data_selection)
     h5py (omsi.dataformat.omsi_file.analysis,omsi.dataformat.omsi_file.format,omsi.shared.omsi_dependency,omsi.analysis.omsi_analysis_base,omsi.dataformat.omsi_file.main_file)
     lxml (omsi.dataformat)
     matplotlib (omsi.shared.omsi_spectrum_layout)
       \-gridspec (omsi.analysis.multivariate_stats.omsi_nmf,omsi.analysis.findpeaks.omsi_findpeaks_global)
       \-pyplot (omsi.analysis.multivariate_stats.omsi_nmf,omsi.shared.omsi_spectrum_layout,omsi.analysis.findpeaks.omsi_findpeaks_global)
-    mpi4py 
+    mpi4py
       \-MPI (omsi.dataformat.omsi_file.main_file)
     numpy (omsi.dataformat.omsi_file.analysis,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.tools.peakCubeOverview,omsi.dataformat.omsi_file.msidata,omsi.analysis.omsi_analysis_data,omsi.dataformat.omsi_file.main_file,omsi.analysis.multivariate_stats.omsi_nmf,omsi.dataformat.mzml_file,omsi.shared.omsi_data_selection,omsi.shared.omsi_spectrum_layout,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.tools.convertToOMSI,omsi.tools.makeThumb,omsi.analysis.omsi_analysis_base,omsi.analysis.multivariate_stats.omsi_cx)
-    omsi 
-      \-analysis 
+    omsi
+      \-analysis
       | \-findpeaks (omsi.analysis)
       | | \-omsi_findpeaks_global (omsi.analysis.findpeaks,omsi.tools.convertToOMSI)
       | | \-omsi_findpeaks_local (omsi.analysis.findpeaks,omsi.tools.convertToOMSI)
-      | | \-third_party 
+      | | \-third_party
       | |   \-findpeaks (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.findpeaks.omsi_findpeaks_global)
       | \-msi_filtering (omsi.analysis)
       | | \-omsi_tic_norm (omsi.tools.convertToOMSI,omsi.analysis.msi_filtering)
       | \-multivariate_stats (omsi.analysis)
       | | \-omsi_nmf (omsi.tools.convertToOMSI)
-      | | \-third_party 
+      | | \-third_party
       | |   \-nmf (omsi.analysis.multivariate_stats.omsi_nmf)
       | \-omsi_analysis_base (omsi.analysis.omsi_analysis_generic,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.dataformat.omsi_file.analysis,omsi.analysis.multivariate_stats.omsi_nmf,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.analysis.multivariate_stats.omsi_cx)
       | \-omsi_analysis_data (omsi.dataformat.omsi_file.analysis,omsi.analysis.omsi_analysis_base)
       | \-omsi_analysis_generic (omsi.dataformat.omsi_file.analysis)
-      | \-omsi_viewer_helper (omsi.dataformat.omsi_file.analysis,omsi.analysis.omsi_analysis_base)
-      \-dataformat 
+      | \-analysis_views (omsi.dataformat.omsi_file.analysis,omsi.analysis.omsi_analysis_base)
+      \-dataformat
       | \-file_reader_base (omsi.dataformat.mzml_file,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file)
       | \-omsi_file (omsi.analysis.multivariate_stats.omsi_nmf)
       |   \-analysis (omsi.dataformat.omsi_file.experiment,omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.dependencies,omsi.analysis.omsi_analysis_base)
@@ -278,8 +278,8 @@ External dependencies
       |   \-main_file (omsi.dataformat.omsi_file.common,omsi.tools.peakCubeOverview,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.tools.makeThumb)
       |   \-methods (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.experiment)
       |   \-msidata (omsi.dataformat.omsi_file.experiment,omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.dependencies,omsi.analysis.omsi_analysis_base)
-      \-shared 
-        \-omsi_data_selection (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.omsi_viewer_helper,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.dataformat.omsi_file.dependencies,omsi.shared.omsi_dependency,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.analysis.omsi_analysis_base,omsi.analysis.multivariate_stats.omsi_cx)
+      \-shared
+        \-omsi_data_selection (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.analysis_views,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.dataformat.omsi_file.dependencies,omsi.shared.omsi_dependency,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.analysis.omsi_analysis_base,omsi.analysis.multivariate_stats.omsi_cx)
         \-omsi_dependency (omsi.dataformat.omsi_file.dependencies,omsi.analysis.omsi_analysis_base)
         \-omsi_web_helper (omsi.tools.convertToOMSI)
     pyteomics (omsi.dataformat)

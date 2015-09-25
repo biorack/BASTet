@@ -497,7 +497,7 @@ class analysis_base(object):
 
         :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
         """
-        from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
+        from omsi.analysis.analysis_views import analysis_views
         from omsi.shared.data_selection import check_selection_string, \
             selection_type, \
             selection_string_to_object
@@ -518,7 +518,7 @@ class analysis_base(object):
 
         elif isinstance(re_slicedata[viewer_option], omsi_file_analysis):
             current_analysis_type = str(re_slicedata[viewer_option].get_analysis_type()[0])
-            return omsi_viewer_helper.analysis_name_to_class(current_analysis_type).v_qslice(
+            return analysis_views.analysis_name_to_class(current_analysis_type).v_qslice(
                 analysis_object=re_slicedata[viewer_option],
                 z=z,
                 viewer_option=re_slice_option_index[viewer_option])
@@ -557,7 +557,7 @@ class analysis_base(object):
                 cases where a per-spectrum peak analysis is performed and the peaks for each spectrum appear \
                 at different m/z values.
         """
-        from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
+        from omsi.analysis.analysis_views import analysis_views
         from omsi.shared.data_selection import \
             check_selection_string, \
             selection_type, \
@@ -594,7 +594,7 @@ class analysis_base(object):
             return data, None
         elif isinstance(re_spectrumdata[viewer_option], omsi_file_analysis):
             current_analysis_type = str(re_spectrumdata[viewer_option].get_analysis_type()[0])
-            return omsi_viewer_helper.analysis_name_to_class(current_analysis_type).v_qspectrum(
+            return analysis_views.analysis_name_to_class(current_analysis_type).v_qspectrum(
                 analysis_object=re_spectrumdata[viewer_option],
                 x=x,
                 y=y,
@@ -624,7 +624,7 @@ class analysis_base(object):
             - labelSlice : Lable for the slice mz axis or None if identical to labelSpectra.
 
         """
-        from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
+        from omsi.analysis.analysis_views import analysis_views
         re_slice, re_spectrum, re_slicedata, re_spectrumdata, re_slice_option_index, re_spectrum_option_index = \
             cls.__construct_dependent_viewer_options__(analysis_object)
         mz_spectra = None
@@ -637,7 +637,7 @@ class analysis_base(object):
                 mz_spectra = re_spectrumdata[qspectrum_viewer_option].mz[:]
                 label_spectra = "m/z"
             elif isinstance(re_spectrumdata[qspectrum_viewer_option], omsi_file_analysis):
-                mz_spectra, label_spectra, temp_a, temp_b = omsi_viewer_helper.get_axes(
+                mz_spectra, label_spectra, temp_a, temp_b = analysis_views.get_axes(
                     re_spectrumdata[qspectrum_viewer_option],
                     qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
                     qspectrum_viewer_option=re_spectrum_option_index[qspectrum_viewer_option])
@@ -651,7 +651,7 @@ class analysis_base(object):
                 label_slice = "m/z"
             elif isinstance(re_slicedata[qslice_viewer_option], omsi_file_analysis):
                 temp_a, temp_b, mz_slice, label_slice = \
-                    omsi_viewer_helper.get_axes(
+                    analysis_views.get_axes(
                         re_slicedata[qslice_viewer_option],
                         qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
                         qspectrum_viewer_option=re_spectrum_option_index[qspectrum_viewer_option])
@@ -726,7 +726,7 @@ class analysis_base(object):
         * ``re_spectrum_optionIndex``: List of integrers indicating for the given entry the viewer_option \
         to be used with the re_spectrumdata object for the given option.
         """
-        from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
+        from omsi.analysis.analysis_views import analysis_views
         re_slice = []
         re_slicedata = []
         re_slice_option_index = []
@@ -735,7 +735,7 @@ class analysis_base(object):
         re_spectrum_option_index = []
 
         # We don't need to use get_all_dependency_data_recursive here, because when we call
-        # omsi_viewer_helper.get_qslice_ .. (spectrum etc.) the recursion to dependent options
+        # analysis_views.get_qslice_ .. (spectrum etc.) the recursion to dependent options
         # occurs automatically.
         all_dependencies = analysis_object.get_all_dependency_data()
         for di in all_dependencies:
@@ -748,8 +748,8 @@ class analysis_base(object):
                 re_slicedata.append(di['omsi_object'])
                 re_spectrum_option_index.append(0)
             elif isinstance(di['omsi_object'], omsi_file_analysis):
-                slice_options = omsi_viewer_helper.get_qslice_viewer_options(di['omsi_object'])
-                spectrum_options = omsi_viewer_helper.get_qspectrum_viewer_options(di['omsi_object'])
+                slice_options = analysis_views.get_qslice_viewer_options(di['omsi_object'])
+                spectrum_options = analysis_views.get_qspectrum_viewer_options(di['omsi_object'])
                 for sloption_index in range(0, len(slice_options)):
                     re_slice.append(slice_options[sloption_index])
                     re_slicedata.append(di['omsi_object'])
@@ -759,10 +759,10 @@ class analysis_base(object):
                     re_spectrumdata.append(di['omsi_object'])
                     re_spectrum_option_index.append(sloption_index)
                 # analysisType = str(anaObj.get_analysis_type()[0])
-                # if omsi_viewer_helper.supports_slice( di['omsi_object']) :
+                # if analysis_views.supports_slice( di['omsi_object']) :
                 #     re_slice.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
                 #     re_slicedata.append( di['omsi_object'] )
-                # if omsi_viewer_helper.supports_spectra( di['omsi_object'] ) :
+                # if analysis_views.supports_spectra( di['omsi_object'] ) :
                 #     re_spectrum.append( "Analysis: "+str(di['omsi_object'].get_analysis_identifier()[0]) )
                 #     re_spectrumdata.append( di['omsi_object'] )
             else:

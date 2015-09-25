@@ -33,10 +33,10 @@ analysis Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_viewer_helper` Module
+:mod:`analysis_views` Module
 --------------------------------
 
-.. automodule:: omsi.analysis.omsi_viewer_helper
+.. automodule:: omsi.analysis.analysis_views
     :members:
     :undoc-members:
     :show-inheritance:

@@ -11,7 +11,7 @@ from omsi.shared.data_selection import transform_and_reduce_data
 from omsi.analysis import *
 
 
-class omsi_viewer_helper(object):
+class analysis_views(object):
     """
     Helper class for interfacing different analysis algorithms with the web-based viewer
     """

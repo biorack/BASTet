@@ -14,7 +14,7 @@ import omsi.analysis.findpeaks
 import omsi.analysis.multivariate_stats
 import omsi.analysis.msi_filtering
 import omsi.analysis.compound_stats
-# from omsi_viewer_helper import *
+# from analysis_views import *
 __all__ = ["findpeaks",
            "multivariate_stats",
            "compound_stats",

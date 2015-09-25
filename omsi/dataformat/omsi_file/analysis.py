@@ -784,10 +784,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  to rerun an analysis. May return analysis_generic in case that the
                  specific analysis is not known.
         """
-        from omsi.analysis.omsi_viewer_helper import omsi_viewer_helper
+        from omsi.analysis.analysis_views import analysis_views
         from omsi.analysis.generic import analysis_generic
         try:
-            analysis_class = omsi_viewer_helper.analysis_name_to_class(self.get_analysis_type()[0])
+            analysis_class = analysis_views.analysis_name_to_class(self.get_analysis_type()[0])
             ignore_type_conflict = False
         except:
             analysis_class = analysis_generic

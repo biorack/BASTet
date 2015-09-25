@@ -1,4 +1,4 @@
-************* Module omsi.analysis.omsi_viewer_helper
+************* Module omsi.analysis.analysis_views
 W: 11, 0: Wildcard import omsi.analysis (wildcard-import)
 R: 63, 4: Too many arguments (6/5) (too-many-arguments)
 W:205, 8: Redefining name 'sys' from outer scope (line 11) (redefined-outer-name)
