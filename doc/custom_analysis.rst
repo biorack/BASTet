@@ -27,7 +27,7 @@ This step makes your analysis "self-sufficient" in that it allows you to execute
 
 
 Some important features of ``analysis_base``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``omsi.analysis.analysis_base`` is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) integration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), iii) support for data provenance, and iv) in combination with the `omsi_analysis_driver` module enable the direct execution of analysis, e.g, from the command line
 
@@ -497,7 +497,7 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
 
 .. code-block:: python
     :linenos:
-    :emphasize-lines: 5,6,41,42,43,45,46,47,48,50,51,52,53,54,55,57,58,59,60,61,62,64
+    :emphasize-lines: 5,6,46,47,48,49,50,51,52,54,55,58,59,63,64,70,71,79
 
     class omsi_myanalysis(analysis_base) :
         ...
@@ -524,6 +524,12 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
                                   None if identical to the mzSpectra array.
                       - labelSlice : String with label for the slice mz axis or None if
                                      identical to labelSpectra.
+                      - valuesX: The values for the x axis of the image (or None)
+                      - labelX: Label for the x axis of the image
+                      - valuesY: The values for the y axis of the image (or None)
+                      - labelY: Label for the y axis of the image
+                      - valuesZ: The values for the z axis of the image (or None)
+                      - labelZ: Label for the z axis of the image
 
                      Developer Note: Here we need to handle the different possible combinations
                      for the differnent viewer_option patterns. It is in general safe to populate
@@ -538,6 +544,14 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
                 labelSpectra = None
                 mzSlice = None
                 labelSlice = None
+                peak_cube_shape = anaObj[ 'labels' ].shape #We assume labels was a 3D image cube of labels
+                valuesX = range(0, peak_cube_shape[0])
+                labelX = 'pixel index X'
+                valuesY = range(0, peak_cube_shape[1])
+                labelY = 'pixel index Y'
+                valuesZ = range(0, peak_cube_shape[2]) if len(peak_cube_shape) > 3 else None
+                labelZ = 'pixel index Z' if len(peak_cube_shape) > 3 else None
+
                 #Both qslice and qspectrum here point to our custom analysis
                 if qspectrum_viewer_option == 0 and qslice_viewer_option==0: #Loadings
                     mzSpectra =  anaObj[ 'labels' ][:]
@@ -551,18 +565,19 @@ NOTE: We here convert the selection string to a python selection (i.e., a list, 
                 elif qspectrum_viewer_option == 0 and qslice_viewer_option>0 :
                     mzSpectra =  anaObj[ 'peak_mz' ][:]
                     labelSpectra = "m/z"
-                    tempA, tempB, mzSlice, labelSlice = \
+                    tempA, tempB, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                             super(omsi_findpeaks_global,cls).v_qmz( anaObj, \
                                   qslice_viewer_option-1 , 0)
-                #Onlye the qlice option points to a data dependency
+                #Only the qspectrum option points to a data dependency
                 elif qspectrum_viewer_option > 0 and qslice_viewer_option==0 :
                     mzSlice =  anaObj[ 'peak_mz' ][:]
                     labelSlice = "m/z"
-                    mzSpectra, labelSpectra, tempA, tempB = \
+                    # Ignore the spatial axes and slize axis as we use our own
+                    mzSpectra, labelSpectra, tempA, tempB, vX, lX, vY, lY, vZ, lZ = \
                             super(omsi_findpeaks_global,cls).v_qmz( anaObj, \
                                   0 , qspectrum_viewer_option-1)
 
-                return mzSpectra, labelSpectra, mzSlice, labelSlice
+                return mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
 Step 3) Making your analysis self-sufficient
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
