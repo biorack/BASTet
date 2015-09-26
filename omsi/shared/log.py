@@ -84,6 +84,49 @@ class log_helper(object):
             return logging.getLogger()
 
     @classmethod
+    def log_var(cls, module_name, root=None, comm=None, level=None, **kwargs):
+        """
+        Log one or more variable values
+        :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
+        :param message: The message to be added to the log
+        :param root: The root process to be used for output when running in parallel. If None, then all
+                     calling ranks will perform logging. Default is None.
+        :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
+                      mpi.comm_world is used.
+        :param kwargs: Variables+values to be logged
+        """
+        for var_name, var_value in kwargs.iteritems():
+            try:
+                message = unicode(var_name) + " = " + unicode(var_value)
+                log_helper.log(level=level, module_name=module_name, root=root, comm=comm, message=message)
+            except:
+                message = "Logging of " + var_name + " for " + module_name + " failed"
+                log_helper.error(module_name=__name__, root=root, comm=comm, message=message)
+
+    @classmethod
+    def log(cls, module_name, message, root=None, comm=None, level=None,  *args, **kwargs):
+        """
+        Convenience function used to select the log message level using an input parameter
+        rathern than by selecting the approbriate function.
+
+        :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
+        :param message: The message to be added to the log
+        :param root: The root process to be used for output when running in parallel. If None, then all
+                     calling ranks will perform logging. Default is None.
+        :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
+                      mpi.comm_world is used.
+        :param level: To which logging level should we send the message
+        :param args: Additional positional arguments for the python logger.debug function. See the python docs.
+        :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
+        """
+        if level is None:
+            level = log_helper.log_levels['INFO']
+        if level in log_helper.log_levels.keys():
+            level = log_helper.log_levels[level]
+        if root is None or root == mpi_helper.get_rank(comm=comm):
+            cls.get_logger(module_name).log(level, message, *args, **kwargs)
+
+    @classmethod
     def debug(cls, module_name, message, root=None, comm=None, *args, **kwargs):
         """
         Create a debug log entry. This function is typically called as:

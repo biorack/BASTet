@@ -191,7 +191,6 @@ class file_reader_base(object):
         """
         # Create list of all derived formats
         formatreaders = {sub.format_name(): sub for sub in file_reader_base.__subclasses__()}
-        print formatreaders
         formatreaders.update({sub.format_name(): sub for sub in file_reader_base_with_regions.__subclasses__()})
         formatreaders.update({sub.format_name(): sub for sub in file_reader_base_multidata.__subclasses__()})
         # Remove extended interface classes which do not implement an actual format

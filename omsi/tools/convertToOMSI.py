@@ -32,6 +32,7 @@ import sys
 import os
 import warnings
 import getpass
+from omsi.shared.log import log_helper
 
 
 # Imports for thumbnail image rendering
@@ -96,7 +97,7 @@ def main(argv=None):
                              email_type='error',
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
-        print emailmsg
+        log_helper.warning(__name__, emailmsg)
         if ConvertSettings.job_id is not None:
             WebHelper.update_job_status(filepath=omsi_outfile,
                                         db_server=ConvertSettings.db_server_url,
@@ -112,10 +113,10 @@ def main(argv=None):
                                         jobid=ConvertSettings.job_id,
                                         status='running')
         except urllib2.URLError as e:
-            print "Update of job-status to running failed " + unicode(e)
+            log_helper.info(__name__, "Update of job-status to running failed " + unicode(e))
             ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
         except ValueError as e:
-            print "Update of job-status to running failed " + unicode(e)
+            log_helper.warning(__name__, "Update of job-status to running failed " + unicode(e))
             ConvertSettings.recorded_warnings.append("Update of job-status to running failed " + unicode(e))
 
     ####################################################################
@@ -126,7 +127,7 @@ def main(argv=None):
             input_filenames=input_filenames,
             format_type=ConvertSettings.format_option,
             data_region_option=ConvertSettings.region_option)
-        print "Number of conversion: " + str(len(ConvertSettings.dataset_list))
+        log_helper.info(__name__, "Number of conversion: " + str(len(ConvertSettings.dataset_list)))
     except:
         emailmsg = "ERROR: An error occurred during the generation of the input filelist. \n"
         emailmsg += "       -- No HDF5 output file has been generated. \n"
@@ -138,7 +139,7 @@ def main(argv=None):
                              email_type='error',
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
-        print emailmsg
+        log_helper.warning(__name__, emailmsg)
         if ConvertSettings.job_id is not None:
             try:
                 WebHelper.update_job_status(filepath=omsi_outfile,
@@ -146,7 +147,7 @@ def main(argv=None):
                                             jobid=ConvertSettings.job_id,
                                             status='error')
             except urllib2.URLError as e:
-                print "Update of job-status to error failed " + unicode(e)
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
                 ConvertSettings.recorded_warnings.append("Update of job-status to error failed " + unicode(e))
         raise
 
@@ -170,7 +171,7 @@ def main(argv=None):
                              email_type='error',
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
-        print emailmsg
+        log_helper.warning(__name__, emailmsg)
         if ConvertSettings.job_id is not None:
             WebHelper.update_job_status(filepath=omsi_outfile,
                                         db_server=ConvertSettings.db_server_url,
@@ -189,7 +190,7 @@ def main(argv=None):
         #    ConvertSettings.recorded_warnings += w
     except:
         emailmsg = "ERROR: An error occurred during the file conversion. \n"
-        print "ERROR: An error occurred during the file conversion."
+        log_helper.warning(__name__, "ERROR: An error occurred during the file conversion.")
         # Try to close the output file
         try:
             ConvertSettings.omsi_output_file.close_file()
@@ -199,21 +200,21 @@ def main(argv=None):
             pass
         if ConvertSettings.error_handling == "terminate-and-cleanup":
             emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
-            print "--The generated HDF5 will not be added to the database."
+            log_helper.warning(__name__, "--The generated HDF5 will not be added to the database.")
             ConvertSettings.add_file_to_db = False
             emailmsg += "  -Attempting to delete the generated HDF5 file." + " \n"
-            print "--Attempting to delete the generated HDF5 file."
+            log_helper.warning(__name__, "--Attempting to delete the generated HDF5 file.")
             os.remove(omsi_outfile)
             emailmsg += "  -Successfully deleted the generated HDF5 file: " + unicode(omsi_outfile) + " \n"
-            print "--Successfully deleted the generated HDF5 file: " + unicode(omsi_outfile)
+            log_helper.warning(__name__, "--Successfully deleted the generated HDF5 file: " + unicode(omsi_outfile))
         if ConvertSettings.error_handling == "terminate-only" or ConvertSettings.error_handling == "continue-on-error":
             emailmsg += "  -The generated HDF5 will not be added to the database." + " \n"
-            print "--The generated HDF5 will not be added to the database."
+            log_helper.warning(__name__, "--The generated HDF5 will not be added to the database.")
             ConvertSettings.add_file_to_db = False
             emailmsg += "  -The output HDF5 file (if generate) remains at: " + unicode(omsi_outfile) + " \n"
             emailmsg += "  -Output file found: " + unicode(os.path.exists(omsi_outfile)) + " \n"
-            print "--The output HDF5 file (if generate) remains at: " + str(omsi_outfile)
-            print "  Output file found: " + unicode(os.path.exists(omsi_outfile))
+            log_helper.warning(__name__, "--The output HDF5 file (if generate) remains at: " + str(omsi_outfile))
+            log_helper.warning(__name__, "  Output file found: " + unicode(os.path.exists(omsi_outfile)))
         emailmsg += "\n"
         emailmsg += unicode(sys.exc_info())
 
@@ -290,7 +291,7 @@ def main(argv=None):
             except AttributeError:
                 warningmsg += unicode(warn) + u"\n"
             warningindex += 1
-        print warningmsg
+        log_helper.warning(__name__, warningmsg)
 
     #####################################################################
     #  Update the status of the job (including registration of the file #
@@ -302,7 +303,7 @@ def main(argv=None):
                                         jobid=ConvertSettings.job_id,
                                         status='complete')
         except ValueError as e:
-            print "ERROR: Update of job status failed: " + e.message
+            log_helper.warning(__name__, "ERROR: Update of job status failed: " + e.message)
             ConvertSettings.recorded_warnings += ["Update of job status failed: "+e.message]
 
     ####################################################################
@@ -503,61 +504,61 @@ class ConvertSettings(object):
             if current_arg == "--no-nmf":
                 start_index += 1
                 ConvertSettings.execute_nmf = False
-                print "Disable NMF"
+                log_helper.info(__name__, "Disable NMF")
             elif current_arg == "--nmf":
                 start_index += 1
                 ConvertSettings.execute_nmf = True
-                print "Enable NMF"
+                log_helper.info(__name__, "Enable NMF")
             elif current_arg == "--nmf-nc":
                 start_index += 2
                 ConvertSettings.nmf_num_component = int(argv[i + 1])
-                print "Set nmf-nc=" + str(ConvertSettings.nmf_num_component)
+                log_helper.info(__name__, "Set nmf-nc=" + str(ConvertSettings.nmf_num_component))
             elif current_arg == "--nmf-timeout":
                 start_index += 2
                 ConvertSettings.nmf_timeout = int(argv[i + 1])
-                print "Set ConvertSettings.nmf_timeout=" + str(ConvertSettings.nmf_timeout)
+                log_helper.info(__name__, "Set ConvertSettings.nmf_timeout=" + str(ConvertSettings.nmf_timeout))
             elif current_arg == "--nmf-niter":
                 start_index += 2
                 ConvertSettings.nmf_num_iter = int(argv[i + 1])
                 if ConvertSettings.nmf_num_iter < 2:
                     warnings.warn("WARNING: --nfm-niter must be 2 or larger")
-                print "Set nmf-niter=" + str(ConvertSettings.nmf_num_iter)
+                log_helper.info(__name__, "Set nmf-niter=" + str(ConvertSettings.nmf_num_iter))
             elif current_arg == "--nmf-tolerance":
                 start_index += 2
                 ConvertSettings.nmf_tolerance = float(argv[i + 1])
-                print "Set nmf-tolerance=" + str(ConvertSettings.nmf_tolerance)
+                log_helper.info(__name__, "Set nmf-tolerance=" + str(ConvertSettings.nmf_tolerance))
             elif current_arg == "--nmf-raw":
                 start_index += 1
                 ConvertSettings.nmf_use_raw_data = True
-                print "Set nmf-raw=" + str(ConvertSettings.nmf_use_raw_data)
+                log_helper.info(__name__, "Set nmf-raw=" + str(ConvertSettings.nmf_use_raw_data))
             elif current_arg == "--fpg":
                 start_index += 1
                 ConvertSettings.execute_fpg = True
-                print "Enable find peaks global"
+                log_helper.info(__name__, "Enable find peaks global")
             elif current_arg == "--no-fpg":
                 start_index += 1
                 ConvertSettings.execute_fpg = False
-                print "Disable find peaks global"
+                log_helper.info(__name__, "Disable find peaks global")
                 if "--fpg" in argv:
                     warnings.warn("WARNING: --no-fpg and --fpg options are conflicting.")
             elif current_arg == "--fpl":
                 start_index += 1
                 ConvertSettings.execute_fpl = True
-                print "Enable find peaks local"
+                log_helper.info(__name__, "Enable find peaks local")
             elif current_arg == "--no-fpl":
                 start_index += 1
                 ConvertSettings.execute_fpl = False
-                print "Disable find peaks local"
+                log_helper.info(__name__, "Disable find peaks local")
                 if "--fpl" in argv:
                     warnings.warn("WARNING: --no-fpl and --fpl options are conflicting.")
             elif current_arg == "--ticnorm":
                 start_index += 1
                 ConvertSettings.execute_ticnorm = True
-                print "Enable tic normalization"
+                log_helper.info(__name__, "Enable tic normalization")
             elif current_arg == "--no-ticnorm":
                 start_index += 1
                 ConvertSettings.execute_ticnorm = False
-                print "Disable tic normalization"
+                log_helper.info(__name__, "Disable tic normalization")
                 if "--ticnorm" in argv:
                     warnings.warn("WARNING: --no-ticnorm and --ticnorm options are conflicting")
             elif current_arg == "--auto-chunking":
@@ -574,17 +575,17 @@ class ConvertSettings(object):
                 try:
                     ConvertSettings.chunks = (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3]))
                 except:
-                    print "An error accured while parsing the --chunking command. " + \
-                          "Something may be wrong with the indicated chunk sizes for x y z."
+                    log_helper.warning(__name__, "An error occured while parsing the --chunking command. " + \
+                                                 "Something may be wrong with the indicated chunk sizes for x y z.")
                     input_error = True
                 if "--auto-chunking" not in argv:
                     ConvertSettings.auto_chunk = False
-                print "Enable chunking: " + str(ConvertSettings.chunks)
+                log_helper.info(__name__,"Enable chunking: " + str(ConvertSettings.chunks))
             elif current_arg == "--no-chunking":
                 start_index += 1
                 ConvertSettings.chunks = None
                 ConvertSettings.auto_chunk = False
-                print "Disable chunking"
+                log_helper.info(__name__, "Disable chunking")
                 if "--auto-chunking" in argv or "--chunking" in argv:
                     warnings.warn("WARNGING: --no-chunking option is conflicting with another chunking option")
             elif current_arg == "--optimized-chunking":
@@ -593,18 +594,18 @@ class ConvertSettings(object):
                     ConvertSettings.user_additional_chunks.append(
                         (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3])))
                 except:
-                    print "An error accured while parsing the --optimized-chunking command. " + \
-                          "Something may be wrong with the indicated chunk sizes for x y z."
+                    log_helper.warning(__name__, "An error accured while parsing the --optimized-chunking command. " + \
+                                                 "Something may be wrong with the indicated chunk sizes for x y z.")
                     input_error = True
             elif current_arg == "--compression":
                 start_index += 1
                 # This is already the default
-                print "Enable compression"
+                log_helper.info(__name__, "Enable compression")
             elif current_arg == "--no-compression":
                 start_index += 1
                 ConvertSettings.compression = None
                 ConvertSettings.compression_opts = None
-                print "Disable compression"
+                log_helper.info(__name__, "Disable compression")
                 if "--compression" in argv:
                     warnings.warn("WARNING: --no-compression and --compression options are conflicting.")
             elif current_arg == "--io":
@@ -614,34 +615,34 @@ class ConvertSettings(object):
                     if ConvertSettings.io_option not in ConvertSettings.available_io_options:
                         raise ValueError("Invalid io option")
                 except:
-                    print "An error accured while parsing the --io command. Something may be wrong with the io-type."
+                    log_helper.warning(__name__, "An error accured while parsing the --io command. Something may be wrong with the io-type.")
                     input_error = True
             elif current_arg == "--io-block-limit":
                 start_index += 2
                 try:
                     ConvertSettings.io_block_size_limit = int(argv[i + 1]) * (1024 * 1024) # MB to Bytes
-                    print "Set io block limit to: " + str(ConvertSettings.io_block_size_limit) + "Byte"
+                    log_helper.info(__name__, "Set io block limit to: " + str(ConvertSettings.io_block_size_limit) + "Byte")
                 except:
-                    print "An error accured while parsing the --io-block-limit command."
+                    log_helper.warning(__name__, "An error accured while parsing the --io-block-limit command.")
                     input_error = True
             elif current_arg == "--thumbnail":
                 start_index += 1
                 ConvertSettings.generate_thumbnail = True
-                print "Enable thumbnail"
+                log_helper.info(__name__, "Enable thumbnail")
             elif current_arg == "--no-thumbnail":
                 start_index += 1
                 ConvertSettings.generate_thumbnail = False
-                print "Disable thumbnail"
+                log_helper.info(__name__, "Disable thumbnail")
                 if "--thumbnail" in argv:
                     warnings.warn("WARNING: --no-thumbnail and --thumbnail options are conflicting.")
             elif current_arg == "--xdmf":
                 start_index += 1
                 ConvertSettings.generate_xdmf = True
-                print "Enable xdmf"
+                log_helper.info(__name__, "Enable xdmf")
             elif current_arg == "--no-xdmf":
                 start_index += 1
                 ConvertSettings.generate_xdmf = False
-                print "Disable xdmf"
+                log_helper.info(__name__, "Disable xdmf")
                 if "--xdmf" in argv:
                     warnings.warn("WARNING: --no-xdmf and --xdmf options are conflicting.")
             elif current_arg in helpargs:
@@ -654,19 +655,19 @@ class ConvertSettings(object):
                 start_index += 2
                 ConvertSettings.format_option = str(argv[i + 1])
                 if ConvertSettings.format_option not in ConvertSettings.available_formats.keys():
-                    print "ERROR: Indicated --format option " + \
-                          ConvertSettings.format_option + \
-                          " not supported. Available options are:"
-                    print "     " + str(ConvertSettings.available_formats.keys())
+                    log_helper.warning(__name__, "ERROR: Indicated --format option " + \
+                                                 ConvertSettings.format_option + \
+                                                " not supported. Available options are:")
+                    log_helper.info(__name__, "     " + str(ConvertSettings.available_formats.keys()))
                     input_error = True
             elif current_arg == "--regions":
                 start_index += 2
                 ConvertSettings.region_option = str(argv[i + 1])
                 if ConvertSettings.region_option not in ConvertSettings.available_region_options:
-                    print "ERROR: Indicated --regions option " + \
-                          ConvertSettings.region_option + \
-                          " not supported. Available options are:"
-                    print "       " + str(ConvertSettings.available_region_options)
+                    log_helper.warning(__name__, "ERROR: Indicated --regions option " + \
+                                              ConvertSettings.region_option + \
+                                              " not supported. Available options are:")
+                    log_helper.warning(__name__, "       " + str(ConvertSettings.available_region_options))
                     input_error = True
             elif current_arg == "--add-to-db":
                 start_index += 1
@@ -675,22 +676,22 @@ class ConvertSettings(object):
             elif current_arg == "--no-add-to-db":
                 start_index += 1
                 ConvertSettings.add_file_to_db = False
-                print "Disable adding to database"
+                log_helper.info(__name__, "Disable adding to database")
             elif current_arg == "--db-server":
                 start_index += 2
                 ConvertSettings.db_server_url = str(argv[i + 1])
                 ConvertSettings.check_add_nersc = False
-                print "Set db server to: " + ConvertSettings.db_server_url
+                log_helper.info(__name__, "Set db server to: " + ConvertSettings.db_server_url)
             elif current_arg == "--user":
                 start_index += 2
                 ConvertSettings.file_user = str(argv[i + 1])
-                print "Set user to: " + ConvertSettings.file_user
+                log_helper.info(__name__, "Set user to: " + ConvertSettings.file_user)
             elif current_arg == "--jobid":
                 start_index += 2
                 ConvertSettings.job_id = str(argv[i + 1])
                 if ConvertSettings.job_id == 'auto':
                     ConvertSettings.job_id = os.environ.get('PBS_JOBID')
-                print "Set jobid: " + ConvertSettings.job_id
+                log_helper.info(__name__, "Set jobid: " + ConvertSettings.job_id)
             elif current_arg == "--email":
                 # Consume all email addresses that follow
                 for ni in range((i+1), len(argv)):
@@ -722,18 +723,25 @@ class ConvertSettings(object):
                 if error_option in ConvertSettings.available_error_options:
                     ConvertSettings.error_handling = error_option
                 else:
-                    print "ERROR: Indicated --error-handling option " + error_option + " invalid. Available options:"
-                    print "     " + str(ConvertSettings.available_error_options)
+                    log_helper.warning(__name__, "ERROR: Indicated --error-handling option " + error_option + " invalid. Available options:")
+                    log_helper.warning(__name__, "     " + str(ConvertSettings.available_error_options))
                     input_error = True
             elif current_arg.startswith("--methods") or \
                     current_arg.startswith("--instrument") or \
                     current_arg.startswith("--notes"):
                 start_index += 2
                 ConvertSettings.metadata[current_arg] = unicode(argv[i+1])
+            elif current_arg == "--loglevel" or current_arg == "--log":
+                start_index += 2
+                if str(argv[i+1]) in log_helper.log_levels:
+                    log_helper.set_log_level(level=log_helper.log_levels[str(argv[i+1])])
+                else:
+                    log_helper.warning(__name__, 'Invalid log level ' + str(argv[i+1]))
+                    input_error = True
             elif current_arg.startswith("--"):
                 start_index += 1
                 input_error = True
-                print "Unrecognized input option: " + current_arg
+                log_helper.warning(__name__, "Unrecognized input option: " + current_arg)
             else:
                 # print "End of input parameters"
                 break
@@ -760,7 +768,7 @@ class ConvertSettings(object):
         if ConvertSettings.generate_thumbnail:
             if not pil_available:
                 ConvertSettings.generate_thumbnail = False
-                print "PIL not available. Generation of thumbnail images disabled"
+                log_helper.warning(__name__, "PIL not available. Generation of thumbnail images disabled")
 
         # Enable chunking if compression is requested and chunking has been
         # disabled
@@ -780,23 +788,23 @@ class ConvertSettings(object):
                                   " User did not respond to resolve the conflict. Aborting the conversion.")
                 elif user_input == yes_input:
                     ConvertSettings.chunks = (4, 4, 2048)
-                    print "Chunking enabled with (4,4, 2048)"
+                    log_helper.info(__name__, "Chunking enabled with (4,4, 2048)")
                     break
                 elif user_input in no_input:
                     ConvertSettings.compression = None
                     ConvertSettings.compression_opts = None
-                    print "Compression disabled"
+                    log_helper.info(__name__, "Compression disabled")
                     break
                 elif i == (num_iter-1):
                     warnings.warn("User did not respond to resolve the conflict. Aborting the conversion")
                     input_error = True
 
         if not input_error and not ConvertSettings.suggest_file_chunkings:
-            print "Execute global peak finding (fpg): " + str(ConvertSettings.execute_fpg)
-            print "Execute local peak finding (fpl): " + str(ConvertSettings.execute_fpl)
-            print "Execute nmf: " + str(ConvertSettings.execute_nmf)
-            print "Number of MSI files: " + str(len(input_filenames))
-            print "Output OMSI file: " + output_filename
+            log_helper.info(__name__, "Execute global peak finding (fpg): " + str(ConvertSettings.execute_fpg))
+            log_helper.info(__name__, "Execute local peak finding (fpl): " + str(ConvertSettings.execute_fpl))
+            log_helper.info(__name__, "Execute nmf: " + str(ConvertSettings.execute_nmf))
+            log_helper.info(__name__, "Number of MSI files: " + str(len(input_filenames)))
+            log_helper.info(__name__, "Output OMSI file: " + output_filename)
 
         # Finish and return
         return input_error, output_filename, input_filenames
@@ -986,19 +994,19 @@ class ConvertFiles(object):
             #  Convert the raw data to HDF5                                   ##
             ####################################################################
             basefile = curr_dataset['basename']  # argv[i].replace('"', "")
-            print "Converting: " + basefile
+            log_helper.info(__name__, "Converting: " + basefile)
             try:
-                print "Selected Region: " + str(curr_dataset['region'])
+                log_helper.info(__name__, "Selected Region: " + str(curr_dataset['region']))
             except:
                 pass
             if not ConvertSettings.auto_chunk:
-                print "HDF5 chunking: " + str(ConvertSettings.chunks)
-            print "HDF5 compression: " + str(ConvertSettings.compression) + ", " + str(ConvertSettings.compression_opts)
+                log_helper.info(__name__, "HDF5 chunking: " + str(ConvertSettings.chunks))
+            log_helper.info(__name__, "HDF5 compression: " + str(ConvertSettings.compression) + ", " + str(ConvertSettings.compression_opts))
 
             # Open the input file
             try:
                 curr_format = curr_dataset['format']
-                print "Input file format: " + str(curr_format)
+                log_helper.info(__name__, "Input file format: " + str(curr_format))
                 if curr_format is not None:
                     input_file = ConvertSettings.available_formats[curr_format](basename=basefile,
                                                                                 requires_slicing=False)
@@ -1007,19 +1015,19 @@ class ConvertFiles(object):
                     if input_file.supports_multidata():
                         input_file.set_dataset_selection(dataset_index=curr_dataset['dataset'])
                 else:
-                    print "ERROR: The following file will not be converted. File type unknown for: " + basefile
-                    print "INFO: If you know the correct file format then try setting appropriate --format option."
+                    log_helper.warning(__name__, "ERROR: The following file will not be converted. File type unknown for: " + basefile)
+                    log_helper.info(__name__, "INFO: If you know the correct file format then try setting appropriate --format option.")
                     if ConvertSettings.error_handling == "continue-on-error":
                         pass
                     elif ConvertSettings.error_handling == "terminate-and-cleanup" or\
                             ConvertSettings.error_handling == "terminate-only":
                         raise ValueError("Unrecognized file format.")
 
-                print "In data shape: " + str(input_file.shape)
+                log_helper.info(__name__, "In data shape: " + str(input_file.shape))
             except:
-                print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: Unexpected error opening the input file:", sys.exc_info()[0])
                 if ConvertSettings.error_handling == "continue-on-error":
-                    print basefile + " failure during conversion. Skipping the file and continue conversion."
+                    log_helper.info(__name__, basefile + " failure during conversion. Skipping the file and continue conversion.")
                     continue
                 elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                         ConvertSettings.error_handling == "terminate-only":
@@ -1034,9 +1042,9 @@ class ConvertFiles(object):
                     print_results=True)
                 ConvertSettings.chunks = spec_chunks
                 additional_chunks = ConvertSettings.user_additional_chunks + [img_chunks]
-                print "Converting data using the following chunking options:"
-                print "     - Spectrum chunking: " + str(ConvertSettings.chunks)
-                print "     - Image chunking:    " + str(additional_chunks[0])
+                log_helper.info(__name__, "Converting data using the following chunking options:")
+                log_helper.info(__name__, "     - Spectrum chunking: " + str(ConvertSettings.chunks))
+                log_helper.info(__name__, "     - Image chunking:    " + str(additional_chunks[0]))
 
             else:
                 additional_chunks = ConvertSettings.user_additional_chunks
@@ -1081,7 +1089,7 @@ class ConvertFiles(object):
 
             # Generate any additional data copies if requested
             for chunkSpec in additional_chunks:
-                print "Generating optimized data copy: " + str(chunkSpec)
+                log_helper.info(__name__, "Generating optimized data copy: " + str(chunkSpec))
                 tempdata = data.create_optimized_chunking(chunks=chunkSpec,
                                                           compression=ConvertSettings.compression,
                                                           compression_opts=ConvertSettings.compression_opts,
@@ -1161,7 +1169,7 @@ class ConvertFiles(object):
             ####################################################################
             # Compute the local peak finding and add the peak-cube data to the file
             if ConvertSettings.execute_fpl:
-                print "Executing local peak finding"
+                log_helper.info(__name__, "Executing local peak finding")
                 # Execute the peak finding
                 fpl = omsi_findpeaks_local(name_key="omsi_findpeaks_local_" + str(time.ctime()))
                 fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
@@ -1170,7 +1178,7 @@ class ConvertFiles(object):
             # Compute the global peak finding and add the peak-cube data to the
             # file
             if ConvertSettings.execute_fpg:
-                print "Executing global peak finding"
+                log_helper.info(__name__, "Executing global peak finding")
                 # Execute the peak finding
                 fpg = omsi_findpeaks_global(name_key="omsi_findpeaks_global_" + str(time.ctime()))
                 fpg.execute(msidata=data, mzdata=mzdata)
@@ -1179,12 +1187,12 @@ class ConvertFiles(object):
                 fpgpath = ana.get_managed_group().name
             # Compute the nmf analysis if requested
             if ConvertSettings.execute_nmf:
-                print "Executing nmf"
+                log_helper.info(__name__, "Executing nmf")
                 # Exectue the nmf analysis on the peak-cube or if peak finding was not performed then
                 # execute nmf on the raw data data
                 nmf = omsi_nmf(name_key="omsi_nmf_" + str(time.ctime()))
                 if ConvertSettings.execute_fpg and not ConvertSettings.nmf_use_raw_data:
-                    print "   Using peak-cube data for NMF"
+                    log_helper.info(__name__, "   Using peak-cube data for NMF")
                     fpgdata = ana['peak_cube']
                     nmf.execute(msidata=fpgdata,
                                 numComponents=ConvertSettings.nmf_num_component,
@@ -1192,7 +1200,7 @@ class ConvertFiles(object):
                                 numIter=ConvertSettings.nmf_num_iter,
                                 tolerance=ConvertSettings.nmf_tolerance)
                 else:
-                    print "   Using raw data for NMF"
+                    log_helper.info(__name__, "   Using raw data for NMF")
                     nmf.execute(msidata=data,
                                 numComponents=ConvertSettings.nmf_num_component,
                                 timeOut=ConvertSettings.nmf_timeout,
@@ -1202,7 +1210,7 @@ class ConvertFiles(object):
                 ana, anaindex = exp.create_analysis(nmf)
             # Compute the tic normalization
             if ConvertSettings.execute_ticnorm:
-                print "Executing tic normalization"
+                log_helper.info(__name__, "Executing tic normalization")
                 tic = omsi_tic_norm(name_key="tic_norm_" + str(time.ctime()))
                 tic.execute(msidata=data, mzdata=mzdata)
                 ana, anaindex = exp.create_analysis(tic)
@@ -1212,9 +1220,9 @@ class ConvertFiles(object):
             ####################################################################
             try:
                 if ConvertSettings.generate_thumbnail:
-                    print "Generating the thumbnail image"
+                    log_helper.info(__name__, "Generating the thumbnail image")
                     if ConvertSettings.execute_nmf:
-                        print "   Generating thumbnail from NMF data"
+                        log_helper.info(__name__, "   Generating thumbnail from NMF data")
                         # Get the NMF data
                         ho = nmf['ho']
                         numx = ho.shape[0]
@@ -1238,7 +1246,7 @@ class ConvertFiles(object):
                             "_" + expindex + ".png"
                         thumbnail.save(thumbnail_filename, 'PNG')
                     elif ConvertSettings.execute_fpg:
-                        print "    Generating thumbnail from FPG data"
+                        log_helper.info(__name__, "    Generating thumbnail from FPG data")
                         # Get the global peak finding data and compute the maximum peak
                         # values for each peak
                         fpgdata = fpg['peak_cube'][:]
@@ -1265,8 +1273,8 @@ class ConvertFiles(object):
                             "_" + expindex + ".png"
                         thumbnail.save(thumbnail_filename, 'PNG')
                     else:
-                        print "Generation of thumbnail from raw data is not yet supported. Thumbnail not generated."
-                        print "Enable --nmf or --fpg in order to generate a thumbnail image."
+                        log_helper.info(__name__, "Generation of thumbnail from raw data is not yet supported. Thumbnail not generated.")
+                        log_helper.info(__name__, "Enable --nmf or --fpg in order to generate a thumbnail image.")
                         # print "    Generating thumbnail from raw data"
                         # Find three most intense peaks that are at least 1% of the m/z range appart
                         # numx = data.shape[0]
@@ -1321,11 +1329,11 @@ class ConvertFiles(object):
                         # thumbnail_filename = ConvertSettings.omsi_output_file.hdf_filename+"_"+expindex+".png"
                         # thumbnail.save(thumbnail_filename, 'PNG')
             except ImportError:
-                print "ERROR: Thumbnail generation failed. I/O error.", sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: Thumbnail generation failed. I/O error.", sys.exc_info()[0])
                 warnings.warn("ERROR: Thumbnail generation failed. I/O error. " + str(sys.exc_info()))
                 pass
             except:
-                print "ERROR: Thumbnail generation failed. Unexpected error:", sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: Thumbnail generation failed. Unexpected error:", sys.exc_info()[0])
                 warnings.warn("ERROR: Thumbnail generation failed. Unexpected error. " + str(sys.exc_info()))
                 pass
 
@@ -1456,9 +1464,9 @@ class ConvertFiles(object):
                                'exp': 'previous'}
                         re_dataset_list.append(nds)
                 except:
-                    print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
+                    log_helper.info(__name__, "ERROR: Unexpected error opening the input file:", sys.exc_info()[0])
                     if ConvertSettings.error_handling == "continue-on-error":
-                        print currds['basename'] + " failure during conversion. Skipping the file and continue."
+                        log_helper.info(__name__, currds['basename'] + " failure during conversion. Skipping the file and continue.")
                         continue
                     elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                             ConvertSettings.error_handling == "terminate-only":
@@ -1482,9 +1490,9 @@ class ConvertFiles(object):
                                    'exp': 'previous'}
                             re_dataset_list.append(nds)
                     except:
-                        print "ERROR: Unexpected error opening the input file:", sys.exc_info()[0]
+                        log_helper.warning(__name__,"ERROR: Unexpected error opening the input file:", sys.exc_info()[0])
                         if ConvertSettings.error_handling == "continue-on-error":
-                            print currds['basename'] + " failure during conversion. Skipping the file and continue."
+                            log_helper.info(__name__, currds['basename'] + " failure during conversion. Skipping the file and continue.")
                             continue
                         elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                                 ConvertSettings.error_handling == "terminate-only":
@@ -1518,7 +1526,7 @@ class ConvertFiles(object):
             currdataset = in_dataset_list[di]
             basefile = currdataset["basename"]
             try:
-                print "Suggested Chunkings: " + basefile
+                "Suggested Chunkings: " + basefile
                 currformat = currdataset["format"]
                 inputfile = ConvertSettings.available_formats[currformat](basename=basefile,
                                                                           requires_slicing=False)
@@ -1688,7 +1696,7 @@ class ConvertFiles(object):
 
         elif data_io_option == "spectrum_to_image":
             #Determine the I/O settings
-            print "Spectrum-to-image I/O. Write %s blocks at a time" % (chunk_shape, )
+            log_helper.info(__name__, "Spectrum-to-image I/O. Write %s blocks at a time" % (chunk_shape, ))
             xdim = input_file.shape[0]
             ydim = input_file.shape[1]
             zdim = input_file.shape[2]

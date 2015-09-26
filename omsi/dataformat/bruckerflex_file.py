@@ -51,7 +51,7 @@ import numpy as np
 import math
 from omsi.shared.dependency_data import dependency_dict
 from omsi.dataformat.file_reader_base import file_reader_base_with_regions
-
+from omsi.shared.log import log_helper
 
 class bruckerflex_file(file_reader_base_with_regions):
     """Interface for reading a single bruker flex image file.
@@ -670,11 +670,11 @@ class bruckerflex_file(file_reader_base_with_regions):
                 continue
             # All variables should start with ## in the acqu file
             if not lines[curr_line].startswith("##"):
-                print "WARNING: Error while reading line" + str(curr_line) + \
-                      " of the acqu file. The error may have occured on the previous line"
+                log_helper.warning(__name__,  "WARNING: Error while reading line" + str(curr_line) + \
+                      " of the acqu file. The error may have occured on the previous line")
                 if curr_line > 0:
-                    print str(curr_line - 1) + ": " + lines[curr_line - 1]
-                print str(curr_line) + ": " + lines[curr_line]
+                    log_helper.debug(__name__, str(curr_line - 1) + ": " + lines[curr_line - 1])
+                log_helper.debug(str(curr_line) + ": " + lines[curr_line])
                 curr_line += 1
                 continue
 

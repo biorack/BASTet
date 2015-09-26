@@ -12,6 +12,7 @@ from omsi.dataformat.file_reader_base import file_reader_base_multidata
 from omsi.shared.dependency_data import dependency_dict
 from omsi.shared.metadata_data import metadata_dict, metadata_value
 from omsi.shared.metadata_ontologies import METADATA_ONTOLOGIES
+from omsi.shared.log import log_helper
 
 
 class mzml_file(file_reader_base_multidata):
@@ -54,11 +55,11 @@ class mzml_file(file_reader_base_multidata):
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
-        print 'Read %s scans from mzML file.' % self.num_scans
+        log_helper.info(__name__, 'Read %s scans from mzML file.' % self.num_scans)
         self.scan_types, self.scan_indices = self.__compute_scan_types_and_indices(filename=self.basename)
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types,
                                                                   basename=basename)
-        print 'Found %s different scan types in mzML file.' % len(self.scan_types)
+        log_helper.info(__name__, 'Found %s different scan types in mzML file.' % len(self.scan_types))
         self.coordinates = self.__compute_coordinates()
         self.scan_params = self.__parse_scan_parameters(self)
 
@@ -107,10 +108,10 @@ class mzml_file(file_reader_base_multidata):
                     try:
                         self.data[scan_idx][xidx, yidx, :] = yi
                     except:
-                        print spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape,
+                        log_helper.debug(__name__, spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape)
             # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
                 if spectrumid%1000 == 0:
-                    print 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype)
+                    log_helper.info(__name__, 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype))
                 spectrumid += 1
 
     def spectrum_iter(self):
@@ -260,7 +261,7 @@ class mzml_file(file_reader_base_multidata):
                     scantypes.append(scanfilter)
                 scan_indices.append(scantypes.index(scanfilter))
             except:
-                print idx
+                log_helper.debug(__name__, idx)
 
         assert len(scan_indices) == self.num_scans
         return scantypes, scan_indices

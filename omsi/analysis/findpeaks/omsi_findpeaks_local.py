@@ -4,7 +4,7 @@ Local peak finding analysis module.
 
 from omsi.analysis.base import analysis_base
 import omsi.shared.mpi_helper as mpi_helper
-
+from omsi.shared.log import log_helper
 
 class omsi_findpeaks_local(analysis_base):
     """
@@ -143,7 +143,7 @@ class omsi_findpeaks_local(analysis_base):
                     current_index = np.nonzero(np.logical_and(array_indices[0] == ci[0],
                                                               array_indices[1] == ci[1]))[0][0]
                 except:
-                    print "Requested pixel not found: " + str(items[ni])
+                    log_helper.warning(__name__, "Requested pixel not found: " + str(items[ni]))
                     continue
                 current_dx = ni
                 current_dy = 0

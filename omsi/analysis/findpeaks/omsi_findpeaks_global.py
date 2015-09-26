@@ -3,6 +3,7 @@ Global peak finder computing peaks and associated ion-images
 for the full MSI data.
 """
 from omsi.analysis.base import analysis_base
+from omsi.shared.log import log_helper
 
 class omsi_findpeaks_global(analysis_base):
     """
@@ -71,7 +72,7 @@ class omsi_findpeaks_global(analysis_base):
                 data = dataset[:, :, z_select]
                 return data
             except:
-                print "Global peak selection failed"
+                log_helper.error(__name__, "Global peak selection failed. ")
                 return None
         elif viewer_option >= 0:
             return super(omsi_findpeaks_global, cls).v_qslice(analysis_object, z, viewer_option-1)

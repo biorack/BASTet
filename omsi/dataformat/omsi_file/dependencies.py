@@ -391,8 +391,8 @@ class omsi_file_dependencies(omsi_file_common):
                     output_list.append(omsi_object)
             except:
                 import sys
-                print "WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_recursive(...):  " + \
-                      unicode(item_obj[0]) + "   :" + str(sys.exc_info())
+                warnings.warn("WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_recursive(...):  " + \
+                      unicode(item_obj[0]) + "   :" + str(sys.exc_info()))
 
             # If we can have recursive dependencies then follow them
             if isinstance(dependency_omsi_obj, omsi_dependencies_manager):
@@ -589,8 +589,8 @@ class omsi_file_dependencies(omsi_file_common):
                         )
             except:
                 import sys
-                print "WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_graph(...):" \
-                      + str(sys.exc_info())
+                warnings.warn("WARNING: Error occurred in omsi_file_dependencies::get_all_dependency_data_graph(...):" \
+                      + str(sys.exc_info()))
 
         return nodes, links
 

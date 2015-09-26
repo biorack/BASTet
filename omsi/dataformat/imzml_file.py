@@ -9,6 +9,7 @@ import os
 # import xml parser
 from pyimzml.ImzMLParser import ImzMLParser
 from omsi.dataformat.file_reader_base import *
+from omsi.shared.log import log_helper
 
 class imzml_file(file_reader_base):
     """
@@ -45,7 +46,7 @@ class imzml_file(file_reader_base):
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
-        print 'Read %s scans from imzML file.' % self.num_scans
+        log_helper.info(__name__, 'Read %s scans from imzML file.' % self.num_scans)
         self.scan_types = self.__compute_scan_types(filename=self.basename)
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
 
@@ -87,10 +88,10 @@ class imzml_file(file_reader_base):
         """
 
         self.data = np.zeros(shape=self.shape_all_data, dtype=self.data_type)
-        print 'Datacube shape is %s' % [self.data.shape]
+        log_helper.info(__name__, 'Datacube shape is %s' % [self.data.shape])
 
         reader = ImzMLParser(filename)
-        print 'READING ALL DATA!! GIVE ME RAM (please)!'
+        log_helper.debug(__name__,'READING ALL DATA!! GIVE ME RAM (please)!')
         for ind in xrange(0, len(reader.coordinates)):
             xidx, yidx = reader.coordinates[ind]
             mz, intens = reader.getspectrum(ind)
@@ -135,7 +136,8 @@ class imzml_file(file_reader_base):
             if mz == mz_axes:
                 pass
             else:
-                print 'Inconsistent m/z axis from scan to scan.  Currently OpenMSI supports only continuous-mode imzML.'
+                log_helper.error(__name__, 'Inconsistent m/z axis from scan to scan. ' +
+                                           'Currently OpenMSI supports only continuous-mode imzML.')
                 raise AttributeError
 
         return mz_axes
@@ -301,8 +303,8 @@ class imzml_file(file_reader_base):
                 if os.path.isfile(filename_only + '.ibd'):
                     filelist.append(currname)
                 else:
-                    print 'Could not find binary .ibd file for file %s' % currname
-                    print 'Skipping conversion of this file.'
+                    log_helper.warning(__name__, 'Could not find binary .ibd file for file %s . Skipping conversion of this file.' % currname)
+
         return filelist
 
     def get_number_of_datasets(self):

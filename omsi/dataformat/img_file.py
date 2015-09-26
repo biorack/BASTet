@@ -3,6 +3,7 @@ import os
 import numpy as np
 import warnings
 from omsi.dataformat.file_reader_base import file_reader_base
+from omsi.shared.log import log_helper
 
 
 class img_file(file_reader_base):
@@ -49,12 +50,12 @@ class img_file(file_reader_base):
             basefile = basename
             if os.path.isdir(basename):
                 filelist = self.get_files_from_dir(basename)
-                print filelist
+                log_helper.log_var(__name__, filelist=filelist)
                 if len(filelist) > 0:
                     basefile = filelist[0]
                 else:
                     raise ValueError("No valid img file found in the given directory.")
-            print basefile
+            log_helper.log_var(__name__, basefile=basefile)
             if os.path.exists(basefile + ".hdr") and \
                     os.path.exists(basefile + ".t2m") and \
                     os.path.exists(basefile + ".img"):
@@ -102,8 +103,8 @@ class img_file(file_reader_base):
             expectednumvalues = int(self.shape[0]) * int(self.shape[1]) * int(self.shape[2])
             expectedsize = expectednumvalues * int(itemsize)
             sizedifference = expectedsize - imgsize
-            print "IMG size: " + str(imgsize) + " Expected size: " + \
-                  str(expectedsize) + "  (difference="+str(sizedifference) + ")"
+            log_helper.warning(__name__ , "IMG size: " + str(imgsize) + " Expected size: " + \
+                                          str(expectedsize) + "  (difference="+str(sizedifference) + ")")
             if imgsize < expectedsize:
                 # Check whether the missing data aligns with images or spectra
                 slicesize = int(self.shape[0]) * int(self.shape[1]) * itemsize
@@ -155,7 +156,7 @@ class img_file(file_reader_base):
             else:
                 raise
         except:
-            print "Error while opening the img file: " + img_filename
+            log_helper.error(__name__, "Error while opening the img file: " + img_filename)
             raise
 
     def __getitem__(self, key):

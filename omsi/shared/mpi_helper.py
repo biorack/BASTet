@@ -73,8 +73,8 @@ class parallel_over_axes(object):
         self.task_function = task_function
         self.schedule = schedule
         self.split_axes = split_axes
-        if isinstance(self.split_axes, int): # Make sure that split-axis is a list not just a single index
-            self.split_axes = [self.split_axes,]
+        if isinstance(self.split_axes, int):  # Make sure that split-axis is a list not just a single index
+            self.split_axes = [self.split_axes, ]
         self.main_data = main_data
         self.main_data_param_name = main_data_param_name
         self.task_function_params = task_function_params
@@ -104,12 +104,16 @@ class parallel_over_axes(object):
                for each task.
 
         """
+        from omsi.shared.log import log_helper
         start_time = time.time()
         self.__data_collected = False
         if self.schedule == self.SCHEDULES['DYNAMIC']:
             result = self.__run_dynamic()
         elif self.schedule == self.SCHEDULES['STATIC_1D'] or self.schedule == self.SCHEDULES['STATIC']:
             result = self.__run_static_1D()
+        else:
+            log_helper.error(__name__, "Invalid scheduling scheme given: " + str(self.schedule))
+            raise ValueError("Invalid scheduling scheme given: " + str(self.schedule))
         end_time = time.time()
         self.run_time = end_time - start_time
         return result
@@ -135,15 +139,16 @@ class parallel_over_axes(object):
             containing the combined data of all  self.result and self.blocks from all ranks respectively.
 
         """
+        from omsi.shared.log import log_helper
         # If we have collected the data already then we don't need to do it again
         if self.__data_collected and not force_collect:
             return self.result, self.blocks
 
-         # Collect the output
+        # Collect the output
         rank = get_rank(comm=self.comm)
         start_time = time.time()
         if rank == self.root:
-            print "COLLECTING RESULTS"
+            log_helper.info(__name__, "COLLECTING RESULTS")
         # Collect the data, blocks, and block_times from all ranks
         collected_data = self.comm.gather(self.result, root=self.root)
         collected_blocks = self.comm.gather(self.blocks, root=self.root)
@@ -158,7 +163,7 @@ class parallel_over_axes(object):
         end_time = time.time()
         run_time = end_time - start_time
         if rank == self.root:
-            print "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time)
+            log_helper.info(__name__, "TIME FOR COLLECTING DATA FROM ALL TASKS: " + str(run_time))
         # Return the result
         self.__data_collected = True
         return self.result, self.blocks
@@ -179,6 +184,7 @@ class parallel_over_axes(object):
                a range slice object along the axes used for decomposition.
 
         """
+        from omsi.shared.log import log_helper
         start_time = time.time()
         # Get MPI parameters
         rank = get_rank(comm=self.comm)
@@ -191,7 +197,8 @@ class parallel_over_axes(object):
         if total_num_subblocks < size:
             size = total_num_subblocks
             if rank == self.root:
-                print "Insufficient number of blocks for number of MPI ranks. Some ranks will remain idle"
+                log_helper.info(__name__,
+                                "Insufficient number of blocks for number of MPI ranks. Some ranks will remain idle")
         axes_sort_index = np.argsort(axes_shapes)[::-1]
         split_axis = self.split_axes[axes_sort_index[0]]
         split_axis_size = axes_shapes[split_axis]
@@ -212,7 +219,7 @@ class parallel_over_axes(object):
                 stop_index = split_axis_size
         self.blocks[axes_sort_index[0]] = slice(start_index, stop_index)
         self.blocks = tuple(self.blocks)
-        print "Rank: " + str(rank) + " Block: " + str(self.blocks)
+        log_helper.info(__name__, "Rank: " + str(rank) + " Block: " + str(self.blocks))
 
         # Execute the task_function on the given data block
         task_params = self.task_function_params
@@ -222,11 +229,11 @@ class parallel_over_axes(object):
         end_time = time.time()
         run_time = end_time - start_time
         self.block_times = [run_time, ]
-        print "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time)
+        log_helper.info(__name__, "TIME FOR PROCESSING THE DATA BLOCK: " + str(run_time))
 
         # Return the output
-        self.result = [self.result,]
-        self.blocks = [self.blocks,]
+        self.result = [self.result, ]
+        self.blocks = [self.blocks, ]
         return self.result, self.blocks
 
     def __run_dynamic(self):
@@ -245,6 +252,7 @@ class parallel_over_axes(object):
                a range slice object along the axes used for decomposition.
 
         """
+        from omsi.shared.log import log_helper
         import time
         rank = get_rank(comm=self.comm)
         size = get_size(comm=self.comm)
@@ -272,7 +280,7 @@ class parallel_over_axes(object):
             block_tuples = itertools.product(*base_blocks)
 
             # Communicate blocks with task ranks
-            print "PROCESSING DATA BLOCKS"
+            log_helper.info(__name__, "PROCESSING DATA BLOCKS")
             start_time = time.time()
             block_index = 0
             for block_selection in block_tuples:
@@ -282,12 +290,12 @@ class parallel_over_axes(object):
                                tag=self.MPI_MESSAGE_TAGS['BLOCK_MSG'])
                 block_index += 1
                 if (block_index % 100) == 0:
-                    print (block_index, total_num_subblocks, request_rank)
+                    log_helper.debug(__name__, str((block_index, total_num_subblocks, request_rank)))
             end_time = time.time()
             run_time = end_time - start_time
-            print "TIME FOR SCHEDULING ALL TASKS: " + str(run_time)
+            log_helper.info(__name__, "TIME FOR SCHEDULING ALL TASKS: " + str(run_time))
             start_time = time.time()
-            print "FINALIZING"
+            log_helper.info(__name__, "FINALIZING")
             # Terminate all ranks and receive all data from the different ranks if requested
             all_ranks_status = np.zeros(size, 'bool')
             all_ranks_status[self.root] = True
@@ -299,7 +307,7 @@ class parallel_over_axes(object):
 
             end_time = time.time()
             run_time = end_time - start_time
-            print "TIME FOR FINALIZING TASKS: " + str(run_time)
+            log_helper.info(__name__, "TIME FOR FINALIZING TASKS: " + str(run_time))
 
         # We are a rank that has to run tasks
         else:
@@ -327,7 +335,6 @@ class parallel_over_axes(object):
         return self.result, self.blocks
 
 
-
 def imports_mpi(python_object):
     """
     Check whether the given class import mpi
@@ -338,13 +345,13 @@ def imports_mpi(python_object):
     import inspect
     import re
     code = inspect.getsource(python_object)
-    object_imports_mpi = re.search('import\s+mpi4py', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi4py\s+import', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi4py', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi\s+import', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('from\s+omsi.shared.mpi_helper\s+import', code) is not  None
-    object_imports_mpi = object_imports_mpi or re.search('import\s+omsi.shared.mpi_helper', code) is not  None
+    object_imports_mpi = re.search('import\s+mpi4py', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi4py\s+import', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi4py', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+mpi', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+mpi\s+import', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('from\s+omsi.shared.mpi_helper\s+import', code) is not None
+    object_imports_mpi = object_imports_mpi or re.search('import\s+omsi.shared.mpi_helper', code) is not None
     return object_imports_mpi
 
 
@@ -359,9 +366,10 @@ def gather(data, comm=None, root=0):
     """
     if MPI_AVAILABLE:
         my_comm = comm if comm is not None else MPI.COMM_WORLD
-        return comm.gather(data, root)
+        return my_comm.gather(data, root)
     else:
         return [data, ]
+
 
 def barrier(comm=None):
     """
@@ -374,6 +382,7 @@ def barrier(comm=None):
         my_comm.barrier()
     else:
         pass
+
 
 def get_rank(comm=None):
     """
@@ -422,6 +431,7 @@ def is_mpi_available():
     :return: bool indicating whether MPI is available
     """
     return MPI_AVAILABLE
+
 
 def mpi_type_from_dtype(dtype):
     """

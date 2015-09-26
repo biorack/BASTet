@@ -6,7 +6,7 @@ from tempfile import TemporaryFile
 import numpy as np
 
 from omsi.analysis.base import analysis_base
-
+from omsi.shared.log import log_helper
 
 
 ###############################################################
@@ -115,7 +115,7 @@ class omsi_tic_norm(analysis_base):
             outformat = 'uint16'
         elif max_output_value <= np.iinfo(np.uint32).max:
             outformat = 'uint32'
-        print outformat
+        log_helper.debug(__name__, "Output format: " + str(outformat))
 
         # Normalize the data one-block-at-a-time
         for i in range(len(idx)-1):

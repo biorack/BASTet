@@ -15,6 +15,7 @@ try:
         import msvcrt
 except ImportError:
     pass
+from omsi.shared.log import log_helper
 
 
 class WebHelper(object):
@@ -58,7 +59,7 @@ class WebHelper(object):
 
         # Make the url request
         try:
-            print "Updating job status: " + update_status_url
+            log_helper.info(__name__, "Updating job status: " + update_status_url)
             url_response = urllib2.urlopen(url=update_status_url)
             if url_response.code == 200:
                 return True
@@ -157,7 +158,7 @@ class WebHelper(object):
 
         # Make the url request
         try:
-            print "Registering file with DB: " + add_file_url
+            log_helper.info(__name__, "Registering file with DB: " + add_file_url)
             url_response = urllib2.urlopen(url=add_file_url)
             if url_response.code == 200:
                 return True
@@ -174,7 +175,7 @@ class WebHelper(object):
            to Apache at NERSC. This necessary to make the file readable for adding it to the
            database.
         """
-        print "Setting NERSC ACL permissions for Apache"
+        log_helper.info(__name__, "Setting NERSC ACL permissions for Apache")
         # Note u:48 is a replacement for u:apache to ensure that
         # that the command works properly on edison.nersc.gov which
         # does not have the apache user. However u:48 is equivalent.
