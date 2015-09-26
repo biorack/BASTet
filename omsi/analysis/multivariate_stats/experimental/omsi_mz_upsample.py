@@ -4,7 +4,7 @@ import numpy as np
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_mz_reupsample(omsi_analysis_base):
+class omsi_mz_upsample(omsi_analysis_base):
     """
     Class representing upsampling the m/z dimension of MSI data by *interpolation*.
     """
@@ -12,7 +12,7 @@ class omsi_mz_reupsample(omsi_analysis_base):
     def __init__(self, name_key="undefined"):
         """Initalize the basic data members"""
 
-        super(omsi_mz_rebin, self).__init__()
+        super(omsi_mz_upsample, self).__init__()
         dtypes = self.get_default_dtypes()
         groups = self.get_default_parameter_groups()
 
@@ -154,7 +154,7 @@ class omsi_mz_reupsample(omsi_analysis_base):
 
         # Expose the qslice viewer functionality of any data dependencies
         if viewer_option >= num_custom_viewer_options:
-            return super(omomsi_mz_bin, cls).v_qslice(analysis_object,
+            return super(omsi_mz_upsample, cls).v_qslice(analysis_object,
                                                                z,
                                                                viewer_option=viewer_option-num_custom_viewer_options)
 
@@ -220,9 +220,9 @@ class omsi_mz_reupsample(omsi_analysis_base):
             """
             EDIT_ME
 
-            Replace omomsi_mz_bin with your classname
+            Replace omsi_mz_upsample with your classname
             """
-            return super(omomsi_mz_bin, cls).v_qspectrum(analysis_object,
+            return super(omsi_mz_upsample, cls).v_qspectrum(analysis_object,
                                                                   x,
                                                                   y,
                                                                   viewer_option=viewer_option-num_custom_viewer_options)
@@ -277,12 +277,18 @@ class omsi_mz_reupsample(omsi_analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        valuesX = None
+        labelX = None
+        valuesY = None
+        labelY = None
+        valuesZ = None
+        labelZ = None
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
-            """EDIT_ME Replace the omomsi_mz_bin class name with your class name"""
-            mz_spectra, label_spectra, mz_slice, label_slice = \
-                super(omomsi_mz_bin, cls)\
+            """EDIT_ME Replace the omsi_mz_upsample class name with your class name"""
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_mz_upsample, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
                            qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
@@ -298,7 +304,7 @@ class omsi_mz_reupsample(omsi_analysis_base):
             mz_slice  = None
             label_slice = None
         """
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):
@@ -330,10 +336,10 @@ class omsi_mz_reupsample(omsi_analysis_base):
         """
         EDIT_ME
 
-        Change the omomsi_mz_bin class-name to your class. If you did a
+        Change the omsi_mz_upsample class-name to your class. If you did a
         replace all, then this should be done already.
         """
-        dependent_options = super(omomsi_mz_bin, cls).v_qspectrum_viewer_options(analysis_object)
+        dependent_options = super(omsi_mz_upsample, cls).v_qspectrum_viewer_options(analysis_object)
         spectrum_viewer_options = custom_options + dependent_options
         return spectrum_viewer_options
 
@@ -368,10 +374,10 @@ class omsi_mz_reupsample(omsi_analysis_base):
         """
         EDIT_ME
 
-        Change the omomsi_mz_bin class-name to your class.  If you did
+        Change the omsi_mz_upsample class-name to your class.  If you did
         a replace all, then this should be done already.
         """
-        dependent_options = super(omomsi_mz_bin, cls).v_qslice_viewer_options(analysis_object)
+        dependent_options = super(omsi_mz_upsample, cls).v_qslice_viewer_options(analysis_object)
         slice_viewer_options = custom_options + dependent_options
         return slice_viewer_options
 
@@ -384,8 +390,8 @@ if __name__ == "__main__":
     """
     EDIT_ME
 
-    Simply replace the omomsi_mz_bin class name with your class name
+    Simply replace the omsi_mz_upsample class name with your class name
     """
-    omsi_cl_driver(analysis_class=omomsi_mz_bin).main()
+    omsi_cl_driver(analysis_class=omsi_mz_upsample).main()
 
 

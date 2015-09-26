@@ -165,6 +165,21 @@ class omsi_npg(analysis_base):
         labelSpectra = None
         mzSlice = None
         labelSlice = None
+        peaksArrayIndex = analysis_object['npg_peaks_ArrayIndex']
+        pAILast = peaksArrayIndex.shape[0] - 1
+        x_size = peaksArrayIndex[pAILast][0] + 1
+        y_size = peaksArrayIndex[pAILast][1] + 1
+        valuesX = range(0, x_size)
+        labelX = 'pixel index X'
+        valuesY = range(0, y_size)
+        labelY = 'pixel index Y'
+        if peaksArrayIndex.shape[1] > 2:
+            z_size = peaksArrayIndex[pAILast][2] + 1
+            valuesZ = range(0, z_size)
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
         #We do not need to handle the qslice_viewer_option separately here since there is only one option right now
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  #Loadings
             mzSpectra = analysis_object['npg_labels_medianmz'][:]
@@ -172,21 +187,21 @@ class omsi_npg(analysis_base):
             mzSlice = None
             labelSlice = None
         elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-            mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_npg, cls).v_qmz(analysis_object,
-                                                                                      qslice_viewer_option - 1,
-                                                                                      qspectrum_viewer_option - 1)
+            mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ =\
+                super(omsi_npg, cls).v_qmz(analysis_object, qslice_viewer_option - 1, qspectrum_viewer_option - 1)
         elif qspectrum_viewer_option == 0 and qslice_viewer_option > 0:
             mzSpectra = analysis_object['npg_labels_medianmz'][:]
             labelSpectra = "m/z"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_npg, cls).v_qmz(analysis_object, 0,
-                                                                           qspectrum_viewer_option - 1)
+            tempA, tempB, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_npg, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option - 1)
         elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0:
             mzSlice = analysis_object['npg_labels_medianmz'][:]
             labelSlice = "m/z"
-            mzSpectra, labelSpectra, tempA, tempB = super(omsi_npg, cls).v_qmz(analysis_object, 0,
-                                                                               qspectrum_viewer_option - 1)
+            # Ignore the spatial axes. We need to use the axes of omsi_npg as defined above
+            mzSpectra, labelSpectra, tempA, tempB, vX, lX, vY, lY, vZ, lZ = \
+                super(omsi_npg, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option - 1)
 
-        return mzSpectra, labelSpectra, mzSlice, labelSlice
+        return mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):

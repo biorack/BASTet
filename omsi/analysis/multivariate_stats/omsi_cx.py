@@ -267,31 +267,49 @@ class omsi_cx(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        cx_analysis_object = omsi_cx()
+        cx_analysis_object.read_from_omsi_file(analysis_object=analysis_object,
+                                               load_data=False,
+                                               load_parameters=False,
+                                               load_runtime_data=False)
+        cx_msidata_shape = cx_analysis_object['msidata'].shape
+        valuesX = range(0, cx_msidata_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, cx_msidata_shape[1])
+        labelY = 'pixel index Y'
+        if len(cx_msidata_shape) > 3:
+            valuesZ = range(0, cx_msidata_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_options and \
                 qslice_viewer_option >= num_custom_slice_options:
             """EDIT_ME Replace the omsi_cx class name with your class name"""
-            print 'HERE 1'
-            mz_spectra, label_spectra, mz_slice, label_slice = super(omsi_cx, cls).\
-                v_qmz(analysis_object,
-                      qslice_viewer_option=qslice_viewer_option-num_custom_slice_options,
-                      qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_cx, cls).v_qmz(analysis_object,
+                                          qslice_viewer_option=qslice_viewer_option-num_custom_slice_options,
+                                          qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
 
         # Implement the qmz pattern for all the custom qslice and qspectrum viewer options.
         if qslice_viewer_option == 0 and current_objective_dimension == cls.dimension_index['imageDim']:
-            mz_spectra, label_spectra, mz_slice, label_slice = super(omsi_cx, cls).\
-                v_qmz(analysis_object,
-                      qslice_viewer_option=0,
-                      qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
+            # Ignore the spatial dimensions as this is a custom qslice option
+            mz_spectra, label_spectra, mz_slice, label_slice, vX, lX, vY, lY, vZ, lZ = \
+                super(omsi_cx, cls).v_qmz(analysis_object,
+                                          qslice_viewer_option=0,
+                                          qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
             label_slice = 'Informative Images'
             mz_slice = np.arange(analysis_object['infIndices'].shape[0])
 
         if (qslice_viewer_option == 0 or qslice_viewer_option == 1) and \
                 current_objective_dimension == cls.dimension_index['pixelDim']:
-            mz_spectra, label_spectra, mz_slice, label_slice = super(omsi_cx, cls).\
-                v_qmz(analysis_object,
-                      qslice_viewer_option=0,
-                      qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
+            # Ignore the spatial dimensions as this is a custom qslice option
+            mz_spectra, label_spectra, mz_slice, label_slice, vX, lX, vY, lY, vZ, lZ = \
+                super(omsi_cx, cls).v_qmz(analysis_object,
+                                          qslice_viewer_option=0,
+                                          qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_options)
             if qslice_viewer_option == 0:
                 label_slice = 'Pixel Leverage Scores'
                 mz_slice = np.arange(1)
@@ -299,7 +317,21 @@ class omsi_cx(analysis_base):
                 label_slice = 'Pixel Rank'
                 mz_slice = np.arange(1)
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        #
+        # elif viewer_option == 0 and current_objective_dimension == cls.dimension_index['imageDim']:
+        #     informative_indices = analysis_object['infIndices'][z_select]
+        #     cx_analysis_object = omsi_cx()
+        #     cx_analysis_object.read_from_omsi_file(analysis_object=analysis_object,
+        #                                            load_data=False,
+        #                                            load_parameters=False,
+        #                                            load_runtime_data=False)
+        #     return cx_analysis_object['msidata'][:, :, informative_indices]
+        # elif viewer_option == 0 and current_objective_dimension == cls.dimension_index['pixelDim']:
+        #     return analysis_object['levScores'][:]
+        # elif viewer_option == 1 and current_objective_dimension == cls.dimension_index['pixelDim']:
+        #     return analysis_object['infIndices'][:]
+
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,

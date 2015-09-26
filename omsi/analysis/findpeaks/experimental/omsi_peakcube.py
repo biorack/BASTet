@@ -107,6 +107,17 @@ class omsi_peakcube(analysis_base):
         labelSpectra = None
         mzSlice = None
         labelSlice = None
+        peak_cube_shape = analysis_object['npg_peak_cube_mz'].shape
+        valuesX = range(0, peak_cube_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, peak_cube_shape[1])
+        labelY = 'pixel index Y'
+        if len(peak_cube_shape) > 3:
+            valuesZ = range(0, peak_cube_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
         # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  #Loadings
             mzSpectra = analysis_object['npg_peak_mz'][:]
@@ -114,21 +125,21 @@ class omsi_peakcube(analysis_base):
             mzSlice = None
             labelSlice = None
         elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-            mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_peakcube, cls).v_qmz(analysis_object,
-                                                                                           qslice_viewer_option - 1,
-                                                                                           qspectrum_viewer_option - 1)
+            mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_peakcube, cls).v_qmz(analysis_object, qslice_viewer_option - 1, qspectrum_viewer_option - 1)
         elif qspectrum_viewer_option == 0 and qslice_viewer_option > 0:
             mzSpectra = analysis_object['npg_peak_mz'][:]
             labelSpectra = "m/z"
-            tempA, tempB, mzSlice, labelSlice = super(omsi_peakcube, cls).v_qmz(analysis_object, 0,
-                                                                                qspectrum_viewer_option - 1)
+            tempA, tempB, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_peakcube, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option - 1)
         elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0:
             mzSlice = analysis_object['npg_peak_mz'][:]
             labelSlice = "m/z"
-            mzSpectra, labelSpectra, tempA, tempB = super(omsi_peakcube, cls).v_qmz(analysis_object, 0,
-                                                                                    qspectrum_viewer_option - 1)
+            # Ignore the spatial axes. We need to uise the axes of omsi_peakcube
+            mzSpectra, labelSpectra, tempA, tempB, vX, lX, vY, lY, vZ, lZ =\
+                super(omsi_peakcube, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option - 1)
 
-        return mzSpectra, labelSpectra, mzSlice, labelSlice
+        return mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):
@@ -201,6 +212,7 @@ class omsi_peakcube(analysis_base):
 
         print "Collecting done."
         print "--- finished ---"
+        return self['npg_peak_cube_mz'], self['npg_peak_mz']
 
     def record_execute_analysis_outputs(self, analysis_output):
         """We are recording our outputs manually as part of the execute function"""

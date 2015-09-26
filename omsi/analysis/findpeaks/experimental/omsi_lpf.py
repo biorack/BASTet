@@ -151,6 +151,21 @@ def v_qmz(cls, analysis_object, qslice_viewer_option=0, qspectrum_viewer_option=
     labelSpectra = None
     mzSlice = None
     labelSlice = None
+    array_indices = analysis_object['peak_arrayindex'][:]
+    x_size = array_indices[:, 0].max()+1
+    y_size = array_indices[:, 1].max()+1
+    valuesX = range(0, x_size)
+    labelX = 'pixel index X'
+    valuesY = range(0, y_size)
+    labelY = 'pixel index Y'
+    if array_indices.shape[1] > 2:
+        z_size = array_indices[:, 2].max()+1
+        valuesZ = range(0, z_size)
+        labelZ = 'pixel index Z'
+    else:
+        valuesZ = None
+        labelZ = None
+
     # We do not have native option for qslice, so we rely on the input data in all cases
     if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  #Loadings
         mzSpectra = analysis_object['LPF_indata_mz'][:]
@@ -158,14 +173,15 @@ def v_qmz(cls, analysis_object, qslice_viewer_option=0, qspectrum_viewer_option=
         mzSlice = None
         labelSlice = None
     elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-        mzSpectra, labelSpectra, mzSlice, labelSlice = super(omsi_lpf, cls).v_qmz(analysis_object, qslice_viewer_option,
-                                                                                  qspectrum_viewer_option - 1)
+        mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ  = \
+            super(omsi_lpf, cls).v_qmz(analysis_object, qslice_viewer_option, qspectrum_viewer_option - 1)
     elif qspectrum_viewer_option == 0 and qslice_viewer_option >= 0:
         mzSpectra = analysis_object['LPF_indata_mz'][:]
         labelSpectra = "m/z"
-        tempA, tempB, mzSlice, labelSlice = super(omsi_lpf, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option)
+        tempA, tempB, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ  = \
+            super(omsi_lpf, cls).v_qmz(analysis_object, 0, qspectrum_viewer_option)
 
-    return mzSpectra, labelSpectra, mzSlice, labelSlice
+    return mzSpectra, labelSpectra, mzSlice, labelSlice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
 
 @classmethod

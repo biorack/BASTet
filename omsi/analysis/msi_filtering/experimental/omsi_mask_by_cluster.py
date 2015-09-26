@@ -79,7 +79,7 @@ class omsi_mask_by_cluster(analysis_base):
 
         # Expose the qslice viewer functionality of any data dependencies
         if viewer_option >= num_custom_viewer_options:
-            return super(omsi_analysis_template, cls).v_qslice(analysis_object,
+            return super(omsi_mask_by_cluster, cls).v_qslice(analysis_object,
                                                                z,
                                                                viewer_option=viewer_option-num_custom_viewer_options)
 
@@ -145,9 +145,9 @@ class omsi_mask_by_cluster(analysis_base):
             """
             EDIT_ME
 
-            Replace omsi_analysis_template with your classname
+            Replace omsi_mask_by_cluster with your classname
             """
-            return super(omsi_analysis_template, cls).v_qspectrum(analysis_object,
+            return super(omsi_mask_by_cluster, cls).v_qspectrum(analysis_object,
                                                                   x,
                                                                   y,
                                                                   viewer_option=viewer_option-num_custom_viewer_options)
@@ -202,12 +202,18 @@ class omsi_mask_by_cluster(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        valuesX = None
+        labelX = None
+        valuesY = None
+        labelY = None
+        valuesZ = None
+        labelZ = None
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
-            """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
-            mz_spectra, label_spectra, mz_slice, label_slice = \
-                super(omsi_analysis_template, cls)\
+            """EDIT_ME Replace the omsi_mask_by_cluster class name with your class name"""
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_mask_by_cluster, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
                            qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
@@ -223,7 +229,7 @@ class omsi_mask_by_cluster(analysis_base):
             mz_slice  = None
             label_slice = None
         """
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):
@@ -255,10 +261,10 @@ class omsi_mask_by_cluster(analysis_base):
         """
         EDIT_ME
 
-        Change the omsi_analysis_template class-name to your class. If you did a
+        Change the omsi_mask_by_cluster class-name to your class. If you did a
         replace all, then this should be done already.
         """
-        dependent_options = super(omsi_analysis_template, cls).v_qspectrum_viewer_options(analysis_object)
+        dependent_options = super(omsi_mask_by_cluster, cls).v_qspectrum_viewer_options(analysis_object)
         spectrum_viewer_options = custom_options + dependent_options
         return spectrum_viewer_options
 
@@ -293,10 +299,10 @@ class omsi_mask_by_cluster(analysis_base):
         """
         EDIT_ME
 
-        Change the omsi_analysis_template class-name to your class.  If you did
+        Change the omsi_mask_by_cluster class-name to your class.  If you did
         a replace all, then this should be done already.
         """
-        dependent_options = super(omsi_analysis_template, cls).v_qslice_viewer_options(analysis_object)
+        dependent_options = super(omsi_mask_by_cluster, cls).v_qslice_viewer_options(analysis_object)
         slice_viewer_options = custom_options + dependent_options
         return slice_viewer_options
 

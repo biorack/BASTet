@@ -271,11 +271,17 @@ class omsi_analysis_template(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        valuesX = None
+        labelX = None
+        valuesY = None
+        labelY = None
+        valuesZ = None
+        labelZ = None
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
             """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ= \
                 super(omsi_analysis_template, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
@@ -292,7 +298,7 @@ class omsi_analysis_template(analysis_base):
             mz_slice  = None
             label_slice = None
         """
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):

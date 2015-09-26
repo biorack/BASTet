@@ -87,6 +87,18 @@ class omsi_nmf(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        ho_cube_shape = analysis_object['ho'].shape
+        valuesX = range(0, ho_cube_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, ho_cube_shape[1])
+        labelY = 'pixel index Y'
+        if len(ho_cube_shape) > 3:
+            valuesZ = range(0, ho_cube_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings
             mz_spectra = np.arange(0, analysis_object['ho'].shape[2])
@@ -94,14 +106,14 @@ class omsi_nmf(analysis_base):
             mz_slice = None
             label_slice = None
         elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_nmf, cls).v_qmz(analysis_object,
                                            qslice_viewer_option=qslice_viewer_option-1,
                                            qspectrum_viewer_option=qspectrum_viewer_option-1)
         elif qspectrum_viewer_option == 0 and qslice_viewer_option > 0:
             mz_spectra = np.arange(0, analysis_object['ho'].shape[2])
             label_spectra = "Component Index"
-            temp_a, temp_b, mz_slice, label_slice = \
+            temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_nmf, cls).v_qmz(analysis_object,
                                            qslice_viewer_option=qslice_viewer_option-1,
                                            qspectrum_viewer_option=0)
@@ -113,12 +125,13 @@ class omsi_nmf(analysis_base):
         elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0:
             mz_slice = np.arange(0, analysis_object['ho'].shape[2])
             label_slice = "Component Index"
-            mz_spectra, label_spectra, temp_a, temp_b = \
+            # Ignore the spatial components as we are implementing our own spatial slicing here
+            mz_spectra, label_spectra, temp_a, temp_b, vX, lX, vY, lY, vZ, lZ = \
                 super(omsi_nmf, cls).v_qmz(analysis_object,
                                            qslice_viewer_option=0,
                                            qspectrum_viewer_option=qspectrum_viewer_option-1)
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):

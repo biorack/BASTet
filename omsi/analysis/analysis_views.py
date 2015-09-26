@@ -122,13 +122,19 @@ class analysis_views(object):
             - label_spectra : Lable for the spectral mz axis
             - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
             - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
+            - values_x: The values for the x axis of the image (or None)
+            - label_x: Label for the x axis of the image
+            - values_y: The values for the y axis of the image (or None)
+            - label_y: Label for the y axis of the image
+            - values_z: The values for the z axis of the image (or None)
+            - label_z: Label for the z axis of the image
+
         """
         analysis_type = str(analysis_object.get_analysis_type()[0])
-        mz_spectra, label_spectra, mz_slice, label_slice = \
-            cls.analysis_name_to_class(analysis_type).v_qmz(analysis_object,
-                                                            qslice_viewer_option=qslice_viewer_option,
-                                                            qspectrum_viewer_option=qspectrum_viewer_option)
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return cls.analysis_name_to_class(analysis_type).v_qmz(analysis_object,
+                                                               qslice_viewer_option=qslice_viewer_option,
+                                                               qspectrum_viewer_option=qspectrum_viewer_option)
+        # return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def supports_slice(cls,

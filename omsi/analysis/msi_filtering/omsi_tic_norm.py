@@ -282,7 +282,7 @@ class omsi_tic_norm(analysis_base):
                 - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
                 - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
         """
-        num_custom_clice_options = 1
+        num_custom_slice_options = 1
         num_custom_spectrum_options = 0
 
         # Compute the output
@@ -290,12 +290,25 @@ class omsi_tic_norm(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+
+        norm_msidata_shape = analysis_object['norm_msidata'].shape
+        valuesX = range(0, norm_msidata_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, norm_msidata_shape[1])
+        labelY = 'pixel index Y'
+        if len(norm_msidata_shape) > 3:
+            valuesZ = range(0, norm_msidata_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_options and \
-                qslice_viewer_option >= num_custom_clice_options:
-            super_qslice_option = qslice_viewer_option-num_custom_clice_options
+                qslice_viewer_option >= num_custom_slice_options:
+            super_qslice_option = qslice_viewer_option-num_custom_slice_options
             super_qspectrum_option = qspectrum_viewer_option-num_custom_spectrum_options
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ= \
                 super(omsi_tic_norm, cls).v_qmz(analysis_object,
                                                 qslice_viewer_option=super_qslice_option,
                                                 qspectrum_viewer_option=super_qspectrum_option)
@@ -304,16 +317,17 @@ class omsi_tic_norm(analysis_base):
         if qslice_viewer_option == 0 and qspectrum_viewer_option >= num_custom_spectrum_options:
             super_qslice_option = 0
             super_qspectrum_option = qspectrum_viewer_option-num_custom_spectrum_options
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            # Ignore the spatial dimensions. We need to use the spatial axes of our norm_msidata
+            mz_spectra, label_spectra, mz_slice, label_slice, vX, lX, vY, lY, vZ, lZ = \
                 super(omsi_tic_norm, cls).v_qmz(analysis_object,
                                                 qslice_viewer_option=super_qslice_option,
                                                 qspectrum_viewer_option=super_qspectrum_option)
             label_slice = 'm/z'
             mz_slice = analysis_object['norm_mz'][:]
-        elif qspectrum_viewer_option == 0 and qslice_viewer_option >= num_custom_clice_options:
-            super_qslice_option = qslice_viewer_option-num_custom_clice_options
+        elif qspectrum_viewer_option == 0 and qslice_viewer_option >= num_custom_slice_options:
+            super_qslice_option = qslice_viewer_option-num_custom_slice_options
             super_qspectrum_option = 0
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_tic_norm, cls).v_qmz(analysis_object,
                                                 qslice_viewer_option=super_qslice_option,
                                                 qspectrum_viewer_option=super_qspectrum_option)
@@ -325,7 +339,7 @@ class omsi_tic_norm(analysis_base):
             mz_slice = None
             label_slice = None
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,

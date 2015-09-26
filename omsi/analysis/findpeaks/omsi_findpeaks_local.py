@@ -186,6 +186,21 @@ class omsi_findpeaks_local(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        array_indices = analysis_object['peak_arrayindex'][:]
+        x_size = array_indices[:, 0].max()+1
+        y_size = array_indices[:, 1].max()+1
+        valuesX = range(0, x_size)
+        labelX = 'pixel index X'
+        valuesY = range(0, y_size)
+        labelY = 'pixel index Y'
+        if array_indices.shape[1] > 2:
+            z_size = array_indices[:, 2].max()+1
+            valuesZ = range(0, z_size)
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # We do not have native option for qslice, so we rely on the input data in all cases
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings
             mz_spectra = analysis_object['indata_mz'][:]
@@ -193,14 +208,14 @@ class omsi_findpeaks_local(analysis_base):
             mz_slice = None
             label_slice = None
         elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ= \
                 super(omsi_findpeaks_local, cls).v_qmz(analysis_object,
                                                        qslice_viewer_option=qslice_viewer_option,
                                                        qspectrum_viewer_option=qspectrum_viewer_option-1)
         elif qspectrum_viewer_option == 0 and qslice_viewer_option >= 0:
             mz_spectra = analysis_object['indata_mz'][:]
             label_spectra = "m/z"
-            temp_a, temp_b, mz_slice, label_slice = \
+            temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_findpeaks_local, cls).v_qmz(analysis_object,
                                                        0,
                                                        qspectrum_viewer_option)
@@ -211,7 +226,7 @@ class omsi_findpeaks_local(analysis_base):
                 mz_slice = temp_a
                 label_slice = temp_b
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,

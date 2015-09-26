@@ -629,9 +629,15 @@ class analysis_base(object):
         :returns: The following four arrays are returned by the analysis:
 
             - mzSpectra : Array with the static mz values for the spectra.
-            - labelSpectra : Lable for the spectral mz axis
+            - labelSpectra : Label for the spectral mz axis
             - mzSlice : Array of the static mz values for the slices or None if identical to the mzSpectra.
-            - labelSlice : Lable for the slice mz axis or None if identical to labelSpectra.
+            - labelSlice : Label for the slice mz axis or None if identical to labelSpectra.
+            - values_x: The values for the x axis of the image (or None)
+            - label_x: Label for the x axis of the image
+            - values_y: The values for the y axis of the image (or None)
+            - label_y: Label for the y axis of the image
+            - values_z: The values for the z axis of the image (or None)
+            - label_z: Label for the z axis of the image
 
         """
         from omsi.analysis.analysis_views import analysis_views
@@ -646,11 +652,18 @@ class analysis_base(object):
             if isinstance(re_spectrumdata[qspectrum_viewer_option], omsi_file_msidata):
                 mz_spectra = re_spectrumdata[qspectrum_viewer_option].mz[:]
                 label_spectra = "m/z"
+                valuesX = range(0, re_spectrumdata[qspectrum_viewer_option].shape[0])
+                valuesY = range(0, re_spectrumdata[qspectrum_viewer_option].shape[1])
+                is3Dimage = len(re_spectrumdata[qspectrum_viewer_option].shape)
+                valuesZ = None if is3Dimage <= 3 else range(0, re_spectrumdata[qspectrum_viewer_option].shape[2])
+                labelX = 'pixel index X'
+                labelY = 'pixel index Y'
+                labelZ = None if is3Dimage else 'pixel index Z'
             elif isinstance(re_spectrumdata[qspectrum_viewer_option], omsi_file_analysis):
-                mz_spectra, label_spectra, temp_a, temp_b = analysis_views.get_axes(
-                    re_spectrumdata[qspectrum_viewer_option],
-                    qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
-                    qspectrum_viewer_option=re_spectrum_option_index[qspectrum_viewer_option])
+                mz_spectra, label_spectra, temp_a, temp_b, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                    analysis_views.get_axes(re_spectrumdata[qspectrum_viewer_option],
+                                            qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
+                                            qspectrum_viewer_option=re_spectrum_option_index[qspectrum_viewer_option])
             else:
                 mz_spectra = None
                 label_spectra = None
@@ -660,7 +673,7 @@ class analysis_base(object):
                 mz_slice = re_slicedata[qslice_viewer_option].mz[:]
                 label_slice = "m/z"
             elif isinstance(re_slicedata[qslice_viewer_option], omsi_file_analysis):
-                temp_a, temp_b, mz_slice, label_slice = \
+                temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ  = \
                     analysis_views.get_axes(
                         re_slicedata[qslice_viewer_option],
                         qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
@@ -669,7 +682,7 @@ class analysis_base(object):
                 mz_slice = None
                 label_slice = None
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,

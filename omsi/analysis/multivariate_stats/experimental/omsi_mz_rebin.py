@@ -282,10 +282,23 @@ class omsi_mz_rebin(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+
+        new_msidata_shape = analysis_object['new_msidata']
+        valuesX = range(0, new_msidata_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, new_msidata_shape[1])
+        labelY = 'pixel index Y'
+        if len(new_msidata_shape) > 3:
+            valuesZ = range(0, new_msidata_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_mz_rebin, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
@@ -300,11 +313,21 @@ class omsi_mz_rebin(analysis_base):
         elif qspectrum_viewer_option == 0:
             mz_spectra =  analysis_object['new_mz'][:]
             label_spectra = "m/z"
+            mzs, ls, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
+                super(omsi_mz_rebin, cls)\
+                    .v_qmz(analysis_object,
+                           qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
+                           qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
         elif qslice_viewer_option == 0:
             mz_slice  = analysis_object['new_mz'][:]
             label_slice = "m/z"
+            mz_spectra, label_spectra, mzs, ls, vX, lX, vY, lY, vZ, lZ = \
+                super(omsi_mz_rebin, cls)\
+                    .v_qmz(analysis_object,
+                           qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
+                           qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls, analysis_object):

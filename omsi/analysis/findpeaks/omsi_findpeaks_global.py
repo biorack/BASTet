@@ -124,6 +124,18 @@ class omsi_findpeaks_global(analysis_base):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        peak_cube_shape = analysis_object['peak_cube'].shape
+        valuesX = range(0, peak_cube_shape[0])
+        labelX = 'pixel index X'
+        valuesY = range(0, peak_cube_shape[1])
+        labelY = 'pixel index Y'
+        if len(peak_cube_shape) > 3:
+            valuesZ = range(0, peak_cube_shape[2])
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
         # We do not need to handle the qslice_viewer_option separately here since there is only one option right now
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings
             mz_spectra = analysis_object['peak_mz'][:]
@@ -131,14 +143,14 @@ class omsi_findpeaks_global(analysis_base):
             mz_slice = None
             label_slice = None
         elif qspectrum_viewer_option > 0 and qslice_viewer_option > 0:
-            mz_spectra, label_spectra, mz_slice, label_slice = \
+            mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_findpeaks_global, cls).v_qmz(analysis_object,
                                                         qslice_viewer_option-1,
                                                         qspectrum_viewer_option-1)
         elif qspectrum_viewer_option == 0 and qslice_viewer_option > 0:
             mz_spectra = analysis_object['peak_mz'][:]
             label_spectra = "m/z"
-            temp_a, temp_b, mz_slice, label_slice = \
+            temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                 super(omsi_findpeaks_global, cls).v_qmz(analysis_object,
                                                         qslice_viewer_option=qslice_viewer_option-1,
                                                         qspectrum_viewer_option=0)
@@ -150,12 +162,13 @@ class omsi_findpeaks_global(analysis_base):
         elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0:
             mz_slice = analysis_object['peak_mz'][:]
             label_slice = "m/z"
-            mz_spectra, label_spectra, temp_a, temp_b = \
+            # Ignore the spatial coordinates. We have to use the shape of the qcube
+            mz_spectra, label_spectra, temp_a, temp_b, vX, lX, vY, lY, vZ, lZ = \
                 super(omsi_findpeaks_global, cls).v_qmz(analysis_object,
                                                         qslice_viewer_option=0,
                                                         qspectrum_viewer_option=qspectrum_viewer_option-1)
 
-        return mz_spectra, label_spectra, mz_slice, label_slice
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,
