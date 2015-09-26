@@ -100,7 +100,7 @@ class log_helper(object):
         :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).debug(message, *args, **kwargs)
 
     @classmethod
@@ -120,7 +120,7 @@ class log_helper(object):
         :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).info(message, *args, **kwargs)
 
     @classmethod
@@ -140,7 +140,7 @@ class log_helper(object):
         :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).warning(message, *args, **kwargs)
 
     @classmethod
@@ -157,7 +157,7 @@ class log_helper(object):
             * ``kwargs`` : Additional keyword arguments for the python logger.error function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).error(message, *args, **kwargs)
 
     @classmethod
@@ -177,7 +177,7 @@ class log_helper(object):
         :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).critical(message, *args, **kwargs)
 
     @classmethod
@@ -197,7 +197,7 @@ class log_helper(object):
         :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
-        if root is None or root == mpi_helper.get_rank(comm=None):
+        if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).exception(message, *args, **kwargs)
 
 

@@ -2,7 +2,7 @@ shared Package
 ==============
 
 :mod:`data_selection` Module
----------------------------------
+----------------------------
 
 .. automodule:: omsi.shared.data_selection
     :members:
@@ -18,7 +18,7 @@ shared Package
     :show-inheritance:
 
 :mod:`metadata_data` Module
------------------------------
+---------------------------
 
 .. automodule:: omsi.shared.metadata_data
     :members:
@@ -26,7 +26,7 @@ shared Package
     :show-inheritance:
 
 :mod:`metadata_ontologies` Module
------------------------------
+---------------------------------
 
 .. automodule:: omsi.shared.metadata_ontologies
     :members:
@@ -45,6 +45,14 @@ shared Package
 -----------------------------
 
 .. automodule:: omsi.shared.spectrum_layout
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`log` Module
+-----------------
+
+.. automodule:: omsi.shared.log
     :members:
     :undoc-members:
     :show-inheritance:
