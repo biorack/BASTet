@@ -738,7 +738,7 @@ class ConvertSettings(object):
                 else:
                     log_helper.warning(__name__, 'Invalid log level ' + str(argv[i+1]))
                     input_error = True
-            elif current_arg.startswith("--"):
+            elif current_arg.startswith("-"):  # Check for single dash to catch the case when a user mistypes the arg
                 start_index += 1
                 input_error = True
                 log_helper.warning(__name__, "Unrecognized input option: " + current_arg)
@@ -1693,7 +1693,6 @@ class ConvertFiles(object):
                         data[xindex, yindex, :] = input_file[xindex, yindex, :]
         elif data_io_option == "all":
             data[:] = input_file[:]
-
         elif data_io_option == "spectrum_to_image":
             #Determine the I/O settings
             log_helper.info(__name__, "Spectrum-to-image I/O. Write %s blocks at a time" % (chunk_shape, ))
