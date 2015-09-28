@@ -64,7 +64,7 @@ class analysis_base(object):
     **Instance Variables:**
 
     :ivar analysis_identifier: Define the name for the analysis used as key in search operations
-    :ivar __data_list: Dictonary of analysis_data to be written to the HDF5 file. Derived classes
+    :ivar __data_list: List of analysis_data to be written to the HDF5 file. Derived classes
         need to add all data that should be saved for the analysis in the omsi HDF5 file to this dictionary.
         See omsi.analysis.analysis_data for details.
     :ivar parameters: List of parameter_data objects of all  analysis parameters
@@ -84,6 +84,8 @@ class analysis_base(object):
         Default is MPI.Comm_world/
     :ivar mpi_root: In case we are running with MPI, this is the root rank where data is collected to (e.g., runtime
         data and analysis results)
+    :ivar update_analysis: If the value is True, then we should execute the analysis before using the outputs.
+        If False, then the analysis has been executed with the current parameter settings.
 
 
     **Execution Functions:**
@@ -162,6 +164,7 @@ class analysis_base(object):
         self._analysis_instances.add(weakref.ref(self))
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
+        self.update_analysis = True
 
     def __getitem__(self,
                     key):
@@ -467,6 +470,9 @@ class analysis_base(object):
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
 
+        # Indicate the analysis is up-to-date
+        self.update_analysis = False
+
         # Return the output of the analysis
         return analysis_output
 
@@ -488,6 +494,40 @@ class analysis_base(object):
 
         """
         raise NotImplementedError("Implement execute_analysis in order to be able to run the analysis.")
+
+    def execute_recursive(self):
+        """
+        Recursively execute this analysis and all its dependencies if necessary
+
+        :return: Same as execute
+        """
+        from omsi.workflow.analysis_driver.base import workflow_driver_base
+        log_helper.info(__name__, "Executing the analysis and all its dependencies. " + str(self))
+
+        if len(self.check_ready_to_execute()) == 0:
+            log_helper.debug(__name__, "All dependencies ready. Recursive execution not needed. Running the analysis.")
+            return self.execute()
+        else:
+            log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
+            default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
+            default_driver.execute()
+            log_helper.debug(__name__, "Compiling outputs and return")
+            outputs = [self[name] for name in self.data_names]
+            return tuple(outputs)
+
+    @classmethod
+    def execute_all(cls):
+        """
+        Execute all analysis instances that are currently defined.
+        """
+        log_helper.info(__name__, "Execute all analyses")
+        from omsi.workflow.analysis_driver.base import workflow_driver_base
+        log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
+        default_driver = workflow_driver_base.get_default_driver()
+        for ana_obj in cls.get_analysis_instances():
+            default_driver.add_analysis(ana_obj)
+        log_helper.debug(__name__, "Execute the workflow using the default driver")
+        default_driver.execute()
 
     @classmethod
     def v_qslice(cls,
@@ -1051,8 +1091,8 @@ class analysis_base(object):
         Get the complete list of all direct dependencies to be written to the HDF5 file
 
         NOTE: These are only the direct dependencies as specified by the analysis itself.
-        Use  get_all_dependency_data_recursive(..) to also get the indirect decencies of
-        the analysis due to dependencies of the decencies themselves.
+        Use  get_all_dependency_data_recursive(..) to also get the indirect dependencies of
+        the analysis due to dependencies of the dependencies themselves.
 
         :returns: List of parameter_data objects that define dependencies.
 
@@ -1185,6 +1225,7 @@ class analysis_base(object):
             if curr_parameter is not None:
                 # curr_parameter['dtype'] = dtype
                 curr_parameter['data'] = value
+                self.update_analysis = True
             else:  # If used correctly this should not happen. Ensures that we don't omit any data
                 warnings.warn('Parameter ' + name + " not found in analysis_base.set_parameter_values(). " +
                               "Adding a new parameter.")
@@ -1193,6 +1234,7 @@ class analysis_base(object):
                                                       dtype=dtype,
                                                       required=False,
                                                       data=value))
+                self.update_analysis = True
 
     def add_parameter(self,
                       name,
@@ -1231,6 +1273,7 @@ class analysis_base(object):
                                               choices=choices,
                                               data=data,
                                               group=group))
+        self.update_analysis = True
 
 #    def add_analysis_data(self , name, data, dtype ) :
 #        """Add a new dataset to the list of data to be written to the HDF5 file
@@ -1385,6 +1428,7 @@ class analysis_base(object):
         self.set_parameter_values(**parameters_values)
         self.run_info = analysis_object.get_all_runinfo_data(load_data=load_runtime_data)
         self.omsi_analysis_storage.append(analysis_object)
+        self.update_analysis = False
         return True
 
     def get_analysis_identifier(self):
