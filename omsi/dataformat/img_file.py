@@ -175,7 +175,8 @@ class img_file(file_reader_base):
         temp_img_file = open( self.img_filename , 'rb' )
         for xindex in range(self.shape[0]):
             for yindex in range(self.shape[1]):
-                index = xindex + (yindex*self.shape[0])
+                #index = xindex + (yindex*self.shape[0])
+                index = yindex + (xindex*self.shape[1])
                 skip = self.shape[2] * np.dtype(self.data_type).itemsize
                 temp_img_file.seek(skip*index, 0)
                 spektrum = np.fromfile(file=temp_img_file,
