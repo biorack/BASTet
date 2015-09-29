@@ -44,7 +44,6 @@ class AnalysisReadyError(Exception):
         super(AnalysisReadyError, self).__init__(repr(message))
 
 
-
 class analysis_base(object):
     """
     Base class for omsi analysis functionality. The class provides a large set of functionality designed
@@ -99,8 +98,8 @@ class analysis_base(object):
     These functions can be optionally overwritten to control how the analysis data should be written/read
     from the omsi HDF5 file. Default implementations are provided here, which should be sufficient for most cases.
 
-    * ``add_custom_data_to_omsi_file``: The default implementation is empty as the default data write is  managed by the \
-    `omsi_file_experiment.create_analysis()` function.  Overwrite this function, in case that the analysis needs \
+    * ``add_custom_data_to_omsi_file``: The default implementation is empty as the default data write is  managed by \
+    the `omsi_file_experiment.create_analysis()` function.  Overwrite this function, in case that the analysis needs \
     to write data to the HDF5 omsi file beyond what the defualt omsi data API does.
 
     * ``read_from_omsi_file``: The default implementation tries to reconstruct the original data as far as possible, \
@@ -334,9 +333,11 @@ class analysis_base(object):
         # Record the analysis output so that we can save it to file
         if analysis_output is not None:
             if len(self.data_names) == 1:   # We need this case, because analysis_output is not a tuple we can slice
+                log_helper.debug(__name__, "Recording output " + str(self.data_names[0]))
                 self[self.data_names[0]] = analysis_output
             else:
                 for data_index, data_name in enumerate(self.data_names):
+                    log_helper.debug(__name__, "Recording output " + str(data_name))
                     self[data_name] = analysis_output[data_index]
 
     def execute(self, **kwargs):
@@ -717,7 +718,7 @@ class analysis_base(object):
                 mz_slice = re_slicedata[qslice_viewer_option].mz[:]
                 label_slice = "m/z"
             elif isinstance(re_slicedata[qslice_viewer_option], omsi_file_analysis):
-                temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ  = \
+                temp_a, temp_b, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ = \
                     analysis_views.get_axes(
                         re_slicedata[qslice_viewer_option],
                         qslice_viewer_option=re_slice_option_index[qslice_viewer_option],
@@ -890,7 +891,6 @@ class analysis_base(object):
                 # Enable profiling
                 self.profile_time_and_usage = True
                 log_helper.debug(__name__, "Enabled time and usage profiling. ", self.mpi_root)
-
 
     def enable_memory_profiling(self, enable=True):
         """
@@ -1171,7 +1171,7 @@ class analysis_base(object):
                may provide a tuple consisting of the dataobject t[0] and
                an additional selection string t[1].
         """
-        log_helper.debug(__name__, "Setting analysis parameters. " + str(kwargs), self.mpi_root)
+        log_helper.debug(__name__, "Setting analysis parameters. " + str(kwargs.keys()), self.mpi_root)
         import h5py
         from omsi.dataformat.omsi_file.common import omsi_file_common
         for k, v in kwargs.items():
@@ -1179,7 +1179,7 @@ class analysis_base(object):
             value = v
             selection = None
             curr_parameter = self.get_parameter_data_by_name(name)
-            dtype = curr_parameter['dtype']   # unicode
+            dtype = curr_parameter['dtype'] if curr_parameter is not None else unicode  # unicode
             if isinstance(v, tuple):
                 value = v[0]
                 selection = v[1]
@@ -1191,14 +1191,14 @@ class analysis_base(object):
                                         link_name=name,
                                         omsi_object=value,
                                         selection=selection,
-                                        help=curr_parameter['help'],
+                                        help=curr_parameter['help'] if curr_parameter is not None else '',
                                         dependency_type=dependency_dict.dependency_types['parameter'])
                 # dtype = analysis_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, dependency_dict):
                 # Set any possibly missing parameters
                 value['param_name'] = name
                 value['link_name'] = name
-                value['help'] = curr_parameter['help']
+                value['help'] = curr_parameter['help'] if curr_parameter is not None else ''
                 value['dependency_type'] = dependency_dict.dependency_types['parameter']
             else:
                 # Try to locate the input parameter to see if it is an output of another analysis
@@ -1240,9 +1240,13 @@ class analysis_base(object):
                 # curr_parameter['dtype'] = dtype
                 curr_parameter['data'] = value
                 self.update_analysis = True
-            else:  # If used correctly this should not happen. Ensures that we don't omit any data
-                warnings.warn('Parameter ' + name + " not found in analysis_base.set_parameter_values(). " +
-                              "Adding a new parameter.")
+            # Missing parameter. Add the parameter to ensure that we don't omit any data.
+            else:
+                # Using the standard implementation path, this should never happen. However, when dynamically
+                # wrapping and restoring functions on-the-fly we cannot determine all parameters until later
+                # (e.g., when use analysis_generic) so that we need to cover this case here.
+                log_helper.warning(__name__, "Parameter " + name +
+                                   " not found in analysis_base.set_parameter_values(). Adding a new parameter.")
                 self.parameters.append(parameter_data(name=name,
                                                       help='',
                                                       dtype=dtype,
