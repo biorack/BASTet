@@ -13,6 +13,7 @@ from omsi.dataformat.omsi_file.methods import omsi_methods_manager
 from omsi.dataformat.omsi_file.instrument import omsi_instrument_manager
 from omsi.dataformat.omsi_file.analysis import omsi_analysis_manager
 from omsi.dataformat.omsi_file.msidata import omsi_msidata_manager
+import os
 
 
 class omsi_experiment_manager(omsi_file_object_manager):
@@ -213,6 +214,13 @@ class omsi_file_experiment(omsi_methods_manager,
         # self.methods_parent = self.managed_group
         # self.instrument_parent = self.managed_group
         # self.name = self.managed_group.name
+
+    def get_experiment_index(self):
+        """
+        Determine the index of the experiment based on the name of the group
+        :return: Integer index of the experiment
+        """
+        return int(os.path.basename(self.managed_group.name).lstrip(omsi_format_experiment.exp_groupname))
 
     ##########################################################
     #  Access the data directly associated with the experiment
