@@ -87,6 +87,7 @@ class log_helper(object):
     def log_var(cls, module_name, root=None, comm=None, level=None, **kwargs):
         """
         Log one or more variable values
+
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
@@ -94,6 +95,7 @@ class log_helper(object):
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param kwargs: Variables+values to be logged
+        
         """
         for var_name, var_value in kwargs.iteritems():
             try:
