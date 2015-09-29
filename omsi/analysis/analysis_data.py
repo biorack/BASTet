@@ -349,9 +349,14 @@ class parameter_data(dict):
             try:
                 outdata = curr_dtype(outdata)
             except:
-                # raise
-                warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
-                              self['name'] + "  " + str(outdata) + "  " + unicode(sys.exc_info()))
+                try:
+                    warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
+                                  self['name'] + "  "  + unicode(outdata)  + "  " +
+                                  unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
+                except (UnicodeDecodeError, UnicodeEncodeError):
+                    warnings.warn('Conversion of parameter data to the expected dtype failed. ' + self['name']
+                                  + "  " + unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
+
 
         # Convert to ndarray if needed
         try:
