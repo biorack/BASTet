@@ -11,6 +11,7 @@ from omsi.dataformat.omsi_file.format import \
     omsi_format_dependencies
 from omsi.dataformat.omsi_file.dependencies import omsi_dependencies_manager
 from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
+from omsi.shared.run_info_data import run_info_dict
 import warnings
 
 
@@ -488,7 +489,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                                       dtype=ana_data['data'].dtype,
                                                       chunks=chunks)
             if ana_data['data'].size > 0:
-                tempdata[:] = ana_data['data']
+                try:
+                    tempdata[:] = ana_data['data']
+                except TypeError:
+                    tempdata[()] = ana_data['data']
             else:
                 warnings.warn("WARNING: " + ana_data['name'] +
                               " dataset generated but not written. The given dataset was empty.")
@@ -505,12 +509,22 @@ class omsi_file_analysis(omsi_dependencies_manager,
                 dat = np.asarray(ana_data['data'])
                 if len(dat.shape) == 0:
                     dat = dat[np.newaxis]  # np.asarray([ana_data['data']])
-                tempdata = data_group.require_dataset(name=ana_data['name'],
-                                                       shape=dat.shape,
-                                                       dtype=str(dat.dtype))
+                try:
+                    tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                          shape=dat.shape,
+                                                          dtype=str(dat.dtype))
+                except TypeError:  # Some Unicode types are not well-understood by h5py
+                    if 'U' in str(dat.dtype) or 'S' in str(dat.dtype):
+                        tempdata = data_group.require_dataset(name=ana_data['name'],
+                                                              shape=dat.shape,
+                                                              dtype=omsi_format_common.str_type)
+                    else:
+                        raise
                 if dat.size > 0:
-                    # data_group[ana_data['name']] = dat
-                    tempdata[:] = dat
+                    try:
+                        tempdata[:] = dat
+                    except TypeError:
+                        tempdata[()] = dat
                 else:
                     warnings.warn(ana_data['name'] + " dataset generated but not written. The given dataset was empty.")
             except:
@@ -693,7 +707,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                     output_list.append(analysis_data())
                     output_list[-1]['name'] = str(item_obj[0])
                     if load_data:
-                        output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][:]
+                        if len(self.managed_group[unicode(item_obj[0])].shape) == 0:  # Scalar dataset
+                            output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][()]
+                        else:
+                            output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][:]
                     else:
                         output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])]
                     output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
@@ -743,9 +760,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         """
         Get a dict of all runtime information stored in the file
 
-        :return: Dict with the runtime information restored.
+        :return: omsi.shared.run_info_data.run_info_dict type python dict with the runtime information restored.
         """
-        output_dict = {}
+        output_dict = run_info_dict()
         if self.runinfo_group is not None:
             for item_obj in self.runinfo_group.items():
                 object_name = unicode(item_obj[0])
