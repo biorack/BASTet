@@ -1,5 +1,2 @@
 ************* Module omsi.dataformat.omsi_file.instrument
-W: 61, 8: No exception type(s) specified (bare-except)
-W: 66,16: No exception type(s) specified (bare-except)
-W:198, 8: No exception type(s) specified (bare-except)
-W:217, 8: No exception type(s) specified (bare-except)
+W: 68, 8: No exception type(s) specified (bare-except)

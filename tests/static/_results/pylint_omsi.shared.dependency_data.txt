@@ -1,0 +1,11 @@
+************* Module omsi.shared.dependency_data
+C: 38, 0: Wrong continued indentation.
+                        }
+                       |^ (bad-continuation)
+W:180, 0: Bad indentation. Found 15 spaces, expected 16 (bad-indentation)
+W: 46,17: Redefining built-in 'help' (redefined-builtin)
+R: 40, 4: Too many arguments (8/5) (too-many-arguments)
+W: 95,16: Access to a protected member _force_set_data of a client class (protected-access)
+W:106, 8: Unused variable 'file_reader_base' (unused-variable)
+R:100, 4: Too many branches (25/12) (too-many-branches)
+W:227,12: No exception type(s) specified (bare-except)

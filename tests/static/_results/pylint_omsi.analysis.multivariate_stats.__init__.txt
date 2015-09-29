@@ -1,7 +1,6 @@
 ************* Module omsi.analysis.multivariate_stats
-C:  1, 0: Missing module docstring (missing-docstring)
-C:  1, 0: Invalid constant name "all__" (invalid-name)
-W:  2, 0: Wildcard import omsi_nmf (wildcard-import)
-W:  2, 0: Relative import 'omsi_nmf', should be 'omsi.analysis.multivariate_stats.omsi_nmf' (relative-import)
-W:  3, 0: Wildcard import omsi_cx (wildcard-import)
-W:  3, 0: Relative import 'omsi_cx', should be 'omsi.analysis.multivariate_stats.omsi_cx' (relative-import)
+C:  4, 0: Invalid constant name "all__" (invalid-name)
+W:  5, 0: Wildcard import omsi_nmf (wildcard-import)
+W:  5, 0: Relative import 'omsi_nmf', should be 'omsi.analysis.multivariate_stats.omsi_nmf' (relative-import)
+W:  6, 0: Wildcard import omsi_cx (wildcard-import)
+W:  6, 0: Relative import 'omsi_cx', should be 'omsi.analysis.multivariate_stats.omsi_cx' (relative-import)

@@ -1,0 +1,735 @@
+************* Module omsi.workflow.analysis_driver.omsi_cl_driver
+W:544, 0: TODO Add a save function to the analysis base class so that we can call the save on a single object and do the fork to the two functions in a central place (fixme)
+W:553, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
+W:554, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
+C:199, 0: Line too long (123/120) (line-too-long)
+C:378, 0: Wrong continued indentation.
+                                action='help',
+                                ^| (bad-continuation)
+C:379, 0: Wrong continued indentation.
+                                default=argparse.SUPPRESS,
+                                ^| (bad-continuation)
+C:380, 0: Wrong continued indentation.
+                                help='show this help message and exit')
+                                ^| (bad-continuation)
+C:399, 0: Line too long (126/120) (line-too-long)
+C:424, 0: Wrong continued indentation.
+                                      "by the analysis but potentially modified by it")
+                            |         ^ (bad-continuation)
+C:517, 0: No space allowed before comma
+                if isinstance(analysis_object.run_info['execution_time'] , list):
+                                                                         ^ (bad-whitespace)
+C:520, 0: Wrong continued indentation.
+                                     str(analysis_object.run_info['execution_time']))
+                                    |^ (bad-continuation)
+C:523, 0: Wrong continued indentation.
+                                              str(analysis_object.run_info['start_time']))
+                                    |         ^ (bad-continuation)
+C:527, 0: Wrong continued indentation.
+                                              str(analysis_object.run_info['end_time']))
+                                    |         ^ (bad-continuation)
+C:544, 0: Line too long (165/120) (line-too-long)
+C: 16, 0: Invalid class name "RawDescriptionDefaultHelpArgParseFormatter" (invalid-name)
+R: 29, 0: Too many instance attributes (15/7) (too-many-instance-attributes)
+R: 73, 4: Too many arguments (7/5) (too-many-arguments)
+R:269, 4: Too many branches (16/12) (too-many-branches)
+C:332, 4: Invalid method name "add_and_parse_analysis_arguments" (invalid-name)
+W:419,12: No exception type(s) specified (bare-except)
+R:429, 4: Too many branches (23/12) (too-many-branches)
+R:203, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
+R:285, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
+R:277, 0: Abstract class not referenced (abstract-class-not-used)
+R:  6, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
+R: 40, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.metadata_collection) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.shared.log -> omsi.shared.mpi_helper) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.workflow.analysis_driver.base -> omsi.workflow.analysis_driver.greedy_workflow_driver) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.analysis_driver.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.dataformat.omsi_file.common) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.metadata_collection -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.analysis_driver.omsi_cl_driver -> omsi.dataformat.omsi_file.main_file -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.metadata_collection -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.metadata_collection) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.shared.dependency_data) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.analysis_driver.base -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.analysis_driver.omsi_cl_driver) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.dataformat.omsi_file.common) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_compounds -> omsi.workflow.analysis_driver.omsi_cl_driver -> omsi.analysis.base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.msi_filtering -> omsi.analysis.msi_filtering.omsi_tic_norm -> omsi.workflow.analysis_driver.omsi_cl_driver -> omsi.analysis.base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analysis.findpeaks.omsi_findpeaks_local -> omsi.analysis.base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.analysis -> omsi.analysis.generic) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analysis.findpeaks.omsi_findpeaks_local -> omsi.workflow.analysis_driver.omsi_cl_driver -> omsi.analysis.base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analysis.findpeaks.omsi_findpeaks_global -> omsi.analysis.base -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.instrument -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.methods -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data -> omsi.analysis.base) (cyclic-import)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.base:580
+==omsi.analysis.msi_filtering.omsi_tic_norm:201
+==omsi.analysis.multivariate_stats.omsi_cx:169
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
+
+        **Developer Note:** h5py currently supports only a single index list. If the user provides an index-list
+        for both x and y, then we need to construct the proper merged list and load the data manually, or if
+        the data is small enough, one can load the full data into a numpy array which supports
+        multiple lists in the selection.
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param x: x selection string
+        :param y: y selection string
+        :param viewer_option: If multiple default viewer behaviors are available for a given
+            analysis then this option is used to switch between them.
+
+        :returns: The following two elements are expected to be returned by this function :
+
+                1) 1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be \
+                the last axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList \
+                selections x=[0]&y=[1] usually a 2D array is expected. For ragne selections x=0:1&y=1:2 we \
+                one usually expects a 3D array.
+                2) None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. \
+                Otherwise, return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z \
+                values are needed for interpretation of the returned spectrum).This may be needed, e.g., in \
+                cases where a per-spectrum peak analysis is performed and the peaks for each spectrum appear \
+                at different m/z values.
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.imzml_file:225
+==omsi.dataformat.mzml_file:389
+        return dependencies
+
+    def __getitem__(self, key):
+        """Enable slicing of img files"""
+        if self.data is not None:
+            if self.select_dataset is None:
+                return self.data[key]
+            else:
+                return self.data[self.select_dataset][key]
+        else:
+            raise ValueError("Slicing is currently only supported when the object has been initialized with readall")
+
+    def close_file(self):
+        """Close the mzml file"""
+        pass
+
+    @classmethod
+    def is_valid_dataset(cls, name):
+        """Check whether the given file or directory points to a img file.
+
+           :param name: Name of the dir or file.
+           :type name: String
+
+           :returns: Boolean indicating whether the given file or folder is a valid img file.
+        """
+        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
+            filelist = cls.get_files_from_dir(name)
+            return len(filelist) > 0
+        else:
+            try:
+                # Try to open the file and iterate over it (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:657
+==omsi.analysis.multivariate_stats.omsi_cx:231
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Get the mz axes for the analysis
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param qslice_viewer_option: If multiple default viewer behaviors are available for a given
+            analysis then this option is used to switch between them for the qslice URL pattern.
+        :param qspectrum_viewer_option: If multiple default viewer behaviors are available for a
+            given analysis then this option is used to switch between them for the qspectrum URL pattern.
+
+        :returns: The following four arrays are returned by the analysis:
+
+            - mz_spectra : Array with the static mz values for the spectra.
+            - label_spectra : Lable for the spectral mz axis
+            - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+            - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
+        """
+
+        """EDIT_ME: Define the number of custom viewer options for qslice and qspectrum.""" (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.imzml_file:307
+==omsi.dataformat.mzml_file:502
+        return filelist
+
+    def get_number_of_datasets(self):
+        """
+        Get the number of available datasets.
+        """
+        return len(self.mz_all)
+
+    def set_dataset_selection(self, dataset_index):
+        """
+        Define the current dataset to be read.
+        """
+        super(mzml_file, self).set_dataset_selection(dataset_index)
+        self.shape = self.shape_all_data[self.select_dataset]
+        self.mz = self.mz_all[self.select_dataset]
+
+    def get_dataset_dependencies(self):
+        """
+        Get the dependencies between the current dataset and any of the
+        other datasets stored in the current file.
+        """
+        # TODO Implement dependencies between current dataset given by self.select_dataset and all other datasets (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:20
+==omsi.analysis.findpeaks.omsi_findpeaks_local:21
+        self.analysis_identifier = name_key
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI dataset to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='mzdata',
+                           help='The m/z values for the spectra of the MSI dataset',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True)
+        self.add_parameter(name='integration_width',
+                           help='The window over which peaks should be integrated',
+                           dtype=float,
+                           default=0.1,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='peakheight',
+                           help='Peak height parameter',
+                           dtype=int, (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:726
+==omsi.analysis.msi_filtering.omsi_tic_norm:338
+            mz_slice = None
+            label_slice = None
+
+        return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
+
+    @classmethod
+    def v_qspectrum_viewer_options(cls,
+                                   analysis_object):
+        """Get a list of strings describing the different default viewer options for the analysis for qspectrum.
+           The default implementation tries to take care of handling the spectra retrieval for all the depencies
+           but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+           implementation is often called at the end of custom implementations to also allow access to data from
+           other dependencies.
+
+            :param analysis_object: The omsi_file_analysis object for which slicing should be performed.  For most cases
+                   this is not needed here as the support for slice operations is usually a static decission based
+                   on the class type, however, in some cases additional checks may be needed (e.g., ensure that
+                   the required data is available).
+
+            :returns: List of strings indicating the different available viewer options. The list should be empty
+                    if the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.base:657
+==omsi.analysis.msi_filtering.omsi_tic_norm:262
+==omsi.analysis.multivariate_stats.omsi_cx:231
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Get the mz axes for the analysis
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param qslice_viewer_option: If multiple default viewer behaviors are available for a given
+            analysis then this option is used to switch between them for the qslice URL pattern.
+        :param qspectrum_viewer_option: If multiple default viewer behaviors are available for a
+            given analysis then this option is used to switch between them for the qspectrum URL pattern.
+
+        :returns: The following four arrays are returned by the analysis:
+
+            - mz_spectra : Array with the static mz values for the spectra.
+            - label_spectra : Lable for the spectral mz axis
+            - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+            - label_slice : Lable for the slice mz axis or None if identical to label_spectra. (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:362
+==omsi.analysis.multivariate_stats.omsi_cx:360
+        spectrum_viewer_options = custom_options + dependent_options
+        return spectrum_viewer_options
+
+    @classmethod
+    def v_qslice_viewer_options(cls,
+                                analysis_object):
+        """
+        Get a list of strings describing the different default viewer options for the analysis for qslice.
+        The default implementation tries to take care of handling the spectra retrieval for all the depencies
+        but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+        implementation is often called at the end of custom implementations to also allow access to data from
+        other dependencies.
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed.  For
+            most cases this is not needed here as the support for slice operations is usually a static
+            decision based on the class type, however, in some cases additional checks may be needed (e.g.,
+            ensure that the required data is available).
+
+        :returns: List of strings indicating the different available viewer options. The list should be empty if
+                  the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.analysis_data:206
+==omsi.analysis.base:1260
+                      required=False,
+                      default=None,
+                      choices=None,
+                      data=None,
+                      group=None):
+        """
+        Add a new parameter for the analysis. This function is typically used in the constructor
+        of a derived analysis to specify the parameters of the analysis.
+
+        :param name: The name of the parameter
+        :param help: Help string describing the parameter
+        :param type: Optional type. Default is string.
+        :param required: Boolean indicating whether the parameter is required (True) or optional (False). Default False.
+        :param default: Optional default value for the parameter. Default None.
+        :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
+        :param data: The data assigned to the parameter. None by default.
+        :param group: Optional group string used to organize parameters. Default None, indicating that
+            parameters are automatically organized by driver class (e.g. in required and optional parameters)
+ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:536
+==omsi.analysis.multivariate_stats.omsi_cx:112
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """
+        Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param z: Selection string indicting which z values should be selected.
+        :param viewer_option: If multiple default viewer behaviors are available for a given analysis
+            then this option is used to switch between them.
+
+        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will
+            be performed typically like [:,:,zmin:zmax].
+
+        """
+        # Convert the z selection to a python selection (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.base:536
+==omsi.analysis.msi_filtering.omsi_tic_norm:171
+==omsi.analysis.multivariate_stats.omsi_cx:112
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """
+        Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param z: Selection string indicting which z values should be selected.
+        :param viewer_option: If multiple default viewer behaviors are available for a given analysis
+            then this option is used to switch between them.
+
+        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will
+            be performed typically like [:,:,zmin:zmax].
+
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:1388
+==omsi.analysis.generic:187
+    def read_from_omsi_file(self,
+                            analysis_object,
+                            load_data=True,
+                            load_parameters=True,
+                            load_runtime_data=True,
+                            dependencies_omsi_format=True,
+                            ignore_type_conflict=False):
+        """
+        This function can be optionally overwritten to implement a custom data read.
+
+        The default implementation tries to reconstruct the original data as far
+        as possible, however, in particular in case that a custom add_custom_data_to_omsi_file
+        function has been implemented, the default implementation may not be sufficient.
+        The default implementation reconstructs: i) analysis_identifier and reads all
+        custom data into iii)__data_list. Note, an error will be raised in case that (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:43
+==omsi.analysis.findpeaks.omsi_findpeaks_local:44
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='slwindow',
+                           help='Sliding window parameter',
+                           dtype=int,
+                           default=100,
+                           group=groups['settings'],
+                           required=True)
+        self.add_parameter(name='smoothwidth',
+                           help='Smooth width parameter',
+                           dtype=int,
+                           default=3,
+                           group=groups['settings'],
+                           required=True) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_compounds:98
+==omsi.analysis.findpeaks.omsi_findpeaks_local:64
+        self.add_parameter(name='schedule',
+                           help='Scheduling to be used for parallel MPI runs',
+                           dtype=str,
+                           required=False,
+                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           group=groups['parallel'],
+                           default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
+        self.add_parameter(name='collect',
+                           help='Collect results to the MPI root rank when running in parallel',
+                           dtype=dtypes['bool'],
+                           required=False,
+                           group=groups['parallel'],
+                           default=True) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.imzml_file:162
+==omsi.dataformat.mzml_file:233
+    @classmethod
+    def test(cls):
+        """
+        Test method
+        """
+        pass
+
+    @staticmethod
+    def __compute_num_scans(filename=None):
+        """
+        Internal helper function used to compute the number of scans in the imzml file.
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.img_file:234
+==omsi.dataformat.mzml_file:488
+        else:
+            return None
+
+    @classmethod
+    def get_files_from_dir(cls, dirname):
+        """
+        Get a list of all basenames of all img files in a given directory.
+        Note: The basenames include the dirname.
+        """
+        filelist = []
+        for l in os.listdir(dirname):
+            currname = os.path.join(dirname, l) (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.dataformat.img_file:235
+==omsi.dataformat.imzml_file:289
+==omsi.dataformat.mzml_file:489
+            return None
+
+    @classmethod
+    def get_files_from_dir(cls, dirname):
+        """
+        Get a list of all basenames of all img files in a given directory.
+        Note: The basenames include the dirname.
+        """
+        filelist = []
+        for l in os.listdir(dirname):
+            currname = os.path.join(dirname, l) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:579
+==omsi.analysis.findpeaks.omsi_findpeaks_global:78
+        else:
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:79
+==omsi.analysis.msi_filtering.omsi_tic_norm:201
+==omsi.analysis.multivariate_stats.omsi_cx:169
+            return None
+
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """Implement support for qspectrum URL requests for the viewer"""
+        # Get the h5py dataset with the peak_cube data (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:117
+==omsi.analysis.findpeaks.omsi_findpeaks_local:178
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """Implement support for qmz URL requests for the viewer"""
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_compounds:199
+==omsi.analysis.findpeaks.omsi_findpeaks_local:367
+                    root=self.mpi_root,                                     # The root MPI task
+                    schedule=self['schedule'],                              # Parallel scheduling scheme
+                    comm=self.mpi_comm)                                     # MPI communicator
+                # Execute the analysis in parallel
+                result = scheduler.run()
+                # Collect the output data to the root rank if requested
+                if self['collect']:
+                    result = scheduler.collect_data()
+
+                # Compile the data from the parallel execution (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:656
+==omsi.analysis.findpeaks.omsi_findpeaks_local:175
+        else:
+            return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """Implement support for qmz URL requests for the viewer""" (duplicate-code)
+R:  1, 0: Similar lines in 4 files
+==omsi.analysis.base:582
+==omsi.analysis.generic:143
+==omsi.analysis.msi_filtering.omsi_tic_norm:203
+==omsi.analysis.multivariate_stats.omsi_cx:171
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Implement support for qspectrum URL requests for the viewer
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.tools.run_analysis:6
+==omsi.workflow.analysis_driver.omsi_cl_driver:556
+if __name__ == "__main__":
+
+    # Create an command-line driver and call the main function to run the analysis
+    omsi_cl_driver(analysis_class=None,
+                   add_analysis_class_arg=True,
+                   add_output_arg=True,
+                   add_profile_arg=True,
+                   add_mem_profile_arg=True).main() (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.imzml_file:281
+==omsi.dataformat.mzml_file:443
+        basename = None
+        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
+            filelist = cls.get_files_from_dir(name)
+            if len(filelist) > 0:
+                basename = filelist[0]
+        else:
+            basename = name
+        if basename is not None: (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:300
+==omsi.analysis.multivariate_stats.omsi_cx:281
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
+        # Both viewer_options point to a data dependency
+        if qspectrum_viewer_option >= num_custom_spectrum_options and \
+                qslice_viewer_option >= num_custom_slice_options: (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.findpeaks.omsi_findpeaks_local:176
+==omsi.analysis.msi_filtering.omsi_tic_norm:262
+==omsi.analysis.multivariate_stats.omsi_cx:231
+        return None, None
+
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:155
+==omsi.analysis.multivariate_stats.omsi_nmf:117
+                                           qslice_viewer_option=qslice_viewer_option-1,
+                                           qspectrum_viewer_option=0)
+            # NOTE: if qspectrum and qslice share the same axis, this call will not return the
+            # copied data, i.e., we need to copy the qspectrum values to the qslice values.
+            if mz_slice is None:
+                mz_slice = temp_a
+                label_slice = temp_b
+        elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0: (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.base:582
+==omsi.analysis.findpeaks.omsi_findpeaks_global:81
+==omsi.analysis.findpeaks.omsi_findpeaks_local:94
+==omsi.analysis.generic:143
+==omsi.analysis.msi_filtering.omsi_tic_norm:203
+==omsi.analysis.multivariate_stats.omsi_cx:171
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Implement support for qspectrum URL requests for the viewer (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:81
+==omsi.analysis.generic:143
+    @classmethod
+    def v_qspectrum(cls,
+                    analysis_object,
+                    x,
+                    y,
+                    viewer_option=0):
+        """
+        Implement support for qspectrum URL requests for the viewer (duplicate-code)
+R:  1, 0: Similar lines in 4 files
+==omsi.analysis.base:659
+==omsi.analysis.generic:154
+==omsi.analysis.msi_filtering.omsi_tic_norm:264
+==omsi.analysis.multivariate_stats.omsi_cx:233
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """
+        Implement support for qmz URL requests for the viewer
+        """ (duplicate-code)
+R:  1, 0: Similar lines in 5 files
+==omsi.analysis.base:536
+==omsi.analysis.findpeaks.omsi_findpeaks_local:82
+==omsi.analysis.generic:133
+==omsi.analysis.msi_filtering.omsi_tic_norm:171
+==omsi.analysis.multivariate_stats.omsi_cx:112
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """
+        Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:285
+==omsi.analysis.multivariate_stats.omsi_cx:262
+        num_custom_spectrum_options = 0
+
+        # Compute the output
+        mz_spectra = None
+        label_spectra = None
+        mz_slice = None
+        label_slice = None (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.msi_filtering.omsi_tic_norm:24
+==omsi.analysis.multivariate_stats.omsi_cx:23
+==omsi.analysis.multivariate_stats.omsi_nmf:15
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='msidata',
+                           help='The MSI matrix to be analyzed',
+                           dtype=dtypes['ndarray'],
+                           required=True,
+                           group=groups['input']) (duplicate-code)
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.findpeaks.omsi_findpeaks_global:134
+==omsi.analysis.findpeaks.omsi_findpeaks_local:198
+==omsi.analysis.multivariate_stats.omsi_nmf:96
+            labelZ = 'pixel index Z'
+        else:
+            valuesZ = None
+            labelZ = None
+
+        # We do not have native option for qslice, so we rely on the input data in all cases
+        if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.tools.create_peak_cube_overview:11
+==omsi.tools.make_thumb:2
+from omsi.dataformat.omsi_file.main_file import omsi_file
+
+try:
+    from PIL import Image
+except ImportError:
+    import Image (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.base:659
+==omsi.analysis.findpeaks.omsi_findpeaks_global:117
+==omsi.analysis.findpeaks.omsi_findpeaks_local:178
+==omsi.analysis.generic:154
+==omsi.analysis.msi_filtering.omsi_tic_norm:264
+==omsi.analysis.multivariate_stats.omsi_cx:233
+    @classmethod
+    def v_qmz(cls,
+              analysis_object,
+              qslice_viewer_option=0,
+              qspectrum_viewer_option=0):
+        """Implement support for qmz URL requests for the viewer""" (duplicate-code)
+R:  1, 0: Similar lines in 6 files
+==omsi.analysis.base:536
+==omsi.analysis.findpeaks.omsi_findpeaks_global:60
+==omsi.analysis.findpeaks.omsi_findpeaks_local:82
+==omsi.analysis.generic:133
+==omsi.analysis.msi_filtering.omsi_tic_norm:171
+==omsi.analysis.multivariate_stats.omsi_cx:112
+    @classmethod
+    def v_qslice(cls,
+                 analysis_object,
+                 z,
+                 viewer_option=0):
+        """Implement support for qslice URL requests for the viewer""" (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.dataformat.imzml_file:36
+==omsi.dataformat.mzml_file:45
+        if os.path.isdir(basename):
+            filelist = self.get_files_from_dir(basename)
+            if len(filelist) > 0:
+                basename = filelist[0]
+            else: (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.generic:214
+==omsi.dataformat.omsi_file.analysis:813
+                                              load_data=load_data,
+                                              load_parameters=load_parameters,
+                                              load_runtime_data=load_runtime_data,
+                                              dependencies_omsi_format=dependencies_omsi_format,
+                                              ignore_type_conflict=ignore_type_conflict) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:186
+==omsi.analysis.generic:77
+                                       link_name=None,
+                                       dataname=key,
+                                       omsi_object=self,
+                                       selection=None,
+                                       help=None) (duplicate-code)

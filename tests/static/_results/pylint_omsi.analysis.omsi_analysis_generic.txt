@@ -1,3 +1,0 @@
-************* Module omsi.analysis.omsi_analysis_generic
-R: 86, 4: Too many arguments (7/5) (too-many-arguments)
-R: 10, 0: Too many public methods (40/20) (too-many-public-methods)

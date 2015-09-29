@@ -1,0 +1,8 @@
+************* Module omsi.shared.log
+C: 98, 0: Trailing whitespace (trailing-whitespace)
+C:109, 0: Exactly one space required after comma
+    def log(cls, module_name, message, root=None, comm=None, level=None,  *args, **kwargs):
+                                                                       ^ (bad-whitespace)
+C: 62, 8: Invalid variable name "ld" (invalid-name)
+W:104,12: No exception type(s) specified (bare-except)
+R:109, 4: Too many arguments (6/5) (too-many-arguments)
