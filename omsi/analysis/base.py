@@ -503,28 +503,32 @@ class analysis_base(object):
         """
         from omsi.workflow.analysis_driver.base import workflow_driver_base
         log_helper.info(__name__, "Executing the analysis and all its dependencies. " + str(self))
-
-        if len(self.check_ready_to_execute()) == 0:
-            log_helper.debug(__name__, "All dependencies ready. Recursive execution not needed. Running the analysis.")
-            return self.execute()
-        else:
-            log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
-            default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
-            default_driver.execute()
-            log_helper.debug(__name__, "Compiling outputs and return")
-            outputs = [self[name] for name in self.data_names]
-            return tuple(outputs)
+        self.update_analysis = True   # Force update of the current analysis
+        log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
+        default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
+        default_driver.execute()
+        log_helper.debug(__name__, "Compiling outputs and return")
+        outputs = [self[name] for name in self.data_names]
+        return tuple(outputs)
 
     @classmethod
-    def execute_all(cls):
+    def execute_all(cls, force_update=False):
         """
         Execute all analysis instances that are currently defined.
+
+        :param force_update: Boolean indicating whether we should force that all analyses are
+            executed again, even if they have already been run with the same settings before.
+            False by default.
         """
         log_helper.info(__name__, "Execute all analyses")
+        if force_update:
+            log_helper.debug(__name__, "Force update of all analyses.")
         from omsi.workflow.analysis_driver.base import workflow_driver_base
         log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
         default_driver = workflow_driver_base.get_default_driver()
         for ana_obj in cls.get_analysis_instances():
+            if force_update:
+                ana_obj.update_analysis = True
             default_driver.add_analysis(ana_obj)
         log_helper.debug(__name__, "Execute the workflow using the default driver")
         default_driver.execute()
@@ -907,6 +911,13 @@ class analysis_base(object):
                 self.profile_memory = True
                 log_helper.debug(__name__, "Enabled memory profiling. ", self.mpi_root)
 
+    def results_ready(self):
+        """
+        Check whether the results of the analysis are ready to be used
+        :return: Boolean
+        """
+        return not self.update_analysis
+
     def get_memory_profile_info(self):
         """
         Based on the memory profile of the execute_analysis(..) function get
@@ -1127,18 +1138,21 @@ class analysis_base(object):
         """Clear the list of analysis data"""
         log_helper.debug(__name__, "Clearing analysis data. ", self.mpi_root)
         self.__data_list = []
+        self.update_analysis = True
 
     def clear_parameter_data(self):
         """Clear the list of parameter data"""
         log_helper.debug(__name__, "Clearing parameter data. ", self.mpi_root)
         for param in self.parameters:
             param.clear_data()
+        self.update_analysis = True
 
     def clear_analysis(self):
         """Clear all analysis, parameter and dependency data"""
         log_helper.debug(__name__, "Clearing the analysis. ", self.mpi_root)
         self.clear_analysis_data()
         self.clear_parameter_data()
+        self.update_analysis = True
 
     def set_parameter_values(self,
                              **kwargs):

@@ -37,11 +37,14 @@ class greedy_workflow_driver(workflow_driver_base):
         # Execute the workflow in a greedy fashion (i.e., execute whichever analysis is ready and has not be run yet)
         log_helper.debug(__name__, "Running the analysis workflow")
         all_analyses = self.get_analyses()
+        iterations = 0
         while True:
+            # Run all analyses that are ready
             for analysis in all_analyses:
                 if analysis.update_analysis and len(analysis.check_ready_to_execute()) == 0:
                     log_helper.debug(__name__, "Execute analysis: " + str(analysis))
                     analysis.execute()
+            # Check if there is any other tasks that we need to execte now
             num_tasks = 0
             num_tasks_ready = 0
             for analysis in all_analyses:
@@ -55,6 +58,9 @@ class greedy_workflow_driver(workflow_driver_base):
             if num_tasks > 0 and num_tasks_ready == 0:
                 log_helper.warning(__name__, "Workflow could not be fully executed. " + str(num_tasks) +
                                    " remain in the queue but cannot be completed due to unresolved dependencies.")
+            iterations += 1
+
+        log_helper.log_var(__name__, iterations=iterations, level='DEBUG')
 
         # Record the runtime information after we are done with the workflow
         self.run_info.record_postexecute()
