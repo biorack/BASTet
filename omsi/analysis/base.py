@@ -10,6 +10,7 @@ import weakref
 import numpy as np
 
 from omsi.dataformat.omsi_file.format import omsi_format_common
+from omsi.workflow.analysis_driver.base import workflow_driver_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
@@ -85,6 +86,9 @@ class analysis_base(object):
         data and analysis results)
     :ivar update_analysis: If the value is True, then we should execute the analysis before using the outputs.
         If False, then the analysis has been executed with the current parameter settings.
+    :ivar driver: Workflow driver to be used when executing multiple analyses, e.g., via execute_recursive or
+        execute_all. Default value is None in which case a new default driver will be used each time we
+        execute a workflow.
 
 
     **Execution Functions:**
@@ -164,6 +168,7 @@ class analysis_base(object):
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
         self.update_analysis = True
+        self.driver = None
 
     def __getitem__(self,
                     key):
@@ -280,7 +285,7 @@ class analysis_base(object):
 
     def update_analysis_parameters(self, **kwargs):
         """
-        Record the analysis parameters pass to the execute() function.
+        Record the analysis parameters passed to the execute() function.
 
         The default implementation simply calls the set_parameter_values(...) function.
         This function may be overwritten to customize the behavior of how parameters
@@ -345,7 +350,7 @@ class analysis_base(object):
         Use this function to run the analysis.
 
         :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
-            the __setitem__ mechanism or as baches using the set_parameter_values function.
+            the __setitem__ mechanism or as batches using the set_parameter_values function.
 
         :returns: This function returns the output of the execute analysis function.
 
@@ -496,43 +501,62 @@ class analysis_base(object):
         """
         raise NotImplementedError("Implement execute_analysis in order to be able to run the analysis.")
 
-    def execute_recursive(self):
+    def execute_recursive(self,
+                          **kwargs):
         """
         Recursively execute this analysis and all its dependencies if necessary
 
+        :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
+            the __setitem__ mechanism or as batches using the set_parameter_values function.
+
         :return: Same as execute
         """
-        from omsi.workflow.analysis_driver.base import workflow_driver_base
         log_helper.info(__name__, "Executing the analysis and all its dependencies. " + str(self))
         self.update_analysis = True   # Force update of the current analysis
-        log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
-        default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
-        default_driver.execute()
+        if len(kwargs) > 0:
+            self.update_analysis_parameters(**kwargs)
+        if self.driver is not None:
+            log_helper.debug(__name__, "Using user-defined driver.")
+            self.driver.clear()
+            self.driver.add_analysis(self)
+            self.driver.execute()
+        else:
+            log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
+            default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
+            default_driver.execute()
         log_helper.debug(__name__, "Compiling outputs and return")
         outputs = [self[name] for name in self.data_names]
         return tuple(outputs)
 
     @classmethod
-    def execute_all(cls, force_update=False):
+    def execute_all(cls,
+                    force_update=False,
+                    driver=None):
         """
         Execute all analysis instances that are currently defined.
 
         :param force_update: Boolean indicating whether we should force that all analyses are
             executed again, even if they have already been run with the same settings before.
             False by default.
+        :param driver: Optional workflow driver to be used for the execution of all analyses.
+            The driver will be cleared and then all analyses will be added to driver. Default
+            value is None, in which case the function creates a default driver to be used.
+
         """
         log_helper.info(__name__, "Execute all analyses")
-        if force_update:
-            log_helper.debug(__name__, "Force update of all analyses.")
-        from omsi.workflow.analysis_driver.base import workflow_driver_base
-        log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
-        default_driver = workflow_driver_base.get_default_driver()
+        log_helper.log_var(__name__, force_update=force_update, level='DEBUG')
+        if driver is not None:
+            log_helper.debug(__name__, "Using user-defined driver.")
+            driver.clear()
+        else:
+            log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
+            driver = workflow_driver_base.get_default_driver()
         for ana_obj in cls.get_analysis_instances():
             if force_update:
                 ana_obj.update_analysis = True
-            default_driver.add_analysis(ana_obj)
+            driver.add_analysis(ana_obj)
         log_helper.debug(__name__, "Execute the workflow using the default driver")
-        default_driver.execute()
+        driver.execute()
 
     @classmethod
     def v_qslice(cls,
