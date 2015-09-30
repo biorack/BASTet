@@ -146,7 +146,10 @@ class analysis_generic(analysis_base):
             elif result is None:
                 self.data_names = []
             else:
-                self.data_names = [self.DEFAULT_OUTPUT_PREFIX + '0']
+                if len(self.data_names) >= 1:
+                    pass
+                else:
+                    self.data_names = [self.DEFAULT_OUTPUT_PREFIX + '0']
             return result
         else:
             raise NotImplementedError("We cannot run this analysis. Analysis_generic cannot run " +
