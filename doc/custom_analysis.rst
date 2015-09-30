@@ -762,12 +762,63 @@ Customizing the recording of analysis outputs
 Finally (i.e., right before returning analysis results), ``execute(..)`` uses the :py:meth:`omsi.analysis.analysis_base.analysis_base.record_execute_analysis_outputs` function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., `self[output_name] = my_output`. By overwriting `record_execute_analysis_outputs(...)` we can customize the recording of data outputs.
 
 
-Auto-wrapping a function: The quick-and-dirty way
--------------------------------------------------
+Wrapping a function: The quick-and-dirty way
+--------------------------------------------
 
-Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The :py:meth:`omsi.analysis.generic.analysis_generic` provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process. In fact, all we need to is, instead of calling our analysis function ``f()`` directly, we wrap it first via ``g = analysis_generic.from_function(f)`` and then we can execute the function simply via ``g.execute(...)`` and do all the other things we do with our standard analyses.
+Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The :py:meth:`omsi.analysis.generic` provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process.
 
-Using the function :py:meth:`omsi.analysis.generic.analysis_generic.from_function` we can easily construct a generic :py:class:`omsi.analysis.base.analysis_base` instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. The code example shown below illustrates this for a simple example function ``f(a)``, which simply uses ``numpy.sum`` to compute the sum of objects in an array. (NOTE: We could naturally also use ``numpy.sum`` directly, we use ``f(a)`` mainly to illustrate that this approach alos works wit functions defined in the interpreter.)
+Using the :py:meth:`omsi.analysis.generic.analysis_generic.from_function` or :py:meth:`omsi.analysis.generic.bastet_analysis` decorator, we can easily construct a generic :py:class:`omsi.analysis.base.analysis_base` instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. Here we briefly outline the two main options to do this:
+
+Option 1: Explicitly track specific excutions of a function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Instead of calling our analysis function ``f()`` directly, we create an instance of :py:meth:`omsi.analysis.generic.analysis_generic` via ``g = analysis_generic.from_function(f)`` which we then use instead of our function. To execute our function we can now either call ``g.execute(...)`` as usual or treat ``g`` as a function and call it directly ``g(...)``
+
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    import numpy as np
+    from omsi.analysis.generic import analysis_generic
+
+    # Define some example function we want to wrap to track results
+    def mysum(a):
+        return np.sum(a)
+
+    # Create an analysis object for our function
+    g = analysis_generic.from_function(mysum)
+    g.execute(np.arange(10))  # This is the same as:  g(np.arange(10))
+
+Option 2: Implicitly track the last execution of a function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If we are only interested in recording the last execution of our function, then we can alternatively wrap our function directly using the ``@bastet_analysis`` decorator. The main difference between the two approaches is that using the decorator we only record the last execution of our function, while using the explicit approach of option 1, we can create as many wrapped instances of our functions as we want and track the execution of each independently.
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    import numpy as np
+    from omsi.shared.log import log_helper
+    log_helper.set_log_level('DEBUG')
+    from omsi.analysis.generic import bastet_analysis
+    from omsi.dataformat.omsi_file.main_file import omsi_file
+
+    # Define some example function and wrap it
+    @bastet_analysis
+    def mysum(a):
+        """Our own sum function"""
+        return np.sum(a)
+
+    # Execute the analysis
+    res = mysum(a=np.arange(10))
+
+
+Example: Defining and using wrapped functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The code example shown below illustrates the "wrapping" of a simple example function ``mysum(a)``, which simply uses ``numpy.sum`` to compute the sum of objects in an array. (NOTE: We could naturally also use ``numpy.sum`` directly, we use ``mysum(a)`` mainly to illustrate that this approach also works wit functions defined in the interpreter.)
 
 .. code-block:: python
     :linenos:
@@ -780,11 +831,11 @@ Using the function :py:meth:`omsi.analysis.generic.analysis_generic.from_functio
     from omsi.dataformat.omsi_file.main_file import omsi_file
 
     # Define some example function we want to wrap to track results
-    def f(a):
+    def mysum(a):
         return np.sum(a)
 
     # Create an analysis object for our function
-    g = analysis_generic.from_function(f)
+    g = analysis_generic.from_function(mysum)
 
     # Execute the analysis
     res = g.execute(a=np.arange(10))
@@ -833,7 +884,7 @@ The figure below shows a view of the file generated by our wrapped function exec
    :scale: 50 %
    :alt: Baseline performance for slice selection
 
-Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intentsites that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.
+Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intensities that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.
 
 
 .. code-block:: python
@@ -873,7 +924,7 @@ Note, we can use the wrapped function objects as usual in an analysis workflow t
 By default, the outputs are named and numbered using the schema ``output_#``, i.e., in the above example we used ``a2['output_0']`` to access the output our wrapped function. To define user-defined names for the outputs of a wrapped function we can simply provide a list of strings to the input parameter ``output_names`` of the ``analysis_generic.from_function(...)``.
 
 
-**NOTE:** Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee auto-wrapping to always work.
+**NOTE:** Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.
 
 
 
