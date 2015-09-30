@@ -36,7 +36,10 @@ class analysis_generic(analysis_base):
         """
         Create a generic analysis class for a given analysis function.
 
-        This functionality is useful to ease quick scripting on analyses but should not be used in production
+        This functionality is useful to ease quick scripting on analyses but should not be used in production.
+
+        NOTE: __analysis_function is a reserved parameter name used to store the analysis function and may
+        not be used as an input parameter for the analysis function.
 
         :param analysis_function: The analysis function to be wrapped for provenance tracking and storage
         :param output_names: Optionally, define a list of the names of the outputs
@@ -106,7 +109,10 @@ class analysis_generic(analysis_base):
             input_dict = {}
             for arg in self.parameters:
                 if arg['data'] is not None and arg['name'] != '__analysis_function':
-                    input_dict[arg['name']] = arg['data']
+                    if isinstance(arg['data'], dependency_dict):
+                        input_dict[arg['name']] = arg['data'].get_data()
+                    else:
+                        input_dict[arg['name']] = arg['data']
             # When we restored the analysis we did not know that the parameter was supposed to be unicode
             log_helper.debug(__name__, "Unpickel the analysis function")
             if isinstance(self['__analysis_function'], np.ndarray):
