@@ -43,6 +43,8 @@ class workflow_driver_base(object):
 
     We are given a set of existing analysis objects for which we need to coordinate the execution.
 
+    :ivar __analysis_objects: Private set of analysis objects to be executed
+
     """
 
     DEFAULT_DRIVER_CLASS = None
@@ -123,7 +125,7 @@ class workflow_driver_base(object):
 
     def add_analysis_dependencies(self):
         """
-        Add the dependencies of all anlyses to the workflow in case they are missing.
+        Add the dependencies of all analyses to the workflow in case they are missing.
 
         This function is recursive, step-by-step adding all dependencies of the workflow to the list of
         tasks to be executed, until no more dependencies are found.
@@ -165,5 +167,12 @@ class workflow_driver_base(object):
         Get the list of analyses to be run.
         """
         return self.__analyses_objects
+
+    def clear(self):
+        """
+        Remove all analyses from the workflow.
+        """
+        log_helper.debug(__name__, "Clearing the workflow")
+        self.__analyses_objects.clear()
 
 
