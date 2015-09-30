@@ -95,3 +95,85 @@ To explicitly execute a subset of analyses (and all their dependencies) we can e
     driver2.execute()  # Execute all analyses
 
 
+Example: Normalizing an image
+-----------------------------
+
+The goal of this example is to 1) illustrate the general concepts of how we can define analysis workflows and 2) illustrate the use of simple wrapped functions in combination with integrated analytics to create complex analysis workflows. The example show below defines a basic image normalization workflow in which we:
+
+1. Compute a reduced peak cube from an MSI image using the global peak finding analysis provided by BASTet
+2. Use a simple wrapped function to compute the total intensity image for the peak cube dataset computed in step 1
+3. use a simple wrapped function to normalize the peak cube computed in step 1 using the total intensity image computed in step 2
+
+
+.. code-block:: python
+    :linenos:
+
+    # Illustration of the basic image normalization workflow defined below:
+    #
+    # +-----------a1------------+       +-------------a2----------------+       +-----------a3--------------+
+    # +---global-peak-finder----+       +------total_intensities--------+       +---normalize_intensities---+
+    # |                         |       |                               |       |                           |
+    # | msidata       peak_cube +---+---> msidata      total_intensities+-------> norm_factors     output_0 |
+    # |                         |   |   |                               |       |                           |
+    # | mzdata                  |   |   | axis=2                        |   +---> msidata                   |
+    # +-------------------------+   |   +-------------------------------+   |   +---------------------------+
+    #                               |                                       |
+    #                               |                                       |
+    #                               +---------------------------------------+
+
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 21,22,23,26,27,28,31,32,33,43
+
+    import numpy as np
+    from omsi.shared.log import log_helper
+    log_helper.set_log_level('DEBUG')
+    from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
+    from omsi.dataformat.omsi_file.main_file import omsi_file
+    from omsi.analysis.generic import analysis_generic
+
+    # Define a simple function to compute the total intensity image
+    def total_intensity(msidata, axis=2):
+        return np.sum(msidata, axis=axis)
+
+    # Define a simple function to normalize an MSI data cube by per-spectrum normalization factors
+    def normalize_intensities(msidata, normfactors):
+        return msidata / normfactors[:,:,np.newaxis]
+
+    # Get an ezample MSI image
+    f = omsi_file('/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5' , 'r')
+    d = f.get_experiment(0).get_msidata(0)
+
+    # Create a global peak finder
+    a1 = omsi_findpeaks_global()
+    a1['msidata'] = d
+    a1['mzdata'] = d.mz
+
+    # Define compute of total intensity image
+    a2 = analysis_generic.from_function(analysis_function=total_intensity,
+                                        output_names=['total_intensities'])
+    a2['msidata'] = a1['peak_cube']
+
+    # Define the normalization of the peak cube
+    a3 = analysis_generic.from_function(normalize_intensities)
+    a3['msidata'] = a1['peak_cube']
+    a3['normfactors'] = a2['total_intensities']
+
+    # To run the workflow we now have several basic options
+    #
+    # 1) a3.execute_recursive()  : Recursively execute the last analysis and all its dependencies (i.e., a1, a2)
+    # 2) a1.execute_all() : Tell any analysis to execute all available analyses (i.e., a1,a2,a3)
+    # 3) Create our own workflow driver to control the execution of the analyses
+    # 4) Manually call execute on a1, a2, and a3 in order of their dependencies
+
+    # Execute the workflow
+    a3.execute_recursive()
+
+
+
+
+
+
+
+

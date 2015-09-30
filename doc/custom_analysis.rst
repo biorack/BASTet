@@ -815,8 +815,8 @@ If we are only interested in recording the last execution of our function, then 
     res = mysum(a=np.arange(10))
 
 
-Example: Defining and using wrapped functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example 1: Defining and using wrapped functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The code example shown below illustrates the "wrapping" of a simple example function ``mysum(a)``, which simply uses ``numpy.sum`` to compute the sum of objects in an array. (NOTE: We could naturally also use ``numpy.sum`` directly, we use ``mysum(a)`` mainly to illustrate that this approach also works wit functions defined in the interpreter.)
 
@@ -925,12 +925,5 @@ By default, the outputs are named and numbered using the schema ``output_#``, i.
 
 
 **NOTE:** Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.
-
-
-
-
-
-
-
 
 
