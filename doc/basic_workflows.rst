@@ -105,7 +105,7 @@ The goal of this example is to 1) illustrate the general concepts of how we can 
 3. use a simple wrapped function to normalize the peak cube computed in step 1 using the total intensity image computed in step 2
 
 
-.. code-block:: python
+.. code-block:: bash
     :linenos:
 
     # Illustration of the basic image normalization workflow defined below:
