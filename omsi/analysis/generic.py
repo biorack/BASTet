@@ -23,6 +23,21 @@ except ImportError:
 import numpy as np
 
 
+def bastet_analysis(func, output_names=None):
+    """
+    Decorator used to wrap a function and replace it with an analysis_generic object
+    that behaves like a function but adds the ability for saving the
+    analysis to file and tracking provenance
+
+    This is essentially the same as analysis_generic.from_function(....).
+
+    :param func: The function to be wrapped
+    :return: analysis_generic instance for the wrapped function
+    """
+    return analysis_generic.from_function(analysis_function=func,
+                                          output_names=output_names)
+
+
 class analysis_generic(analysis_base):
     """
     This analysis class is used if the specific anlaysis type is unknown, e.g., when loading

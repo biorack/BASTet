@@ -170,6 +170,18 @@ class analysis_base(object):
         self.update_analysis = True
         self.driver = None
 
+    def __call__(self, **kwargs):
+        """
+        Execute the analysis.
+
+        Same a self.execute().
+
+        :param kwargs: Keyword arguments to set parameters.
+
+        :return: The output of the execute_analysis(...) function
+        """
+        return self.execute(**kwargs)
+
     def __getitem__(self,
                     key):
         """
