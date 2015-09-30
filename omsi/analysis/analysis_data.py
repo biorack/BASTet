@@ -148,7 +148,7 @@ class analysis_data(dict):
         Overwrite the __setitem__ function inherited from dict to ensure that only elements with a specific
         set of keys can be modified
         """
-        if key in self:
+        if key in self or key in ['name', 'data', 'dtype']:  # The second check is to allow for pickle
             dict.__setitem__(self, key, value)
         else:
             raise KeyError("\'"+str(key)+'\' key not in default key set of analysis_data')
