@@ -1,10 +1,28 @@
 Defining and Executing Analysis Workflows
 =========================================
 
-Defining a workflow:
---------------------
+Figure :ref:`workflow_illustration`, illustrates the basic steps of using analysis workflows, i.e,.:
 
-Defining a workflow is simple, we just need to create the analyses we want to execute and define the input parameters. We can define input parameters prior to execution simply using standard dict-like assignement.
+1) Create the analysis tasks
+2) Define the analysis inputs
+3) Execute
+
+.. _workflow_illustration:
+
+.. figure:: _static/workflow_illustration.png
+   :scale: 37 %
+   :alt: Figure showing and example workflow
+
+   Illustration of an example workflow for image normalization
+
+
+In the following we will use a simple analysis---workflow in which we compute a peak-cube from a raw MSI dataset and then compute an NMF from the peak cube---to illustrate the main steps involved for performing complex analysis workflows.
+
+
+Step 1: Create the analysis tasks:
+----------------------------------
+
+First we need to create our main analysis objects.
 
 .. code-block:: python
     :linenos:
@@ -20,18 +38,37 @@ Defining a workflow is simple, we just need to create the analyses we want to ex
     # Specify the analysis workflow
     # Create a global peak finding analysis
     a1 = omsi_findpeaks_global()      # Create the analysis
+    # Create an NMF that processes our peak cube
+    a2['numIter'] = 2                 # Set input to perform 2 iterations only
+
+Step 2: Define analysis inputs:
+-------------------------------
+
+We can define the input parameters of analysis simply using standard dict-like assignment. Any dependencies between analysis tasks or OpenMSI files are created automatically for us.
+
+.. code-block:: python
+    :linenos:
+
+    # Define the inputs of the global peak finder
     a1['msidata'] = d                 # Set the input msidata
     a1['mzdata'] = d.mz               # Set the input mz data
-    # Create an NMF that processes our peak cube
-    a2 = omsi_nmf()                   # Create the NMF analysis
+    # Define the inputs of the NMF
     a2['msidata'] = a1['peak_cube']   # Set the input data to the peak cube
     a2['numIter'] = 2                 # Set input to perform 2 iterations only
 
 
-The above example creates a simple analysis workflow in which we compute a peak-cube from a raw MSI dataset and then compute an NMF from the peak cube. NOTE: The above code only specifies our workflow, but none of the analyses we specified are actually executed yet.
+
+NOTE: So far we have only specified our workflow. We have not executed any analysis yet, nor have we loaded any actual data yet.
+
+
+Step 3: Execute
+---------------
+
+Finally we need to execute our analyses. For this we have various options, depending on which parts of our workflow we want to execute.
+
 
 Executing a single analysis
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To execute a single analysis, we can simply call the ``execute()`` function of our analysis. Note, the execute may raise and ``AnalysisReadyError`` in case that the inputs of the analsis are not ready. E.g.:
 
@@ -45,8 +82,8 @@ To execute a single analysis, we can simply call the ``execute()`` function of o
 
     a1.execute()   # Will successfully execute a1
 
-Executing a partial workflow
-----------------------------
+Executing a single sub-workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To execute a single analysis including any missing dependencies, we can simply call the ``execute_recursive()`` function. E.g.:
 
@@ -62,7 +99,7 @@ The above will execute ``a1`` as well as ``a2`` since ``a2`` depends on ``a1``.
 **NOTE:** When executing multiple dependent analyses, then the execution is typically controlled by a workflow driver py:meth:`omsi.workflow.analysis_driver.base.workflow_driver_base`. By default, ``execute_recursive(..)`` will automatically create a default driver. If we want to customize the driver to be used then we can simply assign a driver to the analysis before-hand by setting the py:var:`omsi.analysis.base.analysis_base.driver`` instance variable.
 
 Executing all analyses
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 To run all analyses that have been created---independent of whether they depend on each other or not---we can simply call :py:meth:`omsi.analysis.base.analysis_base.execute_all`.
 
@@ -73,8 +110,8 @@ To run all analyses that have been created---independent of whether they depend 
 
 The above will execute any analysis that have not up-to-date. NOTE: In contrast to py:meth:`omsi.analysis.base.analysis_base.execute` and py:meth:`omsi.analysis.base.analysis_base.execute_recursive`, this is a class-level method and not an object-method. Again, the function uses a workflow driver, which we can customize by providing as driver as input to the function.
 
-Explicitly executing workflows
-------------------------------
+Executing multiple sub-workflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To explicitly execute a subset of analyses (and all their dependencies) we can explicitly define a driver for the workflow we want to execute:
 
@@ -98,11 +135,13 @@ To explicitly execute a subset of analyses (and all their dependencies) we can e
 Example: Normalizing an image
 -----------------------------
 
-The goal of this example is to 1) illustrate the general concepts of how we can define analysis workflows and 2) illustrate the use of simple wrapped functions in combination with integrated analytics to create complex analysis workflows. The example show below defines a basic image normalization workflow in which we:
+The goal of this example is to 1) illustrate the general concepts of how we can define analysis workflows and 2) illustrate the use of simple wrapped functions in combination with integrated analytics to create complex analysis workflows. The example shown below defines a basic image normalization workflow in which we:
 
 1. Compute a reduced peak cube from an MSI image using the global peak finding analysis provided by BASTet
 2. Use a simple wrapped function to compute the total intensity image for the peak cube dataset computed in step 1
 3. use a simple wrapped function to normalize the peak cube computed in step 1 using the total intensity image computed in step 2
+
+This is the same workflow as shown in Figure :ref:`workflow_illustration`.
 
 
 .. code-block:: bash
@@ -145,7 +184,7 @@ The goal of this example is to 1) illustrate the general concepts of how we can 
     f = omsi_file('/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5' , 'r')
     d = f.get_experiment(0).get_msidata(0)
 
-    # Create a global peak finder
+    # Define the global peak finder
     a1 = omsi_findpeaks_global()
     a1['msidata'] = d
     a1['mzdata'] = d.mz
