@@ -12,8 +12,11 @@ from omsi.dataformat.omsi_file.format import \
 from omsi.dataformat.omsi_file.dependencies import omsi_dependencies_manager
 from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
 from omsi.shared.run_info_data import run_info_dict
+import omsi.shared.mpi_helper as mpi_helper
+from omsi.shared.log import log_helper
 import warnings
 
+# TODO create_analysis_static(...) and other create functions need to handle the case when a file is opened with the MPI I/O backend. Currently we assume a serial write from root
 
 class omsi_analysis_manager(omsi_file_object_manager):
     """
@@ -36,11 +39,54 @@ class omsi_analysis_manager(omsi_file_object_manager):
             super(omsi_analysis_manager, self).__init__()
         self.analysis_parent = analysis_parent
 
+    @staticmethod
+    def create_analysis_static(analysis_parent,
+                               analysis,
+                               flush_io=True,
+                               force_save=False,
+                               save_unsaved_dependencies=True,
+                               mpi_root=0,
+                               mpi_comm=None):
+        """
+        Same as create_analysis(...) but instead of relying on object-level, this function
+        allows additional parameters (specifically the analysis_parent) to be provided as
+        input, rather than being determined based on self
+
+        :param analysis_parent: The h5py.Group object or omsi.dataformat.omsi_file.common.omsi_file_common object
+            where the analysis should be created
+        :param kwargs: Additional keyword arguments for create_analysis(...). See create_analysis(...) for details.
+
+        :return: The output of create_analysis
+        """
+        if mpi_helper.get_rank(comm=mpi_comm) == mpi_root:
+            if isinstance(analysis_parent, h5py.Group):
+                parent_group = analysis_parent
+            elif isinstance(analysis_parent, omsi_file_common):
+                parent_group = analysis_parent.managed_group
+            else:
+                log_helper.error(__name__, 'Illegal analysis_parent type. Expected h5py.Group or omsi_file_common')
+                raise ValueError("Illegal value for analysis parent")
+            return omsi_file_analysis.__create__(parent_group=parent_group,
+                                                 analysis=analysis,
+                                                 analysis_index=None,  # Same as self.get_num_analysis()
+                                                 flush_io=flush_io,
+                                                 force_save=force_save,
+                                                 save_unsaved_dependencies=save_unsaved_dependencies)
+        else:
+            try:
+                analysis.write_analysis_data()
+                return None
+            except NotImplementedError:
+                pass
+
+
     def create_analysis(self,
                         analysis,
                         flush_io=True,
                         force_save=False,
-                        save_unsaved_dependencies=True):
+                        save_unsaved_dependencies=True,
+                        mpi_root=0,
+                        mpi_comm=None):
         """
         Add a new group for storing derived analysis results for the current experiment
 
@@ -80,17 +126,25 @@ class omsi_analysis_manager(omsi_file_object_manager):
             link to those dependencies will be established, rather than re-saving the dependency.
         :type save_unsaved_dependencies: bool
 
+        :param mpi_root: The root MPI process that should perform the writing. This is to allow all analyses
+            to call the function and have communication in the analysis.write_analysis_data function be
+            handled.
+
+        :param mpi_comm: The MPI communicator to be used. None if default should be used (ie., MPI.COMM_WORLD
+
         :returns: The omsi_file_analysis object for the newly created analysis group and the
                 integer index of the analysis. NOTE: if force_save is False (default), then the group
                 returned may not be new but may be simply the first entry in the list of existing
-                storage locations for the given analysis.
+                storage locations for the given analysis. NOTE: If we are in MPI parallel and we are on a
+                core that does not write any data, then None is returned instead.
         """
-        return omsi_file_analysis.__create__(parent_group=self.analysis_parent,
-                                             analysis=analysis,
-                                             analysis_index=None,  # Same as self.get_num_analysis()
-                                             flush_io=flush_io,
-                                             force_save=force_save,
-                                             save_unsaved_dependencies=save_unsaved_dependencies)
+        return self.create_analysis_static(analysis_parent=self.analysis_parent,
+                                           analysis=analysis,
+                                           flush_io=flush_io,
+                                           force_save=force_save,
+                                           save_unsaved_dependencies=save_unsaved_dependencies,
+                                           mpi_root=mpi_root,
+                                           mpi_comm=mpi_comm)
 
     def get_num_analysis(self):
         """
@@ -372,8 +426,8 @@ class omsi_file_analysis(omsi_dependencies_manager,
         for param_data in parameters:
             if param_data['required'] or param_data.data_set() or param_data['default'] is not None:
                 anadata = analysis_data(name=param_data['name'],
-                                             data=param_data.get_data_or_default(),
-                                             dtype=param_data['dtype'])
+                                        data=param_data.get_data_or_default(),
+                                        dtype=param_data['dtype'])
                 cls.__write_omsi_analysis_data__(parameter_group, anadata)
                 # Try to add the help string attribute
                 try:
@@ -389,15 +443,15 @@ class omsi_file_analysis(omsi_dependencies_manager,
             # __write_omsi_analysis_data function to write the data
             if isinstance(run_info_value, unicode) or isinstance(run_info_value, str):
                 anadata = analysis_data(name=unicode(run_info_key),
-                                             data=run_info_value,
-                                             dtype=omsi_format_common.str_type)
+                                        data=run_info_value,
+                                        dtype=omsi_format_common.str_type)
             else:
                 dat = np.asarray(run_info_value)
                 if len(dat.shape) == 0:
                     dat = np.asarray([run_info_value])
                 anadata = analysis_data(name=unicode(run_info_key),
-                                             data=dat,
-                                             dtype=dat.dtype)
+                                        data=dat,
+                                        dtype=dat.dtype)
             cls.__write_omsi_analysis_data__(runinfo_group, anadata)
 
         # 7. Write all dependencies
@@ -832,7 +886,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  cannot be created.
         """
         from omsi.analysis import analysis_generic
-        analysis_instance = self.restore_analysis(load_runtime_data=False) # We don't need the runtime data
+        analysis_instance = self.restore_analysis(load_runtime_data=False)  # We don't need the runtime data
         if isinstance(analysis_instance, analysis_generic):
             return None
         else:
