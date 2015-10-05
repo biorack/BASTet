@@ -8,6 +8,7 @@ import datetime
 import sys
 import omsi.shared.mpi_helper as mpi_helper
 import time
+from omsi.shared.log import log_helper
 
 
 class run_info_dict(dict):
@@ -38,6 +39,7 @@ class run_info_dict(dict):
         the execution of the analysis.
 
         """
+        log_helper.debug(__name__, 'Recording pre-execution runtime data')
         # Record basic runtime environment information using the platform module
         try:
             self['architecture'] = unicode(platform.architecture())
@@ -89,7 +91,7 @@ class run_info_dict(dict):
             case the function will attempt to compute the execution time based on the start_time
             (if available) and the the current time.
         """
-
+        log_helper.debug(__name__, 'Recording post-execution runtime data')
         # Finalize recording of post execution provenance
         self['end_time'] = unicode(datetime.datetime.now())
         if execution_time:
@@ -97,8 +99,7 @@ class run_info_dict(dict):
         elif 'start_time' in self:
             start_time = run_info_dict.string_to_time(self['start_time'])
             stop_time = run_info_dict.string_to_time(self['end_time'])
-            execution_time = stop_time - start_time
-            self['execution_time'] = unicode(execution_time)
+            execution_time = stop_time - start_time    # TODO: This only gives execution time in full seconds right now
         else:
             self['execution_time'] = None
 
@@ -114,6 +115,7 @@ class run_info_dict(dict):
         at the end of the function to ensure that the runinfo dictionary
         is clean, i.e., does not contain any empty entries.
         """
+        log_helper.debug(__name__, 'Clean up runtime data')
         # Remove empty items from the run_info dict
         for ri_key, ri_value in self.items():
             try:
@@ -146,6 +148,7 @@ class run_info_dict(dict):
             if not comm:
                 comm = mpi_helper.get_comm_world()
             if comm.Get_size() > 1:
+                log_helper.debug(__name__, 'Gather runtime data from parallel tasks')
                 self['mpi_rank'] = comm.Get_rank()
                 run_data = comm.gather(self, root=root)
                 if comm.Get_rank() == root:
