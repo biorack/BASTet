@@ -3,21 +3,19 @@ Module specifying the base analysis API for integrating new analysis with the to
 OpenMSI science gateway.
 """
 
-
 import time
 import warnings
 import weakref
+
 import numpy as np
 
-from omsi.dataformat.omsi_file.format import omsi_format_common
-from omsi.workflow.analysis_driver.base import workflow_driver_base
+from omsi.workflow.base import workflow_driver_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
 from omsi.shared.dependency_data import dependency_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.run_info_data import run_info_dict
-
 from omsi.shared.log import log_helper
 
 
@@ -518,6 +516,11 @@ class analysis_base(object):
         """
         Recursively execute this analysis and all its dependencies if necessary
 
+        We use a workflow driver to control the execution. To define the workflow driver we can set
+        the self.driver variable. If no workflow driver is given (i.e, self.driver==None), then the
+        default driver will be created. To change the default driver,
+        see `omsi.workflow.base.workflow_driver_base.DEFAULT_DRIVER_CLASS`
+
         :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
             the __setitem__ mechanism or as batches using the set_parameter_values function.
 
@@ -728,6 +731,12 @@ class analysis_base(object):
         label_spectra = None
         mz_slice = None
         label_slice = None
+        valuesX = None
+        labelX = None
+        valuesY = None
+        labelY = None
+        valuesZ = None
+        labelZ = None
         # Determine the spectra mz axis
         if len(re_spectrum) > 0:
             if isinstance(re_spectrumdata[qspectrum_viewer_option], omsi_file_msidata):
@@ -923,7 +932,6 @@ class analysis_base(object):
                     from profile import Profile
                 import pstats
                 import StringIO
-                import ast
                 # Enable profiling
                 self.profile_time_and_usage = True
                 log_helper.debug(__name__, "Enabled time and usage profiling. ", self.mpi_root)

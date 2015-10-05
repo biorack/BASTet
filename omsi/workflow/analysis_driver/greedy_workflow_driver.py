@@ -1,7 +1,7 @@
 """
 Module used to help with the execution of complex analyses workflows
 """
-from omsi.workflow.analysis_driver.base import workflow_driver_base
+from omsi.workflow.base import workflow_driver_base
 from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
 
