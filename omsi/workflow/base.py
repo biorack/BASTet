@@ -116,7 +116,7 @@ class workflow_driver_base(object):
         :return: Instance of the default workflow driver
         """
         if cls.DEFAULT_DRIVER_CLASS is None:
-            from omsi.workflow.analysis_driver.greedy_workflow_driver import greedy_workflow_driver
+            from omsi.workflow.driver.greedy_workflow_driver import greedy_workflow_driver
             driver = greedy_workflow_driver(analysis_objects=analysis_objects)
         else:
             driver = cls.DEFAULT_DRIVER_CLASS(analysis_objects=analysis_objects)
