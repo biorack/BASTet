@@ -116,7 +116,7 @@ class dependency_dict(dict):
                         # print super(dependency_dict,self).__str__()
                     else:
                         warnings.warn("The generated dependency does not point to a managed object.")
-                        dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(parent))
+                        dict.__setitem__(self, 'omsi_object', omsi_file_common.get_omsi_object(value))
                     dict.__setitem__(self, '_data', None)  # Any previously loaded date may be invalid (delete)
                 elif isinstance(value, analysis_base):
                     dict.__setitem__(self, 'omsi_object', value)
