@@ -24,4 +24,5 @@ Subpackages
 .. toctree::
 
     omsi.workflow.driver
+    omsi.workflow.executor
 

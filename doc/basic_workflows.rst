@@ -96,7 +96,7 @@ The above will execute ``a1`` as well as ``a2`` since ``a2`` depends on ``a1``.
 
 **NOTE:** Recursive execution will only execute other analyses that are actually needed to complete our analysis and analysis results of dependent analyses that have been executed before will be reused. E.g., if we would call ``a2.execute_recursive()`` again, then only ``a2`` would be executed again.
 
-**NOTE:** When executing multiple dependent analyses, then the execution is typically controlled by a workflow driver py:meth:`omsi.workflow.driver.base.workflow_driver_base`. By default, ``execute_recursive(..)`` will automatically create a default driver. If we want to customize the driver to be used then we can simply assign a driver to the analysis before-hand by setting the py:var:`omsi.analysis.base.analysis_base.driver`` instance variable.
+**NOTE:** When executing multiple dependent analyses, then the execution is typically controlled by a workflow driver py:meth:`omsi.workflow.driver.base.workflow_executor_base`. By default, ``execute_recursive(..)`` will automatically create a default driver. If we want to customize the driver to be used then we can simply assign a driver to the analysis before-hand by setting the py:var:`omsi.analysis.base.analysis_base.driver`` instance variable.
 
 Executing all analyses
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -118,8 +118,8 @@ To explicitly execute a subset of analyses (and all their dependencies) we can e
 .. code-block:: python
     :linenos:
 
-    from omsi.workflow.driver.greedy_workflow_driver import greedy_workflow_driver
-    driver = greedy_workflow_driver()  # Create a driver
+    from omsi.workflow.driver.greedy_executor import greedy_executor
+    driver = greedy_executor()  # Create a driver
     driver.add_analysis(a1)            # Add one ore more analyses
     driver.add_analysis(a2)
     driver.execute()                   # Execute the workflow and its dependencies
@@ -127,7 +127,7 @@ To explicitly execute a subset of analyses (and all their dependencies) we can e
 .. code-block:: python
     :linenos:
 
-    driver2 = greedy_workflow_driver()
+    driver2 = greedy_executor()
     driver2.add_all()  # Add all analyses
     driver2.execute()  # Execute all analyses
 

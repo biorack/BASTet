@@ -16,11 +16,3 @@ driver Package
     :members:
     :undoc-members:
     :show-inheritance:
-
-:mod:`greedy_workflow_driver` Module
--------------------------------------
-
-.. automodule:: omsi.workflow.driver.greedy_workflow_driver
-    :members:
-    :undoc-members:
-    :show-inheritance:
