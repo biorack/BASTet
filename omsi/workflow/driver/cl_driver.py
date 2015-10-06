@@ -6,7 +6,7 @@ import argparse
 from omsi.analysis.base import analysis_base
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.main_file import omsi_file
-from omsi.workflow.base import analysis_driver_base
+from omsi.workflow.driver.base import analysis_driver_base
 import omsi.shared.mpi_helper as mpi_helper
 import numpy as np
 import os

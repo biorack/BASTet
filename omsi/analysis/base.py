@@ -9,7 +9,7 @@ import weakref
 
 import numpy as np
 
-from omsi.workflow.base import workflow_executor_base
+from omsi.workflow.executor.base import workflow_executor_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes

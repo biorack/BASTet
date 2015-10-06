@@ -96,7 +96,7 @@ The above will execute ``a1`` as well as ``a2`` since ``a2`` depends on ``a1``.
 
 **NOTE:** Recursive execution will only execute other analyses that are actually needed to complete our analysis and analysis results of dependent analyses that have been executed before will be reused. E.g., if we would call ``a2.execute_recursive()`` again, then only ``a2`` would be executed again.
 
-**NOTE:** When executing multiple dependent analyses, then the execution is typically controlled by a workflow driver py:meth:`omsi.workflow.driver.base.workflow_executor_base`. By default, ``execute_recursive(..)`` will automatically create a default driver. If we want to customize the driver to be used then we can simply assign a driver to the analysis before-hand by setting the py:var:`omsi.analysis.base.analysis_base.driver`` instance variable.
+**NOTE:** When executing multiple dependent analyses, then the execution is typically controlled by a workflow executor py:meth:`omsi.workflow.executor`. By default, ``execute_recursive(..)`` will automatically create a default driver. If we want to customize the driver to be used then we can simply assign a driver to the analysis before-hand by setting the py:var:`omsi.analysis.base.analysis_base.driver`` instance variable.
 
 Executing all analyses
 ^^^^^^^^^^^^^^^^^^^^^^
