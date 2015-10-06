@@ -9,6 +9,16 @@ driver Package
     :undoc-members:
     :show-inheritance:
 
+
+:mod:`base` Module
+-------------------
+
+.. automodule:: omsi.workflow.driver.base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 :mod:`cl_driver` Module
 -----------------------
 
@@ -16,3 +26,4 @@ driver Package
     :members:
     :undoc-members:
     :show-inheritance:
+
