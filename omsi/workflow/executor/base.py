@@ -104,13 +104,14 @@ class workflow_executor_base(object):
                 analysis_objects = [analysis_objects, ]
         log_helper.log_var(__name__, analysis_objects=analysis_objects, level='DEBUG')
         self.run_info = run_info_dict()
+        self.track_runinfo = True
         self.analysis_tasks = analysis_task_set(analysis_objects) if analysis_objects is not None else analysis_task_set()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
 
     def __call__(self):
         """
-        Same as main
+        Same as execute
 
         :return: The output of main
         """
@@ -129,26 +130,28 @@ class workflow_executor_base(object):
         Execute the workflow. This uses the main() function to run the actual workflow.
         """
         import time
-        log_helper.debug(__name__, "Execute workflow")
-        # 1) Record basic execution provenance information prior to running the analysis
-        self.run_info.clear()
-        self.run_info.record_preexecute()
+        log_helper.debug(__name__, "Execute")
+        if self.track_runinfo:
+            # 1) Record basic execution provenance information prior to running the analysis
+            self.run_info.clear()
+            self.run_info.record_preexecute()
+            start_time = time.time()
 
         # 2) Execute the workflow
-        start_time = time.time()
         re = self.main()
-        execution_time = time.time() - start_time
 
         # 3) Record post-execution information, e.g., the execution time
-        self.run_info.record_postexecute(execution_time=execution_time)
-        self.run_info.clean_up()
-        self.run_info = self.run_info.gather(root=self.mpi_root,
-                                             comm=self.mpi_comm)
-        try:
-            log_helper.info(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s")
-        except (KeyError, ValueError):
-            pass
-        # 4) Return the result of the workflow execution
+        if self.track_runinfo:
+            execution_time = time.time() - start_time
+            self.run_info.record_postexecute(execution_time=execution_time)
+            self.run_info.clean_up()
+            self.run_info = self.run_info.gather(root=self.mpi_root,
+                                                 comm=self.mpi_comm)
+            try:
+                log_helper.info(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s")
+            except (KeyError, ValueError):
+                pass
+        # 4) Return the result of the execution execution
         return re
 
     def add_analysis(self,
