@@ -95,7 +95,7 @@ class log_helper(object):
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param kwargs: Variables+values to be logged
-        
+
         """
         for var_name, var_value in kwargs.iteritems():
             try:
@@ -115,7 +115,7 @@ class log_helper(object):
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
                      calling ranks will perform logging. Default is None.
-        :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
+        :param comm: The MPI communicator to be used to determine the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param level: To which logging level should we send the message
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.

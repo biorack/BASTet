@@ -348,11 +348,13 @@ class analysis_base(object):
         # Record the analysis output so that we can save it to file
         if analysis_output is not None:
             if len(self.data_names) == 1:   # We need this case, because analysis_output is not a tuple we can slice
-                log_helper.debug(__name__, "Recording output " + str(self.data_names[0]))
+                log_helper.debug(__name__, "Recording output " + str(self.data_names[0]),
+                                 root=self.mpi_root, comm=self.mpi_comm)
                 self[self.data_names[0]] = analysis_output
             else:
                 for data_index, data_name in enumerate(self.data_names):
-                    log_helper.debug(__name__, "Recording output " + str(data_name))
+                    log_helper.debug(__name__, "Recording output " + str(data_name),
+                                     root=self.mpi_root, comm=self.mpi_comm)
                     self[data_name] = analysis_output[data_index]
 
     def execute(self, **kwargs):
@@ -368,7 +370,7 @@ class analysis_base(object):
             the case, e.g, when a dependent input parameter is not ready to be used.
 
         """
-        log_helper.debug(__name__, "Execute analysis. " + str(self), self.mpi_root)
+        log_helper.debug(__name__, "Execute analysis. " + str(self), root=self.mpi_root, comm=self.mpi_comm)
 
         # Import modules for profiling if needed
         if self.profile_time_and_usage:
@@ -399,7 +401,8 @@ class analysis_base(object):
                 self.profile_time_and_usage = False
                 warnings.warn("All profiling disabled. Could not import StringIO.")
 
-        log_helper.debug(__name__, "Initializing analysis parameters and environment. " + str(self), self.mpi_root)
+        log_helper.debug(__name__, "Initializing analysis parameters and environment. " + str(self),
+                         root=self.mpi_root, comm=self.mpi_comm)
         # 1) Remove the saved analysis object since we are running the analysis again
         self.omsi_analysis_storage = []
 
@@ -417,10 +420,11 @@ class analysis_base(object):
 
         # 3) Record basic execution provenance information prior to running the analysis
         self.run_info.clear()
-        self.run_info.record_preexecute()
+        self.run_info.record_preexecute(root=self.mpi_root, comm=self.mpi_comm)
 
         # 4) Define the start-time for the execution of our analysis
-        log_helper.debug(__name__, "Run and profile the analysis: " + str(self), self.mpi_root)
+        log_helper.debug(__name__, "Run and profile the analysis: " + str(self),
+                         root=self.mpi_root, comm=self.mpi_comm)
         start_time = time.time()
 
         # 5) Run the analysis
@@ -472,16 +476,18 @@ class analysis_base(object):
         # Record basic post-execute runtime information and clean up the run-info to remove empty entries
         execution_time = time.time() - start_time
 
-        log_helper.debug(__name__, "Completed executing the analysis function. " + str(self), self.mpi_root)
-        log_helper.debug(__name__, "Complete recording runtime data. " + str(self), self.mpi_root)
-        self.run_info.record_postexecute(execution_time=execution_time)
-        self.run_info.clean_up()
+        log_helper.debug(__name__, "Completed executing the analysis function. " + str(self),
+                         root=self.mpi_root, comm=self.mpi_comm)
+        log_helper.debug(__name__, "Complete recording runtime data. " + str(self),
+                         root=self.mpi_root, comm=self.mpi_comm)
+        self.run_info.record_postexecute(execution_time=execution_time, root=self.mpi_root, comm=self.mpi_comm)
+        self.run_info.clean_up(root=self.mpi_root, comm=self.mpi_comm)
 
         # If we ran the analysis in parallel, then collect all runtime information
         if mpi_helper.MPI_AVAILABLE:
             self.run_info = self.run_info.gather(root=self.mpi_root,
                                                  comm=self.mpi_comm)
-        log_helper.debug(__name__, "Finished the analysis. " + str(self), self.mpi_root)
+        log_helper.debug(__name__, "Finished the analysis. " + str(self), root=self.mpi_root, comm=self.mpi_comm)
 
         # Record the analysis output
         self.record_execute_analysis_outputs(analysis_output=analysis_output)
@@ -526,52 +532,58 @@ class analysis_base(object):
 
         :return: Same as execute
         """
-        log_helper.info(__name__, "Executing the analysis and all its dependencies. " + str(self))
+        log_helper.info(__name__, "Executing the analysis and all its dependencies. " + str(self),
+                        root=self.mpi_root, comm=self.mpi_comm)
         self.update_analysis = True   # Force update of the current analysis
         if len(kwargs) > 0:
             self.update_analysis_parameters(**kwargs)
         if self.driver is not None:
-            log_helper.debug(__name__, "Using user-defined driver.")
+            log_helper.debug(__name__, "Using user-defined driver.",  root=self.mpi_root, comm=self.mpi_comm)
             self.driver.clear()
             self.driver.add_analysis(self)
             self.driver.execute()
         else:
-            log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
+            log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.",
+                             root=self.mpi_root, comm=self.mpi_comm)
             default_driver = workflow_executor_base.get_default_executor(analysis_objects=self)
             default_driver.execute()
-        log_helper.debug(__name__, "Compiling outputs and return")
+        log_helper.debug(__name__, "Compiling outputs and return", root=self.mpi_root, comm=self.mpi_comm)
         outputs = [self[name] for name in self.data_names]
         return tuple(outputs)
 
     @classmethod
     def execute_all(cls,
                     force_update=False,
-                    driver=None):
+                    executor=None):
         """
         Execute all analysis instances that are currently defined.
 
         :param force_update: Boolean indicating whether we should force that all analyses are
             executed again, even if they have already been run with the same settings before.
             False by default.
-        :param driver: Optional workflow driver to be used for the execution of all analyses.
-            The driver will be cleared and then all analyses will be added to driver. Default
-            value is None, in which case the function creates a default driver to be used.
+        :param executor: Optional workflow executor to be used for the execution of all analyses.
+            The executor will be cleared and then all analyses will be added to executor. Default
+            value is None, in which case the function creates a default executor to be used.
 
         """
-        log_helper.info(__name__, "Execute all analyses")
-        log_helper.log_var(__name__, force_update=force_update, level='DEBUG')
-        if driver is not None:
-            log_helper.debug(__name__, "Using user-defined driver.")
-            driver.clear()
+        # TODO get root and comm from the executor if available
+        root = 0
+        comm = mpi_helper.get_comm_world()
+        log_helper.info(__name__, "Execute all analyses", root=root, comm=comm)
+        log_helper.log_var(__name__, force_update=force_update, level='DEBUG', root=root, comm=comm)
+        if executor is not None:
+            log_helper.debug(__name__, "Using user-defined executor.",  root=root, comm=comm)
+            executor.clear()
         else:
-            log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
-            driver = workflow_executor_base.get_default_executor()
+            log_helper.debug(__name__, "Creating the default executor and adding all analysis objects",
+                             root=root, comm=comm)
+            executor = workflow_executor_base.get_default_executor()
         for ana_obj in cls.get_analysis_instances():
             if force_update:
                 ana_obj.update_analysis = True
-            driver.add_analysis(ana_obj)
-        log_helper.debug(__name__, "Execute the workflow using the default driver")
-        driver.execute()
+            executor.add_analysis(ana_obj)
+        log_helper.debug(__name__, "Execute the workflow using the default executor", root=root, comm=comm)
+        executor.execute()
 
     @classmethod
     def v_qslice(cls,
@@ -923,7 +935,8 @@ class analysis_base(object):
         if enable != self.profile_time_and_usage:
             if not enable:
                 self.profile_time_and_usage = False
-                log_helper.debug(__name__, "Disabled time and usage profiling. ", self.mpi_root)
+                log_helper.debug(__name__, "Disabled time and usage profiling. ",
+                                 root=self.mpi_root, comm=self.mpi_comm)
             else:
                 # Try to import all required packages for profiling
                 try:
@@ -934,7 +947,7 @@ class analysis_base(object):
                 import StringIO
                 # Enable profiling
                 self.profile_time_and_usage = True
-                log_helper.debug(__name__, "Enabled time and usage profiling. ", self.mpi_root)
+                log_helper.debug(__name__, "Enabled time and usage profiling. ", root=self.mpi_root, comm=self.mpi_comm)
 
     def enable_memory_profiling(self, enable=True):
         """
@@ -948,12 +961,12 @@ class analysis_base(object):
         if enable != self.profile_memory:
             if not enable:
                 self.profile_memory = False
-                log_helper.debug(__name__, "Disabled memory profiling. ", self.mpi_root)
+                log_helper.debug(__name__, "Disabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
             else:
                 import memory_profiler
                 import StringIO
                 self.profile_memory = True
-                log_helper.debug(__name__, "Enabled memory profiling. ", self.mpi_root)
+                log_helper.debug(__name__, "Enabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
 
     def results_ready(self):
         """
@@ -1180,20 +1193,20 @@ class analysis_base(object):
 
     def clear_analysis_data(self):
         """Clear the list of analysis data"""
-        log_helper.debug(__name__, "Clearing analysis data. ", self.mpi_root)
+        log_helper.debug(__name__, "Clearing analysis data. ", root=self.mpi_root, comm=self.mpi_comm)
         self.__data_list = []
         self.update_analysis = True
 
     def clear_parameter_data(self):
         """Clear the list of parameter data"""
-        log_helper.debug(__name__, "Clearing parameter data. ", self.mpi_root)
+        log_helper.debug(__name__, "Clearing parameter data. ", root=self.mpi_root, comm=self.mpi_comm)
         for param in self.parameters:
             param.clear_data()
         self.update_analysis = True
 
     def clear_analysis(self):
         """Clear all analysis, parameter and dependency data"""
-        log_helper.debug(__name__, "Clearing the analysis. ", self.mpi_root)
+        log_helper.debug(__name__, "Clearing the analysis. ", root=self.mpi_root, comm=self.mpi_comm)
         self.clear_analysis_data()
         self.clear_parameter_data()
         self.update_analysis = True
@@ -1215,7 +1228,8 @@ class analysis_base(object):
                may provide a tuple consisting of the dataobject t[0] and
                an additional selection string t[1].
         """
-        log_helper.debug(__name__, "Setting analysis parameters. " + str(kwargs.keys()), self.mpi_root)
+        log_helper.debug(__name__, "Setting analysis parameters. " + str(kwargs.keys()),
+                         root=self.mpi_root, comm=self.mpi_comm)
         import h5py
         from omsi.dataformat.omsi_file.common import omsi_file_common
         for k, v in kwargs.items():
@@ -1290,7 +1304,8 @@ class analysis_base(object):
                 # wrapping and restoring functions on-the-fly we cannot determine all parameters until later
                 # (e.g., when use analysis_generic) so that we need to cover this case here.
                 log_helper.warning(__name__, "Parameter " + name +
-                                   " not found in analysis_base.set_parameter_values(). Adding a new parameter.")
+                                   " not found in analysis_base.set_parameter_values(). Adding a new parameter.",
+                                   root=self.mpi_root, comm=self.mpi_comm)
                 self.parameters.append(parameter_data(name=name,
                                                       help='',
                                                       dtype=dtype,
@@ -1323,9 +1338,9 @@ class analysis_base(object):
 
         :raises: ValueError is raised if the parameter with the given name already exists.
         """
-        log_helper.debug(__name__, "Adding parameter. " + str(name), self.mpi_root)
+        log_helper.debug(__name__, "Adding parameter. " + str(name), root=self.mpi_root, comm=self.mpi_comm)
         if self.get_parameter_data_by_name(name) is not None:
-            log_helper.debug(__name__, "Parameter already exists. " + str(name), self.mpi_root)
+            log_helper.debug(__name__, "Parameter already exists. " + str(name), root=self.mpi_root, comm=self.mpi_comm)
             raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
         self.parameters.append(parameter_data(name=name,
                                               help=help,
