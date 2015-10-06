@@ -9,10 +9,10 @@ workflow Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`workflow_data` Module
----------------------------
+:mod:`common` Module
+---------------------
 
-.. automodule:: omsi.workflow.workflow_data
+.. automodule:: omsi.workflow.common
     :members:
     :undoc-members:
     :show-inheritance:
