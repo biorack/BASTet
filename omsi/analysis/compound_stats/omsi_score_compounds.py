@@ -294,6 +294,6 @@ class omsi_score_compounds(analysis_base):
         return hit_table, pixel_index
 
 if __name__ == "__main__":
-    from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
-    omsi_cl_driver(analysis_class=omsi_score_compounds).main()
+    from omsi.workflow.driver.cl_driver import cl_driver
+    cl_driver(analysis_class=omsi_score_compounds).main()
 

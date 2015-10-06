@@ -1,11 +1,11 @@
 """
 Module used to help with the execution of complex analyses workflows
 """
-from omsi.workflow.base import workflow_driver_base
+from omsi.workflow.base import workflow_executor_base
 from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
 
-class greedy_workflow_driver(workflow_driver_base):
+class greedy_executor(workflow_executor_base):
     """
     Execute a set of analysis objects and their dependencies
     """
@@ -15,7 +15,7 @@ class greedy_workflow_driver(workflow_driver_base):
 
         :param analysis_objects: A list of analysis objects to be executed
         """
-        super(greedy_workflow_driver, self).__init__(analysis_objects)
+        super(greedy_executor, self).__init__(analysis_objects)
         self.run_info = run_info_dict()
 
     def main(self):

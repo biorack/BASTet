@@ -9,7 +9,7 @@ import weakref
 
 import numpy as np
 
-from omsi.workflow.base import workflow_driver_base
+from omsi.workflow.base import workflow_executor_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
@@ -519,7 +519,7 @@ class analysis_base(object):
         We use a workflow driver to control the execution. To define the workflow driver we can set
         the self.driver variable. If no workflow driver is given (i.e, self.driver==None), then the
         default driver will be created. To change the default driver,
-        see `omsi.workflow.base.workflow_driver_base.DEFAULT_DRIVER_CLASS`
+        see `omsi.workflow.base.workflow_executor_base.DEFAULT_EXECUTOR_CLASS`
 
         :param kwargs: Parameters to be used for the analysis. Parameters may also be set using
             the __setitem__ mechanism or as batches using the set_parameter_values function.
@@ -537,7 +537,7 @@ class analysis_base(object):
             self.driver.execute()
         else:
             log_helper.debug(__name__, "Creating default driver and workflow to run the analysis.")
-            default_driver = workflow_driver_base.get_default_driver(analysis_objects=self)
+            default_driver = workflow_executor_base.get_default_executor(analysis_objects=self)
             default_driver.execute()
         log_helper.debug(__name__, "Compiling outputs and return")
         outputs = [self[name] for name in self.data_names]
@@ -565,7 +565,7 @@ class analysis_base(object):
             driver.clear()
         else:
             log_helper.debug(__name__, "Creating the default driver and adding all analysis objects")
-            driver = workflow_driver_base.get_default_driver()
+            driver = workflow_executor_base.get_default_executor()
         for ana_obj in cls.get_analysis_instances():
             if force_update:
                 ana_obj.update_analysis = True
@@ -1034,8 +1034,8 @@ class analysis_base(object):
 
         :return: Help string describing the analysis and its parameters
         """
-        from omsi.workflow.analysis_driver.omsi_cl_driver import omsi_cl_driver
-        temp_driver = omsi_cl_driver(analysis_class=self.__class__)
+        from omsi.workflow.driver.cl_driver import cl_driver
+        temp_driver = cl_driver(analysis_class=self.__class__)
         temp_driver.initialize_argument_parser()
         return temp_driver.parser.format_help()
 

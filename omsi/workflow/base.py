@@ -42,9 +42,9 @@ class analysis_driver_base(object):
         self.main()
 
 
-class workflow_driver_base(object):
+class workflow_executor_base(object):
     """
-    Base class used to drive a workflow of one or many analyses. This is an object-based execution,
+    Base class used to execute a workflow of one or many analyses. This is an object-based execution,
     i.e., the user defines a set of analyses to be executed.
 
     We are given a set of existing analysis objects for which we need to coordinate the execution.
@@ -52,20 +52,20 @@ class workflow_driver_base(object):
     :ivar analysis_objects: Private set of analysis objects to be executed
     :type analysis_objects: analysis_task_set
 
-    :cvar DEFAULT_DRIVER_CLASS: Define the derived workflow_driver_base class to be used as default driver
-        The default value is None, in which case the greedy_workflow_driver is used. This variable is used
-        by the get_default_driver function to instantiate a  default workflow driver on request. Using this
-        variable we can change the default driver to our own preferred driver, e.g., to change the driver
+    :cvar DEFAULT_EXECUTOR_CLASS: Define the derived workflow_executor_base class to be used as default executor
+        The default value is None, in which case the greedy_workflow_executor is used. This variable is used
+        by the get_default_executor function to instantiate a  default workflow executor on request. Using this
+        variable we can change the default executor to our own preferred executor, e.g., to change the executor
         used by the omsi.analysis.base.analysis_base functions execute_all(...) and execute_recursive(...)
 
-    To implement a derived workflow driver, we need to implement a derived class that implements the main()
+    To implement a derived workflow executor, we need to implement a derived class that implements the main()
     function.
 
     """
 
-    DEFAULT_DRIVER_CLASS = None
+    DEFAULT_EXECUTOR_CLASS = None
     """
-    The default driver class to be used
+    The default executor class to be used
     """
 
     @classmethod
@@ -79,17 +79,17 @@ class workflow_driver_base(object):
         :param script_files: List of strings with the paths to the script files. If only a single
             script is used, then a single string may be used as well.
 
-        :return: Instance of the current workflow driver class for running the given workflow
+        :return: Instance of the current workflow executor class for running the given workflow
         """
         analysis_objects = analysis_task_set.from_script_files(script_files)
-        new_driver = cls(analysis_objects)
-        return new_driver
+        new_executor = cls(analysis_objects)
+        return new_executor
 
     @classmethod
     def from_scripts(cls,
                      scripts):
         """
-        Create and initalize a worklflow driver of the current class type to execute the workflow defined
+        Create and initalize a worklflow executor of the current class type to execute the workflow defined
         in the given set of scripts.
 
         This function using analysis_task_set.from_scripts to evaluate the workflow scripts to extract all
@@ -100,36 +100,36 @@ class workflow_driver_base(object):
         :param scripts: The script with the setup of the workflow. This should only include
             the definition of analyses and their inputs.
 
-        :return: Instance of the current workflow driver class for running the given workflow
+        :return: Instance of the current workflow executor class for running the given workflow
         """
         analysis_objects = analysis_task_set.from_scripts(scripts)
-        new_driver = cls(analysis_objects)
-        return new_driver
+        new_executor = cls(analysis_objects)
+        return new_executor
 
     @classmethod
-    def get_default_driver(cls, analysis_objects=None):
+    def get_default_executor(cls, analysis_objects=None):
         """
-        Create an instance of the default workflow driver to be used.
+        Create an instance of the default workflow executor to be used.
 
         :param analysis_objects: A set or unique list of analysis objects to be executed by the workflow
 
-        :return: Instance of the default workflow driver
+        :return: Instance of the default workflow executor
         """
-        if cls.DEFAULT_DRIVER_CLASS is None:
-            from omsi.workflow.driver.greedy_workflow_driver import greedy_workflow_driver
-            driver = greedy_workflow_driver(analysis_objects=analysis_objects)
+        if cls.DEFAULT_EXECUTOR_CLASS is None:
+            from omsi.workflow.executor.greedy_executor import greedy_workflow_executor
+            executor = greedy_workflow_executor(analysis_objects=analysis_objects)
         else:
-            driver = cls.DEFAULT_DRIVER_CLASS(analysis_objects=analysis_objects)
-        return driver
+            executor = cls.DEFAULT_EXECUTOR_CLASS(analysis_objects=analysis_objects)
+        return executor
 
     def __init__(self,
                  analysis_objects=None):
         """
-        Initialize the workflow driver
+        Initialize the workflow executor
 
         :param analysis_objects: A list of analysis objects to be executed
         """
-        log_helper.debug(__name__, "Creating workflow driver")
+        log_helper.debug(__name__, "Creating workflow executor")
         if analysis_objects is not None:
             if not isinstance(analysis_objects, list) and not isinstance(analysis_objects, set):
                 analysis_objects = [analysis_objects, ]
@@ -150,7 +150,7 @@ class workflow_driver_base(object):
     def main(self):
         """
         Implement the execution of the workflow. We should always call execute(..) or __call__(..) to run
-        the workflow. This function is intended to implementd the driver-specific exeuction behavior and
+        the workflow. This function is intended to implementd the executor-specific exeuction behavior and
         must be implemented in child classes.
         """
         raise NotImplementedError("Child classes must implement the main function")
@@ -206,7 +206,7 @@ class workflow_driver_base(object):
         This function is recursive, step-by-step adding all dependencies of the workflow to the list of
         tasks to be executed, until no more dependencies are found.
 
-        Usually this function is called by the workflow driver itself before running the analysis and
+        Usually this function is called by the workflow executor itself before running the analysis and
         should not need to be called by the user.
 
         :returns: Integer indicating the number of dependencies added to the list of tasks
@@ -389,7 +389,7 @@ class analysis_task_set(set):
         This function is recursive, step-by-step adding all dependencies of the workflow to the list of
         tasks to be executed, until no more dependencies are found.
 
-        Usually this function is called by the workflow driver itself before running the analysis and
+        Usually this function is called by the workflow executor itself before running the analysis and
         should not need to be called by the user.
 
         :returns: Integer indicating the number of dependencies added to the list of tasks
