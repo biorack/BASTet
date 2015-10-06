@@ -10,7 +10,7 @@ Figure :ref:`workflow_illustration`, illustrates the basic steps of using analys
 .. _workflow_illustration:
 
 .. figure:: _static/workflow_illustration.png
-   :scale: 37 %
+   :scale: 100 %
    :alt: Figure showing and example workflow
 
    Illustration of an example workflow for image normalization

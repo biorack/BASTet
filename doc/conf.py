@@ -95,7 +95,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'agogo' #'default'
+html_theme = 'sphinx_rtd_theme'  #'agogo' #'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -172,7 +172,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'openmsi_tk_doc'
+htmlhelp_basename = 'bastet_doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -202,7 +202,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'openmsi_tk_doc.tex', u'BASTet: Berkeley Analysis and Storage Toolkit',
+  ('index', 'bastet_doc.tex', u'BASTet: Berkeley Analysis and Storage Toolkit',
    u'Oliver Rübel and Ben Bowen', 'manual'),
 ]
 

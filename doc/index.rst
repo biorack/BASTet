@@ -3,8 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentation of the OpenMSI Toolkit:
-=====================================
+Documentation BASTet:
+=====================
+
+.. figure:: _static/bastet_logo_full.*
+   :scale: 35 %
+   :alt: BASTet Logo
+
 
 .. toctree::
    :maxdepth: 5

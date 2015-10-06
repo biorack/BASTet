@@ -1,5 +1,5 @@
-Developing a new Analysis for OpenMSI
-=====================================
+Developing a new Analysis for BASTet
+====================================
 
 Overview:
 ---------
