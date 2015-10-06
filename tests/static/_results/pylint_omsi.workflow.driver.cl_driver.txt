@@ -1,0 +1,48 @@
+************* Module omsi.workflow.driver.cl_driver
+W:556, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
+W:557, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
+C:199, 0: Line too long (123/120) (line-too-long)
+C:378, 0: Wrong continued indentation.
+                                action='help',
+                                ^| (bad-continuation)
+C:379, 0: Wrong continued indentation.
+                                default=argparse.SUPPRESS,
+                                ^| (bad-continuation)
+C:380, 0: Wrong continued indentation.
+                                help='show this help message and exit')
+                                ^| (bad-continuation)
+C:399, 0: Line too long (126/120) (line-too-long)
+C:424, 0: Wrong continued indentation.
+                                      "by the analysis but potentially modified by it")
+                            |         ^ (bad-continuation)
+C:517, 0: No space allowed before comma
+                if isinstance(analysis_object.run_info['execution_time'] , list):
+                                                                         ^ (bad-whitespace)
+C:520, 0: Wrong continued indentation.
+                                     str(analysis_object.run_info['execution_time']))
+                                    |^ (bad-continuation)
+C:523, 0: Wrong continued indentation.
+                                              str(analysis_object.run_info['start_time']))
+                                    |         ^ (bad-continuation)
+C:527, 0: Wrong continued indentation.
+                                              str(analysis_object.run_info['end_time']))
+                                    |         ^ (bad-continuation)
+C:564, 0: Wrong continued indentation.
+                   add_analysis_class_arg=True,
+              |    ^ (bad-continuation)
+C:565, 0: Wrong continued indentation.
+                   add_output_arg=True,
+              |    ^ (bad-continuation)
+C:566, 0: Wrong continued indentation.
+                   add_profile_arg=True,
+              |    ^ (bad-continuation)
+C:567, 0: Wrong continued indentation.
+                   add_mem_profile_arg=True).main()
+              |    ^ (bad-continuation)
+C: 16, 0: Invalid class name "RawDescriptionDefaultHelpArgParseFormatter" (invalid-name)
+R: 29, 0: Too many instance attributes (15/7) (too-many-instance-attributes)
+R: 73, 4: Too many arguments (7/5) (too-many-arguments)
+R:269, 4: Too many branches (16/12) (too-many-branches)
+C:332, 4: Invalid method name "add_and_parse_analysis_arguments" (invalid-name)
+W:419,12: No exception type(s) specified (bare-except)
+R:429, 4: Too many branches (20/12) (too-many-branches)

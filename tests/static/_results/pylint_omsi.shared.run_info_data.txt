@@ -1,6 +1,7 @@
 ************* Module omsi.shared.run_info_data
-C: 17, 4: Invalid class attribute name "DEFAULT_TIME_FORMAT" (invalid-name)
-W: 63, 8: No exception type(s) specified (bare-except)
-W: 70, 8: No exception type(s) specified (bare-except)
-W:122,12: No exception type(s) specified (bare-except)
-R: 13, 0: Too many public methods (23/20) (too-many-public-methods)
+W:102, 0: TODO: This only gives execution time in full seconds right now (fixme)
+C: 18, 4: Invalid class attribute name "DEFAULT_TIME_FORMAT" (invalid-name)
+W: 65, 8: No exception type(s) specified (bare-except)
+W: 72, 8: No exception type(s) specified (bare-except)
+W:124,12: No exception type(s) specified (bare-except)
+R: 14, 0: Too many public methods (23/20) (too-many-public-methods)

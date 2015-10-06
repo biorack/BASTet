@@ -1,6 +1,0 @@
-************* Module omsi.analysis.omsi_analysis_driver
-R: 12, 0: Too few public methods (0/2) (too-few-public-methods)
-C: 20, 0: Invalid class name "RawDescriptionDefaultHelpArgParseFormatter" (invalid-name)
-R: 33, 0: Too many instance attributes (9/7) (too-many-instance-attributes)
-R:132, 4: Too many local variables (19/15) (too-many-locals)
-W:296,12: No exception type(s) specified (bare-except)

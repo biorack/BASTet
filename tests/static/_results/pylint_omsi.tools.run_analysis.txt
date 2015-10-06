@@ -1,0 +1,13 @@
+************* Module omsi.tools.run_analysis
+C: 11, 0: Wrong continued indentation.
+                   add_analysis_class_arg=True,
+              |    ^ (bad-continuation)
+C: 12, 0: Wrong continued indentation.
+                   add_output_arg=True,
+              |    ^ (bad-continuation)
+C: 13, 0: Wrong continued indentation.
+                   add_profile_arg=True,
+              |    ^ (bad-continuation)
+C: 14, 0: Wrong continued indentation.
+                   add_mem_profile_arg=True).main()
+              |    ^ (bad-continuation)

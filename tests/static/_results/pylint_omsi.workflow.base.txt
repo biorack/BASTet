@@ -1,0 +1,10 @@
+************* Module omsi.workflow.base
+C:138, 0: Line too long (122/120) (line-too-long)
+C: 66, 4: Invalid class attribute name "DEFAULT_EXECUTOR_CLASS" (invalid-name)
+E:119,12: No name 'greedy_workflow_executor' in module 'omsi.workflow.executor.greedy_executor' (no-name-in-module)
+E:122,23: cls.DEFAULT_EXECUTOR_CLASS is not callable (not-callable)
+C:170, 8: Invalid variable name "re" (invalid-name)
+W:291,12: Use of exec (exec-used)
+W:294,16: Use of exec (exec-used)
+C:409, 4: Invalid method name "get_additional_analysis_dependencies" (invalid-name)
+R:248, 0: Too many public methods (24/20) (too-many-public-methods)

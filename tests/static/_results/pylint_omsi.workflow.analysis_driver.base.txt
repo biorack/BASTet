@@ -1,3 +1,0 @@
-************* Module omsi.workflow.analysis_driver.base
-C: 48, 4: Invalid class attribute name "DEFAULT_DRIVER_CLASS" (invalid-name)
-E: 63,21: cls.DEFAULT_DRIVER_CLASS is not callable (not-callable)
