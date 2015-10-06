@@ -20,13 +20,15 @@ class run_info_dict(dict):
     def __init__(self, *args, **kwargs):
         super(run_info_dict, self).__init__(*args, **kwargs)
 
-    def record_preexecute(self):
+    def record_preexecute(self,
+                          root=0,
+                          comm=None):
         """
         Record basic runtime information in this dict before the exeuction is started.
 
 
-         Function used to record runtime information prior to executing the process we want to track, e.g.,
-         the `execute_analysis(...)` of a standard analysis.
+        Function used to record runtime information prior to executing the process we want to track, e.g.,
+        the `execute_analysis(...)` of a standard analysis.
 
         The function may be overwritten in child classes to add recording of
         additional runtime information. All runtime data should be recorded in the
@@ -38,8 +40,14 @@ class run_info_dict(dict):
         last in the custom version to ensure that the start_time is properly recorded right before
         the execution of the analysis.
 
+        :param root: Used for logging only. The rank where logging should be performed.
+            Default is None in which case logging is performed on all ranks.
+
+        :param comm: Used for logging only. The MPI communicator to be used. Default value is None,
+            in which case MPI.COMM_WORLD is used.
+
         """
-        log_helper.debug(__name__, 'Recording pre-execution runtime data')
+        log_helper.debug(__name__, 'Recording pre-execution runtime data', root=root, comm=comm)
         # Record basic runtime environment information using the platform module
         try:
             self['architecture'] = unicode(platform.architecture())
@@ -75,7 +83,10 @@ class run_info_dict(dict):
         # Record the start time for the analysis
         self['start_time'] = unicode(datetime.datetime.now())
 
-    def record_postexecute(self, execution_time=None):
+    def record_postexecute(self,
+                           execution_time=None,
+                           root=0,
+                           comm=None):
         """
         Function used to record runtime information after the task we want to track is comleted, e.g.
         the `execute_analysis(...)` function of a standard analysis.
@@ -90,8 +101,15 @@ class run_info_dict(dict):
         :param execution_time: The total time it took to execute the analysis. May be None, in which
             case the function will attempt to compute the execution time based on the start_time
             (if available) and the the current time.
+
+        :param root: Used for logging only. The rank where logging should be performed.
+            Default is None in which case logging is performed on all ranks.
+
+        :param comm: Used for logging only. The MPI communicator to be used. Default value is None,
+            in which case MPI.COMM_WORLD is used.
+
         """
-        log_helper.debug(__name__, 'Recording post-execution runtime data')
+        log_helper.debug(__name__, 'Recording post-execution runtime data', root=root, comm=comm)
         # Finalize recording of post execution provenance
         self['end_time'] = unicode(datetime.datetime.now())
         if execution_time:
@@ -103,7 +121,9 @@ class run_info_dict(dict):
         else:
             self['execution_time'] = None
 
-    def clean_up(self):
+    def clean_up(self,
+                 root=0,
+                 comm=None):
         """
         Clean up the runinfo object. In particular remove empty keys that
         either recorded None or recorded just an empty string.
@@ -114,8 +134,14 @@ class run_info_dict(dict):
         When overwriting this function we should call super(..., self).runinfo_clean_up()
         at the end of the function to ensure that the runinfo dictionary
         is clean, i.e., does not contain any empty entries.
+
+        :param root: Used for logging only. The rank where logging should be performed.
+            Default is None in which case logging is performed on all ranks.
+
+        :param comm: Used for logging only. The MPI communicator to be used. Default value is None,
+            in which case MPI.COMM_WORLD is used.
         """
-        log_helper.debug(__name__, 'Clean up runtime data')
+        log_helper.debug(__name__, 'Clean up runtime data', root=root, comm=comm)
         # Remove empty items from the run_info dict
         for ri_key, ri_value in self.items():
             try:
@@ -124,7 +150,9 @@ class run_info_dict(dict):
             except:
                 pass
 
-    def gather(self, root=0, comm=None):
+    def gather(self,
+               root=0,
+               comm=None):
         """
         Simple helper function to gather the runtime information---that has been collected on
         multiple processes when running using MPI---on a single root process
@@ -148,7 +176,7 @@ class run_info_dict(dict):
             if not comm:
                 comm = mpi_helper.get_comm_world()
             if comm.Get_size() > 1:
-                log_helper.debug(__name__, 'Gather runtime data from parallel tasks')
+                log_helper.debug(__name__, 'Gather runtime data from parallel tasks', root=root, comm=comm)
                 self['mpi_rank'] = comm.Get_rank()
                 run_data = comm.gather(self, root=root)
                 if comm.Get_rank() == root:
