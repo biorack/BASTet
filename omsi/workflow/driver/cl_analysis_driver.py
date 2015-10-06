@@ -17,7 +17,7 @@ from omsi.shared.log import log_helper
 # TODO Add documentation on logging
 # TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
 # TODO Extend analysis_driver_base  (or define separate base classes) to allow driving of complete workflows not just a single class
-# TODO Add ability to cl_driver to load a workflow from file
+# TODO Add ability to cl_analysis_driver to load a workflow from file
 # TODO Add MPI support to the workflow executor
 
 
@@ -25,7 +25,7 @@ class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFo
                                                  argparse.RawDescriptionHelpFormatter):
     """
     Simple derived formatter class for use with argparse used by the
-    cl_driver class. This formatter combines the default
+    cl_analysis_driver class. This formatter combines the default
     argparse.ArgumentDefaultsHelpFormatter and
     argparse.RawDescriptionHelpFormatter
     for formatting arguments and help descriptions.
@@ -34,7 +34,7 @@ class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFo
     pass
 
 
-class cl_driver(analysis_driver_base):
+class cl_analysis_driver(analysis_driver_base):
     """
     Command-line analysis driver.
 
@@ -112,7 +112,7 @@ class cl_driver(analysis_driver_base):
             raise ValueError('The analysis class must be either set explicitly or determined from the command line.')
         if analysis_class is not None and add_analysis_class_arg:
             raise ValueError('Conflicting inputs: analysis_class set and add_analysis_class_arg set to True.')
-        super(cl_driver, self).__init__(analysis_class)
+        super(cl_analysis_driver, self).__init__(analysis_class)
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
         self.analysis_object = None
         self.add_analysis_class_arg = add_analysis_class_arg
@@ -607,7 +607,7 @@ class cl_driver(analysis_driver_base):
 if __name__ == "__main__":
 
     # Create an command-line driver and call the main function to run the analysis
-    cl_driver(analysis_class=None,
+    cl_analysis_driver(analysis_class=None,
               add_analysis_class_arg=True,
               add_output_arg=True,
               add_profile_arg=True,

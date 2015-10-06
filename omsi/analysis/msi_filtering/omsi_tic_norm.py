@@ -391,8 +391,8 @@ class omsi_tic_norm(analysis_base):
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
 if __name__ == "__main__":
-    from omsi.workflow.driver.cl_driver import cl_driver
-    cl_driver(analysis_class=omsi_tic_norm).main()
+    from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
+    cl_analysis_driver(analysis_class=omsi_tic_norm).main()
 
 
 

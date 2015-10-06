@@ -1047,8 +1047,8 @@ class analysis_base(object):
 
         :return: Help string describing the analysis and its parameters
         """
-        from omsi.workflow.driver.cl_driver import cl_driver
-        temp_driver = cl_driver(analysis_class=self.__class__)
+        from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
+        temp_driver = cl_analysis_driver(analysis_class=self.__class__)
         temp_driver.initialize_argument_parser()
         return temp_driver.parser.format_help()
 

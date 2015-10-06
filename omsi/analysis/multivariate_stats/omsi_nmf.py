@@ -193,8 +193,8 @@ class omsi_nmf(analysis_base):
         return wo_matrix, ho_matrix
 
 if __name__ == "__main__":
-    from omsi.workflow.driver.cl_driver import cl_driver
-    cl_driver(analysis_class=omsi_nmf).main()
+    from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
+    cl_analysis_driver(analysis_class=omsi_nmf).main()
 
 
 # def main(argv=None):

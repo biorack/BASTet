@@ -353,12 +353,12 @@ class omsi_xy_smooth(analysis_base):
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
 if __name__ == "__main__":
-    from omsi.workflow.driver.cl_driver import cl_driver
+    from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
     """
     EDIT_ME
 
     Simply replace the omsi_xy_smooth class name with your class name
     """
-    cl_driver(analysis_class=omsi_xy_smooth).main()
+    cl_analysis_driver(analysis_class=omsi_xy_smooth).main()
 
 

@@ -341,12 +341,12 @@ class omsi_findpeaks_cwt(analysis_base):
 #  3) Making your analysis self-sufficient   (Recommended) #
 ############################################################
 if __name__ == "__main__":
-    from omsi.workflow.driver.cl_driver import cl_driver
+    from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
     """
     EDIT_ME
 
     Simply replace the omsi_findpeaks_cwt class name with your class name
     """
-    cl_driver(analysis_class=omsi_findpeaks_cwt).main()
+    cl_analysis_driver(analysis_class=omsi_findpeaks_cwt).main()
 
 
