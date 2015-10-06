@@ -1204,12 +1204,66 @@ class analysis_base(object):
             param.clear_data()
         self.update_analysis = True
 
+    def clear_run_info_data(self):
+        """Clear the runtime information data"""
+        log_helper.debug(__name__, "Clearing runtime information data. ", root=self.mpi_root, comm=self.mpi_comm)
+
     def clear_analysis(self):
-        """Clear all analysis, parameter and dependency data"""
+        """Clear all analysis data---i.e., parameter, dependency data, output results, runtime data"""
         log_helper.debug(__name__, "Clearing the analysis. ", root=self.mpi_root, comm=self.mpi_comm)
         self.clear_analysis_data()
         self.clear_parameter_data()
+        self.clear_run_info_data()
         self.update_analysis = True
+
+    def clear_and_restore(self, analysis_manager=None, resave=False):
+        """
+        Clear all analysis data and restore the results from file
+
+        :param analysis_manager: Instance of omsi_analysis_manager (e.g., an omsi_file_experiment) where the
+            analysis should be saved.
+        :param resave: Boolean indicating whether the analysis should be saved again, even if it has been
+            saved before. This parameter only has effect if analysis_manager is given.
+
+        :return: self, i.e., the updated analysis object with all data replaced with HDF5 references
+        """
+        log_helper.debug(__name__, "Clearing and restoring the analysis", root=self.mpi_root, comm=self.mpi_comm)
+        from tempfile import NamedTemporaryFile
+        from omsi.dataformat.omsi_file.main_file import omsi_file
+
+        # 1) Write the analysis to file if necessary
+        if not self.has_omsi_analysis_storage() or (analysis_manager is not None and resave):
+            # 1.1) Create a temporary file for storage if needed
+            named_temp_file = None
+            if analysis_manager is None:
+                named_temp_file = NamedTemporaryFile(suffix=".h5")
+                temp_omsi_file = omsi_file(named_temp_file.name, 'a')
+                analysis_manager = temp_omsi_file.create_experiment()
+                log_helper.debug(__name__, "Created temporary file store " + named_temp_file.name,
+                                 root=self.mpi_root, comm=self.mpi_comm)
+            # 1.2) Save the analysis to file
+            ana_obj, ana_index = analysis_manager.create_analysis(analysis=self,
+                                             flush_io=True,
+                                             force_save=False,
+                                             save_unsaved_dependencies=True,
+                                             mpi_root=self.mpi_root,
+                                             mpi_comm=self.mpi_comm)
+            # 1.3) Make sure that the named temporary file we created does not go out of
+            # scope until our data store is deleted for the analysis, by attaching the file to the object
+            setattr(ana_obj, named_temp_file.name, named_temp_file)
+
+        # 2) Clear the in-memory data
+        self.clear_analysis()
+        # 3) Restore the data from file
+        print self.get_omsi_analysis_storage()[0].managed_group.items()
+        self.read_from_omsi_file(analysis_object=self.get_omsi_analysis_storage()[0],
+                                 load_data=True,
+                                 load_parameters=True,
+                                 load_runtime_data=False,
+                                 dependencies_omsi_format=False,
+                                 ignore_type_conflict=False)
+        # 4) Return the updated object
+        return self
 
     def set_parameter_values(self,
                              **kwargs):
@@ -1483,6 +1537,7 @@ class analysis_base(object):
 
 
         """
+        log_helper.debug(__name__, "Restoring the analysis from file", root=self.mpi_root, comm=self.mpi_comm)
         if not ignore_type_conflict:
             if str(analysis_object.get_analysis_type()[0]) != str(self.get_analysis_type()):
                 error_message = "The type of the analysis specified in the omsi data file " + \
