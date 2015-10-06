@@ -110,13 +110,12 @@ class omsi_analysis_manager(omsi_file_object_manager):
                        so that all data has been written to file
         :type flush_io: bool
 
-        :param force_save: Should we save the analysis even if it has been saved before for the same parent?
-            If force_save is False (default) and the self.omsi_analysis_storage parameter of the analysis_base
-            object given as the analysis input parameter is not empty, then we will try to locate the appropriate
-            object first and return it instead, rather than saving the analysis again. Note, only if the prior
-            storage location is within the current self.analysis_parent will we return the previous storage object,
-            otherwise a new object will be created in the file. If force_save is True, then the analysis will be
-            saved either way and the self.omsi_analysis_storage parameter will be extended.
+        :param force_save: Should we save the analysis even if it has been saved in the same location before?
+            If force_save is False (default) and the self.omsi_analysis_storage parameter of the analysis object
+            contains a matching storage location---i.e., same file and experiment---, then the analysis will
+            not be saved again, but the object will only be retrieved from file.
+            If force_save is True, then the analysis will be saved either way and the self.omsi_analysis_storage
+            parameter will be extended.
         :type force_save: bool
 
         :param save_unsaved_dependencies: If there are unsaved (in-memory) dependencies, then should those be
@@ -243,9 +242,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                        so that all data has been written to file
         :type flush_io: True
 
-        :param force_save: Should we save the analysis even if it has been saved before? If force_save is
-            False (default) and the self.omsi_analysis_storage parameter of the analysis_base object
-            given as the analysis input parameter is not None, then the analysis will not be saved again.
+        :param force_save: Should we save the analysis even if it has been saved in the same location before?
+            If force_save is False (default) and the self.omsi_analysis_storage parameter of the analysis object
+            contains a matching storage location---i.e., same file and experiment---, then the analysis will
+            not be saved again, but the object will only be retrieved from file.
             If force_save is True, then the analysis will be saved either way and the self.omsi_analysis_storage
             parameter will be extended.
         :type force_save: bool
