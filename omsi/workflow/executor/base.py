@@ -5,7 +5,7 @@ Workflow executors control the execution of workflows. The setup of workflows is
 either by a workflow driver or the user.
 """
 
-from omsi.workflow.workflow_data import analysis_task_set
+from omsi.workflow.common import analysis_task_set
 from omsi.shared.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.log import log_helper

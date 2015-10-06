@@ -2,7 +2,20 @@
 Module defining basic data structures used by workflows.
 """
 from omsi.shared.log import log_helper
+import argparse
 
+
+class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                                                 argparse.RawDescriptionHelpFormatter):
+    """
+    Simple derived formatter class for use with argparse used by the
+    cl_analysis_driver class. This formatter combines the default
+    argparse.ArgumentDefaultsHelpFormatter and
+    argparse.RawDescriptionHelpFormatter
+    for formatting arguments and help descriptions.
+
+    """
+    pass
 
 
 class analysis_task_set(set):
