@@ -3,59 +3,55 @@ Basic testing for core functionality of the omsi_file package.
 This includes functionality across many of the modules.
 """
 import unittest
-import tempfile
+from omsi.workflow.executor.greedy_executor import greedy_executor
+
+SCRIPT =  \
+"""
 from omsi.analysis.generic import analysis_generic
-from omsi.dataformat.omsi_file.main_file import omsi_file
 import numpy as np
 
+msidata = np.arange(10*10*20).reshape(10,10,20)
 
-class test_omsi_file_analysis(unittest.TestCase):
+# Define a simple function to compute the total intensity image
+def total_intensity(msidata, axis=2):
+    import numpy as np
+    return np.sum(msidata, axis=axis)
+
+# Define a simple function to normalize an MSI data cube by per-spectrum normalization factors
+def normalize_intensities(msidata, normfactors):
+    import numpy as np
+    return msidata / normfactors[:,:,np.newaxis]
+
+# Define compute of total intensity image
+a2 = analysis_generic.from_function(analysis_function=total_intensity,
+                                    output_names=['total_intensities'])
+a2['msidata'] = msidata
+
+# Define the normalization of the peak cube
+a3 = analysis_generic.from_function(normalize_intensities)
+a3['msidata'] = msidata
+a3['normfactors'] = a2['total_intensities']
+"""
+
+class test_generic(unittest.TestCase):
 
     def setUp(self):
-        self.named_temporary_file = tempfile.NamedTemporaryFile()
-        self.test_filename = self.named_temporary_file.name
-        self.testfile = omsi_file(self.test_filename)
+        from omsi.shared.log import log_helper
+        log_helper.set_log_level('WARNING')
 
     def tearDown(self):
-        # Clean up the test suite
-        del self.testfile
-        del self.test_filename
-        del self.named_temporary_file
+        pass
 
-    def test_wrap_function(self):
-        def f(a):
-            return np.sum(a)
-        g = analysis_generic.from_function(f)
-        res = g.execute(a=np.arange(10))
-        self.assertEquals(res, 45)
+    def test_from_scripts(self):
+        try:
+            driver = greedy_executor.from_scripts(SCRIPT)
+        except:
+            self.fail("Creation  of the workflow fomr script failed")
+        try:
+            driver.execute()
+        except:
+            self.fail("Execution of the workflow failed.")
 
-    def test_wrap_function_and_save(self):
-        def f(a):
-            return np.sum(a)
-        g = analysis_generic.from_function(f)
-        g.execute(a=np.arange(10))
-        f = omsi_file(self.test_filename, 'a')
-        e = f.create_experiment()
-        a = e.create_analysis(g)
-        f.flush()
-        self.assertNotEquals(a, None)
-
-    def test_warp_function_save_and_recreate(self):
-        def f(a):
-            return np.sum(a)
-        g = analysis_generic.from_function(f)
-        res1 = g.execute(a=np.arange(10))
-        f = omsi_file(self.test_filename, 'a')
-        e = f.create_experiment()
-        e.create_analysis(g)
-        f.flush()
-        del f
-        f = omsi_file(self.test_filename, 'a')
-        e = f.get_experiment(0)
-        a = e.get_analysis(0)
-        g2 = a.restore_analysis()
-        res2 = g2.execute()
-        self.assertEquals(res1, res2)
 
 
 if __name__ == '__main__':
