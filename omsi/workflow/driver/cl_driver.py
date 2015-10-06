@@ -12,6 +12,14 @@ import numpy as np
 import os
 from omsi.shared.log import log_helper
 
+# TODO Add documentation on how to restore an analysis workflow from file
+# TODO Add documentaiton on how to push analyses out-of-core
+# TODO Add documentation on logging
+# TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
+# TODO Extend analysis_driver_base  (or define separate base classes) to allow driving of complete workflows not just a single class
+# TODO Add ability to cl_driver to load a workflow from file
+# TODO Add MPI support to the workflow executor
+
 
 class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFormatter,
                                                  argparse.RawDescriptionHelpFormatter):
@@ -106,6 +114,7 @@ class cl_driver(analysis_driver_base):
             raise ValueError('Conflicting inputs: analysis_class set and add_analysis_class_arg set to True.')
         super(cl_driver, self).__init__(analysis_class)
         # self.analysis_class = analysis_class  # Initialized by the super constructor call
+        self.analysis_object = None
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
         self.add_profile_arg = add_profile_arg
@@ -120,6 +129,31 @@ class cl_driver(analysis_driver_base):
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
         self.mpi_root = 0
+        self.mpi_comm = mpi_helper.get_comm_world()
+
+    def create_analysis_object(self):
+        """
+        Initialize the analysis object, i.e., set self.analysis_object
+        """
+        if self.analysis_class is not None:
+            if not isinstance(self.analysis_object, self.analysis_class):
+                self.analysis_object = None
+            if self.analysis_object is None:
+                log_helper.debug(__name__, 'Initalizing analysis object', root=self.mpi_root, comm=self.mpi_comm)
+                self.analysis_object = None if self.analysis_class is None else self.analysis_class()
+                self.analysis_object.mpi_root = self.mpi_root
+                self.analysis_object.mpi_comm = self.mpi_comm
+            else:
+                pass
+        else:
+            self.analysis_object = None
+
+    def reset_analysis_object(self):
+        """
+        Clear the analysis object and recreate it, i.e., delete self.analysis_object and set it again.
+        """
+        self.analysis_object = None
+        self.create_analysis_object()
 
     def get_analysis_class_from_cl(self):
         """
@@ -153,8 +187,10 @@ class cl_driver(analysis_driver_base):
             analysis_module_object = __import__(analysis_module_name, globals(), locals(), [analysis_class_name], -1)
         except ImportError as e:
             log_helper.error(__name__, e.message)
-            log_helper.error(__name__, "Could not locate module " + analysis_module_name)
-            log_helper.error(__name__, "Please check the name of the module. Maybe there is a spelling error.")
+            log_helper.error(__name__, "Could not locate module " + analysis_module_name,
+                             root=self.mpi_root, comm=self.mpi_comm)
+            log_helper.error(__name__, "Please check the name of the module. Maybe there is a spelling error.",
+                             root=self.mpi_root, comm=self.mpi_comm)
             raise
 
         # Determine the self.analysis parameter
@@ -162,8 +198,10 @@ class cl_driver(analysis_driver_base):
             self.analysis_class = getattr(analysis_module_object, analysis_class_name)
         except AttributeError as e:
             log_helper.error(__name__, e.message)
-            log_helper.error(__name__, "Could not locate " + analysis_class_name + " in " + analysis_module_name)
-            log_helper.error(__name__, "Please check the name of the analysis. Maybe there is a spelling error.")
+            log_helper.error(__name__, "Could not locate " + analysis_class_name + " in " + analysis_module_name,
+                             root=self.mpi_root, comm=self.mpi_comm)
+            log_helper.error(__name__, "Please check the name of the analysis. Maybe there is a spelling error.",
+                             root=self.mpi_root, comm=self.mpi_comm)
             raise
 
     def initialize_argument_parser(self):
@@ -175,7 +213,8 @@ class cl_driver(analysis_driver_base):
 
         """
         # Initialize the analysis object to collect information about the arguments
-        analysis_object = None if self.analysis_class is None else self.analysis_class()
+        if self.analysis_object is None:
+            self.create_analysis_object()
 
         # Setup the argument parser
         if self.analysis_class is not None:
@@ -196,7 +235,7 @@ class cl_driver(analysis_driver_base):
                         "In rear cases we may need to manually define an array (e.g., a mask)\n" + \
                         "Here we can use standard python syntax, e.g, '[1,2,3,4]' or '[[1, 3], [4, 5]]' \n" + \
                         "\n\n" + \
-                        "This command-line tool has been auto-generated using BASTet (Berkeley Analysis & Storage Toolkit)"
+                        "This command-line tool has been auto-generated by BASTet (Berkeley Analysis & Storage Toolkit)"
 
         self.parser = argparse.ArgumentParser(description=parser_description,
                                               epilog=parser_epilog,
@@ -207,9 +246,9 @@ class cl_driver(analysis_driver_base):
         self.required_argument_group = self.parser.add_argument_group(title="required analysis arguments")
 
         # Create custom argument groups from the analysis
-        if analysis_object is not None:
+        if self.analysis_object is not None:
             arg_group_dict = {arg_param.get_group_name(): arg_param.get_group_description()
-                              for arg_param in analysis_object.get_all_parameter_data()
+                              for arg_param in self.analysis_object.get_all_parameter_data()
                               if arg_param.get_group_name() is not None}
             for group_name, group_description in arg_group_dict.iteritems():
                 self.custom_argument_groups[group_name] = self.parser.add_argument_group(title=group_name,
@@ -265,7 +304,6 @@ class cl_driver(analysis_driver_base):
                                      help='Specify the level of logging to be used.',
                                      choices=log_helper.log_levels.keys())
 
-
     def parse_cl_arguments(self):
         """
         The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
@@ -288,7 +326,7 @@ class cl_driver(analysis_driver_base):
             parsed_arguments.pop(self.analysis_class_arg_name)
 
         # Process the --save argument to determine where we should save the output
-        if self.output_save_arg_name in parsed_arguments and  mpi_helper.get_rank() == self.mpi_root:
+        if self.output_save_arg_name in parsed_arguments and mpi_helper.get_rank() == self.mpi_root:
             # Determine the filename and experiment group from the path
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
             if self.output_target is not None:
@@ -342,9 +380,11 @@ class cl_driver(analysis_driver_base):
 
         """
         # Add all arguments from our analysis object
-        analysis_object = None if self.analysis_class is None else self.analysis_class()
-        if analysis_object is not None:
-            for arg_param in analysis_object.get_all_parameter_data():
+        if self.analysis_object is None:
+            self.create_analysis_object()
+
+        if self.analysis_object is not None:
+            for arg_param in self.analysis_object.get_all_parameter_data():
                 arg_name = "--" + arg_param['name']
                 arg_action = 'store'
                 arg_default = arg_param['default']
@@ -375,9 +415,9 @@ class cl_driver(analysis_driver_base):
                                             dest=arg_dest)          #     Automatically determined by the name
         # Add the help argument
         self.parser.add_argument('-h', '--help',
-                                action='help',
-                                default=argparse.SUPPRESS,
-                                help='show this help message and exit')
+                                 action='help',
+                                 default=argparse.SUPPRESS,
+                                 help='show this help message and exit')
         parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
         parsed_arguments.pop(self.profile_arg_name, None)
@@ -396,7 +436,8 @@ class cl_driver(analysis_driver_base):
         if self.output_target is not None:
             if isinstance(self.output_target, omsi_file_common):
                 h5py_object = omsi_file_common.get_h5py_object(self.output_target)
-                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename) + u":" + unicode(h5py_object.name))
+                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename)
+                                + u":" + unicode(h5py_object.name))
             else:
                 log_helper.info(__name__, "Save to: " + unicode(self.output_target))
 
@@ -470,24 +511,26 @@ class cl_driver(analysis_driver_base):
         # Call the execute function of the analysis
         try:
             # Create the analysis object
-            analysis_object = self.analysis_class()
+            if self.analysis_object is None:
+                self.create_analysis_object()
             # Enable time and usage profiling if requested
             if self.profile_analysis:
                 try:
-                    analysis_object.enable_time_and_usage_profiling(self.profile_analysis)
+                    self.analysis_object.enable_time_and_usage_profiling(self.profile_analysis)
                 except ImportError as e:
                     log_helper.warning(__name__, "Profiling of time and usage not available due to missing packages.")
                     log_helper.warning(__name__, e.message)
             # Enable memory profiling if requested
             if self.profile_analysis_mem:
                 try:
-                    analysis_object.enable_memory_profiling(self.profile_analysis_mem)
+                    self.analysis_object.enable_memory_profiling(self.profile_analysis_mem)
                 except ImportError as e:
                     log_helper.warning(__name__, "Profiling of memory usage not available due to missing packages")
                     log_helper.warning(__name__, e.message)
             # Execute the analysis
-            log_helper.debug(__name__, 'Analysis arguments: ' + str(self.analysis_arguments))
-            analysis_object.execute(**self.analysis_arguments)
+            log_helper.debug(__name__, 'Analysis arguments: ' + str(self.analysis_arguments),
+                             root=self.mpi_root, comm=self.mpi_comm)
+            self.analysis_object.execute(**self.analysis_arguments)
         except:
             if mpi_helper.get_rank() == self.mpi_root:
                 self.remove_output_target()
@@ -502,32 +545,35 @@ class cl_driver(analysis_driver_base):
                 print ""
                 print "PROFILING DATA: TIME AND USAGE"
                 print ""
-                analysis_object.get_profile_stats_object(consolidate=True).print_stats()
+                self.analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
             # Print the profiling results for memory usage
             if self.profile_analysis_mem:
                 print ""
                 print "PROFILING DATA: MEMORY"
                 print ""
-                print analysis_object.get_memory_profile_info()
+                print self.analysis_object.get_memory_profile_info()
 
             # Print the time it took to run the analysis
             try:
                 # Parallel case: We need to compile/collect timing data from all cores
-                if isinstance(analysis_object.run_info['execution_time'] , list):
+                if isinstance(self.analysis_object.run_info['execution_time'], list):
                     # Time for each task to execute
                     log_helper.info(__name__, "Time in seconds for each analysis process: " +
-                                     str(analysis_object.run_info['execution_time']))
+                                    str(self.analysis_object.run_info['execution_time']),
+                                    root=self.mpi_root, comm=self.mpi_comm)
                     # Start times of each task
                     log_helper.info(__name__, "Time when each of the processes started: " +
-                                              str(analysis_object.run_info['start_time']))
+                                    str(self.analysis_object.run_info['start_time']),
+                                    root=self.mpi_root, comm=self.mpi_comm)
                     # Stop times for each task
 
                     log_helper.info(__name__, "Time when each of the processes finished: " +
-                                              str(analysis_object.run_info['end_time']))
+                                    str(self.analysis_object.run_info['end_time']),
+                                    root=self.mpi_root, comm=self.mpi_comm)
 
                     # Compile the time to execute string
-                    exec_time_array = np.asarray(analysis_object.run_info['execution_time'], dtype=float)
+                    exec_time_array = np.asarray(self.analysis_object.run_info['execution_time'], dtype=float)
                     max_exec_time = str(exec_time_array.max())
                     min_exec_time = str(exec_time_array.min())
                     mean_exec_time = str(exec_time_array.mean())
@@ -535,8 +581,9 @@ class cl_driver(analysis_driver_base):
                                        "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
                 # Serial case: We only have a single time to worry about
                 else:
-                    exec_time_string = str(analysis_object.run_info['execution_time']) + " s"
-                log_helper.info(__name__, "Time to execute analysis: " + exec_time_string)
+                    exec_time_string = str(self.analysis_object.run_info['execution_time']) + " s"
+                log_helper.info(__name__, "Time to execute analysis: " + exec_time_string,
+                                root=self.mpi_root, comm=self.mpi_comm)
             except:
                 raise
 
@@ -544,15 +591,15 @@ class cl_driver(analysis_driver_base):
         if self.output_target is not None:
             from omsi.dataformat.omsi_file.analysis import omsi_analysis_manager
             omsi_analysis_manager.create_analysis_static(analysis_parent=self.output_target,
-                                                         analysis=analysis_object)
+                                                         analysis=self.analysis_object)
 
-            #if mpi_helper.get_rank() == self.mpi_root:
-            #    self.output_target.create_analysis(analysis_object)
-            #else:
-            #    try:
-            #        analysis_object.write_analysis_data()
-            #    except NotImplementedError:
-            #        pass
+            # if mpi_helper.get_rank() == self.mpi_root:
+            #     self.output_target.create_analysis(self.analysis_object)
+            # else:
+            #     try:
+            #         self.analysis_object.write_analysis_data()
+            #     except NotImplementedError:
+            #         pass
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
@@ -561,7 +608,7 @@ if __name__ == "__main__":
 
     # Create an command-line driver and call the main function to run the analysis
     cl_driver(analysis_class=None,
-                   add_analysis_class_arg=True,
-                   add_output_arg=True,
-                   add_profile_arg=True,
-                   add_mem_profile_arg=True).main()
+              add_analysis_class_arg=True,
+              add_output_arg=True,
+              add_profile_arg=True,
+              add_mem_profile_arg=True).main()
