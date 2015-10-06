@@ -19,10 +19,10 @@ driver Package
     :show-inheritance:
 
 
-:mod:`cl_driver` Module
------------------------
+:mod:`cl_analysis_driver` Module
+--------------------------------
 
-.. automodule:: omsi.workflow.driver.cl_driver
+.. automodule:: omsi.workflow.driver.cl_analysis_driver
     :members:
     :undoc-members:
     :show-inheritance:

@@ -230,8 +230,8 @@ The simple steps outlined below provide you now with full integration of your an
     # Defining a main function is optional. However, allowing a user to directly execute your analysis
     # from the command line is simple, as we can easily reuse the command-line driver module
     if __name__ == "__main__":
-        from omsi.analysis.omsi_analysis_driver import cl_driver
-        cl_driver(analysis_class=omsi_mypeakfinder).main()
+        from omsi.analysis.omsi_analysis_driver import cl_analysis_driver
+        cl_analysis_driver(analysis_class=omsi_mypeakfinder).main()
 
 1.1 Creating a new analysis skeleton
 """"""""""""""""""""""""""""""""""""
@@ -598,8 +598,8 @@ To now enable us to execute our analysis module itself we simply need to add the
     :linenos:
 
     if __name__ == "__main__":
-        from omsi.analysis.omsi_analysis_driver import cl_driver
-        cl_driver(analysis_class=omsi_mypeakfinder).main()
+        from omsi.analysis.omsi_analysis_driver import cl_analysis_driver
+        cl_analysis_driver(analysis_class=omsi_mypeakfinder).main()
 
 With this we can now directly execute our analysis from the command line, get a command-line help, specify all our input parameters on the command line, and save our analysis to file. To run the analysis we can now do:
 
