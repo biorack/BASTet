@@ -27,3 +27,11 @@ driver Package
     :undoc-members:
     :show-inheritance:
 
+
+:mod:`cl_workflow_driver` Module
+--------------------------------
+
+.. automodule:: omsi.workflow.driver.cl_workflow_driver
+    :members:
+    :undoc-members:
+    :show-inheritance:
