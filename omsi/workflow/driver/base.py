@@ -45,19 +45,19 @@ class analysis_driver_base(driver_base):
 
     :ivar analysis_class: The analysis class for which we want to execute the analysis.
             The analysis class must derive from omsi.analysis.analysis_base. May be None
-            in case that we use the command-line to define the analysis class via the optional
-            positional argument for the command class (i.e., set add_analysis_class_arg to True).
+            in case that we use other means to set the analysis_class, e.g., via the
+            command-line.
+    :type analysis_class: omsi.analysis.base
     """
     def __init__(self,
                  analysis_class):
         """
         Initialize the analysis driver
 
-        :param analysis_class: The analysis class for which we want to execute the analysis.
+        :ivar analysis_class: The analysis class for which we want to execute the analysis.
             The analysis class must derive from omsi.analysis.analysis_base. May be None
-            in case that we use the command-line to define the analysis class via the optional
-            positional argument for the command class (i.e., set add_analysis_class_arg to True).
-
+            in case that we use other means to set the analysis_class, e.g., via the
+            command-line.
         :type analysis_class: omsi.analysis.base
         """
         super(analysis_driver_base, self).__init__()
