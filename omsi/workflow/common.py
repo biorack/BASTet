@@ -38,7 +38,6 @@ class analysis_task_set(set):
         for script_path in inscripts:
             infile = open(script_path, 'r')
             scripttext = infile.read()
-            print scripttext
             scripts.append(scripttext)
             infile.close()
         return cls.from_scripts(scripts=scripts)
@@ -68,8 +67,8 @@ class analysis_task_set(set):
         # Create the list of new analyses that have been created
         all_analyses = set([ana_obj for ana_obj in analysis_base.get_analysis_instances()])
         new_analyses = set(all_analyses - current_analyses)
-        new_workflow = cls(new_analyses)
-        return new_workflow
+        new_analysis_task_set = cls(new_analyses)
+        return new_analysis_task_set
 
     def __init__(self,
                  analysis_objects=None):
@@ -232,6 +231,34 @@ class analysis_task_set(set):
         parameters = [ana.get_all_parameters(exclude_dependencies) for ana in self]
         return parameters
 
+    def get_all_run_info(self):
+        """
+        Get a list of dict with the complete info about the last run of each of the analysis analysis
+
+        :return: List of run_info_dict objects, one for each analysis
+
+        """
+        run_infos = [ana.get_all_run_info() for ana in self]
+        return run_infos
+
+    def get_all_analysis_data(self):
+        """
+        Get a list of all output data objects for all analysis
+
+        :return: List of omsi.analysis.analysis_data.analysis_data objects, one for each analysis
+        """
+        analysis_data = [ana.get_all_analysis_data() for ana in self]
+        return analysis_data
+
+    def get_all_analysis_identifiers(self):
+        """
+        Get a list of all analysis identifiers
+
+        :return: List of strings with the analysis identifier of each analysis
+        """
+        identifiers = [ana.get_analysis_identifier() for ana in self]
+        return identifiers
+
     def add_all(self):
         """
         Add all known analyses to the workflow set
@@ -243,13 +270,69 @@ class analysis_task_set(set):
             self.add(ana)
         return self
 
+    def enable_time_and_usage_profiling(self, enable=True):
+        """
+        Enable or disable profiling of time and usage of code parts of execute_analysis for all analyses.
 
+        :param enable: Enable (True) or disable (False) profiling
+        :type enable: bool
 
+        :raises: ImportError is raised if a required package for profiling is not available.
+        """
+        for ana in self:
+            ana.enable_time_and_usage_profiling(enable=enable)
 
+    def enable_memory_profiling(self, enable=True):
+        """
+        Enable or disable line-by-line profiling of memory usage of execute_analysis.
 
+        :param enable_memory: Enable (True) or disable (False) line-by-line profiling of memory usage
+        :type enable_memory: bool
 
+        :raises: ImportError is raised if a required package for profiling is not available.
+        """
+        for ana in self:
+            ana.enable_memory_profiling(enable=enable)
 
+    def set_undefined_analysis_identifiers(self):
+        """
+        Check that all analysis descriptors are set to a value different than "undefined" and
+        set the descriptor based on their index in the set if necessary.
+        """
+        ana_index = 0
+        for ana in self:
+            if not ana.analysis_identifier_defined():
+                ana.set_analysis_identifier('ana_%i' % ana_index)
+            ana_index += 1
 
+    def analysis_identifiers_unique(self):
+        """
+        Check whether all identifiers of the analyses in the this set are unique.
+        :return: bool
+        """
+        identifiers = self.get_all_analysis_identifiers()
+        unique_identifiers = list(set(identifiers))
+        identifiers_unique = len(identifiers) == len(unique_identifiers)
+        return identifiers_unique
 
+    def make_analysis_identifiers_unique(self):
+        """
+        Update analysis identifiers to be unique.
 
+        Side effects: This function updates the analysis tasks stored in the set
+
+        :return: self, i.e., the modified object with identifiers updated
+        """
+        identifiers = self.get_all_analysis_identifiers()
+        unique_identifiers = list(set(identifiers))
+        num_update = len(identifiers) - len(unique_identifiers)
+        if num_update > 0:
+            log_helper.debug(__name__, "%i analyses have non-unique identifiers and will be updated" % num_update)
+        ana_index = 0
+        for ana in self:
+            current_identifier = ana.get_analysis_identifier()
+            if current_identifier not in unique_identifiers:
+                ana.set_analysis_identifier('ana_' + str(ana_index) + "_" + unicode(current_identifier))
+            ana_index += 1
+        return self
 
