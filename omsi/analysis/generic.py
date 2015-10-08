@@ -63,8 +63,22 @@ class analysis_generic(analysis_base):
         """
         log_helper.debug(__name__, "Creating generic analysis from function")
         generic_analysis = cls()
-        for var in analysis_function.__code__.co_varnames:
-            generic_analysis.add_parameter(name=var, help='')
+        generic_analysis.real_analysis_type = analysis_function.__code__.co_name
+        function_argcount = analysis_function.__code__.co_argcount
+        function_args = analysis_function.__code__.co_varnames[0:function_argcount]
+        function_defaults = ()
+        if hasattr(analysis_function, 'func_defaults'):
+            if analysis_function.func_defaults is not None:
+                function_defaults = analysis_function.func_defaults
+        function_nondefaults = function_argcount - len(function_defaults)
+        default_pos = 0
+        for varindex, varname in enumerate(function_args):
+            has_default = varindex >= function_nondefaults
+            default = None
+            if has_default:
+                default = function_defaults[default_pos]
+                default_pos += 1
+            generic_analysis.add_parameter(name=varname, help='', default=default)
         generic_analysis.add_parameter(name='__analysis_function',
                                        help='The analysis function we want to execute',
                                        dtype=str)
@@ -245,6 +259,22 @@ class analysis_generic(analysis_base):
         self.real_analysis_type = unicode(analysis_object.get_analysis_type()[:])
         # Return the output data
         return output_val
+
+    def write_analysis_data(self, analysis_group=None):
+        """
+        This function is used to write the actual analysis data to file. If not implemented, then the
+        omsi_file_analysis API's default behavior is used instead.
+
+        :param analysis_group: The h5py.Group object where the analysis is stored. May be None on cores that
+            do not perform any writing but which need to participate in communication, e.g., to collect data
+            for writing.
+
+        """
+        # The default implementation does roughly the following
+        # from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
+        # for ana_data in self..get_all_analysis_data():
+        #        omsi_file_analysis.__write_omsi_analysis_data__(analysis_group, ana_data)
+        raise NotImplementedError
 
     def get_real_analysis_type(self):
         """
