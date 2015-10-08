@@ -1,0 +1,7 @@
+************* Module omsi.workflow.executor.base
+C:118, 0: Line too long (122/120) (line-too-long)
+C:265, 0: Final newline missing (missing-final-newline)
+C: 35, 4: Invalid class attribute name "DEFAULT_EXECUTOR_CLASS" (invalid-name)
+C:168, 8: Invalid variable name "re" (invalid-name)
+E:207,12: No value for argument 'message' in classmethod call (no-value-for-parameter)
+E:211,12: No value for argument 'message' in classmethod call (no-value-for-parameter)

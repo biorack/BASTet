@@ -92,7 +92,7 @@ Messages by category
 +--------------------------------------------------+------+--------+---------+-----------+
 |omsi.shared.dependency_data                       |0.00  |1.20    |0.85     |0.29       |
 +--------------------------------------------------+------+--------+---------+-----------+
-|omsi.workflow.analysis_driver.cl_driver      |0.00  |0.96    |32.91    |3.71       |
+|omsi.workflow.analysis_driver.cl_analysis_driver      |0.00  |0.96    |32.91    |3.71       |
 +--------------------------------------------------+------+--------+---------+-----------+
 |omsi.analysis.generic                             |0.00  |0.96    |0.85     |1.14       |
 +--------------------------------------------------+------+--------+---------+-----------+
@@ -273,12 +273,12 @@ External dependencies
     memory_profiler (omsi.analysis.base)
     mpi4py
       \-MPI (omsi.shared.mpi_helper,omsi.dataformat.omsi_file.main_file)
-    numpy (omsi.dataformat.omsi_file.analysis,omsi.shared.spectrum_layout,omsi.shared.data_selection,omsi.dataformat.omsi_file.msidata,omsi.shared.mpi_helper,omsi.tools.create_peak_cube_overview,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file,omsi.dataformat.omsi_file.main_file,omsi.tools.convertToOMSI,omsi.dataformat.imzml_file,omsi.analysis.generic,omsi.analysis.multivariate_stats.omsi_cx,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.tools.make_thumb,omsi.workflow.analysis_driver.cl_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.mzml_file,omsi.analysis.analysis_data,omsi.analysis.base,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.analysis.compound_stats.omsi_score_compounds)
+    numpy (omsi.dataformat.omsi_file.analysis,omsi.shared.spectrum_layout,omsi.shared.data_selection,omsi.dataformat.omsi_file.msidata,omsi.shared.mpi_helper,omsi.tools.create_peak_cube_overview,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file,omsi.dataformat.omsi_file.main_file,omsi.tools.convertToOMSI,omsi.dataformat.imzml_file,omsi.analysis.generic,omsi.analysis.multivariate_stats.omsi_cx,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.tools.make_thumb,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.mzml_file,omsi.analysis.analysis_data,omsi.analysis.base,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.analysis.compound_stats.omsi_score_compounds)
     omsi
       \-analysis (omsi.dataformat.omsi_file.analysis)
       | \-analysis_data (omsi.dataformat.omsi_file.analysis,omsi.analysis.generic,omsi.analysis.base)
       | \-analysis_views (omsi.dataformat.omsi_file.analysis,omsi.analysis.base)
-      | \-base (omsi.dataformat.omsi_file.analysis,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.workflow.analysis_driver.base,omsi.analysis.compound_stats.omsi_score_compounds,omsi.workflow.analysis_driver.cl_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.shared.dependency_data,omsi.analysis.generic,omsi.analysis.multivariate_stats.omsi_cx)
+      | \-base (omsi.dataformat.omsi_file.analysis,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.multivariate_stats.omsi_nmf,omsi.workflow.analysis_driver.base,omsi.analysis.compound_stats.omsi_score_compounds,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.shared.dependency_data,omsi.analysis.generic,omsi.analysis.multivariate_stats.omsi_cx)
       | \-compound_stats (omsi.analysis)
       | | \-omsi_score_compounds (omsi.analysis.compound_stats)
       | \-findpeaks (omsi.analysis)
@@ -297,29 +297,29 @@ External dependencies
       | \-file_reader_base (omsi.tools.convertToOMSI,omsi.shared.dependency_data,omsi.dataformat.mzml_file,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file)
       | \-omsi_file
       |   \-analysis (omsi.dataformat.omsi_file.experiment,omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.dependencies,omsi.analysis.analysis_data,omsi.analysis.base)
-      |   \-common (omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.omsi_file.analysis,omsi.dataformat.omsi_file.experiment,omsi.analysis.analysis_data,omsi.analysis.base,omsi.dataformat.omsi_file.methods,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.main_file,omsi.dataformat.omsi_file.dependencies,omsi.workflow.analysis_driver.cl_driver,omsi.workflow.analysis_driver.base,omsi.shared.dependency_data,omsi.dataformat.omsi_file.instrument)
+      |   \-common (omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.omsi_file.analysis,omsi.dataformat.omsi_file.experiment,omsi.analysis.analysis_data,omsi.analysis.base,omsi.dataformat.omsi_file.methods,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.main_file,omsi.dataformat.omsi_file.dependencies,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.workflow.analysis_driver.base,omsi.shared.dependency_data,omsi.dataformat.omsi_file.instrument)
       |   \-dependencies (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.analysis,omsi.dataformat.omsi_file.msidata)
       |   \-experiment (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.main_file)
       |   \-format (omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.omsi_file.analysis,omsi.dataformat.omsi_file.experiment,omsi.analysis.base,omsi.dataformat.omsi_file.methods,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.main_file,omsi.dataformat.omsi_file.dependencies,omsi.dataformat.omsi_file.instrument)
       |   \-instrument (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.experiment)
-      |   \-main_file (omsi.dataformat.omsi_file.common,omsi.workflow.analysis_driver.cl_driver,omsi.tools.create_peak_cube_overview,omsi.tools.make_thumb)
+      |   \-main_file (omsi.dataformat.omsi_file.common,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.tools.create_peak_cube_overview,omsi.tools.make_thumb)
       |   \-metadata_collection (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.instrument,omsi.dataformat.omsi_file.methods)
       |   \-methods (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.msidata,omsi.dataformat.omsi_file.experiment)
       |   \-msidata (omsi.dataformat.omsi_file.common,omsi.dataformat.omsi_file.experiment,omsi.analysis.analysis_data,omsi.analysis.base)
       \-shared
       | \-data_selection (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.base,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.analysis_views,omsi.analysis.multivariate_stats.omsi_nmf,omsi.dataformat.omsi_file.dependencies,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.shared.dependency_data,omsi.analysis.multivariate_stats.omsi_cx)
       | \-dependency_data (omsi.dataformat.omsi_file.analysis,omsi.dataformat.mzml_file,omsi.analysis.analysis_data,omsi.dataformat.bruckerflex_file,omsi.analysis.base,omsi.dataformat.omsi_file.dependencies,omsi.tools.convertToOMSI,omsi.analysis.generic)
-      | \-log (omsi.workflow.analysis_driver.base,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.base,omsi.dataformat.mzml_file,omsi.workflow.analysis_driver.cl_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.tools.convertToOMSI,omsi.shared.mpi_helper,omsi.dataformat.imzml_file,omsi.shared.omsi_web_helper,omsi.workflow.analysis_driver.greedy_executor,omsi.analysis.generic)
+      | \-log (omsi.workflow.analysis_driver.base,omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.dataformat.img_file,omsi.dataformat.bruckerflex_file,omsi.analysis.msi_filtering.omsi_tic_norm,omsi.analysis.base,omsi.dataformat.mzml_file,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.analysis.findpeaks.omsi_findpeaks_global,omsi.tools.convertToOMSI,omsi.shared.mpi_helper,omsi.dataformat.imzml_file,omsi.shared.omsi_web_helper,omsi.workflow.analysis_driver.greedy_executor,omsi.analysis.generic)
       | \-metadata_data (omsi.dataformat.omsi_file.metadata_collection,omsi.dataformat.mzml_file,omsi.dataformat.file_reader_base,omsi.dataformat.omsi_file.instrument,omsi.tools.convertToOMSI,omsi.dataformat.omsi_file.methods)
       | \-metadata_ontologies (omsi.dataformat.mzml_file)
-      | \-mpi_helper (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.base,omsi.shared.log,omsi.analysis.compound_stats.omsi_score_compounds,omsi.workflow.analysis_driver.cl_driver,omsi.shared.run_info_data)
+      | \-mpi_helper (omsi.analysis.findpeaks.omsi_findpeaks_local,omsi.analysis.base,omsi.shared.log,omsi.analysis.compound_stats.omsi_score_compounds,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.shared.run_info_data)
       | \-omsi_web_helper (omsi.tools.convertToOMSI)
       | \-run_info_data (omsi.dataformat.omsi_file.analysis,omsi.workflow.analysis_driver.greedy_executor,omsi.analysis.base)
       | \-third_party
       |   \-cloudpickle (omsi.analysis.generic)
       \-workflow
         \-analysis_driver
-          \-base (omsi.workflow.analysis_driver.greedy_executor,omsi.workflow.analysis_driver.cl_driver,omsi.analysis.base)
+          \-base (omsi.workflow.analysis_driver.greedy_executor,omsi.workflow.analysis_driver.cl_analysis_driver,omsi.analysis.base)
           \-greedy_executor (omsi.workflow.analysis_driver.base)
     pyteomics (omsi.dataformat)
       \-mzml (omsi.dataformat.mzml_file)

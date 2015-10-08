@@ -1,0 +1,113 @@
+************* Module omsi.workflow.driver.cl_workflow_driver
+W: 17, 0: TODO We need to add saving of analyses to the workflow itself and allow saving to separate files (fixme)
+W: 18, 0: TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (fixme)
+W: 19, 0: TODO We need to add command line options to control the workflow executor itself, e.g., to set the reduce_memory_usage option of the greedy_executor (fixme)
+W: 20, 0: TODO The workflow executor needs to expose its parameters as well (fixme)
+W: 21, 0: TODO We need a command-line option to define the workflow executor type (fixme)
+W: 22, 0: TODO Add documentation on running workflows using the driver (fixme)
+W: 23, 0: TODO Update docstrings of the cl_workflow_driver class (they are largely copy-paste from the analysis driver) (fixme)
+W:614, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
+W:615, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
+C: 18, 0: Line too long (146/120) (line-too-long)
+C: 19, 0: Line too long (150/120) (line-too-long)
+C:126, 0: Line too long (161/120) (line-too-long)
+C:192, 0: Wrong continued indentation.
+                                                       action='append',
+                                                      |^ (bad-continuation)
+C:193, 0: Wrong continued indentation.
+                                                       default=None,
+                                                      |^ (bad-continuation)
+C:194, 0: Wrong continued indentation.
+                                                       type=str,
+                                                      |^ (bad-continuation)
+C:195, 0: Wrong continued indentation.
+                                                       required=True,
+                                                      |^ (bad-continuation)
+C:196, 0: Wrong continued indentation.
+                                                       help='The workflow script to be executed. Multiple scripts ' + \
+                                                      |^ (bad-continuation)
+C:207, 0: Wrong continued indentation.
+                                     action='store',
+                                     ^                | (bad-continuation)
+C:208, 0: Wrong continued indentation.
+                                     default=None,
+                                     ^                | (bad-continuation)
+C:209, 0: Wrong continued indentation.
+                                     type=str,
+                                     ^                | (bad-continuation)
+C:210, 0: Wrong continued indentation.
+                                     required=False,
+                                     ^                | (bad-continuation)
+C:211, 0: Wrong continued indentation.
+                                     help=output_arg_help)
+                                     ^                | (bad-continuation)
+C:219, 0: Wrong continued indentation.
+                                     action='store_true',
+                                     ^                | (bad-continuation)
+C:220, 0: Wrong continued indentation.
+                                     default=False,
+                                     ^                | (bad-continuation)
+C:221, 0: Wrong continued indentation.
+                                     required=False,
+                                     ^                | (bad-continuation)
+C:222, 0: Wrong continued indentation.
+                                     help=profile_arg_help)
+                                     ^                | (bad-continuation)
+C:230, 0: Wrong continued indentation.
+                                     action='store_true',
+                                     ^                | (bad-continuation)
+C:231, 0: Wrong continued indentation.
+                                     default=False,
+                                     ^                | (bad-continuation)
+C:232, 0: Wrong continued indentation.
+                                     required=False,
+                                     ^                | (bad-continuation)
+C:233, 0: Wrong continued indentation.
+                                     help=profile_mem_arg_help)
+                                     ^                | (bad-continuation)
+C:237, 0: Wrong continued indentation.
+                                     action='store',
+                                     ^                | (bad-continuation)
+C:238, 0: Wrong continued indentation.
+                                     default='INFO',
+                                     ^                | (bad-continuation)
+C:239, 0: Wrong continued indentation.
+                                     required=False,
+                                     ^                | (bad-continuation)
+C:240, 0: Wrong continued indentation.
+                                     help='Specify the level of logging to be used.',
+                                     ^                | (bad-continuation)
+C:241, 0: Wrong continued indentation.
+                                     choices=log_helper.log_levels.keys())
+                                     ^                | (bad-continuation)
+C:349, 0: Wrong continued indentation.
+                                                                      analysis.get_analysis_type())
+                                                                |     ^ (bad-continuation)
+C:389, 0: Line too long (125/120) (line-too-long)
+C:390, 0: Line too long (121/120) (line-too-long)
+C:395, 0: Line too long (122/120) (line-too-long)
+C:400, 0: Wrong continued indentation.
+                                 action='help',
+                                 ^                | (bad-continuation)
+C:401, 0: Wrong continued indentation.
+                                 default=argparse.SUPPRESS,
+                                 ^                | (bad-continuation)
+C:402, 0: Wrong continued indentation.
+                                 help='show this help message and exit')
+                                 ^                | (bad-continuation)
+C:482, 0: Wrong continued indentation.
+                                      "by the analysis but potentially modified by it")
+                            |         ^ (bad-continuation)
+R: 26, 0: Too many instance attributes (20/7) (too-many-instance-attributes)
+R: 70, 4: Too many arguments (7/5) (too-many-arguments)
+R:243, 4: Too many branches (18/12) (too-many-branches)
+C:315, 4: Invalid method name "add_and_parse_analysis_arguments" (invalid-name)
+R:315, 4: Too many local variables (25/15) (too-many-locals)
+E:339,12: No value for argument 'message' in classmethod call (no-value-for-parameter)
+W:477,12: No exception type(s) specified (bare-except)
+W:563,12: No exception type(s) specified (bare-except)
+W:570,12: No exception type(s) specified (bare-except)
+E:612,70: Instance of 'cl_workflow_driver' has no 'analysis' member (no-member)
+W:610,16: Unused variable 'analysis' (unused-variable)
+R:487, 4: Too many branches (21/12) (too-many-branches)
+W:  4, 0: Unused import sys (unused-import)
