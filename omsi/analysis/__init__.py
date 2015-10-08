@@ -7,7 +7,6 @@ from omsi.analysis.findpeaks import *
 from omsi.analysis.multivariate_stats import *
 from omsi.analysis.msi_filtering import *
 from omsi.analysis.base import *
-from omsi.analysis.analysis_data import *
 from omsi.analysis.generic import *
 from omsi.analysis.compound_stats import *
 import omsi.analysis.findpeaks

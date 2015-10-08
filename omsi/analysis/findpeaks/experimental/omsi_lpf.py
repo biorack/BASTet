@@ -1,15 +1,12 @@
-from omsi.analysis.base import analysis_base
-from omsi.analysis.analysis_data import analysis_data
-from omsi.shared.dependency_data import *
-from omsi.dataformat.omsi_file.main_file import omsi_file
-
-import datetime
 from time import time, ctime
-import numpy as np
 import math
 import sys
-from sys import argv, exit
+from sys import exit
 
+import numpy as np
+
+from omsi.analysis.base import analysis_base
+from omsi.dataformat.omsi_file.main_file import omsi_file
 
 PRECISION = "double"
 SLWMIN_ARR_SIZE = 10000  # size of the dequeue for slmin

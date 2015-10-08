@@ -12,7 +12,7 @@ import numpy as np
 from omsi.workflow.executor.base import workflow_executor_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
+from omsi.shared.analysis_data import analysis_data, parameter_data, data_dtypes
 from omsi.shared.dependency_data import dependency_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.run_info_data import run_info_dict
@@ -898,9 +898,9 @@ class analysis_base(object):
     def get_default_dtypes():
         """
         Get a list of available default dtypes used for analyses.
-        Same as `analysis_dtypes.get_dtypes()`.
+        Same as `data_dtypes.get_dtypes()`.
         """
-        return analysis_dtypes.get_dtypes()
+        return data_dtypes.get_dtypes()
 
     @staticmethod
     def get_default_parameter_groups():
@@ -1305,7 +1305,7 @@ class analysis_base(object):
                                         selection=selection,
                                         help=curr_parameter['help'] if curr_parameter is not None else '',
                                         dependency_type=dependency_dict.dependency_types['parameter'])
-                # dtype = analysis_dtypes.get_dtypes()['ndarray']
+                # dtype = data_dtypes.get_dtypes()['ndarray']
             elif isinstance(value, dependency_dict):
                 # Set any possibly missing parameters
                 value['param_name'] = name

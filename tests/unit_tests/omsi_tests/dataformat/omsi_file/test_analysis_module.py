@@ -4,16 +4,8 @@ This includes functionality across many of the modules.
 """
 import unittest
 import tempfile
-import sys
-import h5py
-import numpy as np
+
 from omsi.dataformat.omsi_file.main_file import omsi_file
-from omsi.dataformat.omsi_file.experiment import omsi_file_experiment
-from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.dataformat.omsi_file.instrument import omsi_file_instrument
-from omsi.dataformat.omsi_file.methods import omsi_file_methods
-from omsi.analysis.generic import analysis_generic
-from omsi.analysis.analysis_data import analysis_data
 
 
 class test_omsi_file_analysis(unittest.TestCase):

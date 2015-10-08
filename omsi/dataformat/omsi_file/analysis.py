@@ -1,9 +1,11 @@
 """
 Module for managing custom analysis data in OMSI HDF5 files.
 """
+import os
+import warnings
+
 import numpy as np
 import h5py
-import os
 
 from omsi.dataformat.omsi_file.format import \
     omsi_format_common, \
@@ -14,7 +16,7 @@ from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_
 from omsi.shared.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.log import log_helper
-import warnings
+
 
 # TODO create_analysis_static(...) and other create functions need to handle the case when a file is opened with the MPI I/O backend. Currently we assume a serial write from root
 
@@ -344,7 +346,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                   automatically written to file by this function so no addition work is required.
 
         """
-        from omsi.analysis.analysis_data import analysis_data
+        from omsi.shared.analysis_data import analysis_data
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
         from omsi.analysis.base import analysis_base
 
@@ -481,15 +483,15 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param ana_data: The analysis_data object with the description of the data to be written.
         :type ana_data: omsi.analysis.analysis_data
         """
-        from omsi.analysis.analysis_data import analysis_data, parameter_data, analysis_dtypes
+        from omsi.shared.analysis_data import analysis_data, data_dtypes
         curr_dtype = ana_data['dtype']
         try:
-            if curr_dtype == analysis_dtypes.get_dtypes()['ndarray']:
+            if curr_dtype == data_dtypes.get_dtypes()['ndarray']:
                 curr_dtype = ana_data['data'].dtype
         except TypeError:
             pass
         try:
-            if curr_dtype == analysis_dtypes.get_dtypes()['bool']:
+            if curr_dtype == data_dtypes.get_dtypes()['bool']:
                 curr_dtype = bool
         except TypeError:
             pass
@@ -749,7 +751,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :returns: List of analysis_data objects with the names and h5py or numpy objects.
                  Access using [index]['name'] and [index]['data'].
         """
-        from omsi.analysis.analysis_data import analysis_data
+        from omsi.shared.analysis_data import analysis_data
         output_list = []
         if self.managed_group is not None:
             for item_obj in self.managed_group.items():
@@ -781,7 +783,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :returns: List of parameter_data objects with names and h5py or numpy object. Access using
                  [index]['name'] and [index]['data'].
         """
-        from omsi.analysis.analysis_data import parameter_data
+        from omsi.shared.analysis_data import parameter_data
         from omsi.shared.dependency_data import dependency_dict
         output_list = []
         if self.parameter is not None:

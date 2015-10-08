@@ -142,7 +142,72 @@ class workflow_executor_base(object):
         :param item:
         :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
         """
-        return self.analysis_tasks[item]
+        if hasattr(self, item):
+            return getattr(self, item)
+        else:
+            raise KeyError('Invalid parameter given')
+
+
+    def __setitem__(self, key, value):
+        """
+        Set worflow driver parameter options directly via slicing
+
+        Overwrite this function in child classes to implement custom setting behavior, e.g., error
+        checking for valid values before setting a non-standard parameter.
+
+        :param key: name of the parameters
+        :param value: new value
+
+        :raise: ValueError if an invalid value is given
+        :raise: KeyError if an invalid key is given
+        """
+        # Check if we have a valid key
+        if hasattr(self, key):
+            if key == 'analysis_tasks':
+                if not isinstance(value, analysis_task_set):
+                    raise ValueError('The analysis_tasks must be sepcified via an analysis_task_set')
+            elif key == 'run_info':
+                if not isinstance(value, run_info_dict):
+                    raise ValueError('run_info must be a run_info_dict')
+            elif key == 'track_runinfo':
+                try:
+                    value = bool(value)
+                except:
+                    raise ValueError('track_runinfo must be a boo. Conversion of value to bool failed')
+            elif key == 'mpi_root':
+                try:
+                    value = int(value)
+                except:
+                    raise ValueError('mpi_root must be an int. Conversion to int failed.')
+            elif key == 'mpi_comm':
+                pass   # TODO add error checking for mpi_comm
+
+            # Set the attribute
+            setattr(self, key, value)
+        else:
+            raise KeyError('Invalid parameter given')
+
+    def get_all_parameter_data(self):
+        """
+        Overwrite this function to describe input parameters that we want the executor to expose to the
+        outside, e.g., workflow dirvers where a users needs to be able ot set parameters of the executor
+        via the command line or other form of UI.
+
+        :return: List of omsi.shared.analysis_data.parameter_data objects describing the options. Options
+            are set using slicing via the __setitem__ function
+        """
+        return []
+
+    def get_parameter_data(self,
+                           index):
+        """
+        Given the index return the associated dataset to be written to the HDF5 file
+
+        :param index : Return the index entry of the private member parameters.
+
+        :raises: IndexError is raised when the index is out of bounds
+        """
+        return self.get_all_parameter_data()[index]
 
     def main(self):
         """

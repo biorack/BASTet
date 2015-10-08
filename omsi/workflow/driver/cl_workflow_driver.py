@@ -371,7 +371,7 @@ class cl_workflow_driver(workflow_driver_base):
         # Add all arguments from our workflow executor
         target_seperator = self.identifier_argname_seperator
         if self.workflow_executor is not None:
-            for analysis in self.workflow_executor:
+            for analysis in self.workflow_executor.analysis_tasks:
                 # Create the group for the analysis in general
                 analysis_group = self.parser.add_argument_group(title=analysis.get_analysis_identifier() + " : " +
                                                                       analysis.get_analysis_type())
@@ -639,7 +639,7 @@ class cl_workflow_driver(workflow_driver_base):
             from omsi.dataformat.omsi_file.analysis import omsi_analysis_manager
             for analysis in self.workflow_executor.analysis_tasks:
                 omsi_analysis_manager.create_analysis_static(analysis_parent=self.output_target,
-                                                             analysis=self.analysis)
+                                                             analysis=analysis)
 
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything

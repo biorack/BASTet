@@ -4,11 +4,13 @@ a custom user-defined analysis from file for which the indicate class may not be
 available with the local installation. In this case we want to at least be able
 to load and investigate the data.
 """
+import pickle
+
 from omsi.analysis.base import analysis_base
-from omsi.analysis.analysis_data import analysis_dtypes
+from omsi.shared.analysis_data import data_dtypes
 from omsi.shared.dependency_data import dependency_dict
 from omsi.shared.log import log_helper
-import pickle
+
 try:
     import cloudpickle   # Use the version of cloud-pickle installed on the system
     log_helper.debug(__name__, "Using system cloudpickle module")
@@ -117,7 +119,7 @@ class analysis_generic(analysis_base):
     def execute(self, **kwargs):
         # Update the dtype of all the input parameters to ensure we save them correctly to file
         log_helper.debug(__name__, "Setting parameters based on the given inputs")
-        ana_dtypes = analysis_dtypes.get_dtypes()
+        ana_dtypes = data_dtypes.get_dtypes()
         for k, v in kwargs.iteritems():
             for p in self.parameters:
                 if p['name'] == k:

@@ -1,12 +1,10 @@
-from omsi.analysis.base import analysis_base
-from omsi.analysis.analysis_data import analysis_data
-from omsi.shared.dependency_data import *
-from omsi.dataformat.omsi_file.main_file import omsi_file
-
 from time import time, ctime
-import datetime
+import sys
+
 import numpy as np
-import os, sys
+
+from omsi.analysis.base import analysis_base
+from omsi.dataformat.omsi_file.main_file import omsi_file
 
 
 class omsi_peakcube(analysis_base):

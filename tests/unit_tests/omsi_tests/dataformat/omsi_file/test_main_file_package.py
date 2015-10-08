@@ -4,11 +4,13 @@ This includes functionality across many of the modules.
 """
 import unittest
 import tempfile
+
+import numpy as np
+
 from omsi.dataformat.omsi_file.main_file import omsi_file
 from omsi.analysis.generic import analysis_generic
-from omsi.analysis.analysis_data import analysis_data
+from omsi.shared.analysis_data import analysis_data
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
-import numpy as np
 
 
 class test_omsi_file(unittest.TestCase):

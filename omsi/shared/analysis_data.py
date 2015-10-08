@@ -11,7 +11,7 @@ import ast
 import h5py
 
 
-class analysis_dtypes(dict):
+class data_dtypes(dict):
     """
     Class specifying basic function for specifying common
     data types used as part of an analysis.
@@ -25,10 +25,10 @@ class analysis_dtypes(dict):
                   'float': float,
                   'long': long,
                   'complex': complex,
-                  'bool': analysis_dtypes.bool_type,
+                  'bool': data_dtypes.bool_type,
                   'str': str,
                   'unicode': unicode,
-                  'ndarray': analysis_dtypes.ndarray}
+                  'ndarray': data_dtypes.ndarray}
         return dtypes
 
     @staticmethod
@@ -360,7 +360,7 @@ class parameter_data(dict):
 
         # Convert to ndarray if needed
         try:
-            is_array_type = self['dtype'] == analysis_dtypes.ndarray
+            is_array_type = self['dtype'] == data_dtypes.ndarray
         except:
             try:
                 is_array_type = self['dtype'] == 'ndarray'

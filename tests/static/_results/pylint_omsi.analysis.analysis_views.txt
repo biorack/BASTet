@@ -26,7 +26,7 @@ W: 11, 0: Unused import omsi_findpeaks_local from wildcard import (unused-wildca
 W: 11, 0: Unused import omsi from wildcard import (unused-wildcard-import)
 W: 11, 0: Unused import parameter_data from wildcard import (unused-wildcard-import)
 W: 11, 0: Unused import omsi_file_analysis from wildcard import (unused-wildcard-import)
-W: 11, 0: Unused import analysis_dtypes from wildcard import (unused-wildcard-import)
+W: 11, 0: Unused import data_dtypes from wildcard import (unused-wildcard-import)
 W: 11, 0: Unused import dependency_dict from wildcard import (unused-wildcard-import)
 W: 11, 0: Unused import analysis_generic from wildcard import (unused-wildcard-import)
 W: 11, 0: Unused import weakref from wildcard import (unused-wildcard-import)
