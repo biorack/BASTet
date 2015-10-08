@@ -84,12 +84,22 @@ class workflow_executor_base(object):
 
         :return: Instance of the default workflow executor
         """
+        default_executor_class = cls.get_default_executor_class()
+        executor = default_executor_class(analysis_objects=analysis_objects)
+        return executor
+
+    @classmethod
+    def get_default_executor_class(cls):
+        """
+        Get the default executor class
+
+        :return: Derived class of workflow_executor_base
+        """
         if cls.DEFAULT_EXECUTOR_CLASS is None:
             from omsi.workflow.executor.greedy_executor import greedy_executor
-            executor = greedy_executor(analysis_objects=analysis_objects)
+            return greedy_executor
         else:
-            executor = cls.DEFAULT_EXECUTOR_CLASS(analysis_objects=analysis_objects)
-        return executor
+            return cls.DEFAULT_EXECUTOR_CLASS
 
     def __init__(self,
                  analysis_objects=None):
@@ -117,6 +127,23 @@ class workflow_executor_base(object):
         """
         return self.execute()
 
+    def __iter__(self):
+        """
+        Convenience iterator function used to iterate over all analysis tasks.
+        Same as self.analysis_tasks.__iter__
+        :return:
+        """
+        return self.analysis_tasks.__iter__()
+
+    def __getitem__(self, item):
+        """
+        Convenience function used to access analysis objects directly.
+        Same as self.analysis_tasks.__getitem__
+        :param item:
+        :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
+        """
+        return self.analysis_tasks[item]
+
     def main(self):
         """
         Implement the execution of the workflow. We should always call execute(..) or __call__(..) to run
@@ -130,7 +157,7 @@ class workflow_executor_base(object):
         Execute the workflow. This uses the main() function to run the actual workflow.
         """
         import time
-        log_helper.debug(__name__, "Execute")
+        log_helper.debug(__name__, "Execute", root=self.mpi_root, comm=self.mpi_comm)
         if self.track_runinfo:
             # 1) Record basic execution provenance information prior to running the analysis
             self.run_info.clear()
@@ -148,7 +175,8 @@ class workflow_executor_base(object):
             self.run_info = self.run_info.gather(root=self.mpi_root,
                                                  comm=self.mpi_comm)
             try:
-                log_helper.info(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s")
+                log_helper.debug(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s",
+                                 root=self.mpi_root, comm=self.mpi_comm)
             except (KeyError, ValueError):
                 pass
         # 4) Return the result of the execution execution
@@ -162,6 +190,26 @@ class workflow_executor_base(object):
         Shorthand for: self.analysis_tasks.add(analysis_object)
         """
         self.analysis_tasks.add(analysis_object)
+
+    def add_analysis_from_scripts(self,
+                                  script_files):
+        """
+        Evaluate the list of scripts and add all (i.e., zero, one, or multiple) analyses to this workflow
+
+        NOTE: This function executes scripts using exec(..), i.e., there are NO safeguards against malicious codes.
+
+        :param script_files: List of strings with the paths to the script files. If only a single
+            script is used, then a single string may be used as well.
+
+        """
+        new_analysis_objects = analysis_task_set.from_script_files(script_files)
+        if new_analysis_objects is not None and len(new_analysis_objects) > 0:
+            log_helper.debug("Adding %i new analyses to the workflow from scripts" % len(new_analysis_objects),
+                             root=self.mpi_root, comm=self.mpi_comm)
+            self.analysis_tasks = self.analysis_tasks.union(new_analysis_objects)
+        else:
+            log_helper.debug("No analysis found in scripts", root=self.mpi_root, comm=self.mpi_comm)
+
 
     def add_all(self):
         """
@@ -213,5 +261,5 @@ class workflow_executor_base(object):
 
         Shorthand for: self.analysis_tasks.clear()
         """
-        log_helper.debug(__name__, "Clearing the workflow")
+        log_helper.debug(__name__, "Clearing the workflow", root=self.mpi_root, comm=self.mpi_comm)
         self.analysis_tasks.clear()
