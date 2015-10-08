@@ -85,14 +85,14 @@ class log_helper(object):
             return logging.getLogger()
 
     @classmethod
-    def log_var(cls, module_name, root=None, comm=None, level=None, **kwargs):
+    def log_var(cls, module_name, root=0, comm=None, level=None, **kwargs):
         """
         Log one or more variable values
 
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param kwargs: Variables+values to be logged
@@ -107,7 +107,7 @@ class log_helper(object):
                 log_helper.error(module_name=__name__, root=root, comm=comm, message=message)
 
     @classmethod
-    def log(cls, module_name, message, root=None, comm=None, level=None,  *args, **kwargs):
+    def log(cls, module_name, message, root=0, comm=None, level=None,  *args, **kwargs):
         """
         Convenience function used to select the log message level using an input parameter
         rathern than by selecting the approbriate function.
@@ -115,7 +115,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determine the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param level: To which logging level should we send the message
@@ -130,7 +130,7 @@ class log_helper(object):
             cls.get_logger(module_name).log(level, message, *args, **kwargs)
 
     @classmethod
-    def debug(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def debug(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a debug log entry. This function is typically called as:
 
@@ -139,7 +139,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.
@@ -150,7 +150,7 @@ class log_helper(object):
             cls.get_logger(module_name).debug(message, *args, **kwargs)
 
     @classmethod
-    def info(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def info(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a info log entry. This function is typically called as:
 
@@ -159,7 +159,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.
@@ -170,7 +170,7 @@ class log_helper(object):
             cls.get_logger(module_name).info(message, *args, **kwargs)
 
     @classmethod
-    def warning(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def warning(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a warning log entry. This function is typically called as:
 
@@ -179,7 +179,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.
@@ -190,24 +190,27 @@ class log_helper(object):
             cls.get_logger(module_name).warning(message, *args, **kwargs)
 
     @classmethod
-    def error(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def error(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a error log entry. This function is typically called as:
 
         log_helper.error(module_name=__name__, message="your message")
 
-        Parameters:
-
-            * ``module_name`` : __name__ of the calling module or None in case the ROOT logger should be used.
-            * ``args`` : Additional positional arguments for the python logger.error function. See the python docs.
-            * ``kwargs`` : Additional keyword arguments for the python logger.error function. See the python docs.
+        :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
+        :param message: The message to be added to the log
+        :param root: The root process to be used for output when running in parallel. If None, then all
+                     calling ranks will perform logging. Default is 0.
+        :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
+                      mpi.comm_world is used.
+        :param args: Additional positional arguments for the python logger.debug function. See the python docs.
+        :param kwargs: Additional keyword arguments for the python logger.debug function. See the python docs.
 
         """
         if root is None or root == mpi_helper.get_rank(comm=comm):
             cls.get_logger(module_name).error(message, *args, **kwargs)
 
     @classmethod
-    def critical(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def critical(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a critical log entry. This function is typically called as:
 
@@ -216,7 +219,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.
@@ -227,7 +230,7 @@ class log_helper(object):
             cls.get_logger(module_name).critical(message, *args, **kwargs)
 
     @classmethod
-    def exception(cls, module_name, message, root=None, comm=None, *args, **kwargs):
+    def exception(cls, module_name, message, root=0, comm=None, *args, **kwargs):
         """
         Create a exception log entry. This function is typically called as:
 
@@ -236,7 +239,7 @@ class log_helper(object):
         :param module_name: __name__ of the calling module or None in case the ROOT logger should be used.
         :param message: The message to be added to the log
         :param root: The root process to be used for output when running in parallel. If None, then all
-                     calling ranks will perform logging. Default is None.
+                     calling ranks will perform logging. Default is 0.
         :param comm: The MPI communicator to be used to determin the MPI rank. None by default, in which case
                       mpi.comm_world is used.
         :param args: Additional positional arguments for the python logger.debug function. See the python docs.
