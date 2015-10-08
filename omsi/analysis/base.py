@@ -1463,7 +1463,7 @@ class analysis_base(object):
 
     def write_analysis_data(self, analysis_group=None):
         """
-        This function used to write the actual analysis data to file. If not implemented, then the
+        This function is used to write the actual analysis data to file. If not implemented, then the
         omsi_file_analysis API's default behavior is used instead.
 
         :param analysis_group: The h5py.Group object where the analysis is stored. May be None on cores that
@@ -1569,10 +1569,27 @@ class analysis_base(object):
 
     def set_analysis_identifier(self,
                                 identifier):
-        """Set the name of the analysis to newName
-
-           :param identifier: The new analysis identifier string to be used (should be unique)
-           :type identifier: str
         """
+        Set the name of the analysis to identifer
+
+        Side Effects: This function modifies self.analysis_identifier
+
+        :param identifier: The new analysis identifier string to be used (should be unique)
+        :type identifier: str
+
+        """
+        try:
+            log_helper.debug(__name__, "Setting analysis identifier to: " +
+                             unicode(identifier) + " for " + unicode(self))
+        except:
+            pass
         self.analysis_identifier = identifier
+
+    def analysis_identifier_defined(self):
+        """
+        Check whether the analysis identifier is defined by the user, i.e., set to value different than undefined
+        :return: bool
+        """
+        return self.get_analysis_identifier() != "undefined"
+
 
