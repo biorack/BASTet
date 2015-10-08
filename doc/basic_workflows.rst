@@ -128,7 +128,7 @@ To explicitly execute a subset of analyses (and all their dependencies) we can e
     :linenos:
 
     driver2 = greedy_executor()
-    driver2.add_all()  # Add all analyses
+    driver2.add_analysis_all()  # Add all analyses
     driver2.execute()  # Execute all analyses
 
 
@@ -212,8 +212,162 @@ This is the same workflow as shown in Figure :ref:`workflow_illustration`.
     a3.execute_recursive()
 
 
+Workflow Tools
+==============
+
+Similar to the py:mod:`omsi.workflow.driver.cl_analysis_driver` (and the corresponding tool py:mod:`omsi.tools.run_analysis`) for running single analysis tasks, BASTet provides basic tools for executing complete workflows via the concept of workflow dirvers. Users may implement their own drivers using the approbriate base classes py:mod:`omsi.workflow.driver.base`.
+
+Some basic drivers and tools are already available with BASTet, e.g., via py:mod:`omsi.workflow.driver.cl_workflow_driver` module (and the corresponding tool py:mod:`omsi.tools.run_workflow`) is a driver for executing workflows from the command line. Here we can drive one or multiple workflows defined via workflow scripts, directly from the command-line.
+
+Workflow Scripts
+----------------
+
+Workflow scripts are regular python scripts that include the i) creation of the analusis objects, and ii) full or partial definition of analysis parameters but usually **NOT** the actual execution of any of the analyses. Following our example from earlier, we may simply save the following code python source file, e.g, `normalize_image`.
 
 
+.. code-block:: python
+    :linenos:
+
+    import numpy as np
+    from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
+    from omsi.dataformat.omsi_file.main_file import omsi_file
+    from omsi.analysis.generic import analysis_generic
+
+    # Define a simple function to compute the total intensity image
+    def total_intensity(msidata, axis=2):
+        import numpy as np
+        return np.sum(msidata, axis=axis)
+
+    # Define a simple function to normalize an MSI data cube by per-spectrum normalization factors
+    def normalize_intensities(msidata, normfactors):
+        import numpy as np
+        return msidata / normfactors[:,:,np.newaxis]
+
+    # Define the global peak finder
+    a1 = omsi_findpeaks_global()
+
+    # Define compute of total intensity image
+    a2 = analysis_generic.from_function(analysis_function=total_intensity,
+                                        output_names=['total_intensities'])
+    a2['msidata'] = a1['peak_cube']
+
+    # Define the normalization of the peak cube
+    a3 = analysis_generic.from_function(normalize_intensities)
+    a3['msidata'] = a1['peak_cube']
+    a3['normfactors'] = a2['total_intensities']
+
+
+When using our command-line tool, all parameters that are not defined for any of the analyses are automatically exposed via command-line options. In contrast to our previous example, we here, e.g., do not set the input msidata and mzdata parameters for our global peak finder (a1). In this way, we can now easily set the input file we want to process directly via the command line. In cases where we want to expose a parameter via the command line but still want to provide a good default setting for the user, we can set the default value of a parameter via, e.g, `a1.get_parameter_data_by_name('peakheight')['default'] = 3`.
+
+To execute our above example from the command line we can now simply do the following:
+
+.. code-block:: bash
+
+    python run_workflow.py --script ../../locals/autowrap_example2.py
+                           --ana_0:msidata $HOME/20120711_Brain.h5:/entry_0/data_0
+                           --ana_0:mzdata  $HOME/20120711_Brain.h5:/entry_0/data_0/mz
+
+In order to avoid collisions between parameters with the same name for different analyses, the tool prepends the unique `analysis_identifier` to each parameter. Since we did not set any explicit `analysis_identifier` (e.g, via `a1.analysis_identifier='a1'`), the tool automatically generated unique identifiers (i.e, `ana_0`, `ana_1`, and `ana_3` for our 3 analyses). To view all available command line option we can simply call the script with `--help`. If one or more workflow scipts are given (here via seperate `--script` parameters), then all unfilled options of those workflows and the corresponding analyses will be listed as. E.g.
+
+
+.. code-block:: python
+    :linenos:
+
+    newlappy:tools oruebel$ python run_workflow.py --script ../../locals/autowrap_example2.py --help
+    usage: run_workflow.py --script SCRIPT [--save SAVE] [--profile]
+                           [--memprofile]
+                           [--loglevel {INFO,WARNING,CRITICAL,ERROR,DEBUG,NOTSET}]
+                           --ana_0:msidata ANA_0:MSIDATA --ana_0:mzdata
+                           ANA_0:MZDATA
+                           [--ana_0:integration_width ANA_0:INTEGRATION_WIDTH]
+                           [--ana_0:peakheight ANA_0:PEAKHEIGHT]
+                           [--ana_0:slwindow ANA_0:SLWINDOW]
+                           [--ana_0:smoothwidth ANA_0:SMOOTHWIDTH]
+                           [--ana_1:axis ANA_1:AXIS]
+                           [--reduce_memory_usage REDUCE_MEMORY_USAGE]
+                           [--synchronize SYNCHRONIZE] [-h]
+
+    Execute analysis workflow(s) based on a given set of scripts
+
+    required arguments:
+      --script SCRIPT       The workflow script to be executed. Multiple scripts
+                            may be added via separate --script arguments (default:
+                            None)
+
+    optional arguments:
+      --save SAVE           Define the file and experiment where all analysis
+                            results should be stored. A new file will be created
+                            if the given file does not exists but the directory
+                            does. The filename is expected to be of the from:
+                            <filename>:<entry_#> . If no experiment index is
+                            given, then experiment index 0 (i.e, entry_0) will be
+                            assumed by default. A validpath may, e.g, be
+                            "test.h5:/entry_0" or jus "test.h5" (default: None)
+      --profile             Enable runtime profiling of the analysis. NOTE: This
+                            is intended for debugging and investigation of the
+                            runtime behavior of an analysis.Enabling profiling
+                            entails certain overheads in performance (default:
+                            False)
+      --memprofile          Enable runtime profiling of the memory usage of
+                            analysis. NOTE: This is intended for debugging and
+                            investigation of the runtime behavior of an analysis.
+                            Enabling profiling entails certain overheads in
+                            performance. (default: False)
+      --loglevel {INFO,WARNING,CRITICAL,ERROR,DEBUG,NOTSET}
+                            Specify the level of logging to be used. (default:
+                            INFO)
+      -h, --help            show this help message and exit
+
+    ana_0:omsi.analysis.findpeaks.omsi_findpeaks_global:analysis settings:
+      Analysis settings
+
+      --ana_0:integration_width ANA_0:INTEGRATION_WIDTH
+                            The window over which peaks should be integrated
+                            (default: 0.1)
+      --ana_0:peakheight ANA_0:PEAKHEIGHT
+                            Peak height parameter (default: 2)
+      --ana_0:slwindow ANA_0:SLWINDOW
+                            Sliding window parameter (default: 100)
+      --ana_0:smoothwidth ANA_0:SMOOTHWIDTH
+                            Smooth width parameter (default: 3)
+
+    ana_0:omsi.analysis.findpeaks.omsi_findpeaks_global:input data:
+      Input data to be analyzed
+
+      --ana_0:msidata ANA_0:MSIDATA
+                            The MSI dataset to be analyzed (default: None)
+      --ana_0:mzdata ANA_0:MZDATA
+                            The m/z values for the spectra of the MSI dataset
+                            (default: None)
+
+    ana_1 : generic:
+      --ana_1:axis ANA_1:AXIS
+
+    optional workflow executor options:
+      Additional, optional settings for the workflow execution controls
+
+      --reduce_memory_usage REDUCE_MEMORY_USAGE
+                            Reduce memory usage by pushing analyses to file each
+                            time they complete, processing dependencies out-of-
+                            core. (default: False)
+      --synchronize SYNCHRONIZE
+                            Place an MPI-barrier at the beginning of the exection
+                            of the workflow. This can be useful when we require
+                            that all MPI ranks are fully initalized. (default:
+                            False)
+
+    how to specify ndarray data?
+    ----------------------------
+    n-dimensional arrays stored in OpenMSI data files may be specified as
+    input parameters via the following syntax:
+          -- MSI data: <filename>.h5:/entry_#/data_#
+          -- Analysis data: <filename>.h5:/entry_#/analysis_#/<dataname>
+          -- Arbitrary dataset: <filename>.h5:<object_path>
+    E.g. a valid definition may look like: 'test_brain_convert.h5:/entry_0/data_0'
+    In rear cases we may need to manually define an array (e.g., a mask)
+    Here we can use standard python syntax, e.g, '[1,2,3,4]' or '[[1, 3], [4, 5]]'
+
+    This command-line tool has been auto-generated by BASTet (Berkeley Analysis & Storage Toolkit)
 
 
 

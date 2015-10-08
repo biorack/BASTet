@@ -398,7 +398,7 @@ class parameter_manager(object):
     """
     Base class for objects that manage their own parameters.
 
-    Parameters are set an retrieved by name using dict-like slicing. Derived classes
+    Parameters are set and their values retrieved by name using dict-like slicing. Derived classes
     may overwrite __getitem__ and __setitem__ to implement their own behavior but
     we exepct that the functionality of the interface is preserved, i.e., others should
     still be able set parameter value and retrieve values via dict slicing.
