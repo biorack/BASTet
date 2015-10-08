@@ -53,6 +53,7 @@ class log_helper(object):
 
         :param level: The logging levels to be used, one of the values specified in log_helper.log_levels.
         """
+        log_helper.debug(__name__, "Setting log level to " + str(level))
         if level not in log_helper.log_levels.values():
             try:
                 level = log_helper.log_levels[level]
