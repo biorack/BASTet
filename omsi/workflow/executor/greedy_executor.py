@@ -29,7 +29,7 @@ class greedy_executor(workflow_executor_base):
         self.run_info = run_info_dict()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.reduce_memory_usage = True
+        self.reduce_memory_usage = False
 
     def main(self):
         """Execute the analysis workflow"""
@@ -82,5 +82,6 @@ class greedy_executor(workflow_executor_base):
         # Record the runtime information after we are done with the workflow
         self.run_info.record_postexecute()
         self.run_info.gather()
+
 
 
