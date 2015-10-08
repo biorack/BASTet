@@ -16,10 +16,9 @@ from omsi.shared.log import log_helper
 
 # TODO We need to add saving of analyses to the workflow itself and allow saving to separate files
 # TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted
-# TODO We need to add command line options to control the workflow executor itself, e.g., to set the reduce_memory_usage option of the greedy_executor
-# TODO The workflow executor needs to expose its parameters as well
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
+# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors. Possibly make a new base class for classes that expose parameters
 
 
 class cl_workflow_driver(workflow_driver_base):
@@ -63,6 +62,7 @@ class cl_workflow_driver(workflow_driver_base):
     :ivar profile_analyses: Boolean indicating whether we should profile the analysis for time and usage
     :ivar profile_analyses_mem: Boolean indicating whether we should profile the memory usage of the individual analyses
     :ivar analysis_arguments: Dictionary defining the custom input arguments to be used for the analysis
+    :ivar workflow_executor_arguments: Dictionary defining the custom input arguments routed to the workflow executor
     :ivar __output_target_self: Private member variable used to store the output files created by this object.
     :ivar user_log_level: The custom logging level specified by the user (or None)
     :ivar mpi_root: The root rank used when running in parallel
@@ -146,6 +146,7 @@ class cl_workflow_driver(workflow_driver_base):
         self.profile_analyses = False
         self.profile_analyses_mem = False
         self.analysis_arguments = {}
+        self.workflow_executor_arguments = {}
         self.mpi_root = 0
         self.mpi_comm = mpi_helper.get_comm_world()
         self.user_log_level = None   # The logging level specified by the user.
@@ -273,7 +274,7 @@ class cl_workflow_driver(workflow_driver_base):
         The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
 
         This function parses all arguments that are specific to the command-line parser itself. Analysis workflow
-        arguments are added and parsed later by the add_and_parse_analysis_arguments(...) function.
+        arguments are added and parsed later by the add_and_parse_workflow_arguments(...) function.
         The reason for this is two-fold: i) to separate the parsing of analysis arguments and arguments of the
         command-line driver and ii) if the same HDF5 file is used as input and output target, then we need to
         open it first here in append mode before it gets opened in read mode later by the arguments.
@@ -339,8 +340,7 @@ class cl_workflow_driver(workflow_driver_base):
             else:
                 self.workflow_executor.add_analysis_from_scripts(script_files=self.script_files)
 
-
-    def add_and_parse_analysis_arguments(self):
+    def add_and_parse_workflow_arguments(self):
         """
         The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
 
@@ -355,7 +355,7 @@ class cl_workflow_driver(workflow_driver_base):
         """
         # Ensure that we have a workflow executor instantiated. This should usually not happen.
         if self.workflow_executor is None:
-            log_helper.warning(__name__, "Late creation of the workflow executor in add_and_parse_analysis_arguments",
+            log_helper.warning(__name__, "Late creation of the workflow executor in add_and_parse_workflow_arguments",
                                root=self.mpi_root, comm=self.mpi_comm)
             self.create_workflow_executor_object()
 
@@ -423,11 +423,51 @@ class cl_workflow_driver(workflow_driver_base):
                                                     # metavar               #     Don't use. Positional analysis arguments
                                                     #                       #     are not allowed
                                                     dest=arg_dest)          #     Automatically determined by the name
+
+        # Add the arguments of the workflow executor
+        if 'workflow_executor' not in self.custom_argument_groups:
+            workflow_executor_group = self.parser.add_argument_group(
+                title='optional workflow executor options',
+                description='Additional, optional settings for the workflow execution controls')
+            self.custom_argument_groups['workflow_executor'] = workflow_executor_group
+        else:
+            log_helper.warning(__name__, 'The workflow exectutor parser group already exists. ' +
+                               'Workflow options are added to the main parser instead',
+                               root=self.mpi_root, comm=self.mpi_comm)
+            workflow_executor_group = self.parser
+        for arg_param in self.workflow_executor.get_all_parameter_data():
+            # Add the parameter to the argument parser
+            arg_name = "--" + arg_param['name']
+            arg_action = 'store'
+            arg_default = arg_param['default']
+            arg_required = arg_param['required'] and (arg_default is None)
+            arg_type = arg_param['dtype']
+            arg_choices = arg_param['choices']
+            arg_help = arg_param['help']
+            arg_dest = arg_param['name']
+            arg_group = arg_param.get_group_name()
+            argument_group = self.required_argument_group if arg_required else workflow_executor_group
+            # Add the argument to the proper group
+            argument_group.add_argument(arg_name,               # <-- Required, user specified arg name
+                                        action=arg_action,      #     Constant. We define this not the user.
+                                        # nargs=1,                    Don't use. Leave as default
+                                        # const=None,                 Don't use. We don't use this type of action
+                                        default=arg_default,    # <-- Optional default value for the argument
+                                        type=arg_type,          # <-- Optional dtype of the argument
+                                        choices=arg_choices,    # <-- Optional Key may be missing.
+                                        required=arg_required,  # <-- Optional
+                                        help=arg_help,          # <-- Required
+                                        # metavar               #     Don't use. Positional analysis arguments
+                                        #                       #     are not allowed
+                                        dest=arg_dest)          #     Automatically determined by the name
+
         # Add the help argument
         self.optional_argument_group.add_argument('-h', '--help',
                                  action='help',
                                  default=argparse.SUPPRESS,
                                  help='show this help message and exit')
+
+        # Remove the arguments from this driver that cannot be understood by the analysis
         parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.profile_arg_name, None)
         parsed_arguments.pop(self.output_save_arg_name, None)
@@ -435,9 +475,16 @@ class cl_workflow_driver(workflow_driver_base):
         parsed_arguments.pop(self.log_level_arg_name, None)
         parsed_arguments.pop(self.script_arg_name, None)
 
-        self.analysis_arguments = parsed_arguments
+        # Consume the command line arguments for the workflow executor and the analysis
+        self.workflow_executor_arguments = {}
+        for arg_param in self.workflow_executor.get_all_parameter_data():
+            if arg_param['name'] in parsed_arguments:
+                param_value = parsed_arguments.pop(arg_param['name'])
+                self.workflow_executor[arg_param['name']] = param_value
+                self.workflow_executor_arguments[arg_param['name']] = param_value
 
-        # Update the workflow to set all analysis arguments
+        # Consume the arguments for the different analyses
+        self.analysis_arguments = parsed_arguments
         for arg_key, arg_value in self.analysis_arguments.iteritems():
             ana_identifier, arg_key = arg_key.split(target_seperator)
             self.workflow_executor.analysis_tasks[ana_identifier][arg_key] = arg_value
@@ -542,7 +589,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add and parse the command line arguments specific to the analysis to determine the analysis settings
         try:
-            self.add_and_parse_analysis_arguments()
+            self.add_and_parse_workflow_arguments()
         except:
             self.remove_output_target()
             raise
@@ -644,7 +691,7 @@ class cl_workflow_driver(workflow_driver_base):
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
-        # print self.workflow_executor[2]['output_0'][:,:,24]
+        # print self.workflow_executor.analysis_tasks[2]['output_0'][:,:,24]
 
 if __name__ == "__main__":
 

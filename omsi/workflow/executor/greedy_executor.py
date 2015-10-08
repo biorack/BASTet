@@ -4,6 +4,7 @@ Module used to help with the execution of complex analyses workflows
 from omsi.workflow.executor.base import workflow_executor_base
 from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
+from omsi.shared.analysis_data import data_dtypes
 import omsi.shared.mpi_helper as mpi_helper
 
 
@@ -14,7 +15,10 @@ class greedy_executor(workflow_executor_base):
     :ivar run_info: The runtime information dictionary for the overall workflow
     :ivar mpi_comm: The MPI communicator to be used when running in parallel
     :ivar mpi_root: The MPI root rank when running in parallel
-    :ivar reduce_memory_usage: Boolean indicating whether we should reduce memory usage by pushing analysis
+
+    Additional parameters:
+
+    :param reduce_memory_usage: Boolean indicating whether we should reduce memory usage by pushing analysis
         data to file after an analysis has been completed. This reduces the amount of data we keep in memory
         but results in additional overhead for I/O and temporary disk storage.
 
@@ -29,10 +33,29 @@ class greedy_executor(workflow_executor_base):
         self.run_info = run_info_dict()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.reduce_memory_usage = False
+        self.parameters = []
+        self.add_parameter(name = 'reduce_memory_usage',
+                           help = 'Reduce memory usage by pushing analyses to file each time they ' +
+                                  'complete, processing dependencies out-of-core.',
+                           dtype=data_dtypes.bool_type,
+                           required=False,
+                           default=False)
+        self.add_parameter(name = 'synchronize',
+                           help = 'Place an MPI-barrier at the beginning of the exection of the workflow. ' +
+                                  'This can be useful when we require that all MPI ranks are fully initalized.',
+                           dtype=data_dtypes.bool_type,
+                           required=False,
+                           default=False)
 
     def main(self):
-        """Execute the analysis workflow"""
+        """
+        Execute the analysis workflow
+        """
+        # Do the optional MPI barrier
+        if self['synchronize']:
+            mpi_helper.barrier(comm=self.mpi_comm)
+
+        # Check if we have anything to do at all
         if len(self.get_analyses()) == 0:
             log_helper.info(__name__, "The workflow is empty", root=self.mpi_root, comm=self.mpi_comm)
             return
@@ -58,7 +81,7 @@ class greedy_executor(workflow_executor_base):
                     log_helper.debug(__name__, "Execute analysis: " + str(analysis),
                                      root=self.mpi_root, comm=self.mpi_comm)
                     analysis.execute()
-                    if self.reduce_memory_usage:
+                    if self['reduce_memory_usage']:
                         analysis.clear_and_restore()
             # Check if there is any other tasks that we need to execte now
             num_tasks = 0
@@ -82,6 +105,3 @@ class greedy_executor(workflow_executor_base):
         # Record the runtime information after we are done with the workflow
         self.run_info.record_postexecute()
         self.run_info.gather()
-
-
-
