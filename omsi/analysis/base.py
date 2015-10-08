@@ -14,6 +14,7 @@ from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
 from omsi.shared.analysis_data import analysis_data, parameter_data, data_dtypes
 from omsi.shared.dependency_data import dependency_dict
+from omsi.shared.analysis_data import parameter_manager
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
@@ -43,7 +44,7 @@ class AnalysisReadyError(Exception):
         super(AnalysisReadyError, self).__init__(repr(message))
 
 
-class analysis_base(object):
+class analysis_base(parameter_manager):
     """
     Base class for omsi analysis functionality. The class provides a large set of functionality designed
     to facilitate storage of analysis data in the omsi HDF5 file format. The class also provides a set
@@ -154,9 +155,10 @@ class analysis_base(object):
 
     def __init__(self):
         """Initialize the basic data members"""
+        super(analysis_base, self).__init__()
         self.analysis_identifier = "undefined"
         self.__data_list = []
-        self.parameters = []
+        self.parameters = []  # Inherited from parent class parameter_data
         self.data_names = []
         self.run_info = run_info_dict()
         self.profile_time_and_usage = False
@@ -316,9 +318,7 @@ class analysis_base(object):
         modifications (or checks) of parameters before the analysis is executed.
         Any changes applied here will be recorded in the parameter of the analysis.
         """
-        for param in self.parameters:
-            if param['required'] and not param.data_set():
-                param['data'] = param['default']
+        super(analysis_base, self).define_missing_parameters()
 
     def check_ready_to_execute(self):
         """
@@ -1085,7 +1085,7 @@ class analysis_base(object):
         Get a list of all parameter dataset names (including those that may define
         dependencies.
         """
-        return [param['name'] for param in self.parameters]
+        return super(analysis_base, self).get_parameter_names()
 
     def get_analysis_data(self,
                           index):
@@ -1103,7 +1103,7 @@ class analysis_base(object):
 
         :param index : Return the index entry of the private member parameters.
         """
-        return self.parameters[index]
+        return super(analysis_base, self).get_parameter_data(index=index)
 
     def get_analysis_data_by_name(self,
                                   dataname):
@@ -1128,10 +1128,7 @@ class analysis_base(object):
 
         :returns: The parameter_data object or None if not found
         """
-        for i in self.parameters:
-            if i['name'] == dataname:
-                return i
-        return None
+        return super(analysis_base, self).get_parameter_data_by_name(dataname=dataname)
 
     def get_all_run_info(self):
         """Get the dict with the complete info about the last run of the analysis"""
@@ -1149,10 +1146,7 @@ class analysis_base(object):
         :param exclude_dependencies: Boolean indicating whether we should exclude parameters
             that define dependencies from the list
         """
-        if exclude_dependencies:
-            return [param for param in self.parameters if not param.is_dependency()]
-        else:
-            return self.parameters
+        return super(analysis_base, self).get_all_parameter_data(exclude_dependencies=exclude_dependencies)
 
     def get_all_dependency_data(self):
         """
@@ -1165,23 +1159,19 @@ class analysis_base(object):
         :returns: List of parameter_data objects that define dependencies.
 
         """
-        dependency_list = []
-        for param in self.parameters:
-            if param.is_dependency():
-                dependency_list.append(param)
-        return dependency_list
+        return super(analysis_base, self).get_all_dependency_data()
 
     def get_num_analysis_data(self):
         """Retrun the number of analysis datasets to be wirtten to the HDF5 file"""
         return len(self.__data_list)
 
     def get_num_parameter_data(self):
-        """Retrun the number of parameter datasets to be wirtten to the HDF5 file"""
-        return len(self.parameters)
+        """Return the number of parameter datasets to be wirtten to the HDF5 file"""
+        return super(analysis_base, self).get_num_parameter_data()
 
     def get_num_dependency_data(self):
         """Return the number of dependencies to be wirtten to the HDF5 file"""
-        return len(self.get_all_dependency_data())
+        return super(analysis_base, self).get_num_dependency_data()
 
     def keys(self):
         """
@@ -1393,17 +1383,14 @@ class analysis_base(object):
         :raises: ValueError is raised if the parameter with the given name already exists.
         """
         log_helper.debug(__name__, "Adding parameter. " + str(name), root=self.mpi_root, comm=self.mpi_comm)
-        if self.get_parameter_data_by_name(name) is not None:
-            log_helper.debug(__name__, "Parameter already exists. " + str(name), root=self.mpi_root, comm=self.mpi_comm)
-            raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
-        self.parameters.append(parameter_data(name=name,
-                                              help=help,
-                                              dtype=dtype,
-                                              required=required,
-                                              default=default,
-                                              choices=choices,
-                                              data=data,
-                                              group=group))
+        super(analysis_base, self).add_parameter(name=name,
+                                                 help=help,
+                                                 dtype=dtype,
+                                                 required=required,
+                                                 default=default,
+                                                 choices=choices,
+                                                 data=data,
+                                                 group=group)
         self.update_analysis = True
 
 #    def add_analysis_data(self , name, data, dtype ) :

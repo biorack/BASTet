@@ -18,7 +18,8 @@ from omsi.shared.log import log_helper
 # TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
-# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors. Possibly make a new base class for classes that expose parameters
+# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
+# TODO Add new base class for any objects that manage their own parameter data and add a parameter set data structure
 
 
 class cl_workflow_driver(workflow_driver_base):

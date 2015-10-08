@@ -9,10 +9,11 @@ from omsi.workflow.common import analysis_task_set
 from omsi.shared.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.analysis_data import parameter_data
+from omsi.shared.analysis_data import parameter_manager
 from omsi.shared.log import log_helper
 
 
-class workflow_executor_base(object):
+class workflow_executor_base(parameter_manager):
     """
     Base class used to execute a workflow of one or many analyses. This is an object-based execution,
     i.e., the user defines a set of analyses to be executed.
@@ -119,7 +120,7 @@ class workflow_executor_base(object):
         self.analysis_tasks = analysis_task_set(analysis_objects) if analysis_objects is not None else analysis_task_set()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.parameters = []
+        self.parameters = []  # Inherited from parameter_manager
 
     def __call__(self):
         """
@@ -144,14 +145,7 @@ class workflow_executor_base(object):
         :param item:
         :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
         """
-        if isinstance(item, basestring):
-            for param in self.parameters:
-                if param['name'] == item:
-                    return param.get_data_or_default()
-        try:
-            super(workflow_executor_base, self)[item]
-        except TypeError:
-            raise KeyError('Invalid parameter key')
+        super(workflow_executor_base, self).__getitem__(item)
 
     def __setitem__(self, key, value):
         """
@@ -166,47 +160,8 @@ class workflow_executor_base(object):
         :raise: ValueError if an invalid value is given
         :raise: KeyError if an invalid key is given
         """
-        # Check if we have a valid key
-        param_set = False
-        if isinstance(key, basestring):
-            for param in self.parameters:
-                if param['name'] == key:
-                    log_helper.debug(__name__, 'Setting parameter ' + key, root=self.mpi_root, comm=self.mpi_comm)
-                    param['data'] = value
-                    param_set = True
-        if not param_set:
-            try:
-                super(workflow_executor_base, self)[key] = value
-            except TypeError:
-                raise KeyError('Invalid parameter key')
-
-    def __getattr__(self, item):
-        try:
-            return self[item]
-        except KeyError:
-            raise AttributeError("Invalid attribute given")
-
-    def get_all_parameter_data(self):
-        """
-        Overwrite this function to describe input parameters that we want the executor to expose to the
-        outside, e.g., workflow dirvers where a users needs to be able ot set parameters of the executor
-        via the command line or other form of UI.
-
-        :return: List of omsi.shared.analysis_data.parameter_data objects describing the options. Options
-            are set using slicing via the __setitem__ function
-        """
-        return self.parameters
-
-    def get_parameter_data(self,
-                           index):
-        """
-        Given the index return the associated dataset to be written to the HDF5 file
-
-        :param index : Return the index entry of the private member parameters.
-
-        :raises: IndexError is raised when the index is out of bounds
-        """
-        return self.get_all_parameter_data()[index]
+        log_helper.debug(__name__, 'Setting parameter ' + key, root=self.mpi_root, comm=self.mpi_comm)
+        super(workflow_executor_base, self).__setitem__(key, value)
 
     def main(self):
         """
@@ -274,7 +229,6 @@ class workflow_executor_base(object):
         else:
             log_helper.debug("No analysis found in scripts", root=self.mpi_root, comm=self.mpi_comm)
 
-
     def add_analysis_all(self):
         """
         Add all known analyses to the workflow.
@@ -328,42 +282,3 @@ class workflow_executor_base(object):
         log_helper.debug(__name__, "Clearing the workflow", root=self.mpi_root, comm=self.mpi_comm)
         self.analysis_tasks.clear()
 
-    def add_parameter(self,
-                      name,
-                      help,
-                      dtype=unicode,
-                      required=False,
-                      default=None,
-                      choices=None,
-                      data=None,
-                      group=None):
-        """
-        Add a new parameter for the workflow executor. This function is typically used in the constructor
-        of a derived analysis to specify the parameters of the workflow executor.
-
-        :param name: The name of the parameter
-        :param help: Help string describing the parameter
-        :param type: Optional type. Default is string.
-        :param required: Boolean indicating whether the parameter is required (True) or optional (False). Default False.
-        :param default: Optional default value for the parameter. Default None.
-        :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
-        :param data: The data assigned to the parameter. None by default.
-        :param group: Optional group string used to organize parameters. Default None, indicating that
-            parameters are automatically organized by driver class (e.g. in required and optional parameters)
-
-        :raises: ValueError is raised if the parameter with the given name already exists.
-        """
-        log_helper.debug(__name__, "Adding workflow executor parameter. " + str(name),
-                         root=self.mpi_root, comm=self.mpi_comm)
-        for param in self.parameters:
-            if param['name'] == name:
-                log_helper.debug(__name__, "Parameter already exists. " + str(name), root=self.mpi_root, comm=self.mpi_comm)
-                raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
-        self.parameters.append(parameter_data(name=name,
-                                              help=help,
-                                              dtype=dtype,
-                                              required=required,
-                                              default=default,
-                                              choices=choices,
-                                              data=data,
-                                              group=group))

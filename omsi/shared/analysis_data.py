@@ -4,6 +4,7 @@ Helper module with data structures for managing analysis-related data.
 
 import numpy as np
 from omsi.shared.dependency_data import dependency_dict
+from omsi.shared.log import log_helper
 
 import warnings
 import sys
@@ -11,6 +12,9 @@ import ast
 import h5py
 
 
+#########################################################
+#             data_types                                #
+#########################################################
 class data_dtypes(dict):
     """
     Class specifying basic function for specifying common
@@ -45,11 +49,11 @@ class data_dtypes(dict):
             bool(int(argument))
         except ValueError:
             if argument in ('TRUE', 'true', 'True', 't', 'T'):
-               return True
+                return True
             elif argument in ('FALSE', 'false', 'False', 'f', 'F'):
-               return False
+                return False
             else:
-               raise ValueError('Parameter could not be converted to type bool')
+                raise ValueError('Parameter could not be converted to type bool')
 
     @staticmethod
     def ndarray(argument):
@@ -105,6 +109,9 @@ class data_dtypes(dict):
     #     return np.asarray(argument)
 
 
+#########################################################
+#             analysis_data                             #
+#########################################################
 class analysis_data(dict):
     """
     Define an output dataset for the analysis that should be written to the omsi HDF5 file
@@ -154,6 +161,9 @@ class analysis_data(dict):
             raise KeyError("\'"+str(key)+'\' key not in default key set of analysis_data')
 
 
+#########################################################
+#             parameter_data                            #
+#########################################################
 class parameter_data(dict):
     """
     Define a single input parameter for an analysis.
@@ -351,12 +361,11 @@ class parameter_data(dict):
             except:
                 try:
                     warnings.warn('Conversion of parameter data to the expected dtype failed. ' +
-                                  self['name'] + "  "  + unicode(outdata)  + "  " +
+                                  self['name'] + "  " + unicode(outdata) + "  " +
                                   unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
                 except (UnicodeDecodeError, UnicodeEncodeError):
                     warnings.warn('Conversion of parameter data to the expected dtype failed. ' + self['name']
                                   + "  " + unicode(self['dtype']) + "  " + unicode(sys.exc_info()))
-
 
         # Convert to ndarray if needed
         try:
@@ -380,3 +389,209 @@ class parameter_data(dict):
         Remove the currently assigned data.
         """
         self['data'] = None
+
+
+#########################################################
+#             parameter_manager                         #
+#########################################################
+class parameter_manager(object):
+    """
+    Base class for objects that manage their own parameters.
+
+    Parameters are set an retrieved by name using dict-like slicing. Derived classes
+    may overwrite __getitem__ and __setitem__ to implement their own behavior but
+    we exepct that the functionality of the interface is preserved, i.e., others should
+    still be able set parameter value and retrieve values via dict slicing.
+    """
+    def __init__(self):
+        """
+
+        """
+        super(parameter_manager, self).__init__()
+        self.parameters = []
+
+    def __len__(self):
+        return self.get_num_parameter_data()
+
+    def __getitem__(self, item):
+        """
+        Convenience function used to access analysis objects directly.
+        Same as self.analysis_tasks.__getitem__
+        :param item:
+        :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
+        """
+        if isinstance(item, basestring):
+            for param in self.parameters:
+                if param['name'] == item:
+                    return param.get_data_or_default()
+
+        raise KeyError('Invalid parameter key')
+
+    def __setitem__(self, key, value):
+        """
+        Set worflow driver parameter options directly via slicing
+
+        Overwrite this function in child classes to implement custom setting behavior, e.g., error
+        checking for valid values before setting a non-standard parameter.
+
+        :param key: name of the parameters
+        :param value: new value
+
+        :raise: ValueError if an invalid value is given
+        :raise: KeyError if an invalid key is given
+        """
+        # Check if we have a valid key
+        param_set = False
+        if isinstance(key, basestring):
+            for param in self.parameters:
+                if param['name'] == key:
+                    log_helper.debug(__name__, "Setting parameter " + key)
+                    param['data'] = value
+                    param_set = True
+        if not param_set:
+            raise KeyError('Invalid parameter key')
+
+    def keys(self):
+        """
+        Get a list of all valid keys, i.e., a list of all parameter names.
+
+        :return: List of strings with all input parameter and output names.
+        """
+        return self.get_parameter_names()
+
+    def get_all_parameter_data(self,
+                               exclude_dependencies=False):
+        """
+        Get the complete list of all parameter datasets to be written to the HDF5 file
+
+        :param exclude_dependencies: Boolean indicating whether we should exclude parameters
+            that define dependencies from the list
+        """
+        if exclude_dependencies:
+            return [param for param in self.parameters if not param.is_dependency()]
+        else:
+            return self.parameters
+
+    def get_parameter_data(self,
+                           index):
+        """
+        Given the index return the associated dataset to be written to the HDF5 file
+
+        :param index : Return the index entry of the private member parameters. If a
+            string is given, then get_parameter_data_by_name(...) will be used instead.
+
+        :raises: IndexError is raised when the index is out of bounds
+        """
+        if isinstance(index, basestring):
+            return self.get_parameter_data_by_name(index)
+        else:
+            return self.get_all_parameter_data()[index]
+
+    def get_parameter_data_by_name(self,
+                                   dataname):
+        """
+        Given the key name of the data return the associated parameter_data object.
+
+        :param dataname: Name of the parameter requested from the parameters member.
+
+        :returns: The parameter_data object or None if not found
+        """
+        for i in self.parameters:
+            if i['name'] == dataname:
+                return i
+        return None
+
+    def get_parameter_names(self):
+        """
+        Get a list of all parameter dataset names (including those that may define
+        dependencies.
+        """
+        return [param['name'] for param in self.parameters]
+
+    def get_num_parameter_data(self):
+        """Return the number of parameter datasets to be wirtten to the HDF5 file"""
+        return len(self.parameters)
+
+    def get_num_dependency_data(self):
+        """Return the number of dependencies defined as part of the parameters"""
+        return len(self.get_all_dependency_data())
+
+    def get_all_dependency_data(self):
+        """
+        Get the complete list of all direct dependencies to be written to the HDF5 file
+
+        NOTE: These are only the direct dependencies as specified by the analysis itself.
+        Use  get_all_dependency_data_recursive(..) to also get the indirect dependencies of
+        the analysis due to dependencies of the dependencies themselves.
+
+        :returns: List of parameter_data objects that define dependencies.
+
+        """
+        dependency_list = []
+        for param in self.parameters:
+            if param.is_dependency():
+                dependency_list.append(param)
+        return dependency_list
+
+    def define_missing_parameters(self):
+        """
+        Set any required parameters that have not been defined to their respective default values.
+
+        This function may be overwritten in child classes to customize
+        the definition of default parameter values and to apply any
+        modifications (or checks) of parameters before the analysis is executed.
+        Any changes applied here will be recorded in the parameter of the analysis.
+        """
+        log_helper.debug(__name__, "Define missing parameters to default")
+        for param in self.parameters:
+            if param['required'] and not param.data_set():
+                param['data'] = param['default']
+
+    def add_parameter(self,
+                      name,
+                      help,
+                      dtype=unicode,
+                      required=False,
+                      default=None,
+                      choices=None,
+                      data=None,
+                      group=None):
+        """
+        Add a new parameter for the analysis. This function is typically used in the constructor
+        of a derived analysis to specify the parameters of the analysis.
+
+        :param name: The name of the parameter
+        :param help: Help string describing the parameter
+        :param dtype: Optional type. Default is string.
+        :param required: Boolean indicating whether the parameter is required (True) or optional (False). Default False.
+        :param default: Optional default value for the parameter. Default None.
+        :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
+        :param data: The data assigned to the parameter. None by default.
+        :param group: Optional group string used to organize parameters. Default None, indicating that
+            parameters are automatically organized by driver class (e.g. in required and optional parameters)
+
+        :raises: ValueError is raised if the parameter with the given name already exists.
+        """
+        log_helper.debug(__name__, "Add parameter " + str(name))
+        if self.get_parameter_data_by_name(name) is not None:
+            raise ValueError('A parameter with the name ' + unicode(name) + " already exists.")
+        self.parameters.append(parameter_data(name=name,
+                                              help=help,
+                                              dtype=dtype,
+                                              required=required,
+                                              default=default,
+                                              choices=choices,
+                                              data=data,
+                                              group=group))
+
+    def clear_parameter_data(self):
+        """Clear the list of parameter data"""
+        log_helper.debug(__name__, "Clearing parameter data")
+        for param in self.parameters:
+            param.clear_data()
+
+
+
+
+
+
