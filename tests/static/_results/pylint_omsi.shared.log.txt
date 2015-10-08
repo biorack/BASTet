@@ -1,7 +1,7 @@
 ************* Module omsi.shared.log
 C:110, 0: Exactly one space required after comma
-    def log(cls, module_name, message, root=None, comm=None, level=None,  *args, **kwargs):
-                                                                       ^ (bad-whitespace)
+    def log(cls, module_name, message, root=0, comm=None, level=None,  *args, **kwargs):
+                                                                    ^ (bad-whitespace)
 C: 63, 8: Invalid variable name "ld" (invalid-name)
 W:105,12: No exception type(s) specified (bare-except)
 R:110, 4: Too many arguments (6/5) (too-many-arguments)

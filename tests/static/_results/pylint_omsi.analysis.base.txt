@@ -6,25 +6,25 @@ C:541, 0: Exactly one space required after comma
 C:575, 0: Exactly one space required after comma
             log_helper.debug(__name__, "Using user-defined executor.",  root=root, comm=comm)
                                                                      ^ (bad-whitespace)
-C:1246, 0: Wrong continued indentation.
+C:1236, 0: Wrong continued indentation.
                                              flush_io=True,
                                              ^                    | (bad-continuation)
-C:1247, 0: Wrong continued indentation.
+C:1237, 0: Wrong continued indentation.
                                              force_save=False,
                                              ^                    | (bad-continuation)
-C:1248, 0: Wrong continued indentation.
+C:1238, 0: Wrong continued indentation.
                                              save_unsaved_dependencies=True,
                                              ^                    | (bad-continuation)
-C:1249, 0: Wrong continued indentation.
+C:1239, 0: Wrong continued indentation.
                                              mpi_root=self.mpi_root,
                                              ^                    | (bad-continuation)
-C:1250, 0: Wrong continued indentation.
+C:1240, 0: Wrong continued indentation.
                                              mpi_comm=self.mpi_comm)
                                              ^                    | (bad-continuation)
-W: 47, 0: Anomalous backslash in string: '\_'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
-C: 22, 0: Invalid class name "AnalysisReadyError" (invalid-name)
-R: 46, 0: Too many instance attributes (12/7) (too-many-instance-attributes)
-W:221,12: Used * or ** magic (star-args)
+W: 48, 0: Anomalous backslash in string: '\_'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+C: 23, 0: Invalid class name "AnalysisReadyError" (invalid-name)
+R: 47, 0: Too many instance attributes (12/7) (too-many-instance-attributes)
+W:223,12: Used * or ** magic (star-args)
 R:360, 4: Too many branches (17/12) (too-many-branches)
 R:589, 4: Too many local variables (18/15) (too-many-locals)
 W:622,12: No exception type(s) specified (bare-except)
@@ -83,14 +83,14 @@ W:947,16: Unused variable 'StringIO' (unused-variable)
 W:966,16: Unused variable 'memory_profiler' (unused-variable)
 W:967,16: Unused variable 'StringIO' (unused-variable)
 W:1036,32: Used * or ** magic (star-args)
-W:1245,12: Attempting to unpack a non-sequence defined at line 78 of omsi.dataformat.omsi_file.analysis (unpacking-non-sequence)
-W:1245,21: Unused variable 'ana_index' (unused-variable)
-W:1329,20: Access to a protected member _force_set_data of a client class (protected-access)
-R:1268, 4: Too many branches (13/12) (too-many-branches)
-W:1372,22: Redefining built-in 'help' (redefined-builtin)
-R:1370, 4: Too many arguments (9/5) (too-many-arguments)
-R:1502, 4: Too many arguments (7/5) (too-many-arguments)
-W:1560, 8: Used * or ** magic (star-args)
-W:1507,28: Unused argument 'dependencies_omsi_format' (unused-argument)
-W:1584, 8: No exception type(s) specified (bare-except)
-R: 46, 0: Too many public methods (53/20) (too-many-public-methods)
+W:1235,12: Attempting to unpack a non-sequence defined at line 80 of omsi.dataformat.omsi_file.analysis (unpacking-non-sequence)
+W:1235,21: Unused variable 'ana_index' (unused-variable)
+W:1319,20: Access to a protected member _force_set_data of a client class (protected-access)
+R:1258, 4: Too many branches (13/12) (too-many-branches)
+W:1362,22: Redefining built-in 'help' (redefined-builtin)
+R:1360, 4: Too many arguments (9/5) (too-many-arguments)
+R:1489, 4: Too many arguments (7/5) (too-many-arguments)
+W:1547, 8: Used * or ** magic (star-args)
+W:1494,28: Unused argument 'dependencies_omsi_format' (unused-argument)
+W:1571, 8: No exception type(s) specified (bare-except)
+R: 47, 0: Too many public methods (53/20) (too-many-public-methods)

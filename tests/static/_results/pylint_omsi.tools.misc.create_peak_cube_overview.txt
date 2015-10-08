@@ -1,4 +1,4 @@
-************* Module omsi.tools.create_peak_cube_overview
+************* Module omsi.tools.misc.create_peak_cube_overview
 W: 79, 0: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
 W: 80, 0: Anomalous Unicode escape in byte string: '\u'. String constant might be missing an r or u prefix. (anomalous-unicode-escape-in-string)
 W: 81, 0: Anomalous Unicode escape in byte string: '\u'. String constant might be missing an r or u prefix. (anomalous-unicode-escape-in-string)
