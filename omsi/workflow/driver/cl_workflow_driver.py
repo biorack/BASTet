@@ -19,7 +19,6 @@ from omsi.shared.log import log_helper
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
 # TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
-# TODO Add new base class for any objects that manage their own parameter data and add a parameter set data structure
 
 
 class cl_workflow_driver(workflow_driver_base):

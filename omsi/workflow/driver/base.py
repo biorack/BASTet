@@ -5,6 +5,7 @@ Workflow drivers are responsible for the creation and initialization of workflow
 of workflows is then controlled by the workflow executor.
 """
 
+
 class driver_base(object):
     """
     Primitve base class for driving the execution of an object
@@ -31,7 +32,6 @@ class driver_base(object):
         Same as main
         """
         self.main()
-
 
 
 class analysis_driver_base(driver_base):
