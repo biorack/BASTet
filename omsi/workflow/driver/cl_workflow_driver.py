@@ -20,38 +20,56 @@ from omsi.shared.log import log_helper
 # TODO The workflow executor needs to expose its parameters as well
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
-# TODO Update docstrings of the cl_workflow_driver class (they are largely copy-paste from the analysis driver)
 
 
 class cl_workflow_driver(workflow_driver_base):
     """
     Command-line workflow driver.
 
-    :cvar output_save_arg_name: Name of the optional keyword argument for specifying the name
-        and target for the analysis
+    :cvar script_arg_name: Name of the optional keyword cl argument for defining workflow scripts to be executed
 
-    :cvar analysis_class_arg_name: Name of the optional first positional argument to be used
-        to define the analysis class to be used.
+    :cvar output_save_arg_name: Name of the optional keyword argument for specifying the name
+        and target for the workflow. This may be a folder or an HDF5 file ending with .h5
 
     :cvar profile_arg_name: Name of the keyword argument used to enable profiling of the analysis
 
     :cvar profile_mem_arg_name: Name of the keyword argument used to enable profiling of memory usage of an analysis
 
+    :cvar log_level_arg_name: Name of the keyword cl argument to define the level of logging ot be used.
 
-    :ivar analysis_class: The class (subclass of analysis_base) defining the analysis to be executed
-    :ivar add_script_arg: Boolean indicating whether an optional positional command line argument
-        should be used to determine the analysis class (or whether the analysis class will be set explicitly)
+
+    :ivar workflow_executor: The workflow executor object used to execute the analysis workflow.
+        The workflow executor must derive from omsi.workflow.executor.base.workflow_executor_base.
+        May be None in case that we use the command-line to define workflow executor or if the
+        default executor should be used. The default executur class is defined by
+        omsi.workflow.executor.base.workflow_executor_base.
+    :ivar script_files: List of strings with the paths to files with workflow scripts to be executed.
+    :ivar add_script_arg: Boolean indicating whether the --script keyword argument should be added to the
+        command-line, to define the workflow scripts via the CL (or whether the scripts will be set explicitly)
     :ivar add_output_arg: Boolean indicating whether an optional keyword argument should be added to define
         the output target for the analysis.
     :ivar add_profile_arg: Add the optional --profile keyword argument for profiling the analysis
-    :ivar profile_analyses: Boolean indicating whether we should profile the analysis
+    :ivar add_mem_profile_arg: Boolean indicating whether we should add the optional
+        keyword argument for enabling memory profiling of the analysis.
+    :ivar add_log_level_arg: Boolean indicating wither we should add the option keyword argument to specify the
+        logging level via the command line.
     :ivar parser: The argparse.ArgumentParser instance used for defining command-line arguments
     :ivar required_argument_group: argparse.ArgumentParser argument group used to define required command line arguments
+    :ivar optional_argument_group: argparse.ArgumentParser argument group used to define optional command line arguments
     :ivar custom_argument_groups: Dict of custom argparse.ArgumentParser argument groups specified by the analysis
+    :ivar identifier_argname_seperator: String used to seperate the analysis identifier and argument name when
+        creating custom command-line options for the individual analyses of the workflow
     :ivar output_target: Specification of the output target where the analysis result should be stored
-    :ivar analysis_arguments: Dictionary defining the input arguments to be used for the analysis
+    :ivar profile_analyses: Boolean indicating whether we should profile the analysis for time and usage
+    :ivar profile_analyses_mem: Boolean indicating whether we should profile the memory usage of the individual analyses
+    :ivar analysis_arguments: Dictionary defining the custom input arguments to be used for the analysis
+    :ivar __output_target_self: Private member variable used to store the output files created by this object.
+    :ivar user_log_level: The custom logging level specified by the user (or None)
+    :ivar mpi_root: The root rank used when running in parallel
+    :ivar mpi_comm: The mpit communicator to be used when running in parallel
 
     """
+
     script_arg_name = 'script'
     """The name where the positional argument for defining the analysis class will be stored."""
 
@@ -68,7 +86,7 @@ class cl_workflow_driver(workflow_driver_base):
     """Name of the keyword argument used to specify the level of logging to be used"""
 
     def __init__(self,
-                 workflow_executor,
+                 workflow_executor=None,
                  add_script_arg=False,
                  add_output_arg=True,
                  add_log_level_arg=True,
@@ -76,15 +94,18 @@ class cl_workflow_driver(workflow_driver_base):
                  add_mem_profile_arg=False):
         """
 
-        :param workflow_executor: The analysis class for which we want to execute the analysis.
-            The analysis class must derive from omsi.analysis.analysis_base. May be None
-            in case that we use the command-line to define the analysis class via the optional
-            positional argument for the command class (i.e., set add_script_arg to True).
+        :param workflow_executor: The workflow executor object used to execute the analysis workflow.
+            The workflow executor must derive from omsi.workflow.executor.base.workflow_executor_base.
+            May be None in case that we use the command-line to define workflow executor or if the
+            default executor should be used. The default executur class is defined by
+            omsi.workflow.executor.base.workflow_executor_base.
         :type workflow_executor: omsi.analysis.base.analysis_base
-        :param add_script_arg: Boolean indicating whether we will use the positional
-            command-line argument to determine the analysis class name
+        :param add_script_arg: Boolean indicating whether the --script keyword argument should be added to the
+            command-line, to define the workflow scripts via the CL (or whether the scripts will be set explicitly)
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
             argument for defining the output target for the analysis.
+        :param add_log_level_arg: Boolean indicating wither we should add the option keyword argument to specify the
+        logging level via the command line.
         :param add_profile_arg: Boolean indicating whether we should add the optional keyword
             argument for enabling profiling of the analysis.
         :param add_mem_profile_arg: Boolean indicating whether we should add the optional
@@ -96,34 +117,38 @@ class cl_workflow_driver(workflow_driver_base):
             via two separate mechanisms.
 
         """
-        # Check if the input is valid
+        # 1) Check if the input is valid
         if workflow_executor is None and not add_script_arg:
             raise ValueError('The workflow executor must be either set explicitly or determined from the command line.')
         if workflow_executor is not None and add_script_arg:
             raise ValueError('Conflicting inputs: workflow_executor set and add_script_arg set to True.')
+
+        # 2) Initialize core workflow settings
         super(cl_workflow_driver, self).__init__(workflow_executor)
         # self.workflow_executor = workflow_executor  # Initialized by the super constructor call
-        self.workflow_executor = None
-        self.script_files = []
-        self.add_script_arg = add_script_arg
-        self.add_output_arg = add_output_arg
-        self.add_profile_arg = add_profile_arg
-        self.add_mem_profile_arg = add_mem_profile_arg
-        self.add_log_level_arg = add_log_level_arg
-        self.parser = None   # The argument parser
-        self.required_argument_group = None    # The argparse group used for required arguments
-        self.optional_argument_group = None    # The argparse group used for general optional arguments
-        # The string used to separate the analysis identifier from the argument name in command-line options
-        self.identifier_argname_seperator = ":"
+        self.script_files = []                  # The list of script files
+
+        # 3) Define the command line parser settings
+        self.add_script_arg = add_script_arg    # Add the --script argument ot the command line
+        self.add_output_arg = add_output_arg    # Add the --save argument to the command line
+        self.add_profile_arg = add_profile_arg  # Add the --profile argument ot the command line
+        self.add_mem_profile_arg = add_mem_profile_arg  # Add the --memprofile argument to the command line
+        self.add_log_level_arg = add_log_level_arg      # Add the --loglevel argument to the command line
+        self.parser = None                      # The argument parser
+        self.required_argument_group = None     # The argparse group used for required arguments
+        self.optional_argument_group = None     # The argparse group used for general optional arguments
+        self.custom_argument_groups = {}        # Dictionary of cusom argparse group create for the different analyses
+        self.identifier_argname_seperator = ":" # Separator string when formation analysis command-line options
+
+        # 4) Define the settings for the execution, many of which are retrieved from the command line
         self.output_target = None
+        self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.profile_analyses = False
         self.profile_analyses_mem = False
-        self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
-        self.custom_argument_groups = {}
         self.mpi_root = 0
         self.mpi_comm = mpi_helper.get_comm_world()
-        self.user_log_level = None   # The logging level specified by the user. A developer may have set some log_level in his script and we want to overwrite it
+        self.user_log_level = None   # The logging level specified by the user.
 
     def create_workflow_executor_object(self):
         """
@@ -133,7 +158,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         """
         if self.workflow_executor is None:
-            log_helper.debug(__name__, 'Initalizing workflow executor', root=self.mpi_root, comm=self.mpi_comm)
+            log_helper.debug(__name__, 'Initializing workflow executor', root=self.mpi_root, comm=self.mpi_comm)
             default_executor_class = workflow_executor_base.get_default_executor_class()
             if self.script_files is None or len(self.script_files) == 0:
                 self.workflow_executor = default_executor_class()
@@ -163,7 +188,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         """
         # Setup the argument parser
-        parser_description = "Execute workflow based on a given set of scripts"
+        parser_description = "Execute analysis workflow(s) based on a given set of scripts"
         parser_epilog = "how to specify ndarray data? \n" \
                         "---------------------------- \n" +\
                         "n-dimensional arrays stored in OpenMSI data files may be specified as \n" + \
@@ -186,7 +211,7 @@ class cl_workflow_driver(workflow_driver_base):
         self.required_argument_group = self.parser.add_argument_group(title="required arguments")
         self.optional_argument_group = self.parser.add_argument_group(title="optional arguments")
 
-        # Add optional the script argument
+        # Add optional script argument
         if self.add_script_arg:
             self.required_argument_group.add_argument("--"+self.script_arg_name,
                                                        action='append',
@@ -195,6 +220,7 @@ class cl_workflow_driver(workflow_driver_base):
                                                        required=True,
                                                        help='The workflow script to be executed. Multiple scripts ' + \
                                                              'may be added via separate --script arguments')
+
         # Add the argument for defining where we should save the analysis
         if self.add_output_arg:
             output_arg_help = 'Define the file and experiment where all analysis results should be stored. ' + \
@@ -220,6 +246,7 @@ class cl_workflow_driver(workflow_driver_base):
                                      default=False,
                                      required=False,
                                      help=profile_arg_help)
+
         # Add the optional keyword argument for enabling memory profiling of the analysis
         if self.add_mem_profile_arg:
             profile_mem_arg_help = 'Enable runtime profiling of the memory usage of analysis. ' + \
@@ -231,6 +258,7 @@ class cl_workflow_driver(workflow_driver_base):
                                      default=False,
                                      required=False,
                                      help=profile_mem_arg_help)
+
         # Add the optional logging argument
         if self.add_log_level_arg:
             self.optional_argument_group.add_argument("--"+self.log_level_arg_name,
@@ -244,7 +272,7 @@ class cl_workflow_driver(workflow_driver_base):
         """
         The function assumes that the command line parser has been setup using the initialize_argument_parser(..)
 
-        This function parses all arguments that are specific to the command-line parser itself. Analysis
+        This function parses all arguments that are specific to the command-line parser itself. Analysis workflow
         arguments are added and parsed later by the add_and_parse_analysis_arguments(...) function.
         The reason for this is two-fold: i) to separate the parsing of analysis arguments and arguments of the
         command-line driver and ii) if the same HDF5 file is used as input and output target, then we need to
@@ -467,6 +495,7 @@ class cl_workflow_driver(workflow_driver_base):
         *Side effects* The function modifies ``self.output_target``
 
         :return: Boolean indicating whether we succesfully cleaned up the output
+
         """
         success = False
         if self.__output_target_self is not None:
@@ -492,6 +521,7 @@ class cl_workflow_driver(workflow_driver_base):
         print a help text for the function.
 
         :raises: ValueError is raised in case that the analysis class is unknown
+
         """
 
         # Initialize the argument parser

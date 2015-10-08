@@ -27,6 +27,9 @@ class cl_analysis_driver(analysis_driver_base):
     """
     Command-line analysis driver.
 
+    :cvar analysis_class_arg_name: The name for the argument where the positional argument for defining the
+        analysis class should be stored.
+
     :cvar output_save_arg_name: Name of the optional keyword argument for specifying the name
         and target for the analysis
 
@@ -37,6 +40,7 @@ class cl_analysis_driver(analysis_driver_base):
 
     :cvar profile_mem_arg_name: Name of the keyword argument used to enable profiling of memory usage of an analysis
 
+    :cvar log_level_arg_name: Name of the keyword cl argument to define the level of logging ot be used.
 
     :ivar analysis_class: The class (subclass of analysis_base) defining the analysis to be executed
     :ivar add_analysis_class_arg: Boolean indicating whether an optional positional command line argument
