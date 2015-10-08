@@ -25,6 +25,18 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
+
+tools.experimental Package
+==========================
+
+:mod:`tools.misc` Package
+--------------------------
+
+.. automodule:: omsi.tools.experimental
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`make_thumb` Module
 ------------------------
 
@@ -41,3 +53,14 @@ tools Package
     :undoc-members:
     :show-inheritance:
 
+
+tools.experimental Package
+==========================
+
+:mod:`tools.experimental` Package
+----------------------------------
+
+.. automodule:: omsi.tools.experimental
+    :members:
+    :undoc-members:
+    :show-inheritance:
