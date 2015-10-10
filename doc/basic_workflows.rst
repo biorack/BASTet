@@ -215,14 +215,14 @@ This is the same workflow as shown in Figure :ref:`workflow_illustration`.
 Workflow Tools
 ==============
 
-Similar to the py:mod:`omsi.workflow.driver.cl_analysis_driver` (and the corresponding tool py:mod:`omsi.tools.run_analysis`) for running single analysis tasks, BASTet provides basic tools for executing complete workflows via the concept of workflow dirvers. Users may implement their own drivers using the approbriate base classes py:mod:`omsi.workflow.driver.base`.
+Similar to the :py:mod:`omsi.workflow.driver.cl_analysis_driver` (and the corresponding tool :py:mod:`omsi.tools.run_analysis`) for running single analysis tasks, BASTet provides basic tools for executing complete workflows via the concept of workflow dirvers. Users may implement their own drivers using the approbriate base classes :py:mod:`omsi.workflow.driver.base`.
 
-Some basic drivers and tools are already available with BASTet, e.g., via py:mod:`omsi.workflow.driver.cl_workflow_driver` module (and the corresponding tool py:mod:`omsi.tools.run_workflow`) is a driver for executing workflows from the command line. Here we can drive one or multiple workflows defined via workflow scripts, directly from the command-line.
+Some basic drivers and tools are already available with BASTet, e.g., the :py:mod:`omsi.workflow.driver.cl_workflow_driver` module (and the corresponding tool :py:mod:`omsi.tools.run_workflow`) defines a driver for driving and executing one or multiple workflows defined via workflow scripts, directly from the command-line.
 
 Workflow Scripts
 ----------------
 
-Workflow scripts are regular python scripts that include the i) creation of the analusis objects, and ii) full or partial definition of analysis parameters but usually **NOT** the actual execution of any of the analyses. Following our example from earlier, we may simply save the following code python source file, e.g, `normalize_image`.
+Workflow scripts are regular python scripts that include the i) creation of the analusis objects, and ii) full or partial definition of analysis parameters but usually **NOT** the actual execution of any of the analyses. Following our example from earlier, we may simply save the following code in python source file, e.g, `normalize_image.py`.
 
 
 .. code-block:: python
@@ -257,23 +257,23 @@ Workflow scripts are regular python scripts that include the i) creation of the 
     a3['normfactors'] = a2['total_intensities']
 
 
-When using our command-line tool, all parameters that are not defined for any of the analyses are automatically exposed via command-line options. In contrast to our previous example, we here, e.g., do not set the input msidata and mzdata parameters for our global peak finder (a1). In this way, we can now easily set the input file we want to process directly via the command line. In cases where we want to expose a parameter via the command line but still want to provide a good default setting for the user, we can set the default value of a parameter via, e.g, `a1.get_parameter_data_by_name('peakheight')['default'] = 3`.
+When using our command-line tool, all parameters that are not defined for any of the analyses are automatically exposed via command-line options. In contrast to our previous example, we here, e.g., do not set the input msidata and mzdata parameters for our global peak finder (a1). In this way, we can now easily set the input file we want to process directly via the command line. In cases where we want to expose a parameter via the command line but still want to provide a good default setting for the user, we can set the default value of a parameter via, e.g, ``a1.get_parameter_data_by_name('peakheight')['default'] = 3``.
 
 To execute our above example from the command line we can now simply do the following:
 
 .. code-block:: bash
 
-    python run_workflow.py --script ../../locals/autowrap_example2.py
+    python run_workflow.py --script normalize_image.py
                            --ana_0:msidata $HOME/20120711_Brain.h5:/entry_0/data_0
                            --ana_0:mzdata  $HOME/20120711_Brain.h5:/entry_0/data_0/mz
-
-In order to avoid collisions between parameters with the same name for different analyses, the tool prepends the unique `analysis_identifier` to each parameter. Since we did not set any explicit `analysis_identifier` (e.g, via `a1.analysis_identifier='a1'`), the tool automatically generated unique identifiers (i.e, `ana_0`, `ana_1`, and `ana_3` for our 3 analyses). To view all available command line option we can simply call the script with `--help`. If one or more workflow scipts are given (here via seperate `--script` parameters), then all unfilled options of those workflows and the corresponding analyses will be listed as. E.g.
+`
+In order to avoid collisions between parameters with the same name for different analyses, the tool prepends the unique ``analysis_identifier`` to each parameter. Since we did not set any explicit ``analysis_identifier` (e.g, via ``a1.analysis_identifier='a1'``), the tool automatically generated unique identifiers (i.e, ``ana_0``, ``ana_1``, and ``ana_3`` for our 3 analyses). To view all available command line option we can simply call the script with ``--help``. If one or more workflow scipts are given (here via seperate ``--script`` parameters), then all unfilled options of those workflows and the corresponding analyses will be listed as. E.g.
 
 
 .. code-block:: python
     :linenos:
 
-    newlappy:tools oruebel$ python run_workflow.py --script ../../locals/autowrap_example2.py --help
+    newlappy:tools oruebel$ python run_workflow.py --script normalize_image.py --help
     usage: run_workflow.py --script SCRIPT [--save SAVE] [--profile]
                            [--memprofile]
                            [--loglevel {INFO,WARNING,CRITICAL,ERROR,DEBUG,NOTSET}]
