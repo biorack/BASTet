@@ -127,6 +127,9 @@ class analysis_generic(analysis_base):
                         p['dtype'] = ana_dtypes['ndarray']
                     else:
                         p['dtype'] = type(v)
+        # Determine the custom parameters
+        custom_parameters = kwargs
+
         # Execute the analysis as usual
         result = super(analysis_generic, self).execute(**kwargs)
         return result
@@ -139,7 +142,7 @@ class analysis_generic(analysis_base):
             log_helper.debug(__name__, "Compiling the input dict for the analysis function.")
             input_dict = {}
             for arg in self.parameters:
-                if arg['data'] is not None and arg['name'] != '__analysis_function':
+                if arg['data'] is not None and arg['name'] not in ['__analysis_function', 'profile_time_and_usage', 'profile_memory']:
                     if isinstance(arg['data'], dependency_dict):
                         input_dict[arg['name']] = arg['data'].get_data()
                     else:

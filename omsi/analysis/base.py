@@ -18,6 +18,7 @@ from omsi.shared.analysis_data import parameter_manager
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
+from collections import OrderedDict
 
 
 class AnalysisReadyError(Exception):
@@ -148,9 +149,13 @@ class analysis_base(parameter_manager):
     are most interested in.
     """
 
-    _analysis_instances = set()
+    _analysis_instances = OrderedDict()
     """
-    Class variable used to track all instances of analysis_base
+    Class variable used to track all instances of analysis_base. Only the keys of the
+    OrderedDict are used to store weak references. The values are set to None in
+    all cases. I.e., we are taking advantage of the uniqueness of dict keys and the
+    order-preserving feature of the OrderedDict to ensure that analyses are not
+    duplicated and that refernces are retrieved in order of creation.
     """
 
     def __init__(self):
@@ -161,14 +166,28 @@ class analysis_base(parameter_manager):
         self.parameters = []  # Inherited from parent class parameter_data
         self.data_names = []
         self.run_info = run_info_dict()
-        self.profile_time_and_usage = False
-        self.profile_memory = False
         self.omsi_analysis_storage = []
-        self._analysis_instances.add(weakref.ref(self))
+        self._analysis_instances[weakref.ref(self)] = None
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
         self.update_analysis = True
         self.driver = None
+
+        # Add common analysis parameters
+        dtypes = self.get_default_dtypes()
+        groups = self.get_default_parameter_groups()
+        self.add_parameter(name='profile_time_and_usage',
+                           help='Enable/disable profiling of time and usage of the analysis function',
+                           required=False,
+                           default=False,
+                           dtype=dtypes['bool'],
+                           group=groups['profile'])
+        self.add_parameter(name='profile_memory',
+                           help='Enable/disable profiling of memory usage of the analysis function',
+                           required=False,
+                           default=False,
+                           dtype=dtypes['bool'],
+                           group=groups['profile'])
 
     def __call__(self, **kwargs):
         """
@@ -255,13 +274,14 @@ class analysis_base(parameter_manager):
         :return: References to analysis_base objects
         """
         invalid_references = set()
-        for ref in cls._analysis_instances:
+        for ref in cls._analysis_instances.keys():
             obj = ref()
             if obj is not None:
                 yield obj
             else:
                 invalid_references.add(ref)
-        cls._analysis_instances -= invalid_references
+        for ref in invalid_references:
+            cls._analysis_instances.pop(ref)
 
     @classmethod
     def locate_analysis(cls,
@@ -372,33 +392,39 @@ class analysis_base(parameter_manager):
         """
         log_helper.debug(__name__, "Execute analysis. " + str(self), root=self.mpi_root, comm=self.mpi_comm)
 
+        # Set parameters that the base class defines
+        #if 'profile_time_and_usage' in kwargs:
+        #    self['profile_time_and_usage'] = kwargs.pop('profile_time_and_usage')
+        #if 'profile_memory' in kwargs:
+        #    self['profile_memory'] = kwargs.pop('profile_memory')
+
         # Import modules for profiling if needed
-        if self.profile_time_and_usage:
+        if self['profile_time_and_usage']:
             try:
                 from cProfile import Profile
             except ImportError:
                 try:
                     from profile import Profile
                 except ImportError:
-                    self.profile_time_and_usage = False
+                    self['profile_time_and_usage'] = False
                     warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile.")
             try:
                 import pstats
             except ImportError:
                 warnings.warn("Profiling of run failed due to import error for pstats module")
-                self.profile_time_and_usage = False
-        if self.profile_memory:
+                self['profile_time_and_usage'] = False
+        if self['profile_memory']:
             try:
                 import memory_profiler
             except ImportError:
-                self.profile_memory = False
+                self['profile_memory'] = False
                 warnings.warn("Profiling of memory failed due to import error. Could not import memory_profiler.")
-        if self.profile_time_and_usage or self.profile_memory:
+        if self['profile_time_and_usage'] or self['profile_memory']:
             try:
                 import StringIO
             except ImportError:
-                self.profile_memory = False
-                self.profile_time_and_usage = False
+                self['profile_memory'] = False
+                self['profile_time_and_usage'] = False
                 warnings.warn("All profiling disabled. Could not import StringIO.")
 
         log_helper.debug(__name__, "Initializing analysis parameters and environment. " + str(self),
@@ -429,25 +455,25 @@ class analysis_base(parameter_manager):
 
         # 5) Run the analysis
         # 5.1) Execute the analysis as is without any profiling
-        if not self.profile_time_and_usage and not self.profile_memory:
+        if not self['profile_time_and_usage'] and not self['profile_memory']:
             analysis_output = self.execute_analysis()
         # 5.2) Execute the analysis with runtime profiling enabled
         else:
             profiler_time_and_use = None
             profiler_mem = None
             # 5.2.1) Profile time and usage only
-            if self.profile_time_and_usage and not self.profile_memory:
+            if self['profile_time_and_usage'] and not self['profile_memory']:
                 # Enable profiling cProfile and execute the analysis
                 profiler_time_and_use = Profile()
                 profiler_time_and_use.enable()
                 analysis_output = self.execute_analysis()
                 profiler_time_and_use.disable()
             # 5.2.2) Profile memory usage only
-            elif self.profile_memory and not self.profile_time_and_usage:
+            elif self['profile_memory'] and not self['profile_time_and_usage']:
                 profiler_mem = memory_profiler.LineProfiler()
                 analysis_output = profiler_mem(self.execute_analysis)()
             # 5.2.3) Profile i) time and usage  and ii) memory usage
-            elif self.profile_memory and self.profile_time_and_usage:
+            elif self['profile_memory'] and self['profile_time_and_usage']:
                 profiler_mem = memory_profiler.LineProfiler()
                 profiler_time_and_use = Profile()
                 profiler_time_and_use.enable()
@@ -921,7 +947,9 @@ class analysis_base(parameter_manager):
                 'settings': {'name': 'analysis settings',
                              'description': 'Analysis settings'},
                 'parallel': {'name': 'parallel settings',
-                             'description': 'Parallel execution settings'}}
+                             'description': 'Parallel execution settings'},
+                'profile': {'name': 'profile analysis',
+                            'description': 'Profile the exeution of the analysis'}}
 
     def enable_time_and_usage_profiling(self, enable=True):
         """
@@ -932,9 +960,9 @@ class analysis_base(parameter_manager):
 
         :raises: ImportError is raised if a required package for profiling is not available.
         """
-        if enable != self.profile_time_and_usage:
+        if enable != self['profile_time_and_usage']:
             if not enable:
-                self.profile_time_and_usage = False
+                self['profile_time_and_usage'] = False
                 log_helper.debug(__name__, "Disabled time and usage profiling. ",
                                  root=self.mpi_root, comm=self.mpi_comm)
             else:
@@ -946,7 +974,7 @@ class analysis_base(parameter_manager):
                 import pstats
                 import StringIO
                 # Enable profiling
-                self.profile_time_and_usage = True
+                self['profile_time_and_usage'] = True
                 log_helper.debug(__name__, "Enabled time and usage profiling. ", root=self.mpi_root, comm=self.mpi_comm)
 
     def enable_memory_profiling(self, enable=True):
@@ -958,14 +986,14 @@ class analysis_base(parameter_manager):
 
         :raises: ImportError is raised if a required package for profiling is not available.
         """
-        if enable != self.profile_memory:
+        if enable != self['profile_memory']:
             if not enable:
-                self.profile_memory = False
+                self['profile_memory'] = False
                 log_helper.debug(__name__, "Disabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
             else:
                 import memory_profiler
                 import StringIO
-                self.profile_memory = True
+                self['profile_memory'] = True
                 log_helper.debug(__name__, "Enabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
 
     def results_ready(self):

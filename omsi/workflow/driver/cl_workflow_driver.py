@@ -15,10 +15,15 @@ import os
 from omsi.shared.log import log_helper
 
 # TODO We need to add saving of analyses to the workflow itself and allow saving to separate files
-# TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted
+# TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (and moving the workflow to a different machine)
+# TODO Can we create python scripts from in-memory workflows?
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
 # TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
+# TODO If available, use psutil in run_info_dict to track open files, memory usage before and after, e.g,. psutil.Process().memory_indo, psutil.Process.get_open_files etc.
+# TODO Add template for writing tests for integrated analysis functions
+# TODO Implement the workflow we show in the BASTet paper
+# TODO Investigate automatic wrapping of iPython notebooks
 
 
 class cl_workflow_driver(workflow_driver_base):
@@ -239,7 +244,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add the optional keyword argument for enabling profiling of the analysis
         if self.add_profile_arg:
-            profile_arg_help = 'Enable runtime profiling of the analysis. NOTE: This is intended for ' + \
+            profile_arg_help = 'Enable runtime profiling of all analysis. NOTE: This is intended for ' + \
                                'debugging and investigation of the runtime behavior of an analysis.' + \
                                'Enabling profiling entails certain overheads in performance'
             self.optional_argument_group.add_argument("--"+self.profile_arg_name,
@@ -250,7 +255,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add the optional keyword argument for enabling memory profiling of the analysis
         if self.add_mem_profile_arg:
-            profile_mem_arg_help = 'Enable runtime profiling of the memory usage of analysis. ' + \
+            profile_mem_arg_help = 'Enable runtime profiling of the memory usage all analysis. ' + \
                                    'NOTE: This is intended for debugging and investigation of ' + \
                                    'the runtime behavior of an analysis. Enabling profiling ' + \
                                    'entails certain overheads in performance.'

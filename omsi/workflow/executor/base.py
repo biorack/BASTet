@@ -5,7 +5,7 @@ Workflow executors control the execution of workflows. The setup of workflows is
 either by a workflow driver or the user.
 """
 
-from omsi.workflow.common import analysis_task_set
+from omsi.workflow.common import analysis_task_list
 from omsi.shared.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.analysis_data import parameter_data
@@ -21,7 +21,7 @@ class workflow_executor_base(parameter_manager):
     We are given a set of existing analysis objects for which we need to coordinate the execution.
 
     :ivar analysis_objects: Private set of analysis objects to be executed
-    :type analysis_objects: analysis_task_set
+    :type analysis_objects: analysis_task_list
 
     :cvar DEFAULT_EXECUTOR_CLASS: Define the derived workflow_executor_base class to be used as default executor
         The default value is None, in which case the greedy_workflow_executor is used. This variable is used
@@ -52,7 +52,7 @@ class workflow_executor_base(parameter_manager):
 
         :return: Instance of the current workflow executor class for running the given workflow
         """
-        analysis_objects = analysis_task_set.from_script_files(script_files)
+        analysis_objects = analysis_task_list.from_script_files(script_files)
         new_executor = cls(analysis_objects)
         return new_executor
 
@@ -63,7 +63,7 @@ class workflow_executor_base(parameter_manager):
         Create and initalize a worklflow executor of the current class type to execute the workflow defined
         in the given set of scripts.
 
-        This function using analysis_task_set.from_scripts to evaluate the workflow scripts to extract all
+        This function using analysis_task_list.from_scripts to evaluate the workflow scripts to extract all
         analyses to be created.
 
         NOTE: This function executes scripts using exec(..), i.e., there are NO safeguards against malicious codes.
@@ -73,7 +73,7 @@ class workflow_executor_base(parameter_manager):
 
         :return: Instance of the current workflow executor class for running the given workflow
         """
-        analysis_objects = analysis_task_set.from_scripts(scripts)
+        analysis_objects = analysis_task_list.from_scripts(scripts)
         new_executor = cls(analysis_objects)
         return new_executor
 
@@ -117,7 +117,7 @@ class workflow_executor_base(parameter_manager):
         log_helper.log_var(__name__, analysis_objects=analysis_objects, level='DEBUG')
         self.run_info = run_info_dict()
         self.track_runinfo = True
-        self.analysis_tasks = analysis_task_set(analysis_objects) if analysis_objects is not None else analysis_task_set()
+        self.analysis_tasks = analysis_task_list(analysis_objects) if analysis_objects is not None else analysis_task_list()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
         self.parameters = []  # Inherited from parameter_manager
@@ -221,7 +221,7 @@ class workflow_executor_base(parameter_manager):
             script is used, then a single string may be used as well.
 
         """
-        new_analysis_objects = analysis_task_set.from_script_files(script_files)
+        new_analysis_objects = analysis_task_list.from_script_files(script_files)
         if new_analysis_objects is not None and len(new_analysis_objects) > 0:
             log_helper.debug("Adding %i new analyses to the workflow from scripts" % len(new_analysis_objects),
                              root=self.mpi_root, comm=self.mpi_comm)

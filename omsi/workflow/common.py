@@ -18,9 +18,11 @@ class RawDescriptionDefaultHelpArgParseFormatter(argparse.ArgumentDefaultsHelpFo
     pass
 
 
-class analysis_task_set(set):
+class analysis_task_list(list):
     """
-    Define a python set of analyses to be executed as a workflow.
+    Define a python list of analyses to be executed as a workflow. The list allows only for
+    storage of analysis_base objects and ensures uniqueness of elements in the list.
+
     """
     @classmethod
     def from_script_files(cls,
@@ -55,9 +57,10 @@ class analysis_task_set(set):
 
         :return: An instance of workflow_base with the specification of the workflow to be executed
         """
-        from omsi.analysis.base import analysis_base
+
         # Check which analyses exist already as we only want to include the analyses created by the script
-        current_analyses = set([ana_obj for ana_obj in analysis_base.get_analysis_instances()])
+        from omsi.analysis.base import analysis_base
+        current_analyses = cls.all()
         # Evaluate the workflows script
         if isinstance(scripts, basestring):
             exec(scripts)
@@ -65,10 +68,24 @@ class analysis_task_set(set):
             for script in scripts:
                 exec(script)
         # Create the list of new analyses that have been created
-        all_analyses = set([ana_obj for ana_obj in analysis_base.get_analysis_instances()])
-        new_analyses = set(all_analyses - current_analyses)
-        new_analysis_task_set = cls(new_analyses)
-        return new_analysis_task_set
+        new_analysis_task_list = cls()
+        for ana_obj in analysis_base.get_analysis_instances():
+            if ana_obj not in current_analyses:
+                new_analysis_task_list.add(ana_obj)
+        return new_analysis_task_list
+
+    @classmethod
+    def all(cls):
+        """
+        Get an analysis_task_list of all current analysis_base objects
+
+        :return: New analysis_task_list of all current analysis objects
+        """
+        from omsi.analysis.base import analysis_base
+        current_analyses = analysis_task_list()
+        for ana_obj in analysis_base.get_analysis_instances():
+            current_analyses.append(ana_obj)
+        return current_analyses
 
     def __init__(self,
                  analysis_objects=None):
@@ -78,7 +95,7 @@ class analysis_task_set(set):
         :param analysis_objects: Set or list of unique analysis objects to be added.
             Duplicates will be removed.
         """
-        super(analysis_task_set, self).__init__()
+        super(analysis_task_list, self).__init__()
         self.update(analysis_objects)
 
     def __getitem__(self, item):
@@ -89,7 +106,7 @@ class analysis_task_set(set):
             with matching identifiers will be retrieved.
 
         :return: Instance of omsi.analysis.base.analysis_base with the matching analysis object. In case that
-            multiple analyses match the key, then a analysis_task_set object will be returned instead
+            multiple analyses match the key, then a analysis_task_list object will be returned instead
         """
         if isinstance(item, int):
             return list(self)[item]
@@ -101,7 +118,7 @@ class analysis_task_set(set):
             if len(matching_analyses) == 1:
                 return matching_analyses[0]
             if len(matching_analyses) > 1:
-                return analysis_task_set(matching_analyses)
+                return analysis_task_list(matching_analyses)
         else:
             raise KeyError('Invalid key type')
         raise KeyError('Invalid key')
@@ -125,12 +142,16 @@ class analysis_task_set(set):
             return self
         # Check that all elements to be added are instances of analysis_base
         for ana_obj in analysis_objects:
-            if not isinstance(ana_obj, analysis_base):
-                raise ValueError('Object is not instance of analysis_base')
-        # Update the workflow set
-        return super(analysis_task_set, self).update(analysis_objects)
+            self.append(ana_obj)
+        return self
 
     def add(self, analysis_object):
+        """
+        Same as append
+        """
+        self.append(analysis_object)
+
+    def append(self, analysis_object):
         """
         Add a given analysis to the set of object to be executed by the workflow
 
@@ -150,13 +171,31 @@ class analysis_task_set(set):
                 log_helper.debug(__name__, "Analysis already in the list of tasks")
                 return
             log_helper.info(__name__, "Adding analysis object to the workflow set. " + str(analysis_object))
-            super(analysis_task_set, self).add(analysis_object)
+            super(analysis_task_list, self).append(analysis_object)
+        else:
+            raise ValueError('Analysis is not of type omsi.analysis.base.analysis_base')
+
+    def insert(self, index, analysis_object):
+        """
+        Insert a given analysis object at the given location
+
+        :param index: Location where the obejct should be inserted
+        :param analysis_object: The analysis object to be inserted
+
+        """
+        from omsi.analysis.base import analysis_base
+        if isinstance(analysis_object, analysis_base):
+            if analysis_object in self:
+                log_helper.debug(__name__, "Analysis already in the list of tasks")
+                return
+            log_helper.info(__name__, "Inserting analysis object in the workflow list. " + str(analysis_object))
+            super(analysis_task_list, self).insert(index, analysis_object)
         else:
             raise ValueError('Analysis is not of type omsi.analysis.base.analysis_base')
 
     def add_analysis_dependencies(self):
         """
-        Add the dependencies of all analyses to the workflow set in case they are missing.
+        Add the dependencies of all analyses to the workflow list in case they are missing.
 
         This function is recursive, step-by-step adding all dependencies of the workflow to the list of
         tasks to be executed, until no more dependencies are found.
@@ -180,15 +219,15 @@ class analysis_task_set(set):
 
     def get_additional_analysis_dependencies(self):
         """
-        Compute a set of all dependencies of the current list of analyses (excluding analyses that
+        Compute a list of all dependencies of the current list of analyses (excluding analyses that
         are already in the the list of tasks.
 
-        :return: Python set of all analysis dependencies
+        :return: analysis_task_list of all analysis dependencies
         """
         from omsi.dataformat.omsi_file.common import omsi_file_common
         from omsi.analysis.base import analysis_base
 
-        missing_dependencies = set()
+        missing_dependencies = analysis_task_list()
         for analysis_obj in self:
             for dependency_param_obj in analysis_obj.get_all_dependency_data():
                 dependency_analysis = dependency_param_obj['data']['omsi_object']
@@ -261,9 +300,9 @@ class analysis_task_set(set):
 
     def add_all(self):
         """
-        Add all known analyses to the workflow set
+        Add all known analyses to the workflow list
 
-        :return: The updated analysis_task_set with all analyses added
+        :return: The updated analysis_task_list with all analyses added
         """
         from omsi.analysis.base import analysis_base
         for ana in analysis_base.get_analysis_instances():
@@ -297,7 +336,7 @@ class analysis_task_set(set):
     def set_undefined_analysis_identifiers(self):
         """
         Check that all analysis descriptors are set to a value different than "undefined" and
-        set the descriptor based on their index in the set if necessary.
+        set the descriptor based on their index in the list if necessary.
         """
         ana_index = 0
         for ana in self:
@@ -307,7 +346,7 @@ class analysis_task_set(set):
 
     def analysis_identifiers_unique(self):
         """
-        Check whether all identifiers of the analyses in the this set are unique.
+        Check whether all identifiers of the analyses in the this list are unique.
         :return: bool
         """
         identifiers = self.get_all_analysis_identifiers()
