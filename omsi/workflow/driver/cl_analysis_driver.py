@@ -36,10 +36,6 @@ class cl_analysis_driver(analysis_driver_base):
     :cvar analysis_class_arg_name: Name of the optional first positional argument to be used
         to define the analysis class to be used.
 
-    :cvar profile_arg_name: Name of the keyword argument used to enable profiling of the analysis
-
-    :cvar profile_mem_arg_name: Name of the keyword argument used to enable profiling of memory usage of an analysis
-
     :cvar log_level_arg_name: Name of the keyword cl argument to define the level of logging ot be used.
 
     :ivar analysis_class: The class (subclass of analysis_base) defining the analysis to be executed
@@ -62,12 +58,6 @@ class cl_analysis_driver(analysis_driver_base):
     output_save_arg_name = 'save'
     """Name of the key-word argument used to define"""
 
-    profile_arg_name = 'profile'
-    """Name of the keyword argument used to enable profiling of the analysis"""
-
-    profile_mem_arg_name = 'memprofile'
-    """Name of the keyword argument used to enable profiling of memory usage of an analysis"""
-
     log_level_arg_name = 'loglevel'
     """Name of the keyword argument used to specify the level of logging to be used"""
 
@@ -75,9 +65,7 @@ class cl_analysis_driver(analysis_driver_base):
                  analysis_class,
                  add_analysis_class_arg=False,
                  add_output_arg=True,
-                 add_log_level_arg=True,
-                 add_profile_arg=False,
-                 add_mem_profile_arg=False):
+                 add_log_level_arg=True):
         """
 
         :param analysis_class: The analysis class for which we want to execute the analysis.
@@ -89,8 +77,6 @@ class cl_analysis_driver(analysis_driver_base):
             command-line argument to determine the analysis class name
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
             argument for defining the output target for the analysis.
-        :param add_profile_arg: Boolean indicating whether we should add the optional keyword
-            argument for enabling profiling of the analysis.
         :param add_mem_profile_arg: Boolean indicating whether we should add the optional
             keyword argument for enabling memory profiling of the analysis.
 
@@ -110,14 +96,10 @@ class cl_analysis_driver(analysis_driver_base):
         self.analysis_object = None
         self.add_analysis_class_arg = add_analysis_class_arg
         self.add_output_arg = add_output_arg
-        self.add_profile_arg = add_profile_arg
-        self.add_mem_profile_arg = add_mem_profile_arg
         self.add_log_level_arg = add_log_level_arg
         self.parser = None
         self.required_argument_group = None
         self.output_target = None
-        self.profile_analysis = False
-        self.profile_analysis_mem = False
         self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
         self.custom_argument_groups = {}
@@ -267,27 +249,6 @@ class cl_analysis_driver(analysis_driver_base):
                                      required=False,
                                      help=output_arg_help)
 
-        # Add the optional keyword argument for enabling profiling of the analysis
-        if self.add_profile_arg:
-            profile_arg_help = 'Enable runtime profiling of the analysis. NOTE: This is intended for ' + \
-                               'debugging and investigation of the runtime behavior of an analysis.' + \
-                               'Enabling profiling entails certain overheads in performance'
-            self.parser.add_argument("--"+self.profile_arg_name,
-                                     action='store_true',
-                                     default=False,
-                                     required=False,
-                                     help=profile_arg_help)
-        # Add the optional keyword argument for enabling memory profiling of the analysis
-        if self.add_mem_profile_arg:
-            profile_mem_arg_help = 'Enable runtime profiling of the memory usage of analysis. ' + \
-                                   'NOTE: This is intended for debugging and investigation of ' + \
-                                   'the runtime behavior of an analysis. Enabling profiling ' + \
-                                   'entails certain overheads in performance.'
-            self.parser.add_argument("--"+self.profile_mem_arg_name,
-                                     action='store_true',
-                                     default=False,
-                                     required=False,
-                                     help=profile_mem_arg_help)
         # Add the optional logging argument
         if self.add_log_level_arg:
             self.parser.add_argument("--"+self.log_level_arg_name,
@@ -345,13 +306,6 @@ class cl_analysis_driver(analysis_driver_base):
         else:
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
 
-        # Process the --profile profiling argument
-        if self.profile_arg_name in parsed_arguments:
-            self.profile_analysis = parsed_arguments.pop(self.profile_arg_name)
-
-        # Process the --memprofile argument
-        if self.profile_mem_arg_name in parsed_arguments:
-            self.profile_analysis_mem = parsed_arguments.pop(self.profile_mem_arg_name)
         # The --loglovel argument
         if self.log_level_arg_name in parsed_arguments:
             user_log_level = parsed_arguments.pop(self.log_level_arg_name)
@@ -413,9 +367,7 @@ class cl_analysis_driver(analysis_driver_base):
                                  help='show this help message and exit')
         parsed_arguments = vars(self.parser.parse_args())
         parsed_arguments.pop(self.analysis_class_arg_name, None)
-        parsed_arguments.pop(self.profile_arg_name, None)
         parsed_arguments.pop(self.output_save_arg_name, None)
-        parsed_arguments.pop(self.profile_mem_arg_name, None)
         parsed_arguments.pop(self.log_level_arg_name, None)
         self.analysis_arguments = parsed_arguments
 
@@ -506,20 +458,6 @@ class cl_analysis_driver(analysis_driver_base):
             # Create the analysis object
             if self.analysis_object is None:
                 self.create_analysis_object()
-            # Enable time and usage profiling if requested
-            if self.profile_analysis:
-                try:
-                    self.analysis_object.enable_time_and_usage_profiling(self.profile_analysis)
-                except ImportError as e:
-                    log_helper.warning(__name__, "Profiling of time and usage not available due to missing packages.")
-                    log_helper.warning(__name__, e.message)
-            # Enable memory profiling if requested
-            if self.profile_analysis_mem:
-                try:
-                    self.analysis_object.enable_memory_profiling(self.profile_analysis_mem)
-                except ImportError as e:
-                    log_helper.warning(__name__, "Profiling of memory usage not available due to missing packages")
-                    log_helper.warning(__name__, e.message)
             # Execute the analysis
             log_helper.debug(__name__, 'Analysis arguments: ' + str(self.analysis_arguments),
                              root=self.mpi_root, comm=self.mpi_comm)
@@ -534,14 +472,14 @@ class cl_analysis_driver(analysis_driver_base):
         # our mpi_root is 0 and the mpi_helper returns 0 for the rank when running in serial.
         if mpi_helper.get_rank() == self.mpi_root:
             # Print the profiling results of time and usage
-            if self.profile_analysis:
+            if self.analysis_object['profile_time_and_usage']:
                 print ""
                 print "PROFILING DATA: TIME AND USAGE"
                 print ""
                 self.analysis_object.get_profile_stats_object(consolidate=True).print_stats()
 
             # Print the profiling results for memory usage
-            if self.profile_analysis_mem:
+            if self.analysis_object['profile_memory']:
                 print ""
                 print "PROFILING DATA: MEMORY"
                 print ""
@@ -600,8 +538,4 @@ class cl_analysis_driver(analysis_driver_base):
 if __name__ == "__main__":
 
     # Create an command-line driver and call the main function to run the analysis
-    cl_analysis_driver(analysis_class=None,
-              add_analysis_class_arg=True,
-              add_output_arg=True,
-              add_profile_arg=True,
-              add_mem_profile_arg=True).main()
+    cl_analysis_driver(analysis_class=None, add_analysis_class_arg=True, add_output_arg=True).main()

@@ -19,8 +19,8 @@ from omsi.shared.log import log_helper
 # TODO Can we create python scripts from in-memory workflows?
 # TODO We need a command-line option to define the workflow executor type
 # TODO Add documentation on running workflows using the driver
+# TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling
 # TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
-# TODO If available, use psutil in run_info_dict to track open files, memory usage before and after, e.g,. psutil.Process().memory_indo, psutil.Process.get_open_files etc.
 # TODO Add template for writing tests for integrated analysis functions
 # TODO Implement the workflow we show in the BASTet paper
 # TODO Investigate automatic wrapping of iPython notebooks
@@ -89,6 +89,7 @@ class cl_workflow_driver(workflow_driver_base):
 
     log_level_arg_name = 'loglevel'
     """Name of the keyword argument used to specify the level of logging to be used"""
+
 
     def __init__(self,
                  workflow_executor=None,
@@ -244,8 +245,8 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add the optional keyword argument for enabling profiling of the analysis
         if self.add_profile_arg:
-            profile_arg_help = 'Enable runtime profiling of all analysis. NOTE: This is intended for ' + \
-                               'debugging and investigation of the runtime behavior of an analysis.' + \
+            profile_arg_help = 'Enable runtime profiling for all individual analyses. NOTE: This is intended' + \
+                               'for debugging and investigation of the runtime behavior of an analysis.' + \
                                'Enabling profiling entails certain overheads in performance'
             self.optional_argument_group.add_argument("--"+self.profile_arg_name,
                                      action='store_true',
@@ -255,7 +256,7 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add the optional keyword argument for enabling memory profiling of the analysis
         if self.add_mem_profile_arg:
-            profile_mem_arg_help = 'Enable runtime profiling of the memory usage all analysis. ' + \
+            profile_mem_arg_help = 'Enable runtime profiling of the memory usage of all individual analysis.' + \
                                    'NOTE: This is intended for debugging and investigation of ' + \
                                    'the runtime behavior of an analysis. Enabling profiling ' + \
                                    'entails certain overheads in performance.'
@@ -369,9 +370,19 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Ensure that all analysis identifiers are unique
         if not self.workflow_executor.analysis_tasks.analysis_identifiers_unique():
-            log_helper.warning("The workflow contains multiple analyses with the same user-defined identifier. " +
-                               "Colliding identifiers will be modified to ensure uniqueness")
+            log_helper.warning(__name__, "The workflow contains multiple analyses with the same user-defined " +
+                               "identifier. Colliding identifiers will be modified to ensure uniqueness",
+                               root=self.mpi_root, comm=self.mpi_comm)
             self.workflow_executor.analysis_tasks.make_analysis_identifiers_unique(self)
+
+        # Ensure that the prefix of the workflow executor does not interfere with the prefix of an analysis
+        all_analysis_identifiers = self.workflow_executor.analysis_tasks.get_all_analysis_identifiers()
+        if self.workflow_executor.workflow_identifier in all_analysis_identifiers:
+            log_helper.warning(__name__, "The identifier of the workflow executor collides with the identifier " +
+                               "of an analysis. Updating the identifier of the workflow executor to be unique",
+                               root=self.mpi_root, comm=self.mpi_comm)
+            while self.workflow_executor.workflow_identifier in all_analysis_identifiers:
+                self.workflow_executor.workflow_identifier += '_'
 
         # Add all arguments from our workflow executor
         target_seperator = self.identifier_argname_seperator
@@ -442,15 +453,14 @@ class cl_workflow_driver(workflow_driver_base):
             workflow_executor_group = self.parser
         for arg_param in self.workflow_executor.get_all_parameter_data():
             # Add the parameter to the argument parser
-            arg_name = "--" + arg_param['name']
+            arg_name = "--" + self.workflow_executor.workflow_identifier + target_seperator + arg_param['name']
             arg_action = 'store'
             arg_default = arg_param['default']
             arg_required = arg_param['required'] and (arg_default is None)
             arg_type = arg_param['dtype']
             arg_choices = arg_param['choices']
             arg_help = arg_param['help']
-            arg_dest = arg_param['name']
-            arg_group = arg_param.get_group_name()
+            arg_dest = self.workflow_executor.workflow_identifier + target_seperator + arg_param['name']
             argument_group = self.required_argument_group if arg_required else workflow_executor_group
             # Add the argument to the proper group
             argument_group.add_argument(arg_name,               # <-- Required, user specified arg name
@@ -483,8 +493,9 @@ class cl_workflow_driver(workflow_driver_base):
         # Consume the command line arguments for the workflow executor and the analysis
         self.workflow_executor_arguments = {}
         for arg_param in self.workflow_executor.get_all_parameter_data():
-            if arg_param['name'] in parsed_arguments:
-                param_value = parsed_arguments.pop(arg_param['name'])
+            arg_dest = self.workflow_executor.workflow_identifier + target_seperator + arg_param['name']
+            if arg_dest in parsed_arguments:
+                param_value = parsed_arguments.pop(arg_dest)
                 self.workflow_executor[arg_param['name']] = param_value
                 self.workflow_executor_arguments[arg_param['name']] = param_value
 
@@ -502,7 +513,7 @@ class cl_workflow_driver(workflow_driver_base):
         Print the analysis settings.
         """
         log_helper.info(__name__, "Inputs:")
-        for key, value in self.analysis_arguments.iteritems():
+        for key, value in sorted(self.analysis_arguments.iteritems()):
             log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
         if self.output_target is not None:
             if isinstance(self.output_target, omsi_file_common):
@@ -696,7 +707,7 @@ class cl_workflow_driver(workflow_driver_base):
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
-        # print self.workflow_executor.analysis_tasks[2]['output_0'][:,:,24]
+        print self.workflow_executor.analysis_tasks[2]['output_0'][:,:,24]
 
 if __name__ == "__main__":
 

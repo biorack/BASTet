@@ -8,7 +8,7 @@ either by a workflow driver or the user.
 from omsi.workflow.common import analysis_task_list
 from omsi.shared.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
-from omsi.shared.analysis_data import parameter_data
+from omsi.shared.analysis_data import data_dtypes
 from omsi.shared.analysis_data import parameter_manager
 from omsi.shared.log import log_helper
 
@@ -110,17 +110,35 @@ class workflow_executor_base(parameter_manager):
 
         :param analysis_objects: A list of analysis objects to be executed
         """
+        super(workflow_executor_base, self).__init__()
         log_helper.debug(__name__, "Creating workflow executor")
         if analysis_objects is not None:
             if not isinstance(analysis_objects, list) and not isinstance(analysis_objects, set):
                 analysis_objects = [analysis_objects, ]
         log_helper.log_var(__name__, analysis_objects=analysis_objects, level='DEBUG')
         self.run_info = run_info_dict()
-        self.track_runinfo = True
         self.analysis_tasks = analysis_task_list(analysis_objects) if analysis_objects is not None else analysis_task_list()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.parameters = []  # Inherited from parameter_manager
+        self.workflow_identifier = "we"
+        # self.parameters = []  # Inherited from parameter_manager
+
+        dtypes = data_dtypes.get_dtypes()
+        #self.add_parameter(name='record_run_info',
+        #                   help='Record runtime information for the whole workflow. Required for profiling.',
+        #                   required=False,
+        #                   default=True,
+        #                   dtype=dtypes['bool'])
+        self.add_parameter(name='profile_time_and_usage',
+                           help='Enable/disable profiling of time and usage of the whole workflow',
+                           required=False,
+                           default=False,
+                           dtype=dtypes['bool'])
+        self.add_parameter(name='profile_memory',
+                           help='Enable/disable profiling of memory usage of the whole workflow',
+                           required=False,
+                           default=False,
+                           dtype=dtypes['bool'])
 
     def __call__(self):
         """
@@ -140,12 +158,12 @@ class workflow_executor_base(parameter_manager):
 
     def __getitem__(self, item):
         """
-        Convenience function used to access analysis objects directly.
-        Same as self.analysis_tasks.__getitem__
+        Get workflow parameter options directly via slicing
+
         :param item:
         :return: Output of self.analysis_tasks.__getitem__ implemented by omsi.workflow.common
         """
-        super(workflow_executor_base, self).__getitem__(item)
+        return super(workflow_executor_base, self).__getitem__(item)
 
     def __setitem__(self, key, value):
         """
@@ -161,7 +179,7 @@ class workflow_executor_base(parameter_manager):
         :raise: KeyError if an invalid key is given
         """
         log_helper.debug(__name__, 'Setting parameter ' + key, root=self.mpi_root, comm=self.mpi_comm)
-        super(workflow_executor_base, self).__setitem__(key, value)
+        return super(workflow_executor_base, self).__setitem__(key, value)
 
     def main(self):
         """
@@ -177,29 +195,18 @@ class workflow_executor_base(parameter_manager):
         """
         import time
         log_helper.debug(__name__, "Execute", root=self.mpi_root, comm=self.mpi_comm)
-        if self.track_runinfo:
-            # 1) Record basic execution provenance information prior to running the analysis
-            self.run_info.clear()
-            self.run_info.record_preexecute()
-            start_time = time.time()
+        #if self['record_run_info']:
+        result = self.run_info(self.main)()
+        try:
+            log_helper.debug(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s",
+                             root=self.mpi_root, comm=self.mpi_comm)
+        except (KeyError, ValueError):
+            pass
+        #else:
+        #    result = self.main()
 
-        # 2) Execute the workflow
-        re = self.main()
-
-        # 3) Record post-execution information, e.g., the execution time
-        if self.track_runinfo:
-            execution_time = time.time() - start_time
-            self.run_info.record_postexecute(execution_time=execution_time)
-            self.run_info.clean_up()
-            self.run_info = self.run_info.gather(root=self.mpi_root,
-                                                 comm=self.mpi_comm)
-            try:
-                log_helper.debug(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s",
-                                 root=self.mpi_root, comm=self.mpi_comm)
-            except (KeyError, ValueError):
-                pass
         # 4) Return the result of the execution execution
-        return re
+        return result
 
     def add_analysis(self,
                      analysis_object):

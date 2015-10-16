@@ -392,41 +392,6 @@ class analysis_base(parameter_manager):
         """
         log_helper.debug(__name__, "Execute analysis. " + str(self), root=self.mpi_root, comm=self.mpi_comm)
 
-        # Set parameters that the base class defines
-        #if 'profile_time_and_usage' in kwargs:
-        #    self['profile_time_and_usage'] = kwargs.pop('profile_time_and_usage')
-        #if 'profile_memory' in kwargs:
-        #    self['profile_memory'] = kwargs.pop('profile_memory')
-
-        # Import modules for profiling if needed
-        if self['profile_time_and_usage']:
-            try:
-                from cProfile import Profile
-            except ImportError:
-                try:
-                    from profile import Profile
-                except ImportError:
-                    self['profile_time_and_usage'] = False
-                    warnings.warn("Profiling of run failed due to import error. Could not find cProfile or profile.")
-            try:
-                import pstats
-            except ImportError:
-                warnings.warn("Profiling of run failed due to import error for pstats module")
-                self['profile_time_and_usage'] = False
-        if self['profile_memory']:
-            try:
-                import memory_profiler
-            except ImportError:
-                self['profile_memory'] = False
-                warnings.warn("Profiling of memory failed due to import error. Could not import memory_profiler.")
-        if self['profile_time_and_usage'] or self['profile_memory']:
-            try:
-                import StringIO
-            except ImportError:
-                self['profile_memory'] = False
-                self['profile_time_and_usage'] = False
-                warnings.warn("All profiling disabled. Could not import StringIO.")
-
         log_helper.debug(__name__, "Initializing analysis parameters and environment. " + str(self),
                          root=self.mpi_root, comm=self.mpi_comm)
         # 1) Remove the saved analysis object since we are running the analysis again
@@ -444,75 +409,19 @@ class analysis_base(parameter_manager):
         if len(pending_params) > 0:
             raise AnalysisReadyError("The analysis is not ready.", pending_params)
 
-        # 3) Record basic execution provenance information prior to running the analysis
-        self.run_info.clear()
-        self.run_info.record_preexecute(root=self.mpi_root, comm=self.mpi_comm)
-
-        # 4) Define the start-time for the execution of our analysis
+        # 3) Record basic execution provenance while running the analysis
         log_helper.debug(__name__, "Run and profile the analysis: " + str(self),
                          root=self.mpi_root, comm=self.mpi_comm)
-        start_time = time.time()
 
-        # 5) Run the analysis
-        # 5.1) Execute the analysis as is without any profiling
-        if not self['profile_time_and_usage'] and not self['profile_memory']:
-            analysis_output = self.execute_analysis()
-        # 5.2) Execute the analysis with runtime profiling enabled
+        if True: # self.run_info is not None:
+            self.run_info.mpi_comm = self.mpi_comm
+            self.run_info.mpi_root = self.mpi_root
+            self.enable_time_and_usage_profiling(self['profile_time_and_usage'])
+            self.enable_memory_profiling(self['profile_memory'])
+            analysis_output = self.run_info(self.execute_analysis)()
         else:
-            profiler_time_and_use = None
-            profiler_mem = None
-            # 5.2.1) Profile time and usage only
-            if self['profile_time_and_usage'] and not self['profile_memory']:
-                # Enable profiling cProfile and execute the analysis
-                profiler_time_and_use = Profile()
-                profiler_time_and_use.enable()
-                analysis_output = self.execute_analysis()
-                profiler_time_and_use.disable()
-            # 5.2.2) Profile memory usage only
-            elif self['profile_memory'] and not self['profile_time_and_usage']:
-                profiler_mem = memory_profiler.LineProfiler()
-                analysis_output = profiler_mem(self.execute_analysis)()
-            # 5.2.3) Profile i) time and usage  and ii) memory usage
-            elif self['profile_memory'] and self['profile_time_and_usage']:
-                profiler_mem = memory_profiler.LineProfiler()
-                profiler_time_and_use = Profile()
-                profiler_time_and_use.enable()
-                analysis_output = profiler_mem(self.execute_analysis)()
-                profiler_time_and_use.disable()
+            analysis_output = self.execute_analysis()
 
-            # 5.3) Record the profiling data
-            # 5.3.1) Save the time and usage profiling data from cProfile
-            if profiler_time_and_use is not None:
-                profiler_time_and_use.create_stats()
-                self.run_info['profile'] = unicode(profiler_time_and_use.stats)
-
-                # Save the summary statistics for the profiling data
-                stats_io = StringIO.StringIO()
-                profiler_stats = pstats.Stats(profiler_time_and_use, stream=stats_io).sort_stats('cumulative')
-                profiler_stats.print_stats()
-                self.run_info['profile_stats'] = stats_io.getvalue()
-
-            # 5.3.2) Save the results of the memory profiler
-            if profiler_mem is not None:
-                mem_stats_io = StringIO.StringIO()
-                memory_profiler.show_results(profiler_mem, stream=mem_stats_io)
-                self.run_info['profile_mem'] = unicode(profiler_mem.code_map)
-                self.run_info['profile_mem_stats'] = mem_stats_io.getvalue()
-
-        # Record basic post-execute runtime information and clean up the run-info to remove empty entries
-        execution_time = time.time() - start_time
-
-        log_helper.debug(__name__, "Completed executing the analysis function. " + str(self),
-                         root=self.mpi_root, comm=self.mpi_comm)
-        log_helper.debug(__name__, "Complete recording runtime data. " + str(self),
-                         root=self.mpi_root, comm=self.mpi_comm)
-        self.run_info.record_postexecute(execution_time=execution_time, root=self.mpi_root, comm=self.mpi_comm)
-        self.run_info.clean_up(root=self.mpi_root, comm=self.mpi_comm)
-
-        # If we ran the analysis in parallel, then collect all runtime information
-        if mpi_helper.MPI_AVAILABLE:
-            self.run_info = self.run_info.gather(root=self.mpi_root,
-                                                 comm=self.mpi_comm)
         log_helper.debug(__name__, "Finished the analysis. " + str(self), root=self.mpi_root, comm=self.mpi_comm)
 
         # Record the analysis output
@@ -960,22 +869,11 @@ class analysis_base(parameter_manager):
 
         :raises: ImportError is raised if a required package for profiling is not available.
         """
-        if enable != self['profile_time_and_usage']:
-            if not enable:
-                self['profile_time_and_usage'] = False
-                log_helper.debug(__name__, "Disabled time and usage profiling. ",
-                                 root=self.mpi_root, comm=self.mpi_comm)
-            else:
-                # Try to import all required packages for profiling
-                try:
-                    from cProfile import Profile
-                except ImportError:
-                    from profile import Profile
-                import pstats
-                import StringIO
-                # Enable profiling
-                self['profile_time_and_usage'] = True
-                log_helper.debug(__name__, "Enabled time and usage profiling. ", root=self.mpi_root, comm=self.mpi_comm)
+        if enable != self.run_info.get_profile_time_and_usage():
+            self.run_info.enable_profile_time_and_usage(enable=enable)
+        if self.run_info.get_profile_time_and_usage() != self['profile_time_and_usage']:
+            # NOTE when assignign the paramter this function will be called again by the set_parameter_values function
+            self['profile_time_and_usage'] = self.run_info.get_profile_time_and_usage()
 
     def enable_memory_profiling(self, enable=True):
         """
@@ -986,15 +884,11 @@ class analysis_base(parameter_manager):
 
         :raises: ImportError is raised if a required package for profiling is not available.
         """
-        if enable != self['profile_memory']:
-            if not enable:
-                self['profile_memory'] = False
-                log_helper.debug(__name__, "Disabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
-            else:
-                import memory_profiler
-                import StringIO
-                self['profile_memory'] = True
-                log_helper.debug(__name__, "Enabled memory profiling. ", root=self.mpi_root, comm=self.mpi_comm)
+        if enable != self.run_info.get_profile_memory():
+            self.run_info.enable_profile_memory(enable=enable)
+        if self.run_info.get_profile_memory() != self['profile_memory']:
+            # NOTE when assignign the paramter this function will be called again by the set_parameter_values function
+            self['profile_memory'] = self.run_info.get_profile_memory()
 
     def results_ready(self):
         """
@@ -1029,45 +923,7 @@ class analysis_base(parameter_manager):
             returns a list of pstats.Stats objects, one per recorded statistic. None is returned
             in case that the stats objects cannot be created or no profiling data is available.
         """
-        from pstats import Stats
-        from ast import literal_eval
-        if stream is None:
-            import sys
-            stream = sys.stdout
-
-        if 'profile' in self.run_info:
-            # Parse the profile data (which is stored as a string) or in the case of MPI we may
-            # have a list of strings from each MPI processes
-            if isinstance(self.run_info['profile'], list):
-                # Convert the profile from each MPI process independently
-                profile_data = [literal_eval(profile) for profile in self.run_info['profile']]
-            else:
-                # If we only have a single stat, then convert our data to a list, so that we can
-                # handle the single and multiple statistics case in the same way in the remainder of this function
-                profile_data = [literal_eval(self.run_info['profile']), ]
-
-            # Create a list of profile objects that the pstats.Stats class understands
-            profile_dummies = []
-            for profile_i in profile_data:
-                # Here we are creating for each statistic a dummy class on the fly that holds our
-                # profile_data in the stats attributes and has an empty create_stats function.
-                # This trick allows us to create a pstats.Stats object without having to write our
-                # stats data to file or having to create a cProfile.Profile object first. Writing
-                # the data to file involves overhead and is ugly and creating a profiler and
-                # overwriting its stats is potentially problematic
-                profile_dummies.append(type('Profile',
-                                            (object,),
-                                            {'stats': profile_i, 'create_stats': lambda x: None})())
-
-            # Create the statistics object and return it
-            if consolidate:
-                profile_stats = Stats(*profile_dummies, stream=stream)
-                return profile_stats
-            else:
-                profile_stats = [Stats(profile_i, stream=stream) for profile_i in profile_dummies]
-                return profile_stats
-        else:
-            return None
+        return self.run_info.get_profile_stats_object(consolidate=consolidate, stream=stream)
 
     def get_help_string(self):
         """
