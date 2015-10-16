@@ -117,18 +117,15 @@ class workflow_executor_base(parameter_manager):
                 analysis_objects = [analysis_objects, ]
         log_helper.log_var(__name__, analysis_objects=analysis_objects, level='DEBUG')
         self.run_info = run_info_dict()
-        self.analysis_tasks = analysis_task_list(analysis_objects) if analysis_objects is not None else analysis_task_list()
+        self.analysis_tasks = analysis_task_list(analysis_objects) \
+            if analysis_objects is not None \
+            else analysis_task_list()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
         self.workflow_identifier = "we"
-        # self.parameters = []  # Inherited from parameter_manager
+        # self.parameters = []  # Inherited from parameter_manager and set in parent class
 
         dtypes = data_dtypes.get_dtypes()
-        #self.add_parameter(name='record_run_info',
-        #                   help='Record runtime information for the whole workflow. Required for profiling.',
-        #                   required=False,
-        #                   default=True,
-        #                   dtype=dtypes['bool'])
         self.add_parameter(name='profile_time_and_usage',
                            help='Enable/disable profiling of time and usage of the whole workflow',
                            required=False,
@@ -193,17 +190,13 @@ class workflow_executor_base(parameter_manager):
         """
         Execute the workflow. This uses the main() function to run the actual workflow.
         """
-        import time
         log_helper.debug(__name__, "Execute", root=self.mpi_root, comm=self.mpi_comm)
-        #if self['record_run_info']:
         result = self.run_info(self.main)()
         try:
             log_helper.debug(__name__, 'Execution time: ' + str(self.run_info['execution_time']) + "s",
                              root=self.mpi_root, comm=self.mpi_comm)
         except (KeyError, ValueError):
             pass
-        #else:
-        #    result = self.main()
 
         # 4) Return the result of the execution execution
         return result
@@ -230,11 +223,14 @@ class workflow_executor_base(parameter_manager):
         """
         new_analysis_objects = analysis_task_list.from_script_files(script_files)
         if new_analysis_objects is not None and len(new_analysis_objects) > 0:
-            log_helper.debug("Adding %i new analyses to the workflow from scripts" % len(new_analysis_objects),
+            log_helper.debug(__name__,
+                             "Adding %i new analyses to the workflow from scripts" % len(new_analysis_objects),
                              root=self.mpi_root, comm=self.mpi_comm)
             self.analysis_tasks = self.analysis_tasks.union(new_analysis_objects)
         else:
-            log_helper.debug("No analysis found in scripts", root=self.mpi_root, comm=self.mpi_comm)
+            log_helper.debug(__name__,
+                             "No analysis found in scripts",
+                             root=self.mpi_root, comm=self.mpi_comm)
 
     def add_analysis_all(self):
         """

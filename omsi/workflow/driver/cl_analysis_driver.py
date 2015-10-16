@@ -30,17 +30,19 @@ class cl_analysis_driver(analysis_driver_base):
     :cvar log_level_arg_name: Name of the keyword cl argument to define the level of logging ot be used.
 
     :ivar analysis_class: The class (subclass of analysis_base) defining the analysis to be executed
+    :ivar analysis_object: Instance of the analysis object to be executed
     :ivar add_analysis_class_arg: Boolean indicating whether an optional positional command line argument
         should be used to determine the analysis class (or whether the analysis class will be set explicitly)
     :ivar add_output_arg: Boolean indicating whether an optional keyword argument should be added to define
         the output target for the analysis.
-    :ivar add_profile_arg: Add the optional --profile keyword argument for profiling the analysis
-    :ivar profile_analysis: Boolean indicating whether we should profile the analysis
+    :ivar add_log_level_arg: Boolean indicating whether the --loglevel argument should be added to the command line
     :ivar parser: The argparse.ArgumentParser instance used for defining command-line arguments
     :ivar required_argument_group: argparse.ArgumentParser argument group used to define required command line arguments
     :ivar custom_argument_groups: Dict of custom argparse.ArgumentParser argument groups specified by the analysis
     :ivar output_target: Specification of the output target where the analysis result should be stored
     :ivar analysis_arguments: Dictionary defining the input arguments to be used for the analysis
+    :ivar mpi_root: Integer indicating the root rank when running using MPI
+    :ivar mpi_comm: Integer indicating the MPI communicator to be used when running in parallel using MPI
 
     """
     analysis_class_arg_name = '__analysis_class'
@@ -68,8 +70,8 @@ class cl_analysis_driver(analysis_driver_base):
             command-line argument to determine the analysis class name
         :param add_output_arg: Boolean indicating whether we should add the optional keyword
             argument for defining the output target for the analysis.
-        :param add_mem_profile_arg: Boolean indicating whether we should add the optional
-            keyword argument for enabling memory profiling of the analysis.
+        :param add_log_level_arg: Boolean indicating wither we should add the option keyword argument to specify the
+            logging level via the command line.
 
         :raises: A ValueError is raised in the case of conflicting inputs, i.e., if
             i) analysis_class==None and add_analysis_class_arg=False, i.e., the analysis class is not determined or
@@ -90,10 +92,10 @@ class cl_analysis_driver(analysis_driver_base):
         self.add_log_level_arg = add_log_level_arg
         self.parser = None
         self.required_argument_group = None
+        self.custom_argument_groups = {}
         self.output_target = None
         self. __output_target_self = None  # Path to output target created by the driver if we need to remove it
         self.analysis_arguments = {}
-        self.custom_argument_groups = {}
         self.mpi_root = 0
         self.mpi_comm = mpi_helper.get_comm_world()
 
@@ -500,7 +502,7 @@ class cl_analysis_driver(analysis_driver_base):
                     min_exec_time = str(exec_time_array.min())
                     mean_exec_time = str(exec_time_array.mean())
                     exec_time_string = max_exec_time + " s " + \
-                                       "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
+                        "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
                 # Serial case: We only have a single time to worry about
                 else:
                     exec_time_string = str(self.analysis_object.run_info['execution_time']) + " s"

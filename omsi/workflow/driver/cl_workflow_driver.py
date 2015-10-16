@@ -14,20 +14,20 @@ import numpy as np
 import os
 from omsi.shared.log import log_helper
 
-## High-priority items
+# High-priority items
 # TODO We need to add saving of analyses to the workflow itself and allow saving to separate files
 # TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (and moving the workflow to a different machine)
 # TODO Add template for writing tests for integrated analysis functions
 # TODO Implement the workflow we show in the BASTet paper
 # TODO Add MPI support to the workflow executor
 
-## Other items
+# Other items
 # TODO We need a command-line option to define the workflow executor type
 # TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
 # TODO Investigate automatic wrapping of iPython notebooks
 # TODO Can we create python scripts from in-memory workflows?
 
-## Documentation
+# Documentation
 # TODO Add documentation on running workflows using the driver
 # TODO Add documentation on how to restore an analysis workflow from file
 # TODO Add documentation on how to push analyses out-of-core
@@ -35,7 +35,6 @@ from omsi.shared.log import log_helper
 # TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling
 # TODO Add module for data strucutres
 # TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
-
 
 
 class cl_workflow_driver(workflow_driver_base):
@@ -102,7 +101,6 @@ class cl_workflow_driver(workflow_driver_base):
     log_level_arg_name = 'loglevel'
     """Name of the keyword argument used to specify the level of logging to be used"""
 
-
     def __init__(self,
                  workflow_executor=None,
                  add_script_arg=False,
@@ -147,16 +145,16 @@ class cl_workflow_driver(workflow_driver_base):
         self.script_files = []                  # The list of script files
 
         # 3) Define the command line parser settings
-        self.add_script_arg = add_script_arg    # Add the --script argument ot the command line
-        self.add_output_arg = add_output_arg    # Add the --save argument to the command line
-        self.add_profile_arg = add_profile_arg  # Add the --profile argument ot the command line
+        self.add_script_arg = add_script_arg     # Add the --script argument ot the command line
+        self.add_output_arg = add_output_arg     # Add the --save argument to the command line
+        self.add_profile_arg = add_profile_arg   # Add the --profile argument ot the command line
         self.add_mem_profile_arg = add_mem_profile_arg  # Add the --memprofile argument to the command line
         self.add_log_level_arg = add_log_level_arg      # Add the --loglevel argument to the command line
-        self.parser = None                      # The argument parser
-        self.required_argument_group = None     # The argparse group used for required arguments
-        self.optional_argument_group = None     # The argparse group used for general optional arguments
-        self.custom_argument_groups = {}        # Dictionary of cusom argparse group create for the different analyses
-        self.identifier_argname_seperator = ":" # Separator string when formation analysis command-line options
+        self.parser = None                       # The argument parser
+        self.required_argument_group = None      # The argparse group used for required arguments
+        self.optional_argument_group = None      # The argparse group used for general optional arguments
+        self.custom_argument_groups = {}         # Dictionary of cusom argparse group create for the different analyses
+        self.identifier_argname_seperator = ":"  # Separator string when formation analysis command-line options
 
         # 4) Define the settings for the execution, many of which are retrieved from the command line
         self.output_target = None
@@ -233,12 +231,12 @@ class cl_workflow_driver(workflow_driver_base):
         # Add optional script argument
         if self.add_script_arg:
             self.required_argument_group.add_argument("--"+self.script_arg_name,
-                                                       action='append',
-                                                       default=None,
-                                                       type=str,
-                                                       required=True,
-                                                       help='The workflow script to be executed. Multiple scripts ' + \
-                                                             'may be added via separate --script arguments')
+                                                      action='append',
+                                                      default=None,
+                                                      type=str,
+                                                      required=True,
+                                                      help='The workflow script to be executed. Multiple scripts ' +
+                                                      'may be added via separate --script arguments')
 
         # Add the argument for defining where we should save the analysis
         if self.add_output_arg:
@@ -249,11 +247,11 @@ class cl_workflow_driver(workflow_driver_base):
                               'experiment index 0 (i.e, entry_0) will be assumed by default. A valid' + \
                               'path may, e.g, be "test.h5:/entry_0" or jus "test.h5"'
             self.optional_argument_group.add_argument("--"+self.output_save_arg_name,
-                                     action='store',
-                                     default=None,
-                                     type=str,
-                                     required=False,
-                                     help=output_arg_help)
+                                                      action='store',
+                                                      default=None,
+                                                      type=str,
+                                                      required=False,
+                                                      help=output_arg_help)
 
         # Add the optional keyword argument for enabling profiling of the analysis
         if self.add_profile_arg:
@@ -261,10 +259,10 @@ class cl_workflow_driver(workflow_driver_base):
                                'for debugging and investigation of the runtime behavior of an analysis.' + \
                                'Enabling profiling entails certain overheads in performance'
             self.optional_argument_group.add_argument("--"+self.profile_arg_name,
-                                     action='store_true',
-                                     default=False,
-                                     required=False,
-                                     help=profile_arg_help)
+                                                      action='store_true',
+                                                      default=False,
+                                                      required=False,
+                                                      help=profile_arg_help)
 
         # Add the optional keyword argument for enabling memory profiling of the analysis
         if self.add_mem_profile_arg:
@@ -273,19 +271,19 @@ class cl_workflow_driver(workflow_driver_base):
                                    'the runtime behavior of an analysis. Enabling profiling ' + \
                                    'entails certain overheads in performance.'
             self.optional_argument_group.add_argument("--"+self.profile_mem_arg_name,
-                                     action='store_true',
-                                     default=False,
-                                     required=False,
-                                     help=profile_mem_arg_help)
+                                                      action='store_true',
+                                                      default=False,
+                                                      required=False,
+                                                      help=profile_mem_arg_help)
 
         # Add the optional logging argument
         if self.add_log_level_arg:
             self.optional_argument_group.add_argument("--"+self.log_level_arg_name,
-                                     action='store',
-                                     default='INFO',
-                                     required=False,
-                                     help='Specify the level of logging to be used.',
-                                     choices=log_helper.log_levels.keys())
+                                                      action='store',
+                                                      default='INFO',
+                                                      required=False,
+                                                      help='Specify the level of logging to be used.',
+                                                      choices=log_helper.log_levels.keys())
 
     def parse_cl_arguments(self):
         """
@@ -402,7 +400,7 @@ class cl_workflow_driver(workflow_driver_base):
             for analysis in self.workflow_executor.analysis_tasks:
                 # Create the group for the analysis in general
                 analysis_group = self.parser.add_argument_group(title=analysis.get_analysis_identifier() + " : " +
-                                                                      analysis.get_analysis_type())
+                                                                analysis.get_analysis_type())
                 arg_group_name = analysis.get_analysis_identifier() + target_seperator + analysis.get_analysis_type()
                 self.custom_argument_groups[arg_group_name] = analysis_group
 
@@ -442,14 +440,14 @@ class cl_workflow_driver(workflow_driver_base):
                         argument_group.add_argument(arg_name,               # <-- Required, user specified arg name
                                                     action=arg_action,      #     Constant. We define this not the user.
                                                     # nargs=1,                    Don't use. Leave as default
-                                                    # const=None,                 Don't use. We don't use this type of action
-                                                    default=arg_default,    # <-- Optional default value for the argument
+                                                    # const=None,                 Don't use this type of action
+                                                    default=arg_default,    # <-- Optional default value of the argument
                                                     type=arg_type,          # <-- Optional dtype of the argument
                                                     choices=arg_choices,    # <-- Optional Key may be missing.
                                                     required=arg_required,  # <-- Optional
                                                     help=arg_help,          # <-- Required
-                                                    # metavar               #     Don't use. Positional analysis arguments
-                                                    #                       #     are not allowed
+                                                    # metavar               #     Don't use. Positional analysis
+                                                    #                       #     arguments are not allowed
                                                     dest=arg_dest)          #     Automatically determined by the name
 
         # Add the arguments of the workflow executor
@@ -490,9 +488,9 @@ class cl_workflow_driver(workflow_driver_base):
 
         # Add the help argument
         self.optional_argument_group.add_argument('-h', '--help',
-                                 action='help',
-                                 default=argparse.SUPPRESS,
-                                 help='show this help message and exit')
+                                                  action='help',
+                                                  default=argparse.SUPPRESS,
+                                                  help='show this help message and exit')
 
         # Remove the arguments from this driver that cannot be understood by the analysis
         parsed_arguments = vars(self.parser.parse_args())
@@ -700,7 +698,7 @@ class cl_workflow_driver(workflow_driver_base):
                     min_exec_time = str(exec_time_array.min())
                     mean_exec_time = str(exec_time_array.mean())
                     exec_time_string = max_exec_time + " s " + \
-                                       "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
+                        "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
                 # Serial case: We only have a single time to worry about
                 else:
                     exec_time_string = str(self.workflow_executor.run_info['execution_time']) + " s"
@@ -719,7 +717,7 @@ class cl_workflow_driver(workflow_driver_base):
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
-        print self.workflow_executor.analysis_tasks[2]['output_0'][:,:,24]
+        print self.workflow_executor.analysis_tasks[2]['output_0'][:, :, 24]
 
 if __name__ == "__main__":
 

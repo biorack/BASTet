@@ -151,6 +151,12 @@ class analysis_task_list(list):
         """
         self.append(analysis_object)
 
+    def clear(self):
+        """
+        Remove all elements from the list
+        """
+        self[:] = []
+
     def append(self, analysis_object):
         """
         Add a given analysis to the set of object to be executed by the workflow

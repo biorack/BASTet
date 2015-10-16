@@ -32,15 +32,15 @@ class greedy_executor(workflow_executor_base):
         super(greedy_executor, self).__init__(analysis_objects)
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.add_parameter(name = 'reduce_memory_usage',
-                           help = 'Reduce memory usage by pushing analyses to file each time they ' +
-                                  'complete, processing dependencies out-of-core.',
+        self.add_parameter(name='reduce_memory_usage',
+                           help='Reduce memory usage by pushing analyses to file each time they ' +
+                                'complete, processing dependencies out-of-core.',
                            dtype=data_dtypes.bool_type,
                            required=False,
                            default=False)
-        self.add_parameter(name = 'synchronize',
-                           help = 'Place an MPI-barrier at the beginning of the exection of the workflow. ' +
-                                  'This can be useful when we require that all MPI ranks are fully initalized.',
+        self.add_parameter(name='synchronize',
+                           help='Place an MPI-barrier at the beginning of the exection of the workflow. ' +
+                                'This can be useful when we require that all MPI ranks are fully initalized.',
                            dtype=data_dtypes.bool_type,
                            required=False,
                            default=False)
