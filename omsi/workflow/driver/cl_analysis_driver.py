@@ -13,15 +13,6 @@ import numpy as np
 import os
 from omsi.shared.log import log_helper
 
-# TODO Add documentation on how to restore an analysis workflow from file
-# TODO Add documentaiton on how to push analyses out-of-core
-# TODO Add documentation on logging
-# TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
-# TODO Extend analysis_driver_base  (or define separate base classes) to allow driving of complete workflows not just a single class
-# TODO Add ability to cl_analysis_driver to load a workflow from file
-# TODO Add MPI support to the workflow executor
-
-
 
 class cl_analysis_driver(analysis_driver_base):
     """

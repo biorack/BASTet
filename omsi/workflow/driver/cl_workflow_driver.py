@@ -14,16 +14,28 @@ import numpy as np
 import os
 from omsi.shared.log import log_helper
 
+## High-priority items
 # TODO We need to add saving of analyses to the workflow itself and allow saving to separate files
 # TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (and moving the workflow to a different machine)
-# TODO Can we create python scripts from in-memory workflows?
-# TODO We need a command-line option to define the workflow executor type
-# TODO Add documentation on running workflows using the driver
-# TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling
-# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
 # TODO Add template for writing tests for integrated analysis functions
 # TODO Implement the workflow we show in the BASTet paper
+# TODO Add MPI support to the workflow executor
+
+## Other items
+# TODO We need a command-line option to define the workflow executor type
+# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
 # TODO Investigate automatic wrapping of iPython notebooks
+# TODO Can we create python scripts from in-memory workflows?
+
+## Documentation
+# TODO Add documentation on running workflows using the driver
+# TODO Add documentation on how to restore an analysis workflow from file
+# TODO Add documentation on how to push analyses out-of-core
+# TODO Add documentation on logging
+# TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling
+# TODO Add module for data strucutres
+# TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
+
 
 
 class cl_workflow_driver(workflow_driver_base):
