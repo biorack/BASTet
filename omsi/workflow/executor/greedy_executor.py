@@ -30,10 +30,8 @@ class greedy_executor(workflow_executor_base):
         :param analysis_objects: A list of analysis objects to be executed
         """
         super(greedy_executor, self).__init__(analysis_objects)
-        self.run_info = run_info_dict()
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
-        self.parameters = []
         self.add_parameter(name = 'reduce_memory_usage',
                            help = 'Reduce memory usage by pushing analyses to file each time they ' +
                                   'complete, processing dependencies out-of-core.',
@@ -64,11 +62,6 @@ class greedy_executor(workflow_executor_base):
         log_helper.debug(__name__, "Executing the workflow", root=self.mpi_root, comm=self.mpi_comm)
         log_helper.info(__name__, "Adding all dependencies", root=self.mpi_root, comm=self.mpi_comm)
         self.add_analysis_dependencies()
-
-        # Record the runtime information
-        log_helper.debug(__name__, "Recording runtime information", root=self.mpi_root, comm=self.mpi_comm)
-        self.run_info.clear()
-        self.run_info.record_preexecute()
 
         # Execute the workflow in a greedy fashion (i.e., execute whichever analysis is ready and has not be run yet)
         log_helper.debug(__name__, "Running the analysis workflow", root=self.mpi_root, comm=self.mpi_comm)
@@ -101,7 +94,3 @@ class greedy_executor(workflow_executor_base):
             iterations += 1
 
         log_helper.log_var(__name__, iterations=iterations, level='DEBUG', root=self.mpi_root, comm=self.mpi_comm)
-
-        # Record the runtime information after we are done with the workflow
-        self.run_info.record_postexecute()
-        self.run_info.gather()
