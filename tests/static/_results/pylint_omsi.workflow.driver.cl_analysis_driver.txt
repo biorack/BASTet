@@ -1,33 +1,11 @@
 ************* Module omsi.workflow.driver.cl_analysis_driver
-W: 16, 0: TODO Add documentation on how to restore an analysis workflow from file (fixme)
-W: 17, 0: TODO Add documentaiton on how to push analyses out-of-core (fixme)
-W: 18, 0: TODO Add documentation on logging (fixme)
-W: 19, 0: TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking (fixme)
-W: 20, 0: TODO Extend analysis_driver_base  (or define separate base classes) to allow driving of complete workflows not just a single class (fixme)
-W: 21, 0: TODO Add ability to cl_analysis_driver to load a workflow from file (fixme)
-W: 22, 0: TODO Add MPI support to the workflow executor (fixme)
-W:596, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
-W:597, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
-C: 19, 0: Line too long (164/120) (line-too-long)
-C: 20, 0: Line too long (132/120) (line-too-long)
-C:458, 0: Wrong continued indentation.
+W:527, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
+W:528, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
+C:403, 0: Wrong continued indentation.
                                       "by the analysis but potentially modified by it")
                             |         ^ (bad-continuation)
-C:604, 0: Wrong continued indentation.
-              add_analysis_class_arg=True,
-              ^        | (bad-continuation)
-C:605, 0: Wrong continued indentation.
-              add_output_arg=True,
-              ^        | (bad-continuation)
-C:606, 0: Wrong continued indentation.
-              add_profile_arg=True,
-              ^        | (bad-continuation)
-C:607, 0: Wrong continued indentation.
-              add_mem_profile_arg=True).main()
-              ^        | (bad-continuation)
-R: 26, 0: Too many instance attributes (17/7) (too-many-instance-attributes)
-R: 74, 4: Too many arguments (7/5) (too-many-arguments)
-R:300, 4: Too many branches (16/12) (too-many-branches)
-C:363, 4: Invalid method name "add_and_parse_analysis_arguments" (invalid-name)
-W:453,12: No exception type(s) specified (bare-except)
-R:463, 4: Too many branches (21/12) (too-many-branches)
+R: 17, 0: Too many instance attributes (13/7) (too-many-instance-attributes)
+R:254, 4: Too many branches (14/12) (too-many-branches)
+C:310, 4: Invalid method name "add_and_parse_analysis_arguments" (invalid-name)
+W:398,12: No exception type(s) specified (bare-except)
+R:408, 4: Too many branches (17/12) (too-many-branches)

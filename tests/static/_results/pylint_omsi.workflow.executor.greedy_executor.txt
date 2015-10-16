@@ -1,23 +1,12 @@
 ************* Module omsi.workflow.executor.greedy_executor
-C: 37, 0: No space allowed around keyword argument assignment
-        self.add_parameter(name = 'reduce_memory_usage',
-                                ^ (bad-whitespace)
-C: 38, 0: No space allowed around keyword argument assignment
-                           help = 'Reduce memory usage by pushing analyses to file each time they ' +
-                                ^ (bad-whitespace)
-C: 39, 0: Wrong continued indentation.
-                                  'complete, processing dependencies out-of-core.',
-                           |      ^ (bad-continuation)
-C: 43, 0: No space allowed around keyword argument assignment
-        self.add_parameter(name = 'synchronize',
-                                ^ (bad-whitespace)
-C: 44, 0: No space allowed around keyword argument assignment
-                           help = 'Place an MPI-barrier at the beginning of the exection of the workflow. ' +
-                                ^ (bad-whitespace)
-C: 45, 0: Wrong continued indentation.
-                                  'This can be useful when we require that all MPI ranks are fully initalized.',
-                           |      ^ (bad-continuation)
+C: 37, 0: Wrong continued indentation.
+                                'complete, processing dependencies out-of-core.',
+                           |    ^ (bad-continuation)
+C: 43, 0: Wrong continued indentation.
+                                'This can be useful when we require that all MPI ranks are fully initalized.',
+                           |    ^ (bad-continuation)
 R: 11, 0: Too many public methods (24/20) (too-many-public-methods)
+W:  5, 0: Unused import run_info_dict (unused-import)
 R: 43, 0: Abstract class not referenced (abstract-class-not-used)
 R:203, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
 R:285, 0: Abstract class is only referenced 1 times (abstract-class-little-used)
@@ -54,10 +43,10 @@ R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analys
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.executor.base -> omsi.shared.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.instrument -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.executor.base -> omsi.shared.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.methods -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.dataformat.omsi_file.dependencies -> omsi.shared.dependency_data) (cyclic-import)
 R:  1, 0: Similar lines in 3 files
-==omsi.analysis.base:631
+==omsi.analysis.base:566
 ==omsi.analysis.msi_filtering.omsi_tic_norm:201
 ==omsi.analysis.multivariate_stats.omsi_cx:169
-            return None
+        return None
 
     @classmethod
     def v_qspectrum(cls,
@@ -68,29 +57,29 @@ R:  1, 0: Similar lines in 3 files
         """
         Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
 
-        **Developer Note:** h5py currently supports only a single index list. If the user provides an index-list
-        for both x and y, then we need to construct the proper merged list and load the data manually, or if
-        the data is small enough, one can load the full data into a numpy array which supports
-        multiple lists in the selection.
+        Developer Note: h5py currently supports only a single index list. If the user provides an index-list for both
+                       x and y, then we need to construct the proper merged list and load the data manually, or if
+                       the data is small enough, one can load the full data into a numpy array which supports
+                       mulitple lists in the selection.
 
         :param analysis_object: The omsi_file_analysis object for which slicing should be performed
         :param x: x selection string
         :param y: y selection string
-        :param viewer_option: If multiple default viewer behaviors are available for a given
-            analysis then this option is used to switch between them.
+        :param viewer_option: If multiple default viewer behaviors are available for a given analysis then
+            this option is used to switch between them.
 
-        :returns: The following two elements are expected to be returned by this function :
+        :returns: The following two elemnts are expected to be returned by this function :
 
-                1) 1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be \
-                the last axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList \
-                selections x=[0]&y=[1] usually a 2D array is expected. For ragne selections x=0:1&y=1:2 we \
-                one usually expects a 3D array.
-                2) None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. \
-                Otherwise, return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z \
-                values are needed for interpretation of the returned spectrum).This may be needed, e.g., in \
-                cases where a per-spectrum peak analysis is performed and the peaks for each spectrum appear \
-                at different m/z values.
-        """ (duplicate-code)
+            1) 1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be the last \
+                axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList selections x=[0]&y=[1] \
+                usually a 2D array is expected. For ragne selections x=0:1&y=1:2 we one usually expects a 3D array.
+            2) None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. Otherwise, \
+                return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z values are needed \
+                for interpretation of the returned spectrum).This may be needed, e.g., in cases where a per-spectrum \
+                peak analysis is performed and the peaks for each spectrum appear at different m/z values.
+        """
+
+        # Convert the x,y selection to a python selection (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.dataformat.imzml_file:225
 ==omsi.dataformat.mzml_file:389
@@ -126,8 +115,8 @@ R:  1, 0: Similar lines in 2 files
             try:
                 # Try to open the file and iterate over it (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:321
-==omsi.workflow.driver.cl_workflow_driver:291
+==omsi.workflow.driver.cl_analysis_driver:275
+==omsi.workflow.driver.cl_workflow_driver:307
         if self.output_save_arg_name in parsed_arguments and mpi_helper.get_rank() == self.mpi_root:
             # Determine the filename and experiment group from the path
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
@@ -154,11 +143,10 @@ R:  1, 0: Similar lines in 2 files
         else:
             self.output_target = parsed_arguments.pop(self.output_save_arg_name)
 
-        # Process the --profile profiling argument
-        if self.profile_arg_name in parsed_arguments: (duplicate-code)
+        # Process the --profile profiling argument (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:446
-==omsi.workflow.driver.cl_workflow_driver:546
+==omsi.workflow.driver.cl_analysis_driver:391
+==omsi.workflow.driver.cl_workflow_driver:572
         success = False
         if self.__output_target_self is not None:
             try:
@@ -186,7 +174,7 @@ R:  1, 0: Similar lines in 2 files
 
         """ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:1359
+==omsi.analysis.base:1243
 ==omsi.shared.analysis_data:549
     def add_parameter(self,
                       name,
@@ -203,7 +191,7 @@ R:  1, 0: Similar lines in 2 files
 
         :param name: The name of the parameter
         :param help: Help string describing the parameter
-        :param type: Optional type. Default is string.
+        :param dtype: Optional type. Default is string.
         :param required: Boolean indicating whether the parameter is required (True) or optional (False). Default False.
         :param default: Optional default value for the parameter. Default None.
         :param choices: Optional list of choices with allowed data values. Default None, indicating no choices set.
@@ -214,9 +202,9 @@ R:  1, 0: Similar lines in 2 files
         :raises: ValueError is raised if the parameter with the given name already exists.
         """ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:708
+==omsi.analysis.base:643
 ==omsi.analysis.multivariate_stats.omsi_cx:231
-            return None, None
+        return None, None
 
     @classmethod
     def v_qmz(cls,
@@ -234,13 +222,13 @@ R:  1, 0: Similar lines in 2 files
 
         :returns: The following four arrays are returned by the analysis:
 
-            - mzSpectra : Array with the static mz values for the spectra.
-            - labelSpectra : Label for the spectral mz axis
-            - mzSlice : Array of the static mz values for the slices or None if identical to the mzSpectra.
-            - labelSlice : Label for the slice mz axis or None if identical to labelSpectra.
-            - values_x: The values for the x axis of the image (or None)
-            - label_x: Label for the x axis of the image
-            - values_y: The values for the y axis of the image (or None) (duplicate-code)
+            - mz_spectra : Array with the static mz values for the spectra.
+            - label_spectra : Lable for the spectral mz axis
+            - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+            - label_slice : Lable for the slice mz axis or None if identical to label_spectra.
+        """
+
+        """EDIT_ME: Define the number of custom viewer options for qslice and qspectrum.""" (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.dataformat.imzml_file:307
 ==omsi.dataformat.mzml_file:502
@@ -292,35 +280,35 @@ R:  1, 0: Similar lines in 2 files
                            help='Peak height parameter',
                            dtype=int, (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:783
+==omsi.analysis.base:718
 ==omsi.analysis.msi_filtering.omsi_tic_norm:338
-                mz_slice = None
-                label_slice = None
+            mz_slice = None
+            label_slice = None
 
         return mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ
 
     @classmethod
     def v_qspectrum_viewer_options(cls,
                                    analysis_object):
-        """
-        Get a list of strings describing the different default viewer options for the analysis for qspectrum.
-        The default implementation tries to take care of handling the spectra retrieval for all the dependencies
-        but can naturally not decide how the qspectrum should be handled by a derived class. However, this
-        implementation is often called at the end of custom implementations to also allow access to data from
-        other dependencies.
+        """Get a list of strings describing the different default viewer options for the analysis for qspectrum.
+           The default implementation tries to take care of handling the spectra retrieval for all the depencies
+           but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+           implementation is often called at the end of custom implementations to also allow access to data from
+           other dependencies.
 
-        :param analysis_object: The omsi_file_analysis object for which slicing should be performed.
-            For most cases this is not needed here as the support for slice operations is usually a static decision
-            based on the class type, however, in some cases additional checks may be needed (e.g., ensure that the
-            required data is available).
+            :param analysis_object: The omsi_file_analysis object for which slicing should be performed.  For most cases
+                   this is not needed here as the support for slice operations is usually a static decission based
+                   on the class type, however, in some cases additional checks may be needed (e.g., ensure that
+                   the required data is available).
 
-        :returns: List of strings indicating the different available viewer options. The list should be empty if
-            the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available). (duplicate-code)
+            :returns: List of strings indicating the different available viewer options. The list should be empty
+                    if the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).
+        """ (duplicate-code)
 R:  1, 0: Similar lines in 3 files
-==omsi.analysis.base:708
+==omsi.analysis.base:643
 ==omsi.analysis.msi_filtering.omsi_tic_norm:262
 ==omsi.analysis.multivariate_stats.omsi_cx:231
-            return None, None
+        return None, None
 
     @classmethod
     def v_qmz(cls,
@@ -338,10 +326,10 @@ R:  1, 0: Similar lines in 3 files
 
         :returns: The following four arrays are returned by the analysis:
 
-            - mzSpectra : Array with the static mz values for the spectra.
-            - labelSpectra : Label for the spectral mz axis
-            - mzSlice : Array of the static mz values for the slices or None if identical to the mzSpectra.
-            - labelSlice : Label for the slice mz axis or None if identical to labelSpectra. (duplicate-code)
+            - mz_spectra : Array with the static mz values for the spectra.
+            - label_spectra : Lable for the spectral mz axis
+            - mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.
+            - label_slice : Lable for the slice mz axis or None if identical to label_spectra. (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.msi_filtering.omsi_tic_norm:362
 ==omsi.analysis.multivariate_stats.omsi_cx:360
@@ -367,8 +355,8 @@ R:  1, 0: Similar lines in 2 files
                   the analysis does not support qslice requests (i.e., v_qslice(...) is not available).
         """ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:293
-==omsi.workflow.driver.cl_workflow_driver:265
+==omsi.workflow.driver.cl_analysis_driver:247
+==omsi.workflow.driver.cl_workflow_driver:281
                                      action='store',
                                      default='INFO',
                                      required=False,
@@ -390,8 +378,8 @@ R:  1, 0: Similar lines in 2 files
         """
         # Parse the arguments and convert them to a dict using vars (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:219
-==omsi.workflow.driver.cl_workflow_driver:192
+==omsi.workflow.driver.cl_analysis_driver:194
+==omsi.workflow.driver.cl_workflow_driver:208
         parser_epilog = "how to specify ndarray data? \n" \
                         "---------------------------- \n" +\
                         "n-dimensional arrays stored in OpenMSI data files may be specified as \n" + \
@@ -410,9 +398,9 @@ R:  1, 0: Similar lines in 2 files
                                               formatter_class=RawDescriptionDefaultHelpArgParseFormatter,
                                               add_help=False)  # We'll add the help later in
 
-        # Create the argument group for required and optional arguments (duplicate-code)
+        # Create the argument group for required arguments (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:587
+==omsi.analysis.base:522
 ==omsi.analysis.multivariate_stats.omsi_cx:112
     @classmethod
     def v_qslice(cls,
@@ -425,15 +413,15 @@ R:  1, 0: Similar lines in 2 files
         :param analysis_object: The omsi_file_analysis object for which slicing should be performed
         :param z: Selection string indicting which z values should be selected.
         :param viewer_option: If multiple default viewer behaviors are available for a given analysis
-            then this option is used to switch between them.
+                            then this option is used to switch between them.
 
-        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will
-            be performed typically like [:,:,zmin:zmax].
+        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be
+                 performed typically like [:,:,zmin:zmax].
 
-        """
-        # Convert the z selection to a python selection (duplicate-code)
+        :raises: NotImplementedError in case that v_qslice is not supported by the analysis.
+        """ (duplicate-code)
 R:  1, 0: Similar lines in 3 files
-==omsi.analysis.base:587
+==omsi.analysis.base:522
 ==omsi.analysis.msi_filtering.omsi_tic_norm:171
 ==omsi.analysis.multivariate_stats.omsi_cx:112
     @classmethod
@@ -441,39 +429,21 @@ R:  1, 0: Similar lines in 3 files
                  analysis_object,
                  z,
                  viewer_option=0):
-        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
-
-           :param analysis_object: The omsi_file_analysis object for which slicing should be performed
-           :param z: Selection string indicting which z values should be selected.
-           :param viewer_option: If multiple default viewer behaviors are available for a given analysis
-                  then this option is used to switch between them.
-
-           :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will
-                     be performed typically like [:,:,zmin:zmax].
-
         """
-        # Convert the z selection to a python selection (duplicate-code)
+        Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+
+        :param analysis_object: The omsi_file_analysis object for which slicing should be performed
+        :param z: Selection string indicting which z values should be selected.
+        :param viewer_option: If multiple default viewer behaviors are available for a given analysis
+                            then this option is used to switch between them.
+
+        :returns: numpy array with the data to be displayed in the image slice viewer. Slicing will be
+                 performed typically like [:,:,zmin:zmax].
+
+        :raises: NotImplementedError in case that v_qslice is not supported by the analysis. (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:421
-==omsi.workflow.driver.cl_workflow_driver:494
-    def print_settings(self):
-        """
-        Print the analysis settings.
-        """
-        log_helper.info(__name__, "Inputs:")
-        for key, value in self.analysis_arguments.iteritems():
-            log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
-        if self.output_target is not None:
-            if isinstance(self.output_target, omsi_file_common):
-                h5py_object = omsi_file_common.get_h5py_object(self.output_target)
-                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename)
-                                + u":" + unicode(h5py_object.name))
-            else:
-                log_helper.info(__name__, "Save to: " + unicode(self.output_target))
- (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:1488
-==omsi.analysis.generic:227
+==omsi.analysis.base:1372
+==omsi.analysis.generic:230
     def read_from_omsi_file(self,
                             analysis_object,
                             load_data=True,
@@ -507,9 +477,9 @@ R:  1, 0: Similar lines in 2 files
                            group=groups['settings'],
                            required=True) (duplicate-code)
 R:  1, 0: Similar lines in 3 files
-==omsi.workflow.driver.cl_analysis_driver:396
-==omsi.workflow.driver.cl_workflow_driver:413
-==omsi.workflow.driver.cl_workflow_driver:450
+==omsi.workflow.driver.cl_analysis_driver:343
+==omsi.workflow.driver.cl_workflow_driver:439
+==omsi.workflow.driver.cl_workflow_driver:475
                 argument_group.add_argument(arg_name,               # <-- Required, user specified arg name
                                             action=arg_action,      #     Constant. We define this not the user.
                                             # nargs=1,                    Don't use. Leave as default
@@ -523,38 +493,6 @@ R:  1, 0: Similar lines in 3 files
                                             #                       #     are not allowed
                                             dest=arg_dest)          #     Automatically determined by the name
         # Add the help argument (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:61
-==omsi.workflow.driver.cl_workflow_driver:75
-    output_save_arg_name = 'save'
-    """Name of the key-word argument used to define"""
-
-    profile_arg_name = 'profile'
-    """Name of the keyword argument used to enable profiling of the analysis"""
-
-    profile_mem_arg_name = 'memprofile'
-    """Name of the keyword argument used to enable profiling of memory usage of an analysis"""
-
-    log_level_arg_name = 'loglevel'
-    """Name of the keyword argument used to specify the level of logging to be used"""
-
-    def __init__(self, (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:9
-==omsi.workflow.driver.cl_workflow_driver:10
-from omsi.workflow.common import RawDescriptionDefaultHelpArgParseFormatter
-import omsi.shared.mpi_helper as mpi_helper
-import numpy as np
-import os
-from omsi.shared.log import log_helper
-
-# TODO We need to add saving of analyses to the workflow itself and allow saving to separate files
-# TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted
-# TODO We need a command-line option to define the workflow executor type
-# TODO Add documentation on running workflows using the driver
-# TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors.
-
- (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.compound_stats.omsi_score_compounds:98
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:64
@@ -602,8 +540,8 @@ R:  1, 0: Similar lines in 2 files
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l) (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:495
-==omsi.workflow.driver.cl_workflow_driver:592
+==omsi.workflow.driver.cl_analysis_driver:440
+==omsi.workflow.driver.cl_workflow_driver:618
         except:
             self.remove_output_target()
             raise
@@ -612,23 +550,9 @@ R:  1, 0: Similar lines in 2 files
         if mpi_helper.get_rank() == self.mpi_root:
             self.print_settings()
 
-        # Call the execute function of the analysis
+        # Enable time and usage profiling
         try:
-            # Create the analysis object (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:263
-==omsi.workflow.driver.cl_workflow_driver:233
-                                     action='store',
-                                     default=None,
-                                     type=str,
-                                     required=False,
-                                     help=output_arg_help)
-
-        # Add the optional keyword argument for enabling profiling of the analysis
-        if self.add_profile_arg:
-            profile_arg_help = 'Enable runtime profiling of the analysis. NOTE: This is intended for ' + \
-                               'debugging and investigation of the runtime behavior of an analysis.' + \
-                               'Enabling profiling entails certain overheads in performance' (duplicate-code)
+            # Enable time and usage profiling if requested (duplicate-code)
 R:  1, 0: Similar lines in 3 files
 ==omsi.dataformat.img_file:235
 ==omsi.dataformat.imzml_file:289
@@ -645,7 +569,7 @@ R:  1, 0: Similar lines in 3 files
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l) (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:630
+==omsi.analysis.base:565
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:78
         else:
             return None
@@ -656,11 +580,11 @@ R:  1, 0: Similar lines in 2 files
                     x,
                     y,
                     viewer_option=0):
-        """Implement support for qspectrum URL requests for the viewer"""
-        # Get the h5py dataset with the peak_cube data (duplicate-code)
+        """
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:526
-==omsi.workflow.driver.cl_workflow_driver:626
+==omsi.workflow.driver.cl_analysis_driver:457
+==omsi.workflow.driver.cl_workflow_driver:652
         except:
             if mpi_helper.get_rank() == self.mpi_root:
                 self.remove_output_target()
@@ -712,7 +636,19 @@ R:  1, 0: Similar lines in 2 files
 
                 # Compile the data from the parallel execution (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:707
+==omsi.workflow.driver.cl_analysis_driver:372
+==omsi.workflow.driver.cl_workflow_driver:526
+            log_helper.info(__name__, "   " + unicode(key) + " = " + unicode(value))
+        if self.output_target is not None:
+            if isinstance(self.output_target, omsi_file_common):
+                h5py_object = omsi_file_common.get_h5py_object(self.output_target)
+                log_helper.info(__name__, "Save to: " + unicode(h5py_object.file.filename)
+                                + u":" + unicode(h5py_object.name))
+            else:
+                log_helper.info(__name__, "Save to: " + unicode(self.output_target))
+ (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.base:642
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:175
         else:
             return None, None
@@ -724,8 +660,8 @@ R:  1, 0: Similar lines in 2 files
               qspectrum_viewer_option=0):
         """Implement support for qmz URL requests for the viewer""" (duplicate-code)
 R:  1, 0: Similar lines in 4 files
-==omsi.analysis.base:633
-==omsi.analysis.generic:183
+==omsi.analysis.base:568
+==omsi.analysis.generic:186
 ==omsi.analysis.msi_filtering.omsi_tic_norm:203
 ==omsi.analysis.multivariate_stats.omsi_cx:171
     @classmethod
@@ -735,11 +671,11 @@ R:  1, 0: Similar lines in 4 files
                     y,
                     viewer_option=0):
         """
-        Implement support for qspectrum URL requests for the viewer
-        """ (duplicate-code)
+        Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer
+ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:577
-==omsi.workflow.driver.cl_workflow_driver:678
+==omsi.workflow.driver.cl_analysis_driver:508
+==omsi.workflow.driver.cl_workflow_driver:704
                 log_helper.info(__name__, "Time to execute analysis: " + exec_time_string,
                                 root=self.mpi_root, comm=self.mpi_comm)
             except:
@@ -794,10 +730,10 @@ R:  1, 0: Similar lines in 2 files
                 label_slice = temp_b
         elif qspectrum_viewer_option > 0 and qslice_viewer_option == 0: (duplicate-code)
 R:  1, 0: Similar lines in 6 files
-==omsi.analysis.base:633
+==omsi.analysis.base:568
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:81
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:94
-==omsi.analysis.generic:183
+==omsi.analysis.generic:186
 ==omsi.analysis.msi_filtering.omsi_tic_norm:203
 ==omsi.analysis.multivariate_stats.omsi_cx:171
     @classmethod
@@ -810,7 +746,7 @@ R:  1, 0: Similar lines in 6 files
         Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:81
-==omsi.analysis.generic:183
+==omsi.analysis.generic:186
     @classmethod
     def v_qspectrum(cls,
                     analysis_object,
@@ -820,8 +756,8 @@ R:  1, 0: Similar lines in 2 files
         """
         Implement support for qspectrum URL requests for the viewer (duplicate-code)
 R:  1, 0: Similar lines in 4 files
-==omsi.analysis.base:710
-==omsi.analysis.generic:194
+==omsi.analysis.base:645
+==omsi.analysis.generic:197
 ==omsi.analysis.msi_filtering.omsi_tic_norm:264
 ==omsi.analysis.multivariate_stats.omsi_cx:233
     @classmethod
@@ -830,12 +766,12 @@ R:  1, 0: Similar lines in 4 files
               qslice_viewer_option=0,
               qspectrum_viewer_option=0):
         """
-        Implement support for qmz URL requests for the viewer
-        """ (duplicate-code)
+        Get the mz axes for the analysis
+ (duplicate-code)
 R:  1, 0: Similar lines in 5 files
-==omsi.analysis.base:587
+==omsi.analysis.base:522
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:82
-==omsi.analysis.generic:173
+==omsi.analysis.generic:176
 ==omsi.analysis.msi_filtering.omsi_tic_norm:171
 ==omsi.analysis.multivariate_stats.omsi_cx:112
     @classmethod
@@ -843,19 +779,39 @@ R:  1, 0: Similar lines in 5 files
                  analysis_object,
                  z,
                  viewer_option=0):
-        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
-
-           :param analysis_object: The omsi_file_analysis object for which slicing should be performed (duplicate-code)
+        """Implement support for qslice URL requests for the viewer"""
+        # Use the dependency data for slicing here. We do not have a native option to reconstruct
+        # images from local peak finding data (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:569
-==omsi.workflow.driver.cl_workflow_driver:670
+==omsi.workflow.driver.cl_analysis_driver:500
+==omsi.workflow.driver.cl_workflow_driver:696
                     max_exec_time = str(exec_time_array.max())
                     min_exec_time = str(exec_time_array.min())
                     mean_exec_time = str(exec_time_array.mean())
                     exec_time_string = max_exec_time + " s " + \
-                                       "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
+                        "    ( min = " + min_exec_time + " , mean = " + mean_exec_time + " )"
                 # Serial case: We only have a single time to worry about
                 else: (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.workflow.driver.cl_analysis_driver:238
+==omsi.workflow.driver.cl_workflow_driver:249
+                                     action='store',
+                                     default=None,
+                                     type=str,
+                                     required=False,
+                                     help=output_arg_help)
+
+        # Add the optional logging argument (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.workflow.driver.cl_analysis_driver:9
+==omsi.workflow.driver.cl_workflow_driver:10
+from omsi.workflow.common import RawDescriptionDefaultHelpArgParseFormatter
+import omsi.shared.mpi_helper as mpi_helper
+import numpy as np
+import os
+from omsi.shared.log import log_helper
+
+# High-priority items (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.msi_filtering.omsi_tic_norm:285
 ==omsi.analysis.multivariate_stats.omsi_cx:262
@@ -889,15 +845,6 @@ R:  1, 0: Similar lines in 3 files
         # We do not have native option for qslice, so we rely on the input data in all cases
         if qspectrum_viewer_option == 0 and qslice_viewer_option == 0:  # Loadings (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:111
-==omsi.workflow.driver.cl_workflow_driver:132
-        self.add_output_arg = add_output_arg    # Add the --save argument to the command line
-        self.add_profile_arg = add_profile_arg  # Add the --profile argument ot the command line
-        self.add_mem_profile_arg = add_mem_profile_arg  # Add the --memprofile argument to the command line
-        self.add_log_level_arg = add_log_level_arg      # Add the --loglevel argument to the command line
-        self.parser = None                      # The argument parser
-        self.required_argument_group = None     # The argparse group used for required arguments (duplicate-code)
-R:  1, 0: Similar lines in 2 files
 ==omsi.tools.misc.create_peak_cube_overview:11
 ==omsi.tools.misc.make_thumb:2
 from omsi.dataformat.omsi_file.main_file import omsi_file
@@ -907,7 +854,7 @@ try:
 except ImportError:
     import Image (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:1386
+==omsi.analysis.base:1270
 ==omsi.shared.analysis_data:578
                                               help=help,
                                               dtype=dtype,
@@ -916,10 +863,10 @@ R:  1, 0: Similar lines in 2 files
                                               choices=choices,
                                               data=data, (duplicate-code)
 R:  1, 0: Similar lines in 6 files
-==omsi.analysis.base:710
+==omsi.analysis.base:645
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:117
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:178
-==omsi.analysis.generic:194
+==omsi.analysis.generic:197
 ==omsi.analysis.msi_filtering.omsi_tic_norm:264
 ==omsi.analysis.multivariate_stats.omsi_cx:233
     @classmethod
@@ -929,10 +876,10 @@ R:  1, 0: Similar lines in 6 files
               qspectrum_viewer_option=0):
         """Implement support for qmz URL requests for the viewer""" (duplicate-code)
 R:  1, 0: Similar lines in 6 files
-==omsi.analysis.base:587
+==omsi.analysis.base:522
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:60
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:82
-==omsi.analysis.generic:173
+==omsi.analysis.generic:176
 ==omsi.analysis.msi_filtering.omsi_tic_norm:171
 ==omsi.analysis.multivariate_stats.omsi_cx:112
     @classmethod
@@ -942,24 +889,8 @@ R:  1, 0: Similar lines in 6 files
                  viewer_option=0):
         """Implement support for qslice URL requests for the viewer""" (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:384
-==omsi.workflow.driver.cl_workflow_driver:443
-                arg_type = arg_param['dtype']
-                arg_choices = arg_param['choices']
-                arg_help = arg_param['help']
-                arg_dest = arg_param['name']
-                arg_group = arg_param.get_group_name() (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:280
-==omsi.workflow.driver.cl_workflow_driver:251
-        if self.add_mem_profile_arg:
-            profile_mem_arg_help = 'Enable runtime profiling of the memory usage of analysis. ' + \
-                                   'NOTE: This is intended for debugging and investigation of ' + \
-                                   'the runtime behavior of an analysis. Enabling profiling ' + \
-                                   'entails certain overheads in performance.' (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.workflow.driver.cl_analysis_driver:257
-==omsi.workflow.driver.cl_workflow_driver:227
+==omsi.workflow.driver.cl_analysis_driver:232
+==omsi.workflow.driver.cl_workflow_driver:243
                               'A new file will be created if the given file does not exists ' + \
                               'but the directory does. The filename is expected to be of the from:  ' + \
                               '<filename>:<entry_#> . If no experiment index is given, then ' + \
@@ -974,7 +905,7 @@ R:  1, 0: Similar lines in 2 files
                 basename = filelist[0]
             else: (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.generic:254
+==omsi.analysis.generic:257
 ==omsi.dataformat.omsi_file.analysis:869
                                               load_data=load_data,
                                               load_parameters=load_parameters,
@@ -982,7 +913,7 @@ R:  1, 0: Similar lines in 2 files
                                               dependencies_omsi_format=dependencies_omsi_format,
                                               ignore_type_conflict=ignore_type_conflict) (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.analysis.base:203
+==omsi.analysis.base:222
 ==omsi.analysis.generic:111
                                      link_name=None,
                                      dataname=key,

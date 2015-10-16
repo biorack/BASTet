@@ -1,108 +1,35 @@
 ************* Module omsi.workflow.driver.cl_workflow_driver
-W: 17, 0: TODO We need to add saving of analyses to the workflow itself and allow saving to separate files (fixme)
-W: 18, 0: TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (fixme)
-W: 19, 0: TODO We need a command-line option to define the workflow executor type (fixme)
-W: 20, 0: TODO Add documentation on running workflows using the driver (fixme)
-W: 21, 0: TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors. (fixme)
-W:691, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
-W:692, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
-C: 18, 0: Line too long (146/120) (line-too-long)
-C:218, 0: Wrong continued indentation.
-                                                       action='append',
-                                                      |^ (bad-continuation)
-C:219, 0: Wrong continued indentation.
-                                                       default=None,
-                                                      |^ (bad-continuation)
-C:220, 0: Wrong continued indentation.
-                                                       type=str,
-                                                      |^ (bad-continuation)
-C:221, 0: Wrong continued indentation.
-                                                       required=True,
-                                                      |^ (bad-continuation)
-C:222, 0: Wrong continued indentation.
-                                                       help='The workflow script to be executed. Multiple scripts ' + \
-                                                      |^ (bad-continuation)
-C:234, 0: Wrong continued indentation.
-                                     action='store',
-                                     ^                | (bad-continuation)
-C:235, 0: Wrong continued indentation.
-                                     default=None,
-                                     ^                | (bad-continuation)
-C:236, 0: Wrong continued indentation.
-                                     type=str,
-                                     ^                | (bad-continuation)
-C:237, 0: Wrong continued indentation.
-                                     required=False,
-                                     ^                | (bad-continuation)
-C:238, 0: Wrong continued indentation.
-                                     help=output_arg_help)
-                                     ^                | (bad-continuation)
-C:246, 0: Wrong continued indentation.
-                                     action='store_true',
-                                     ^                | (bad-continuation)
-C:247, 0: Wrong continued indentation.
-                                     default=False,
-                                     ^                | (bad-continuation)
-C:248, 0: Wrong continued indentation.
-                                     required=False,
-                                     ^                | (bad-continuation)
-C:249, 0: Wrong continued indentation.
-                                     help=profile_arg_help)
-                                     ^                | (bad-continuation)
-C:258, 0: Wrong continued indentation.
-                                     action='store_true',
-                                     ^                | (bad-continuation)
-C:259, 0: Wrong continued indentation.
-                                     default=False,
-                                     ^                | (bad-continuation)
-C:260, 0: Wrong continued indentation.
-                                     required=False,
-                                     ^                | (bad-continuation)
-C:261, 0: Wrong continued indentation.
-                                     help=profile_mem_arg_help)
-                                     ^                | (bad-continuation)
-C:266, 0: Wrong continued indentation.
-                                     action='store',
-                                     ^                | (bad-continuation)
-C:267, 0: Wrong continued indentation.
-                                     default='INFO',
-                                     ^                | (bad-continuation)
-C:268, 0: Wrong continued indentation.
-                                     required=False,
-                                     ^                | (bad-continuation)
-C:269, 0: Wrong continued indentation.
-                                     help='Specify the level of logging to be used.',
-                                     ^                | (bad-continuation)
-C:270, 0: Wrong continued indentation.
-                                     choices=log_helper.log_levels.keys())
-                                     ^                | (bad-continuation)
-C:377, 0: Wrong continued indentation.
-                                                                      analysis.get_analysis_type())
-                                                                |     ^ (bad-continuation)
-C:417, 0: Line too long (125/120) (line-too-long)
-C:418, 0: Line too long (121/120) (line-too-long)
-C:423, 0: Line too long (122/120) (line-too-long)
-C:466, 0: Wrong continued indentation.
-                                 action='help',
-                                 ^                | (bad-continuation)
-C:467, 0: Wrong continued indentation.
-                                 default=argparse.SUPPRESS,
-                                 ^                | (bad-continuation)
-C:468, 0: Wrong continued indentation.
-                                 help='show this help message and exit')
-                                 ^                | (bad-continuation)
-C:558, 0: Wrong continued indentation.
+W: 18, 0: TODO We need to add saving of analyses to the workflow itself and allow saving to separate files (fixme)
+W: 19, 0: TODO Need to add cabability to save workflow state after each analysis completes and ability to restart a workflow after it has been interrupted (and moving the workflow to a different machine) (fixme)
+W: 20, 0: TODO Add template for writing tests for integrated analysis functions (fixme)
+W: 21, 0: TODO Implement the workflow we show in the BASTet paper (fixme)
+W: 22, 0: TODO Add MPI support to the workflow executor (fixme)
+W: 25, 0: TODO We need a command-line option to define the workflow executor type (fixme)
+W: 26, 0: TODO Update the driver classes to expose their own parameters using the same interface as the analysis and executors. (fixme)
+W: 27, 0: TODO Investigate automatic wrapping of iPython notebooks (fixme)
+W: 28, 0: TODO Can we create python scripts from in-memory workflows? (fixme)
+W: 31, 0: TODO Add documentation on running workflows using the driver (fixme)
+W: 32, 0: TODO Add documentation on how to restore an analysis workflow from file (fixme)
+W: 33, 0: TODO Add documentation on how to push analyses out-of-core (fixme)
+W: 34, 0: TODO Add documentation on logging (fixme)
+W: 35, 0: TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling (fixme)
+W: 36, 0: TODO Add module for data strucutres (fixme)
+W: 37, 0: TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking (fixme)
+W:717, 0: TODO we should compute the minimum and maximum start time and compute the total runtime that way as well (fixme)
+W:718, 0: TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything (fixme)
+C: 19, 0: Line too long (195/120) (line-too-long)
+C: 37, 0: Line too long (164/120) (line-too-long)
+C:584, 0: Wrong continued indentation.
                                       "by the analysis but potentially modified by it")
                             |         ^ (bad-continuation)
-R: 24, 0: Too many instance attributes (21/7) (too-many-instance-attributes)
-R: 88, 4: Too many arguments (7/5) (too-many-arguments)
-R:272, 4: Too many branches (18/12) (too-many-branches)
-C:343, 4: Invalid method name "add_and_parse_workflow_arguments" (invalid-name)
-R:343, 4: Too many local variables (27/15) (too-many-locals)
-E:367,12: No value for argument 'message' in classmethod call (no-value-for-parameter)
-R:343, 4: Too many branches (15/12) (too-many-branches)
-W:553,12: No exception type(s) specified (bare-except)
-W:640,12: No exception type(s) specified (bare-except)
-W:647,12: No exception type(s) specified (bare-except)
-R:563, 4: Too many branches (21/12) (too-many-branches)
+R: 40, 0: Too many instance attributes (21/7) (too-many-instance-attributes)
+R:104, 4: Too many arguments (7/5) (too-many-arguments)
+R:288, 4: Too many branches (18/12) (too-many-branches)
+C:359, 4: Invalid method name "add_and_parse_workflow_arguments" (invalid-name)
+R:359, 4: Too many local variables (28/15) (too-many-locals)
+R:359, 4: Too many branches (17/12) (too-many-branches)
+W:579,12: No exception type(s) specified (bare-except)
+W:666,12: No exception type(s) specified (bare-except)
+W:673,12: No exception type(s) specified (bare-except)
+R:589, 4: Too many branches (21/12) (too-many-branches)
 W:  4, 0: Unused import sys (unused-import)

@@ -1,9 +1,3 @@
 ************* Module omsi.workflow.executor.base
-C:120, 0: Line too long (122/120) (line-too-long)
 C: 37, 4: Invalid class attribute name "DEFAULT_EXECUTOR_CLASS" (invalid-name)
-W:106, 4: __init__ method from base class 'parameter_manager' is not called (super-init-not-called)
-C:187, 8: Invalid variable name "re" (invalid-name)
-E:226,12: No value for argument 'message' in classmethod call (no-value-for-parameter)
-E:230,12: No value for argument 'message' in classmethod call (no-value-for-parameter)
 R: 16, 0: Too many public methods (24/20) (too-many-public-methods)
-W: 11, 0: Unused import parameter_data (unused-import)
