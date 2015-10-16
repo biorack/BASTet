@@ -56,3 +56,27 @@ shared Package
     :members:
     :undoc-members:
     :show-inheritance:
+
+:mod:`analysis_data` Module
+---------------------------
+
+.. automodule:: omsi.shared.analysis_data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`mpi_helper` Module
+-------------------------
+
+.. automodule:: omsi.shared.mpi_helper
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`run_info_data` Module
+---------------------------
+
+.. automodule:: omsi.shared.run_info_data
+    :members:
+    :undoc-members:
+    :show-inheritance:
