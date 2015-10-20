@@ -7,8 +7,8 @@ to load and investigate the data.
 import pickle
 
 from omsi.analysis.base import analysis_base
-from omsi.shared.analysis_data import data_dtypes
-from omsi.shared.dependency_data import dependency_dict
+from omsi.datastructures.analysis_data import data_dtypes
+from omsi.datastructures.dependency_data import dependency_dict
 from omsi.shared.log import log_helper
 
 try:
@@ -247,6 +247,9 @@ class analysis_generic(analysis_base):
             parameter_list = analysis_object.get_all_parameter_data(load_data=False,
                                                                     exclude_dependencies=False)
             for param in parameter_list:
+                # Ignore the profiling parameters as they are added by the analysis base class already
+                if param['name'] in ['profile_time_and_usage', 'profile_memory']:
+                    continue
                 self.add_parameter(name=param['name'],
                                    help=param['help'],
                                    dtype=param['dtype'])
