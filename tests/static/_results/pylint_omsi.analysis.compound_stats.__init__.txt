@@ -1,4 +1,4 @@
 ************* Module omsi.analysis.compound_stats
-C:  4, 0: Missing function docstring (missing-docstring)
-F:  6, 8: Unable to import 'MIDAS' (import-error)
-W:  6, 8: Unused variable 'MIDAS' (unused-variable)
+C:  5, 0: Missing function docstring (missing-docstring)
+F:  7, 8: Unable to import 'MIDAS' (import-error)
+W:  7, 8: Unused variable 'MIDAS' (unused-variable)

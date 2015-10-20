@@ -3,13 +3,13 @@ W:126, 0: TODO np.require create an in-memory copy of the full data. Allow usage
 C:106, 0: No space allowed before comma
             log_helper.warning(__name__ , "IMG size: " + str(imgsize) + " Expected size: " + \
                                         ^ (bad-whitespace)
-C:175, 0: No space allowed after bracket
+C:177, 0: No space allowed after bracket
         temp_img_file = open( self.img_filename , 'rb' )
                             ^ (bad-whitespace)
-C:175, 0: No space allowed before comma
+C:177, 0: No space allowed before comma
         temp_img_file = open( self.img_filename , 'rb' )
                                                 ^ (bad-whitespace)
-C:175, 0: No space allowed before bracket
+C:177, 0: No space allowed before bracket
         temp_img_file = open( self.img_filename , 'rb' )
                                                        ^ (bad-whitespace)
 R: 18, 4: Too many arguments (6/5) (too-many-arguments)
@@ -17,4 +17,4 @@ R: 18, 4: Too many local variables (24/15) (too-many-locals)
 E: 83,24: Instance of 'int' has no 'shape' member (but some types could not be inferred) (maybe-no-member)
 E:146,36: Instance of 'int' has no 'shape' member (but some types could not be inferred) (maybe-no-member)
 R: 18, 4: Too many branches (17/12) (too-many-branches)
-C:245,12: Invalid variable name "l" (invalid-name)
+C:247,12: Invalid variable name "l" (invalid-name)

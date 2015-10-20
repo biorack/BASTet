@@ -1,4 +1,4 @@
-************* Module omsi.shared.run_info_data
+************* Module omsi.datastructures.run_info_data
 W: 40, 0: TODO Expand the data that is being recorded, e.g. psutil data etc. (fixme)
 W: 41, 0: TODO Add options to record inputs and outputs of functions and the function itself (fixme)
 W:294, 0: TODO: This only gives execution time in full seconds right now (fixme)
