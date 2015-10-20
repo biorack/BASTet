@@ -266,7 +266,7 @@ To execute our above example from the command line we can now simply do the foll
     python run_workflow.py --script normalize_image.py
                            --ana_0:msidata $HOME/20120711_Brain.h5:/entry_0/data_0
                            --ana_0:mzdata  $HOME/20120711_Brain.h5:/entry_0/data_0/mz
-`
+
 In order to avoid collisions between parameters with the same name for different analyses, the tool prepends the unique ``analysis_identifier`` to each parameter. Since we did not set any explicit ``analysis_identifier` (e.g, via ``a1.analysis_identifier='a1'``), the tool automatically generated unique identifiers (i.e, ``ana_0``, ``ana_1``, and ``ana_3`` for our 3 analyses). To view all available command line option we can simply call the script with ``--help``. If one or more workflow scipts are given (here via seperate ``--script`` parameters), then all unfilled options of those workflows and the corresponding analyses will be listed as. E.g.
 
 

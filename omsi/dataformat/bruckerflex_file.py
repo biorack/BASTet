@@ -47,11 +47,14 @@ a = bruckerflex_file( dirname )
 """
 
 import os
-import numpy as np
 import math
-from omsi.shared.dependency_data import dependency_dict
+
+import numpy as np
+
+from omsi.datastructures.dependency_data import dependency_dict
 from omsi.dataformat.file_reader_base import file_reader_base_with_regions
 from omsi.shared.log import log_helper
+
 
 class bruckerflex_file(file_reader_base_with_regions):
     """Interface for reading a single bruker flex image file.

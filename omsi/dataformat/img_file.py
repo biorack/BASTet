@@ -169,8 +169,10 @@ class img_file(file_reader_base):
     def spectrum_iter(self):
         """
         Enable iteration over the spectra in the file
+
         :return: tuple of ((x , y) , intensities), i.e., the tuple of (x, y) integer index of the spectrum and
             the numpy array of the intensities
+
         """
         temp_img_file = open( self.img_filename , 'rb' )
         for xindex in range(self.shape[0]):

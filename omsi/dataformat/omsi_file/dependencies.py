@@ -4,8 +4,9 @@ Base module for managing of dependencies between data in OpenMSI HDF5 files
 
 import time
 import os
-import h5py
 import warnings
+
+import h5py
 
 from omsi.dataformat.omsi_file.format import omsi_format_common, \
     omsi_format_dependencies, \
@@ -370,7 +371,6 @@ class omsi_file_dependencies(omsi_file_common):
         :returns: List analysis_data objects containing either omsi file API interface objects or
                 h5py objects for the dependcies. Access using [index]['name'] and [index]['data'].
         """
-        from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
         if omsi_main_parent is None:
             omsi_main_parent = omsi_file_common.get_omsi_object(self.managed_group.parent)
         if dependency_list is None:
@@ -720,7 +720,7 @@ class omsi_file_dependencydata(omsi_file_common):
         :returns: omsi_file_dependencydata object for management of the newly created object
 
         """
-        from omsi.shared.dependency_data import dependency_dict
+        from omsi.datastructures.dependency_data import dependency_dict
         dep_group = dependency_group
         # 1) Save the name of the parameter
         param_name_data = dep_group.require_dataset(name=unicode(omsi_format_dependencydata.dependency_parameter),
@@ -911,7 +911,7 @@ class omsi_file_dependencydata(omsi_file_common):
         if omsi_format_dependencydata.dependency_typename in self.managed_group.keys():
             return self.managed_group[unicode(omsi_format_dependencydata.dependency_typename)][0]
         else:
-            from omsi.shared.dependency_data import dependency_dict
+            from omsi.datastructures.dependency_data import dependency_dict
             param_name = self.get_parameter_name()
             if param_name is not None and len(param_name) > 0:
                 return dependency_dict.dependency_types['parameter']
@@ -975,7 +975,7 @@ class omsi_file_dependencydata(omsi_file_common):
 
         :returns: dependency_dict object with all the dependency data.
         """
-        from omsi.shared.dependency_data import dependency_dict
+        from omsi.datastructures.dependency_data import dependency_dict
         output_dependency = dependency_dict()
         try:
             output_dependency['param_name'] = self.get_parameter_name()

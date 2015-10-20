@@ -7,13 +7,13 @@ from omsi.analysis.base import analysis_base
 ###############################################################
 #  1) Basic integration of your analysis with omsi (Required) #
 ###############################################################
-class omsi_analysis_template(analysis_base):
+class analysis_template(analysis_base):
     """
     Template intended to help with the development of new analysis classes.
 
     Search for EDIT_ME to find locations that need to be changed.
 
-    EDIT_ME Search for omsi_analysis_template and replace it with your classname throughout
+    EDIT_ME Search for analysis_template and replace it with your classname throughout
 
     EDIT_ME Replace this doc-string with your class documentation
 
@@ -28,7 +28,7 @@ class omsi_analysis_template(analysis_base):
         Change the class-name to your class to call the init function of
         analysis_base. If you did a replace all then this should be done already.
         """
-        super(omsi_analysis_template, self).__init__()
+        super(analysis_template, self).__init__()
         dtypes = self.get_default_dtypes()
         groups = self.get_default_parameter_groups()
         """
@@ -148,7 +148,7 @@ class omsi_analysis_template(analysis_base):
 
         # Expose the qslice viewer functionality of any data dependencies
         if viewer_option >= num_custom_viewer_options:
-            return super(omsi_analysis_template, cls).v_qslice(analysis_object,
+            return super(analysis_template, cls).v_qslice(analysis_object,
                                                                z,
                                                                viewer_option=viewer_option-num_custom_viewer_options)
 
@@ -214,9 +214,9 @@ class omsi_analysis_template(analysis_base):
             """
             EDIT_ME
 
-            Replace omsi_analysis_template with your classname
+            Replace analysis_template with your classname
             """
-            return super(omsi_analysis_template, cls).v_qspectrum(analysis_object,
+            return super(analysis_template, cls).v_qspectrum(analysis_object,
                                                                   x,
                                                                   y,
                                                                   viewer_option=viewer_option-num_custom_viewer_options)
@@ -280,9 +280,9 @@ class omsi_analysis_template(analysis_base):
         # Both viewer_options point to a data dependency
         if qspectrum_viewer_option >= num_custom_spectrum_viewer_options \
                 and qslice_viewer_option >= num_custom_slice_viewer_options:
-            """EDIT_ME Replace the omsi_analysis_template class name with your class name"""
+            """EDIT_ME Replace the analysis_template class name with your class name"""
             mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ= \
-                super(omsi_analysis_template, cls)\
+                super(analysis_template, cls)\
                     .v_qmz(analysis_object,
                            qslice_viewer_option=qslice_viewer_option-num_custom_slice_viewer_options,
                            qspectrum_viewer_option=qspectrum_viewer_option-num_custom_spectrum_viewer_options)
@@ -330,10 +330,10 @@ class omsi_analysis_template(analysis_base):
         """
         EDIT_ME
 
-        Change the omsi_analysis_template class-name to your class. If you did a
+        Change the analysis_template class-name to your class. If you did a
         replace all, then this should be done already.
         """
-        dependent_options = super(omsi_analysis_template, cls).v_qspectrum_viewer_options(analysis_object)
+        dependent_options = super(analysis_template, cls).v_qspectrum_viewer_options(analysis_object)
         spectrum_viewer_options = custom_options + dependent_options
         return spectrum_viewer_options
 
@@ -368,10 +368,10 @@ class omsi_analysis_template(analysis_base):
         """
         EDIT_ME
 
-        Change the omsi_analysis_template class-name to your class.  If you did
+        Change the analysis_template class-name to your class.  If you did
         a replace all, then this should be done already.
         """
-        dependent_options = super(omsi_analysis_template, cls).v_qslice_viewer_options(analysis_object)
+        dependent_options = super(analysis_template, cls).v_qslice_viewer_options(analysis_object)
         slice_viewer_options = custom_options + dependent_options
         return slice_viewer_options
 
@@ -384,8 +384,8 @@ if __name__ == "__main__":
     """
     EDIT_ME
 
-    Simply replace the omsi_analysis_template class name with your class name
+    Simply replace the analysis_template class name with your class name
     """
-    cl_analysis_driver(analysis_class=omsi_analysis_template).main()
+    cl_analysis_driver(analysis_class=analysis_template).main()
 
 

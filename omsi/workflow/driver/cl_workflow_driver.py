@@ -35,6 +35,7 @@ from omsi.shared.log import log_helper
 # TODO Add documentation on how to use the run_info_data module to track runtime data and do profiling
 # TODO Add module for data strucutres
 # TODO Prepare user training on, workflows, logging, integration of analyses (derived class, wrapping of a function, and decorating a function), provenance tracking
+# TODO Add documentation on how we do testing
 
 
 class cl_workflow_driver(workflow_driver_base):

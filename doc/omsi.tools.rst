@@ -26,13 +26,13 @@ tools Package
     :show-inheritance:
 
 
-tools.experimental Package
-==========================
+tools.misc Package
+===================
 
 :mod:`tools.misc` Package
 --------------------------
 
-.. automodule:: omsi.tools.experimental
+.. automodule:: omsi.tools.misc
     :members:
     :undoc-members:
     :show-inheritance:

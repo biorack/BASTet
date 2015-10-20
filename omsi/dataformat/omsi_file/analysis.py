@@ -13,7 +13,7 @@ from omsi.dataformat.omsi_file.format import \
     omsi_format_dependencies
 from omsi.dataformat.omsi_file.dependencies import omsi_dependencies_manager
 from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
-from omsi.shared.run_info_data import run_info_dict
+from omsi.datastructures.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.log import log_helper
 
@@ -346,7 +346,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                   automatically written to file by this function so no addition work is required.
 
         """
-        from omsi.shared.analysis_data import analysis_data
+        from omsi.datastructures.analysis_data import analysis_data
         from omsi.dataformat.omsi_file.dependencies import omsi_file_dependencies
         from omsi.analysis.base import analysis_base
 
@@ -483,7 +483,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :param ana_data: The analysis_data object with the description of the data to be written.
         :type ana_data: omsi.analysis.analysis_data
         """
-        from omsi.shared.analysis_data import analysis_data, data_dtypes
+        from omsi.datastructures.analysis_data import analysis_data, data_dtypes
         curr_dtype = ana_data['dtype']
         try:
             if curr_dtype == data_dtypes.get_dtypes()['ndarray']:
@@ -556,8 +556,9 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # file.
         else:
             # Safely convert scalars to numpy but warn in case we see something else
-            if ana_data['dtype'] not in [int, float, long, complex, bool, str, unicode,
-                                         'int', 'float', 'long', 'complex', 'bool', 'str', 'unicode']:
+            from omsi.datastructures.analysis_data import data_dtypes
+            default_dtypes = data_dtypes.get_dtypes()
+            if ana_data['dtype'] not in default_dtypes.keys() and ana_data['dtype'] not in default_dtypes.values():
                 warnings.warn("WARNING: " + str(ana_data['name']) +
                               ": The data specified by the analysis object is not " +
                               "in numpy format. Attempting to convert the data to numpy")
@@ -751,7 +752,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :returns: List of analysis_data objects with the names and h5py or numpy objects.
                  Access using [index]['name'] and [index]['data'].
         """
-        from omsi.shared.analysis_data import analysis_data
+        from omsi.datastructures.analysis_data import analysis_data
         output_list = []
         if self.managed_group is not None:
             for item_obj in self.managed_group.items():
@@ -783,8 +784,8 @@ class omsi_file_analysis(omsi_dependencies_manager,
         :returns: List of parameter_data objects with names and h5py or numpy object. Access using
                  [index]['name'] and [index]['data'].
         """
-        from omsi.shared.analysis_data import parameter_data
-        from omsi.shared.dependency_data import dependency_dict
+        from omsi.datastructures.analysis_data import parameter_data
+        from omsi.datastructures.dependency_data import dependency_dict
         output_list = []
         if self.parameter is not None:
             for item_obj in self.parameter.items():

@@ -2,14 +2,15 @@
 Helper module with data structures for managing analysis-related data.
 """
 
-import numpy as np
-from omsi.shared.dependency_data import dependency_dict
-from omsi.shared.log import log_helper
-
 import warnings
 import sys
 import ast
+
+import numpy as np
 import h5py
+
+from omsi.datastructures.dependency_data import dependency_dict
+from omsi.shared.log import log_helper
 
 
 #########################################################

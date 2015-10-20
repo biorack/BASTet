@@ -3,22 +3,21 @@ Module specifying the base analysis API for integrating new analysis with the to
 OpenMSI science gateway.
 """
 
-import time
 import warnings
 import weakref
+from collections import OrderedDict
 
 import numpy as np
 
 from omsi.workflow.executor.base import workflow_executor_base
 from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
 from omsi.dataformat.omsi_file.msidata import omsi_file_msidata
-from omsi.shared.analysis_data import analysis_data, parameter_data, data_dtypes
-from omsi.shared.dependency_data import dependency_dict
-from omsi.shared.analysis_data import parameter_manager
+from omsi.datastructures.analysis_data import analysis_data, parameter_data, data_dtypes
+from omsi.datastructures.dependency_data import dependency_dict
+from omsi.datastructures.analysis_data import parameter_manager
 import omsi.shared.mpi_helper as mpi_helper
-from omsi.shared.run_info_data import run_info_dict
+from omsi.datastructures.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
-from collections import OrderedDict
 
 
 class AnalysisReadyError(Exception):

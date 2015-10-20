@@ -3,13 +3,15 @@ Module for management of general metadata storage entities. These are often spec
 ---e.g., omsi_file_instrument, omsi_file_sample---to store specific metadata and add
 more functionality.
 """
+import time
+import json
+
+import h5py
+from numpy import nan as float_nan
+
 from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_metadata_collection
 from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
-from omsi.shared.metadata_data import metadata_dict, metadata_value
-import h5py
-import time
-from numpy import nan as float_nan
-import json
+from omsi.datastructures.metadata.metadata_data import metadata_dict, metadata_value
 
 
 class omsi_metadata_collection_manager(omsi_file_object_manager):

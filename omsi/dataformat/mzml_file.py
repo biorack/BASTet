@@ -3,15 +3,17 @@ This module provides functionality for reading mzml mass spectrometry image file
 
 filename = '/Users/oruebel/Devel/openmsi-data/mzML_Data/N2A2_Serratia_spots_extract_TI.mzML'
 """
-import numpy as np
-from pyteomics import mzml
-
 import re
 import os
+
+import numpy as np
+
+from pyteomics import mzml
+
 from omsi.dataformat.file_reader_base import file_reader_base_multidata
-from omsi.shared.dependency_data import dependency_dict
-from omsi.shared.metadata_data import metadata_dict, metadata_value
-from omsi.shared.metadata_ontologies import METADATA_ONTOLOGIES
+from omsi.datastructures.dependency_data import dependency_dict
+from omsi.datastructures.metadata.metadata_data import metadata_dict, metadata_value
+from omsi.datastructures.metadata.metadata_ontologies import METADATA_ONTOLOGIES
 from omsi.shared.log import log_helper
 
 
@@ -117,9 +119,11 @@ class mzml_file(file_reader_base_multidata):
     def spectrum_iter(self):
         """
         Generator function that yields a position and associated spectrum for a selected datacube type.
+
         :yield: (xidx, yidx) a tuple of ints representing x and y position in the image
-        :yield: yi,          a numpy 1D-array of floats containing spectral intensities at the given position
-                                and for the selected datacube type
+        :yield: yi,          a numpy 1D-array of floats containing spectral intensities at the given position \
+                             and for the selected datacube type
+
         """
         reader = mzml.read(self.basename)
         if self.select_dataset is None:

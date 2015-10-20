@@ -14,8 +14,10 @@
 # TODO Register all print-outs with the email message (use logging instead of print)
 # TODO add ability have --format option for each dataset to be converted
 
+import sys
+import getpass
+
 from omsi.dataformat.omsi_file import *
-from omsi.dataformat import *
 from omsi.dataformat import file_reader_base
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
@@ -23,16 +25,11 @@ from omsi.analysis.findpeaks.omsi_findpeaks_local import omsi_findpeaks_local
 from omsi.analysis.msi_filtering.omsi_tic_norm import omsi_tic_norm
 from omsi.shared.omsi_web_helper import WebHelper
 from omsi.shared.omsi_web_helper import UserInput
-from omsi.shared.dependency_data import dependency_dict
-from omsi.shared.metadata_data import metadata_value
-import time
-import numpy as np
-import math
-import sys
-import os
-import warnings
-import getpass
+from omsi.datastructures.dependency_data import dependency_dict
+from omsi.datastructures.metadata.metadata_data import metadata_value
 from omsi.shared.log import log_helper
+
+
 
 
 # Imports for thumbnail image rendering

@@ -2,9 +2,8 @@
 Module used to help with the execution of complex analyses workflows
 """
 from omsi.workflow.executor.base import workflow_executor_base
-from omsi.shared.run_info_data import run_info_dict
 from omsi.shared.log import log_helper
-from omsi.shared.analysis_data import data_dtypes
+from omsi.datastructures.analysis_data import data_dtypes
 import omsi.shared.mpi_helper as mpi_helper
 
 

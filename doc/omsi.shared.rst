@@ -9,30 +9,6 @@ shared Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`dependency_data` Module
------------------------------
-
-.. automodule:: omsi.shared.dependency_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`metadata_data` Module
----------------------------
-
-.. automodule:: omsi.shared.metadata_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`metadata_ontologies` Module
----------------------------------
-
-.. automodule:: omsi.shared.metadata_ontologies
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`omsi_web_helper` Module
 -----------------------------
 
@@ -57,13 +33,6 @@ shared Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`analysis_data` Module
----------------------------
-
-.. automodule:: omsi.shared.analysis_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 :mod:`mpi_helper` Module
 -------------------------
@@ -73,10 +42,3 @@ shared Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`run_info_data` Module
----------------------------
-
-.. automodule:: omsi.shared.run_info_data
-    :members:
-    :undoc-members:
-    :show-inheritance:

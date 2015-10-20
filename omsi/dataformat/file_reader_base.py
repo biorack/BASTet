@@ -9,7 +9,7 @@ ToDo:
 * Need to implement new file format for combined raw data file (ie., multiple raw files in one folder).
 
 """
-from omsi.shared.metadata_data import metadata_dict
+from omsi.datastructures.metadata.metadata_data import metadata_dict
 
 class file_reader_base(object):
     """

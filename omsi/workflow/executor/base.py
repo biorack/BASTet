@@ -6,10 +6,10 @@ either by a workflow driver or the user.
 """
 
 from omsi.workflow.common import analysis_task_list
-from omsi.shared.run_info_data import run_info_dict
+from omsi.datastructures.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
-from omsi.shared.analysis_data import data_dtypes
-from omsi.shared.analysis_data import parameter_manager
+from omsi.datastructures.analysis_data import data_dtypes
+from omsi.datastructures.analysis_data import parameter_manager
 from omsi.shared.log import log_helper
 
 

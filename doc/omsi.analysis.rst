@@ -10,23 +10,15 @@ analysis Package
     :show-inheritance:
 
 :mod:`base` Module
---------------------------------
+------------------
 
 .. automodule:: omsi.analysis.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`analysis_data` Module
---------------------------------
-
-.. automodule:: omsi.analysis.analysis_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`generic` Module
------------------------------------
+---------------------
 
 .. automodule:: omsi.analysis.generic
     :members:

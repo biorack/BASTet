@@ -5,7 +5,7 @@ from omsi.dataformat.omsi_file.format import omsi_format_instrument
 from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.metadata_collection import omsi_metadata_collection_manager
 from omsi.dataformat.omsi_file.metadata_collection import omsi_file_metadata_collection
-from omsi.shared.metadata_data import metadata_value, metadata_dict
+from omsi.datastructures.metadata.metadata_data import metadata_value, metadata_dict
 
 
 class omsi_instrument_manager(omsi_metadata_collection_manager):

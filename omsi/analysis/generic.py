@@ -49,7 +49,7 @@ class analysis_generic(analysis_base):
     DEFAULT_OUTPUT_PREFIX = "output_"
 
     @classmethod
-    def from_function(cls, analysis_function, output_names=None):
+    def from_function(cls, analysis_function, output_names=None, name_key="undefined"):
         """
         Create a generic analysis class for a given analysis function.
 
@@ -60,11 +60,12 @@ class analysis_generic(analysis_base):
 
         :param analysis_function: The analysis function to be wrapped for provenance tracking and storage
         :param output_names: Optionally, define a list of the names of the outputs
+        :param name_key: The name for the analysis, i.e., the analysis  identifier
 
         :return: A new generic analysis class
         """
         log_helper.debug(__name__, "Creating generic analysis from function")
-        generic_analysis = cls()
+        generic_analysis = cls(name_key=name_key)
         generic_analysis.real_analysis_type = analysis_function.__code__.co_name
         function_argcount = analysis_function.__code__.co_argcount
         function_args = analysis_function.__code__.co_varnames[0:function_argcount]
