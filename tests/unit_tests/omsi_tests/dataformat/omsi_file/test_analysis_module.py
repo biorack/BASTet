@@ -6,6 +6,10 @@ import unittest
 import tempfile
 
 from omsi.dataformat.omsi_file.main_file import omsi_file
+from omsi.analysis.generic import analysis_generic
+from omsi.datastructures.analysis_data import analysis_data
+from omsi.dataformat.omsi_file.analysis import omsi_file_analysis
+import numpy as np
 
 
 class test_omsi_file_analysis(unittest.TestCase):
@@ -14,6 +18,7 @@ class test_omsi_file_analysis(unittest.TestCase):
         self.named_temporary_file = tempfile.NamedTemporaryFile()
         self.test_filename = self.named_temporary_file.name
         self.testfile = omsi_file(self.test_filename)
+        self.exp = self.testfile.create_experiment()
 
     def tearDown(self):
         # Clean up the test suite
@@ -27,7 +32,20 @@ class test_omsi_file_analysis(unittest.TestCase):
 
     def test_create_analysis(self):
         # Testing the creation of derived analysis
-        pass
+        testanaidname = "Peak Finding 123"
+        def my_funct(a):
+            return np.sum(a)
+        testana = analysis_generic.from_function(my_funct, name_key=testanaidname)
+        _ = testana.execute(a=np.arange(10))
+        analysis, _ = self.exp.create_analysis(testana)
+        self.assertIsInstance(analysis, omsi_file_analysis)
+        tempanaid = analysis.get_analysis_identifier()[:]
+        self.assertEquals(tempanaid, testanaidname)
+        tempanatype = analysis.get_analysis_type()[:]
+        self.assertEquals(tempanatype, testana.get_analysis_type())
+        self.assertIsInstance(self.exp.get_analysis_by_identifier(testanaidname), omsi_file_analysis)
+
+
     """
     print "Creating derived analysis"
     testanaidname = "Peak Finding 123"

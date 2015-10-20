@@ -9,7 +9,7 @@ from omsi.dataformat.omsi_file.main_file import omsi_file
 import numpy as np
 
 
-class test_greedy_excutor(unittest.TestCase):
+class test_greedy_executor(unittest.TestCase):
 
     def setUp(self):
         self.named_temporary_file = tempfile.NamedTemporaryFile()
@@ -41,15 +41,16 @@ class test_greedy_excutor(unittest.TestCase):
         self.assertNotEquals(a, None)
 
     def test_warp_function_save_and_recreate(self):
-        def f(a):
+        def my_funct(a):
             return np.sum(a)
-        g = analysis_generic.from_function(f)
+        g = analysis_generic.from_function(my_funct)
         res1 = g.execute(a=np.arange(10))
         f = omsi_file(self.test_filename, 'a')
         e = f.create_experiment()
         e.create_analysis(g)
         f.flush()
         del f
+        del my_funct
         f = omsi_file(self.test_filename, 'a')
         e = f.get_experiment(0)
         a = e.get_analysis(0)

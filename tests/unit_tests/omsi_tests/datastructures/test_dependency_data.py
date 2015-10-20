@@ -2,7 +2,9 @@
 Test the omsi.shared.omsi_dependency module
 """
 import unittest
-from omsi.shared.dependency_data import dependency_dict
+
+from omsi.datastructures.dependency_data import dependency_dict
+
 
 # TODO create a test openmsi data file during setup
 # TODO Add tests for get_data()

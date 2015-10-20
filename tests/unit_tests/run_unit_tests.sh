@@ -6,4 +6,4 @@ export PYTHONPATH=$PWD/../../
 echo "Set PYTHONPATH to: " $PYTHONPATH
 
 # 2) Execute all unit tests
-python -m unittest discover omsi_tests/
+python -m unittest discover -v omsi_tests/
