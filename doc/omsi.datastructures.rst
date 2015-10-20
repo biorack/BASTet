@@ -1,6 +1,18 @@
 datastructures Package
 ======================
 
+
+.. autosummary::
+
+   omsi.datastructures
+   omsi.datastructures.metadata
+   omsi.datastructures.metadata.metadata_data
+   omsi.datastructures.metadata.metadata_ontologies
+   omsi.datastructures.analysis_data
+   omsi.datastructures.dependency_data
+   omsi.datastructures.run_info_data
+
+
 :mod:`datastructures` Package
 -----------------------------
 

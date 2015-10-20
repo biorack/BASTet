@@ -1,6 +1,6 @@
 """
-OpenMSI toolkit analysis package defining the main analysis API as well as
-specific MSI analysis algorithms.
+Package containing the base classes that facilitate the integration of new analysis with the BASTet software
+stack (e.g, the file format) and collection of specific analysis functionality.
 """
 
 from omsi.analysis.findpeaks import *

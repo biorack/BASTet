@@ -20,6 +20,7 @@ from omsi.shared.log import log_helper
 # TODO Add template for writing tests for integrated analysis functions
 # TODO Implement the workflow we show in the BASTet paper
 # TODO Add MPI support to the workflow executor
+# TODO Add pactolus scoring to omsi.analysis.compound_stats.omsi_score_compounds
 
 # Other items
 # TODO We need a command-line option to define the workflow executor type

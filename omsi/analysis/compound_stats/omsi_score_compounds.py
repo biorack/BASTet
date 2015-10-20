@@ -1,12 +1,17 @@
 """
 MIDAS spectrum analysis
 """
+
 # TODO  Add support for using centroided MSI data directly by removing 0's from the intensity and mz array
 # TODO  We can further parallelize the callculations by splitting the compound list up as well (not just the spectra)
 
 from omsi.analysis.base import analysis_base
 import omsi.shared.mpi_helper as mpi_helper
-import MIDAS
+from omsi.shared.log import log_helper
+try:
+    import MIDAS
+except ImportError:
+    log_helper.error(__name__, "Import of MIDAS failed. The omsi_score_compounds module will not work.")
 import os
 import numpy as np
 

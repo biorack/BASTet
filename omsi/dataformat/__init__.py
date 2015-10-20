@@ -1,5 +1,5 @@
 """
-Module for implementation and specification of file formats.
+Package for implementation and specification of file formats.
 """
 
 def mzml_available():

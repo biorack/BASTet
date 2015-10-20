@@ -1,6 +1,18 @@
 shared Package
 ==============
 
+.. autosummary::
+
+   omsi.shared
+   omsi.shared.data_selection
+   omsi.shared.log
+   omsi.shared.mpi_helper
+   omsi.shared.omsi_web_helper
+   omsi.shared.spectrum_layout
+   omsi.shared.third_party
+   omsi.shared.thirs_party.cloudpickle
+
+
 :mod:`data_selection` Module
 ----------------------------
 

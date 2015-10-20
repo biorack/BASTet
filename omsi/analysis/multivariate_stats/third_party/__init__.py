@@ -1,6 +1,4 @@
 """
-Module with third-party modules, functions, classes
-used by some of the analysis modules in the containing 
-package.
+Package containing shared third-party code modules included here to reduce the need for external
+dependencies when only small parts of external code are used.
 """
-

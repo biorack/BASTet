@@ -1,6 +1,18 @@
 tools Package
 =============
 
+.. autosummary::
+
+   omsi.tools
+   omsi.tools.convertToOMSI
+   omsi.tools.run_analysis
+   omsi.tools.run_workflow
+   omsi.tools.misc
+   omsi.tools.misc.create_peak_cube_overview
+   omsi.tools.misc.make_thumb
+   omsi.tools.experimental
+
+
 :mod:`convertToOMSI` Module
 ---------------------------
 

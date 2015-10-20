@@ -1,6 +1,12 @@
 templates Package
 =================
 
+.. autosummary::
+
+   omsi.templates
+   omsi.templates.analysis_template
+
+
 :mod:`templates` Package
 ------------------------
 

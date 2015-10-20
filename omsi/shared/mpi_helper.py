@@ -1,3 +1,7 @@
+"""
+Module used to ease the use of MPI and distributed parallel implementations using MPI
+"""
+
 try:
     from mpi4py import MPI
     MPI_AVAILABLE = True

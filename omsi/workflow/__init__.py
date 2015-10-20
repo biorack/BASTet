@@ -1,5 +1,4 @@
 """
-This module implements functionality for helping with the execution of
-analysis workflows.
+Package with modules for specification and execution of analysis tasks and complex analysis workflows.
 """
 __author__ = 'oruebel'

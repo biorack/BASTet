@@ -1,6 +1,11 @@
 examples Package
 ================
 
+.. autosummary::
+
+   omsi.examples
+
+
 :mod:`simple_viewer` Module
 ---------------------------
 
