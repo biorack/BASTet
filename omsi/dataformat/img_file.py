@@ -57,6 +57,11 @@ class img_file(file_reader_base):
                     raise ValueError("No valid img file found in the given directory.")
             elif basefile.endswith(".img") and os.path.exists(basefile):
                 basefile = basefile.rstrip(".img")
+            elif basefile.endswith(".hdr") and os.path.exists(basefile):
+                basefile = basefile.rstrip(".hdr")
+            elif basefile.endswith(".t2m") and os.path.exists(basefile):
+                basefile = basefile.rstrip(".t2m")
+
             log_helper.log_var(__name__, basefile=basefile)
             if os.path.exists(basefile + ".hdr") and \
                     os.path.exists(basefile + ".t2m") and \
@@ -207,6 +212,10 @@ class img_file(file_reader_base):
         """
         if name.endswith(".img") and os.path.exists(name):
             name = name.rstrip(".img")
+        if name.endswith(".t2m") and os.path.exists(name):
+            name = name.rstrip(".t2m")
+        if name.endswith(".hdr") and os.path.exists(name):
+            name = name.rstrip(".hdr")
         # Check if this points to a basname for the img file
         if os.path.exists(name + ".hdr") and os.path.exists(name + ".t2m") and os.path.exists(name + ".img"):
             return True
