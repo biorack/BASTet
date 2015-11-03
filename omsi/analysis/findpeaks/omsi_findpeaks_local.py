@@ -79,6 +79,7 @@ class omsi_findpeaks_local(analysis_base):
                            'peak_value',
                            'peak_arrayindex',
                            'indata_mz']
+        # TODO Allow the precursor_mz to be stored when doing local peak finding on MS2 data. This should be a 1D float array called 'precursor_mz' with the precursor m/z value for each spectrum
 
     @classmethod
     def v_qslice(cls,
