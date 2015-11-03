@@ -11,14 +11,14 @@ from omsi.shared.log import log_helper
 try:
     import MIDAS
 except ImportError:
-    log_helper.error(__name__, "Import of MIDAS failed. The omsi_score_compounds module will not work.")
+    log_helper.error(__name__, "Import of MIDAS failed. The omsi_score_midas module will not work.")
 import os
 import numpy as np
 import time
 
 
 
-class omsi_score_compounds(analysis_base):
+class omsi_score_midas(analysis_base):
     """
     Class for executing midas on an MSI or local peak finding dataset.
     """
@@ -27,7 +27,7 @@ class omsi_score_compounds(analysis_base):
         """
         Initialize the basic data members
         """
-        super(omsi_score_compounds, self).__init__()
+        super(omsi_score_midas, self).__init__()
         self.analysis_identifier = name_key
         dtypes = self.get_default_dtypes()
         groups = self.get_default_parameter_groups()
@@ -266,10 +266,10 @@ class omsi_score_compounds(analysis_base):
             current_peaks_list = np.zeros(shape=(spectrum_length, 3), dtype=float)
             current_peaks_list[:, 0] = fpl_peak_mz[start:stop]
             current_peaks_list[:, 1] = fpl_peak_value[start:stop]
- 
+
             # Get the parent mass
             current_parent_mass = parent_mass if len(parent_mass) == 1 else parent_mass[spectrum_index]
- 
+
             start_time = time.time()
             # Call MIDAS to score the current spectrum against all compounds in the database
             current_hits = MIDAS.scoring_C.score_main(
@@ -290,7 +290,7 @@ class omsi_score_compounds(analysis_base):
             execution_time = end_time - start_time
             time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
             time_str += " : num hits : " + str(current_hits.shape[0])
-            print time_str            
+            print time_str
 
             # Initialize the hit_table if necessary
             if hit_table is None:
@@ -317,5 +317,5 @@ class omsi_score_compounds(analysis_base):
 
 if __name__ == "__main__":
     from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
-    cl_analysis_driver(analysis_class=omsi_score_compounds).main()
+    cl_analysis_driver(analysis_class=omsi_score_midas).main()
 
