@@ -55,6 +55,8 @@ class img_file(file_reader_base):
                     basefile = filelist[0]
                 else:
                     raise ValueError("No valid img file found in the given directory.")
+            elif basefile.endswith(".img") and os.path.exists(basefile):
+                basefile = basefile.rstrip(".img")
             log_helper.log_var(__name__, basefile=basefile)
             if os.path.exists(basefile + ".hdr") and \
                     os.path.exists(basefile + ".t2m") and \
@@ -203,6 +205,8 @@ class img_file(file_reader_base):
 
            :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
+        if name.endswith(".img") and os.path.exists(name):
+            name = name.rstrip(".img")
         # Check if this points to a basname for the img file
         if os.path.exists(name + ".hdr") and os.path.exists(name + ".t2m") and os.path.exists(name + ".img"):
             return True
