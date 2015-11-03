@@ -365,7 +365,7 @@ class run_info_dict(dict):
                 log_helper.debug(__name__, 'Gather runtime data from parallel tasks',
                                  root=self.mpi_root, comm=self.mpi_comm)
                 self['mpi_rank'] = self.mpi_comm.Get_rank()
-                run_data = self.mpi_comm.gather()
+                run_data = self.mpi_comm.gather(self, self.mpi_root)
                 if self.mpi_comm.Get_rank() == self.mpi_root:
                     merged_run_data = {}
                     for run_dict in run_data:
