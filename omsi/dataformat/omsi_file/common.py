@@ -153,10 +153,8 @@ class omsi_file_common(object):
             * omsi_file_analysis : If the given object is an analysis group
             * omsi_file_msidata : If the given object is a MSI data group
             * omsi_file_dependencydata : If the fiven object is a dependency group
-            * The input h5py_object: If the given objet is a h5py.Dataset
-            * None: In case that an unknown type is given. E.g. a user may have \
-                    given an unmanaged Group object that does not have a \
-                    corresponding omsi file API object.
+            * The input h5py_object: If the given object is a h5py.Dataset or h5py.Group
+            * None: In case that an unknown type is given.
         """
         from omsi.dataformat.omsi_file.experiment import omsi_file_experiment
         from omsi.dataformat.omsi_file.main_file import omsi_file
