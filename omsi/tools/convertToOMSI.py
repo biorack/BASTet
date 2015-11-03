@@ -18,6 +18,7 @@ import sys
 import getpass
 
 from omsi.dataformat import *
+from omsi.dataformat import omsi_file
 from omsi.dataformat import file_reader_base
 from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
 from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
@@ -32,6 +33,8 @@ import warnings
 import os
 import numpy as np
 import math
+import h5py
+import time
 
 # Imports for thumbnail image rendering
 try:
@@ -573,12 +576,12 @@ class ConvertSettings(object):
                 try:
                     ConvertSettings.chunks = (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3]))
                 except:
-                    log_helper.warning(__name__, "An error occured while parsing the --chunking command. " + \
+                    log_helper.warning(__name__, "An error occured while parsing the --chunking command. " +
                                                  "Something may be wrong with the indicated chunk sizes for x y z.")
                     input_error = True
                 if "--auto-chunking" not in argv:
                     ConvertSettings.auto_chunk = False
-                log_helper.info(__name__,"Enable chunking: " + str(ConvertSettings.chunks))
+                log_helper.info(__name__, "Enable chunking: " + str(ConvertSettings.chunks))
             elif current_arg == "--no-chunking":
                 start_index += 1
                 ConvertSettings.chunks = None
@@ -592,7 +595,7 @@ class ConvertSettings(object):
                     ConvertSettings.user_additional_chunks.append(
                         (int(argv[i + 1]), int(argv[i + 2]), int(argv[i + 3])))
                 except:
-                    log_helper.warning(__name__, "An error accured while parsing the --optimized-chunking command. " + \
+                    log_helper.warning(__name__, "An error accured while parsing the --optimized-chunking command. " +
                                                  "Something may be wrong with the indicated chunk sizes for x y z.")
                     input_error = True
             elif current_arg == "--compression":
@@ -613,13 +616,15 @@ class ConvertSettings(object):
                     if ConvertSettings.io_option not in ConvertSettings.available_io_options:
                         raise ValueError("Invalid io option")
                 except:
-                    log_helper.warning(__name__, "An error accured while parsing the --io command. Something may be wrong with the io-type.")
+                    log_helper.warning(__name__, "An error accured while parsing the --io command. " +
+                                       "Something may be wrong with the io-type.")
                     input_error = True
             elif current_arg == "--io-block-limit":
                 start_index += 2
                 try:
-                    ConvertSettings.io_block_size_limit = int(argv[i + 1]) * (1024 * 1024) # MB to Bytes
-                    log_helper.info(__name__, "Set io block limit to: " + str(ConvertSettings.io_block_size_limit) + "Byte")
+                    ConvertSettings.io_block_size_limit = int(argv[i + 1]) * (1024 * 1024)  # MB to Bytes
+                    log_helper.info(__name__, "Set io block limit to: " +
+                                    str(ConvertSettings.io_block_size_limit) + "Byte")
                 except:
                     log_helper.warning(__name__, "An error accured while parsing the --io-block-limit command.")
                     input_error = True
@@ -653,18 +658,20 @@ class ConvertSettings(object):
                 start_index += 2
                 ConvertSettings.format_option = str(argv[i + 1])
                 if ConvertSettings.format_option not in ConvertSettings.available_formats.keys():
-                    log_helper.warning(__name__, "ERROR: Indicated --format option " + \
-                                                 ConvertSettings.format_option + \
-                                                " not supported. Available options are:")
+                    log_helper.warning(__name__,
+                                       "ERROR: Indicated --format option " +
+                                       ConvertSettings.format_option +
+                                       " not supported. Available options are:")
                     log_helper.info(__name__, "     " + str(ConvertSettings.available_formats.keys()))
                     input_error = True
             elif current_arg == "--regions":
                 start_index += 2
                 ConvertSettings.region_option = str(argv[i + 1])
                 if ConvertSettings.region_option not in ConvertSettings.available_region_options:
-                    log_helper.warning(__name__, "ERROR: Indicated --regions option " + \
-                                              ConvertSettings.region_option + \
-                                              " not supported. Available options are:")
+                    log_helper.warning(__name__,
+                                       "ERROR: Indicated --regions option " +
+                                       ConvertSettings.region_option +
+                                       " not supported. Available options are:")
                     log_helper.warning(__name__, "       " + str(ConvertSettings.available_region_options))
                     input_error = True
             elif current_arg == "--add-to-db":
@@ -721,7 +728,9 @@ class ConvertSettings(object):
                 if error_option in ConvertSettings.available_error_options:
                     ConvertSettings.error_handling = error_option
                 else:
-                    log_helper.warning(__name__, "ERROR: Indicated --error-handling option " + error_option + " invalid. Available options:")
+                    log_helper.warning(__name__,
+                                       "ERROR: Indicated --error-handling option " +
+                                       error_option + " invalid. Available options:")
                     log_helper.warning(__name__, "     " + str(ConvertSettings.available_error_options))
                     input_error = True
             elif current_arg.startswith("--methods") or \
@@ -999,7 +1008,9 @@ class ConvertFiles(object):
                 pass
             if not ConvertSettings.auto_chunk:
                 log_helper.info(__name__, "HDF5 chunking: " + str(ConvertSettings.chunks))
-            log_helper.info(__name__, "HDF5 compression: " + str(ConvertSettings.compression) + ", " + str(ConvertSettings.compression_opts))
+            log_helper.info(__name__,
+                            "HDF5 compression: " + str(ConvertSettings.compression) +
+                            ", " + str(ConvertSettings.compression_opts))
 
             # Open the input file
             try:
@@ -1013,8 +1024,12 @@ class ConvertFiles(object):
                     if input_file.supports_multidata():
                         input_file.set_dataset_selection(dataset_index=curr_dataset['dataset'])
                 else:
-                    log_helper.warning(__name__, "ERROR: The following file will not be converted. File type unknown for: " + basefile)
-                    log_helper.info(__name__, "INFO: If you know the correct file format then try setting appropriate --format option.")
+                    log_helper.warning(__name__,
+                                       "ERROR: The following file will not be converted. File type unknown for: " +
+                                       basefile)
+                    log_helper.info(__name__,
+                                    "INFO: If you know the correct file format then try setting " +
+                                    "appropriate --format option.")
                     if ConvertSettings.error_handling == "continue-on-error":
                         pass
                     elif ConvertSettings.error_handling == "terminate-and-cleanup" or\
@@ -1025,7 +1040,8 @@ class ConvertFiles(object):
             except:
                 log_helper.warning(__name__, "ERROR: Unexpected error opening the input file:", sys.exc_info()[0])
                 if ConvertSettings.error_handling == "continue-on-error":
-                    log_helper.info(__name__, basefile + " failure during conversion. Skipping the file and continue conversion.")
+                    log_helper.info(__name__,
+                                    basefile + " failure during conversion. Skipping the file and continue conversion.")
                     continue
                 elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                         ConvertSettings.error_handling == "terminate-only":
@@ -1271,7 +1287,9 @@ class ConvertFiles(object):
                             "_" + expindex + ".png"
                         thumbnail.save(thumbnail_filename, 'PNG')
                     else:
-                        log_helper.info(__name__, "Generation of thumbnail from raw data is not yet supported. Thumbnail not generated.")
+                        log_helper.info(__name__,
+                                        "Generation of thumbnail from raw data is not yet supported. " +
+                                        "Thumbnail not generated.")
                         log_helper.info(__name__, "Enable --nmf or --fpg in order to generate a thumbnail image.")
                         # print "    Generating thumbnail from raw data"
                         # Find three most intense peaks that are at least 1% of the m/z range appart
@@ -1488,9 +1506,12 @@ class ConvertFiles(object):
                                    'exp': 'previous'}
                             re_dataset_list.append(nds)
                     except:
-                        log_helper.warning(__name__,"ERROR: Unexpected error opening the input file:", sys.exc_info()[0])
+                        log_helper.warning(__name__,
+                                           "ERROR: Unexpected error opening the input file:" + str(sys.exc_info()[0]))
                         if ConvertSettings.error_handling == "continue-on-error":
-                            log_helper.info(__name__, currds['basename'] + " failure during conversion. Skipping the file and continue.")
+                            log_helper.info(__name__,
+                                            currds['basename'] +
+                                            " failure during conversion. Skipping the file and continue.")
                             continue
                         elif ConvertSettings.error_handling == "terminate-and-cleanup" or \
                                 ConvertSettings.error_handling == "terminate-only":
@@ -1524,7 +1545,7 @@ class ConvertFiles(object):
             currdataset = in_dataset_list[di]
             basefile = currdataset["basename"]
             try:
-                "Suggested Chunkings: " + basefile
+                print "Suggested Chunkings: " + basefile
                 currformat = currdataset["format"]
                 inputfile = ConvertSettings.available_formats[currformat](basename=basefile,
                                                                           requires_slicing=False)
@@ -1692,7 +1713,7 @@ class ConvertFiles(object):
         elif data_io_option == "all":
             data[:] = input_file[:]
         elif data_io_option == "spectrum_to_image":
-            #Determine the I/O settings
+            # Determine the I/O settings
             log_helper.info(__name__, "Spectrum-to-image I/O. Write %s blocks at a time" % (chunk_shape, ))
             xdim = input_file.shape[0]
             ydim = input_file.shape[1]
