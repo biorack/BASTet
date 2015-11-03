@@ -213,7 +213,7 @@ class omsi_file_common(object):
                 elif type_attribute == 'omsi_file_metadata_collection':
                     return omsi_file_metadata_collection(h5py_object)
                 else:
-                    return None
+                    return h5py_object
             except:
                 # If the attribute is missing, then try to determine the type
                 # based on he name of group
@@ -245,7 +245,7 @@ class omsi_file_common(object):
                 elif groupname == "":  # We are at the root group
                     return omsi_file(h5py_object.file)
                 else:
-                    return None
+                    return h5py_object
         # If we have an hpy.Dataset then we don't have a corresponding API object. Return as is
         elif isinstance(h5py_object, h5py.Dataset):
             return h5py_object
@@ -262,13 +262,12 @@ class omsi_file_common(object):
 
             if object_path is not None:
                 try:
-                    file_object = curr_omsi_file[object_path]
+                    file_object = curr_omsi_file.managed_group[object_path]
                 except KeyError:
                     return None
                 return omsi_file_common.get_omsi_object(file_object, resolve_dependencies=True)
             else:
                 raise ValueError('omsi_file_common.Invalid path or file')
-
         else:
             return None
 
