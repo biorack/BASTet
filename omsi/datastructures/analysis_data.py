@@ -80,7 +80,7 @@ class data_dtypes(dict):
                     raise ValueError('String could not be converted to valid ndarray. This may be ' +
                                      'due to, e.g., a syntax error or the file may not exists')
         elif isinstance(argument, dependency_dict) or \
-                isinstance(argument, h5py.Dataset) or \
+                isinstance(argument, h5py.Dataset) or isinstance(argument, h5py.Group) or \
                 isinstance(argument, omsi_file_analysis) or \
                 isinstance(argument, omsi_file_msidata):
             return argument
