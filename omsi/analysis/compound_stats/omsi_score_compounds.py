@@ -14,6 +14,8 @@ except ImportError:
     log_helper.error(__name__, "Import of MIDAS failed. The omsi_score_compounds module will not work.")
 import os
 import numpy as np
+import time
+
 
 
 class omsi_score_compounds(analysis_base):
@@ -158,6 +160,8 @@ class omsi_score_compounds(analysis_base):
 
         # Calculate the parent_mass
         precursor_mz = self['precursor_mz']              # FIXME  Get the precursor_mz from the MS2 data
+        if precursor_mz == -1:
+             precursor_mz = self['fpl_data']['precursor_mz'][:]
         default_charge = self['default_charge']          # FIXME  Is this an input or should we get this from file
         proton_mass = 1.00782503207 - 5.4857990946e-4
         parent_mass = precursor_mz - (default_charge * proton_mass)
@@ -255,18 +259,24 @@ class omsi_score_compounds(analysis_base):
             spectrum_length = stop - start
             # Skip empty spectra
             if spectrum_length == 0:
+                time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
+                print time_str
                 continue
             # Load the m/z and intensity values for the current spectrum
             current_peaks_list = np.zeros(shape=(spectrum_length, 3), dtype=float)
             current_peaks_list[:, 0] = fpl_peak_mz[start:stop]
             current_peaks_list[:, 1] = fpl_peak_value[start:stop]
-
+ 
+            # Get the parent mass
+            current_parent_mass = parent_mass if len(parent_mass) == 1 else parent_mass[spectrum_index]
+ 
+            start_time = time.time()
             # Call MIDAS to score the current spectrum against all compounds in the database
             current_hits = MIDAS.scoring_C.score_main(
                 Compound_list=compound_list,
                 bBreakRing=break_rings,
                 dCurrentPrecursor_type=precursor_type,
-                dCurrentParentMass=parent_mass,
+                dCurrentParentMass=current_parent_mass,
                 current_peaks_list=current_peaks_list,
                 iParentMassWindow_list=parent_mass_windows,
                 dMass_Tolerance_Parent_Ion=mass_tolerance_parent_ion,
@@ -276,6 +286,12 @@ class omsi_score_compounds(analysis_base):
                 iNegative_Ion_Fragment_Mass_Windows_list=negative_ion_fragment_mass_windows,
                 top_n=None)
 
+            end_time = time.time()
+            execution_time = end_time - start_time
+            time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
+            time_str += " : num hits : " + str(current_hits.shape[0])
+            print time_str            
+
             # Initialize the hit_table if necessary
             if hit_table is None:
                 # If our compound database does not contain any related compounds then just finish
@@ -283,7 +299,7 @@ class omsi_score_compounds(analysis_base):
                     # Initialize the results as empty and finish as there is nothing to do
                     hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
                                          dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
-                    break
+                    continue
                 # If our compound database contains at least one relevant compound then check all spectra
                 else:
                     # Create the data structure to store all results
@@ -291,6 +307,7 @@ class omsi_score_compounds(analysis_base):
                                          dtype=current_hits.dtype)
             # Save the hits for the current pixel
             hit_table[current_index] = current_hits
+
         if hit_table is None:
             hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
                                  dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
