@@ -248,7 +248,7 @@ class omsi_score_midas(analysis_base):
         pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
         if len(pixel_index.shape) == 1:
             pixel_index = pixel_index[np.newaxis, :]
-        hit_table = None
+        hit_table = None  # FIXME The initalization of the hit_table is only valid if we assume that all spectra have the same precursor m/z, which may not be the case
         # Iterate through all the pixel we were asked to process in serial
         for current_index, spectrum_index in enumerate(spectrum_indexes):
             # Determine the start and stop index for the m/z and intensity data of the current spectrum
@@ -298,13 +298,13 @@ class omsi_score_midas(analysis_base):
                 if current_hits.shape[0] == 0:
                     # Initialize the results as empty and finish as there is nothing to do
                     hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
-                                         dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)
+                                         dtype=MIDAS.scoring_C.HIT_TABLE_DTYPE)  # FIXME the number of hits may be different for different spectra if we have varying precursor m/z
                     continue
                 # If our compound database contains at least one relevant compound then check all spectra
                 else:
                     # Create the data structure to store all results
                     hit_table = np.zeros(shape=(pixel_index.shape[0], current_hits.shape[0]),
-                                         dtype=current_hits.dtype)
+                                         dtype=current_hits.dtype)  # FIXME the number of hits may be different for different spectra if we have varying precursor m/z
             # Save the hits for the current pixel
             hit_table[current_index] = current_hits
 

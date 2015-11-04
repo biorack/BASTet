@@ -35,4 +35,4 @@ if midas_available():
 
 if pactolus_available():
     __all__ = ["omsi_score_pactolus"]
-    from omsi.analysis.compound_stats.omsi_score_pactolus import omsi_score_compounds
+    from omsi.analysis.compound_stats.omsi_score_pactolus import omsi_score_pactolus
