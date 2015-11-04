@@ -1,0 +1,31 @@
+************* Module omsi.analysis.compound_stats.omsi_score_midas
+W:  5, 0: TODO  Add support for using centroided MSI data directly by removing 0's from the intensity and mz array (fixme)
+W:  6, 0: TODO  We can further parallelize the callculations by splitting the compound list up as well (not just the spectra) (fixme)
+W: 34, 0: FIXME Check that the group and required settings for parameters are set appropriately (fixme)
+W: 41, 0: FIXME This is not in the config but should be read from the MS2 data if available (fixme)
+W: 45, 0: FIXME make this false once we can read it from file (fixme)
+W: 48, 0: FIXME This is not in the config file. Needed to compute the neutralized *mass* in Da of the parent molecule (fixme)
+W:162, 0: FIXME  Get the precursor_mz from the MS2 data (fixme)
+W:165, 0: FIXME  Is this an input or should we get this from file (fixme)
+W:177, 0: TODO: Possible further optimization by reading only on self.mpi_root and then sending the list to all (fixme)
+W:223, 0: TODO NEED to update since collect now returns a single list not a list of lists (fixme)
+C: 37, 0: Wrong continued indentation.
+                                'group in the file or the omsi_findpeaks_local analysis object',
+                           |    ^ (bad-continuation)
+W:164, 0: Bad indentation. Found 13 spaces, expected 12 (bad-indentation)
+C:262, 0: Line too long (162/120) (line-too-long)
+C:262, 0: Exactly one space required after assignment
+                time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
+                         ^ (bad-whitespace)
+C:291, 0: Line too long (174/120) (line-too-long)
+C:291, 0: Exactly one space required after assignment
+            time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
+                     ^ (bad-whitespace)
+F: 12, 4: Unable to import 'MIDAS' (import-error)
+W: 21, 0: Method 'write_analysis_data' is abstract in class 'analysis_base' but is not overridden (abstract-method)
+W:122, 4: Arguments number differs from overridden method (arguments-differ)
+R:122, 4: Too many local variables (42/15) (too-many-locals)
+C:154, 8: Invalid variable name "positive_ion_fragment_mass_windows" (invalid-name)
+C:155, 8: Invalid variable name "negative_ion_fragment_mass_windows" (invalid-name)
+R:122, 4: Too many branches (19/12) (too-many-branches)
+R: 21, 0: Too many public methods (53/20) (too-many-public-methods)

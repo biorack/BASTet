@@ -1,19 +1,19 @@
 ************* Module omsi.dataformat.omsi_file.common
-C:301, 0: Exactly one space required before assignment
+C:298, 0: Exactly one space required before assignment
                 object_path= None
                            ^ (bad-whitespace)
 W:  4, 0: Wildcard import omsi.dataformat.omsi_file.format (wildcard-import)
 R:  7, 0: Too few public methods (0/2) (too-few-public-methods)
 R:134, 4: Too many local variables (21/15) (too-many-locals)
-W:217,12: No exception type(s) specified (bare-except)
-W:258,16: No exception type(s) specified (bare-except)
+W:215,12: No exception type(s) specified (bare-except)
+W:256,16: No exception type(s) specified (bare-except)
 R:134, 4: Too many return statements (30/6) (too-many-return-statements)
 R:134, 4: Too many branches (37/12) (too-many-branches)
-W:333, 8: Unused variable 'os' (unused-variable)
-W:358,12: No exception type(s) specified (bare-except)
-W:408, 8: No exception type(s) specified (bare-except)
-W:435, 8: No exception type(s) specified (bare-except)
-W:449, 8: No exception type(s) specified (bare-except)
+W:330, 8: Unused variable 'os' (unused-variable)
+W:355,12: No exception type(s) specified (bare-except)
+W:405, 8: No exception type(s) specified (bare-except)
+W:432, 8: No exception type(s) specified (bare-except)
+W:446, 8: No exception type(s) specified (bare-except)
 W:  4, 0: Unused import omsi_format_msidata_partial_spectra from wildcard import (unused-wildcard-import)
 W:  4, 0: Unused import omsi_format_file from wildcard import (unused-wildcard-import)
 W:  4, 0: Unused import omsi_format_msidata_partial_cube from wildcard import (unused-wildcard-import)

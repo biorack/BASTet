@@ -31,15 +31,62 @@ R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.driver.cl_analysis_
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.driver.cl_analysis_driver) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.driver.cl_analysis_driver -> omsi.dataformat.omsi_file.analysis -> omsi.datastructures.dependency_data) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.experiment -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.metadata_collection) (cyclic-import)
-R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_compounds -> omsi.workflow.driver.cl_analysis_driver -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_midas -> omsi.workflow.driver.cl_analysis_driver -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.driver.cl_analysis_driver -> omsi.workflow.common) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.msi_filtering -> omsi.analysis.msi_filtering.omsi_tic_norm -> omsi.workflow.driver.cl_analysis_driver -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
-R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_compounds -> omsi.workflow.driver.cl_analysis_driver -> omsi.workflow.common -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_midas -> omsi.workflow.driver.cl_analysis_driver -> omsi.workflow.common -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analysis.findpeaks.omsi_findpeaks_local -> omsi.analysis.base -> omsi.workflow.executor.base -> omsi.workflow.common -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.generic -> omsi.datastructures.analysis_data -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.findpeaks -> omsi.analysis.findpeaks.omsi_findpeaks_global -> omsi.analysis.base -> omsi.workflow.executor.base -> omsi.workflow.common -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.executor.base -> omsi.datastructures.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.instrument -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.datastructures.dependency_data) (cyclic-import)
 R:  1, 0: Cyclic import (omsi.analysis.base -> omsi.workflow.executor.base -> omsi.datastructures.analysis_data -> omsi.dataformat.omsi_file.msidata -> omsi.dataformat.omsi_file.methods -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis -> omsi.datastructures.dependency_data) (cyclic-import)
+R:  1, 0: Cyclic import (omsi.analysis -> omsi.analysis.compound_stats -> omsi.analysis.compound_stats.omsi_score_pactolus -> omsi.analysis.base -> omsi.workflow.executor.base -> omsi.workflow.common -> omsi.dataformat.omsi_file.common -> omsi.dataformat.omsi_file.analysis) (cyclic-import)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:219
+==omsi.analysis.compound_stats.omsi_score_pactolus:197
+                pixel_index = np.zeros((0, 2), dtype='int')
+                use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
+
+                # TODO NEED to update since collect now returns a single list not a list of lists
+                if not self['collect'] and (mpi_helper.get_rank() == self.mpi_root and use_dynamic_schedule):
+                    # We did not process any data on the root process when using dynamic scheduling
+                    # and we did not collect the data to the root either
+                    pass
+                #elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
+                #    temp_data = [ri[0] for rt in result[0] for ri in rt]
+                #    if len(temp_data) > 0:
+                #        hit_table = np.concatenate(tuple(temp_data), axis=-1)
+                #    temp_data = [ri[1] for rt in result[0] for ri in rt]
+                #    if len(temp_data) > 0:
+                #        pixel_index = np.concatenate(tuple(temp_data), axis=0) # axis=-1
+                else:
+                    temp_data = [ri[0] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        hit_table = np.concatenate(tuple(temp_data), axis=-1)
+                    temp_data = [ri[1] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        pixel_index = np.concatenate(tuple(temp_data), axis=0)
+                return hit_table, pixel_index
+
+        #############################################################
+        # Serial processing of the current data block
+        #############################################################
+        # Initialize the output data structures
+        pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
+        if len(pixel_index.shape) == 1:
+            pixel_index = pixel_index[np.newaxis, :]
+        hit_table = None
+        # Iterate through all the pixel we were asked to process in serial
+        for current_index, spectrum_index in enumerate(spectrum_indexes):
+            # Determine the start and stop index for the m/z and intensity data of the current spectrum
+            start = fpl_peak_arrayindex[spectrum_index, 2]
+            stop = fpl_peak_arrayindex[(spectrum_index+1), 2] \
+                if spectrum_index < (num_spectra-1) \
+                else fpl_peak_value.size
+            spectrum_length = stop - start
+            # Skip empty spectra
+            if spectrum_length == 0:
+                time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored." (duplicate-code)
 R:  1, 0: Similar lines in 3 files
 ==omsi.analysis.base:565
 ==omsi.analysis.msi_filtering.omsi_tic_norm:201
@@ -278,6 +325,31 @@ R:  1, 0: Similar lines in 2 files
                            help='Peak height parameter',
                            dtype=int, (duplicate-code)
 R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:182
+==omsi.analysis.compound_stats.omsi_score_pactolus:160
+        num_spectra = fpl_peak_arrayindex.shape[0]
+        if spectrum_indexes is None:
+            # Get the complete peak array index data
+            spectrum_indexes = np.arange(0, num_spectra)
+            enable_parallel = True
+        else:
+            if isinstance(spectrum_indexes, int):
+                spectrum_indexes = np.asarray([spectrum_indexes, ])
+            enable_parallel = False
+
+        #############################################################
+        # Parallel execution using MPI
+        #############################################################
+        # We have more than a single core AND we have multiple spectra to process
+        if mpi_helper.get_size() > 1 and len(spectrum_indexes) > 1:
+            # We were not asked to process a specific data subblock from a parallel process
+            # but we need to initiate the parallel processing.
+            if enable_parallel:
+                # Setup the parallel processing using mpi_helper.parallel_over_axes
+                split_axis = [0, ]
+                scheduler = mpi_helper.parallel_over_axes(
+                    task_function=self.execute_analysis,                    # Execute this function (duplicate-code)
+R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.base:717
 ==omsi.analysis.msi_filtering.omsi_tic_norm:338
             mz_slice = None
@@ -440,6 +512,24 @@ R:  1, 0: Similar lines in 3 files
 
         """ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:103
+==omsi.analysis.compound_stats.omsi_score_pactolus:77
+                           group=groups['settings'])
+        # Parallel execution parameters
+        self.add_parameter(name='schedule',
+                           help='Scheduling to be used for parallel MPI runs',
+                           dtype=str,
+                           required=False,
+                           choices=mpi_helper.parallel_over_axes.SCHEDULES.values(),
+                           group=groups['parallel'],
+                           default=mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
+        self.add_parameter(name='collect',
+                           help='Collect results to the MPI root rank when running in parallel',
+                           dtype=dtypes['bool'],
+                           required=False,
+                           group=groups['parallel'],
+                           default=True) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.base:1371
 ==omsi.analysis.generic:231
     def read_from_omsi_file(self,
@@ -491,8 +581,9 @@ R:  1, 0: Similar lines in 3 files
                                             #                       #     are not allowed
                                             dest=arg_dest)          #     Automatically determined by the name
         # Add the help argument (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.analysis.compound_stats.omsi_score_compounds:103
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.compound_stats.omsi_score_midas:105
+==omsi.analysis.compound_stats.omsi_score_pactolus:79
 ==omsi.analysis.findpeaks.omsi_findpeaks_local:64
         self.add_parameter(name='schedule',
                            help='Scheduling to be used for parallel MPI runs',
@@ -507,6 +598,22 @@ R:  1, 0: Similar lines in 2 files
                            required=False,
                            group=groups['parallel'],
                            default=True) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:205
+==omsi.analysis.compound_stats.omsi_score_pactolus:183
+                    main_data=spectrum_indexes,                             # Process the spectra independently
+                    split_axes=split_axis,                                  # Split along axes
+                    main_data_param_name='spectrum_indexes',                # data input param
+                    root=self.mpi_root,                                     # The root MPI task
+                    schedule=self['schedule'],                              # Parallel scheduling scheme
+                    comm=self.mpi_comm)                                     # MPI communicator
+                # Execute the analysis in parallel
+                result = scheduler.run()
+                # Collect the output data to the root rank if requested
+                if self['collect']:
+                    result = scheduler.collect_data()
+
+                # Compile the data from the parallel execution (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.dataformat.imzml_file:162
 ==omsi.dataformat.mzml_file:237
@@ -523,7 +630,7 @@ R:  1, 0: Similar lines in 2 files
         Internal helper function used to compute the number of scans in the imzml file.
         """ (duplicate-code)
 R:  1, 0: Similar lines in 2 files
-==omsi.dataformat.img_file:236
+==omsi.dataformat.img_file:249
 ==omsi.dataformat.mzml_file:492
         else:
             return None
@@ -552,7 +659,7 @@ R:  1, 0: Similar lines in 2 files
         try:
             # Enable time and usage profiling if requested (duplicate-code)
 R:  1, 0: Similar lines in 3 files
-==omsi.dataformat.img_file:237
+==omsi.dataformat.img_file:250
 ==omsi.dataformat.imzml_file:289
 ==omsi.dataformat.mzml_file:493
             return None
@@ -566,6 +673,20 @@ R:  1, 0: Similar lines in 3 files
         filelist = []
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:301
+==omsi.analysis.compound_stats.omsi_score_pactolus:269
+                    continue
+                # If our compound database contains at least one relevant compound then check all spectra
+                else:
+                    # Create the data structure to store all results
+                    hit_table = np.zeros(shape=(pixel_index.shape[0], current_hits.shape[0]),
+                                         dtype=current_hits.dtype)
+            # Save the hits for the current pixel
+            hit_table[current_index] = current_hits
+
+        if hit_table is None:
+            hit_table = np.zeros(shape=(pixel_index.shape[0], 0), (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.base:564
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:78
@@ -609,7 +730,7 @@ R:  1, 0: Similar lines in 3 files
         # Get the h5py dataset with the peak_cube data (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:117
-==omsi.analysis.findpeaks.omsi_findpeaks_local:178
+==omsi.analysis.findpeaks.omsi_findpeaks_local:179
     @classmethod
     def v_qmz(cls,
               analysis_object,
@@ -620,9 +741,10 @@ R:  1, 0: Similar lines in 2 files
         label_spectra = None
         mz_slice = None
         label_slice = None (duplicate-code)
-R:  1, 0: Similar lines in 2 files
-==omsi.analysis.compound_stats.omsi_score_compounds:204
-==omsi.analysis.findpeaks.omsi_findpeaks_local:367
+R:  1, 0: Similar lines in 3 files
+==omsi.analysis.compound_stats.omsi_score_midas:208
+==omsi.analysis.compound_stats.omsi_score_pactolus:186
+==omsi.analysis.findpeaks.omsi_findpeaks_local:368
                     root=self.mpi_root,                                     # The root MPI task
                     schedule=self['schedule'],                              # Parallel scheduling scheme
                     comm=self.mpi_comm)                                     # MPI communicator
@@ -647,7 +769,7 @@ R:  1, 0: Similar lines in 2 files
  (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.base:641
-==omsi.analysis.findpeaks.omsi_findpeaks_local:175
+==omsi.analysis.findpeaks.omsi_findpeaks_local:176
         else:
             return None, None
 
@@ -705,7 +827,7 @@ R:  1, 0: Similar lines in 2 files
         if qspectrum_viewer_option >= num_custom_spectrum_options and \
                 qslice_viewer_option >= num_custom_slice_options: (duplicate-code)
 R:  1, 0: Similar lines in 3 files
-==omsi.analysis.findpeaks.omsi_findpeaks_local:176
+==omsi.analysis.findpeaks.omsi_findpeaks_local:177
 ==omsi.analysis.msi_filtering.omsi_tic_norm:262
 ==omsi.analysis.multivariate_stats.omsi_cx:231
         return None, None
@@ -730,7 +852,7 @@ R:  1, 0: Similar lines in 2 files
 R:  1, 0: Similar lines in 6 files
 ==omsi.analysis.base:567
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:81
-==omsi.analysis.findpeaks.omsi_findpeaks_local:94
+==omsi.analysis.findpeaks.omsi_findpeaks_local:95
 ==omsi.analysis.generic:187
 ==omsi.analysis.msi_filtering.omsi_tic_norm:203
 ==omsi.analysis.multivariate_stats.omsi_cx:171
@@ -768,7 +890,7 @@ R:  1, 0: Similar lines in 4 files
  (duplicate-code)
 R:  1, 0: Similar lines in 5 files
 ==omsi.analysis.base:521
-==omsi.analysis.findpeaks.omsi_findpeaks_local:82
+==omsi.analysis.findpeaks.omsi_findpeaks_local:83
 ==omsi.analysis.generic:177
 ==omsi.analysis.msi_filtering.omsi_tic_norm:171
 ==omsi.analysis.multivariate_stats.omsi_cx:112
@@ -777,9 +899,9 @@ R:  1, 0: Similar lines in 5 files
                  analysis_object,
                  z,
                  viewer_option=0):
-        """Implement support for qslice URL requests for the viewer"""
-        # Use the dependency data for slicing here. We do not have a native option to reconstruct
-        # images from local peak finding data (duplicate-code)
+        """Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer
+
+           :param analysis_object: The omsi_file_analysis object for which slicing should be performed (duplicate-code)
 R:  1, 0: Similar lines in 2 files
 ==omsi.workflow.driver.cl_analysis_driver:500
 ==omsi.workflow.driver.cl_workflow_driver:698
@@ -833,7 +955,7 @@ R:  1, 0: Similar lines in 3 files
                            group=groups['input']) (duplicate-code)
 R:  1, 0: Similar lines in 3 files
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:134
-==omsi.analysis.findpeaks.omsi_findpeaks_local:198
+==omsi.analysis.findpeaks.omsi_findpeaks_local:199
 ==omsi.analysis.multivariate_stats.omsi_nmf:96
             labelZ = 'pixel index Z'
         else:
@@ -852,6 +974,15 @@ try:
 except ImportError:
     import Image (duplicate-code)
 R:  1, 0: Similar lines in 2 files
+==omsi.analysis.compound_stats.omsi_score_midas:34
+==omsi.analysis.compound_stats.omsi_score_pactolus:32
+        self.add_parameter(name='fpl_data',
+                           help='The raw findpeaks local dataset to be analyzed. Either the finpeaks local ' +
+                                'group in the file or the omsi_findpeaks_local analysis object',
+                           dtype=dtypes['ndarray'],
+                           group=groups['input'],
+                           required=True) (duplicate-code)
+R:  1, 0: Similar lines in 2 files
 ==omsi.analysis.base:1269
 ==omsi.datastructures.analysis_data:579
                                                  help=help,
@@ -863,7 +994,7 @@ R:  1, 0: Similar lines in 2 files
 R:  1, 0: Similar lines in 6 files
 ==omsi.analysis.base:644
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:117
-==omsi.analysis.findpeaks.omsi_findpeaks_local:178
+==omsi.analysis.findpeaks.omsi_findpeaks_local:179
 ==omsi.analysis.generic:198
 ==omsi.analysis.msi_filtering.omsi_tic_norm:264
 ==omsi.analysis.multivariate_stats.omsi_cx:233
@@ -876,7 +1007,7 @@ R:  1, 0: Similar lines in 6 files
 R:  1, 0: Similar lines in 6 files
 ==omsi.analysis.base:521
 ==omsi.analysis.findpeaks.omsi_findpeaks_global:60
-==omsi.analysis.findpeaks.omsi_findpeaks_local:82
+==omsi.analysis.findpeaks.omsi_findpeaks_local:83
 ==omsi.analysis.generic:177
 ==omsi.analysis.msi_filtering.omsi_tic_norm:171
 ==omsi.analysis.multivariate_stats.omsi_cx:112

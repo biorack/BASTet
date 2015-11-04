@@ -1,75 +1,77 @@
 ************* Module omsi.analysis.findpeaks.omsi_findpeaks_local
-W:273, 0: TODO Implement the data write when the data is distributed (fixme)
-W:308, 0: TODO Add collecting and saving of peak_arrayindex (fixme)
-W:309, 0: TODO Write mzdata from the raw file (which we have on all cores, i.e, no gather needed) (fixme)
-W:377, 0: TODO Record runtime information data from the scheduler in our provenance data (fixme)
-C:211, 0: Exactly one space required before assignment
+W: 82, 0: TODO Allow the precursor_mz to be stored when doing local peak finding on MS2 data. This should be a 1D float array called 'precursor_mz' with the precursor m/z value for each spectrum (fixme)
+W:274, 0: TODO Implement the data write when the data is distributed (fixme)
+W:309, 0: TODO Add collecting and saving of peak_arrayindex (fixme)
+W:310, 0: TODO Write mzdata from the raw file (which we have on all cores, i.e, no gather needed) (fixme)
+W:378, 0: TODO Record runtime information data from the scheduler in our provenance data (fixme)
+C: 82, 0: Line too long (194/120) (line-too-long)
+C:212, 0: Exactly one space required before assignment
             mz_spectra, label_spectra, mz_slice, label_slice, valuesX, labelX, valuesY, labelY, valuesZ, labelZ= \
                                                                                                                ^ (bad-whitespace)
-C:404, 0: Exactly one space required around comparison
+C:405, 0: Exactly one space required around comparison
                     if len(result[1])>1: # Correct indices from the individual runs since they all start at 0
                                      ^ (bad-whitespace)
-C:405, 0: No space allowed after bracket
+C:406, 0: No space allowed after bracket
                         peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1] ])
                                                      ^ (bad-whitespace)
-C:405, 0: No space allowed before bracket
+C:406, 0: No space allowed before bracket
                         peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1] ])
                                                                                           ^ (bad-whitespace)
-C:406, 0: Exactly one space required after comma
+C:407, 0: Exactly one space required after comma
                         peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
                                          ^ (bad-whitespace)
-C:406, 0: No space allowed after bracket
+C:407, 0: No space allowed after bracket
                         peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
                                                                ^ (bad-whitespace)
-C:406, 0: No space allowed before bracket
+C:407, 0: No space allowed before bracket
                         peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0] ])[:-1]
                                                                                                 ^ (bad-whitespace)
-C:420, 0: No space allowed after bracket
+C:421, 0: No space allowed after bracket
                         peak_arrayindex = np.asarray([ [b[0], b[1], 0] for b in result[1]])
                                                      ^ (bad-whitespace)
-C:421, 0: Exactly one space required after comma
+C:422, 0: Exactly one space required after comma
                         peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0]])[:-1]
                                          ^ (bad-whitespace)
-C:421, 0: No space allowed after bracket
+C:422, 0: No space allowed after bracket
                         peak_arrayindex[:,2] = np.cumsum([0] + [ len(ri[0]) for ri in result[0]])[:-1]
                                                                ^ (bad-whitespace)
-R: 96, 4: Too many local variables (37/15) (too-many-locals)
-C:140,16: Invalid variable name "ni" (invalid-name)
-C:140,20: Invalid variable name "ci" (invalid-name)
-W:145,16: No exception type(s) specified (bare-except)
-R: 96, 4: Too many branches (17/12) (too-many-branches)
-R:180, 4: Too many local variables (20/15) (too-many-locals)
-C:192, 8: Invalid variable name "valuesX" (invalid-name)
-C:193, 8: Invalid variable name "labelX" (invalid-name)
-C:194, 8: Invalid variable name "valuesY" (invalid-name)
-C:195, 8: Invalid variable name "labelY" (invalid-name)
-C:198,12: Invalid variable name "valuesZ" (invalid-name)
-C:199,12: Invalid variable name "labelZ" (invalid-name)
-C:201,12: Invalid variable name "valuesZ" (invalid-name)
-C:202,12: Invalid variable name "labelZ" (invalid-name)
-C:211,62: Invalid variable name "valuesX" (invalid-name)
-C:211,71: Invalid variable name "labelX" (invalid-name)
-C:211,79: Invalid variable name "valuesY" (invalid-name)
-C:211,88: Invalid variable name "labelY" (invalid-name)
-C:211,96: Invalid variable name "valuesZ" (invalid-name)
-C:211,105: Invalid variable name "labelZ" (invalid-name)
-C:218,51: Invalid variable name "valuesX" (invalid-name)
-C:218,60: Invalid variable name "labelX" (invalid-name)
-C:218,68: Invalid variable name "valuesY" (invalid-name)
-C:218,77: Invalid variable name "labelY" (invalid-name)
-C:218,85: Invalid variable name "valuesZ" (invalid-name)
-C:218,94: Invalid variable name "labelZ" (invalid-name)
-C:236, 8: Invalid variable name "re" (invalid-name)
-W:324,-1: Unreachable code (unreachable)
-W:324,-1: String statement has no effect (pointless-string-statement)
-W:326, 4: Arguments number differs from overridden method (arguments-differ)
-R:326, 4: Too many local variables (38/15) (too-many-locals)
-C:424,24: Invalid variable name "d" (invalid-name)
-C:425,24: Invalid variable name "d2" (invalid-name)
-C:426,28: Invalid variable name "di" (invalid-name)
-C:482,16: Invalid variable name "xp" (invalid-name)
-C:483,16: Invalid variable name "yp" (invalid-name)
-W:481,24: Unused variable 'pkmin' (unused-variable)
-W:345, 8: Unused variable 'integration_width' (unused-variable)
-R:326, 4: Too many branches (20/12) (too-many-branches)
+R: 97, 4: Too many local variables (37/15) (too-many-locals)
+C:141,16: Invalid variable name "ni" (invalid-name)
+C:141,20: Invalid variable name "ci" (invalid-name)
+W:146,16: No exception type(s) specified (bare-except)
+R: 97, 4: Too many branches (17/12) (too-many-branches)
+R:181, 4: Too many local variables (20/15) (too-many-locals)
+C:193, 8: Invalid variable name "valuesX" (invalid-name)
+C:194, 8: Invalid variable name "labelX" (invalid-name)
+C:195, 8: Invalid variable name "valuesY" (invalid-name)
+C:196, 8: Invalid variable name "labelY" (invalid-name)
+C:199,12: Invalid variable name "valuesZ" (invalid-name)
+C:200,12: Invalid variable name "labelZ" (invalid-name)
+C:202,12: Invalid variable name "valuesZ" (invalid-name)
+C:203,12: Invalid variable name "labelZ" (invalid-name)
+C:212,62: Invalid variable name "valuesX" (invalid-name)
+C:212,71: Invalid variable name "labelX" (invalid-name)
+C:212,79: Invalid variable name "valuesY" (invalid-name)
+C:212,88: Invalid variable name "labelY" (invalid-name)
+C:212,96: Invalid variable name "valuesZ" (invalid-name)
+C:212,105: Invalid variable name "labelZ" (invalid-name)
+C:219,51: Invalid variable name "valuesX" (invalid-name)
+C:219,60: Invalid variable name "labelX" (invalid-name)
+C:219,68: Invalid variable name "valuesY" (invalid-name)
+C:219,77: Invalid variable name "labelY" (invalid-name)
+C:219,85: Invalid variable name "valuesZ" (invalid-name)
+C:219,94: Invalid variable name "labelZ" (invalid-name)
+C:237, 8: Invalid variable name "re" (invalid-name)
+W:325,-1: Unreachable code (unreachable)
+W:325,-1: String statement has no effect (pointless-string-statement)
+W:327, 4: Arguments number differs from overridden method (arguments-differ)
+R:327, 4: Too many local variables (38/15) (too-many-locals)
+C:425,24: Invalid variable name "d" (invalid-name)
+C:426,24: Invalid variable name "d2" (invalid-name)
+C:427,28: Invalid variable name "di" (invalid-name)
+C:483,16: Invalid variable name "xp" (invalid-name)
+C:484,16: Invalid variable name "yp" (invalid-name)
+W:482,24: Unused variable 'pkmin' (unused-variable)
+W:346, 8: Unused variable 'integration_width' (unused-variable)
+R:327, 4: Too many branches (20/12) (too-many-branches)
 R:  9, 0: Too many public methods (53/20) (too-many-public-methods)
