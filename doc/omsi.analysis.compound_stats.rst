@@ -9,14 +9,21 @@ compound_stats Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`omsi_score_compounds` Module
------------------------------------
+:mod:`omsi_score_midas` Module
+------------------------------
 
-.. automodule:: omsi.analysis.compound_stats.omsi_score_compounds
+.. automodule:: omsi.analysis.compound_stats.omsi_score_midas
     :members:
     :undoc-members:
     :show-inheritance:
 
+:mod:`omsi_score_pactolus` Module
+---------------------------------
+
+.. automodule:: omsi.analysis.compound_stats.omsi_score_pactolus
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 compound_stats.third_party Package
 ==================================
