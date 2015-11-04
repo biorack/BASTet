@@ -3,8 +3,23 @@ Module used to ease the use of MPI and distributed parallel implementations usin
 """
 
 try:
-    from mpi4py import MPI
-    MPI_AVAILABLE = True
+    def test_mpi_available():
+        """
+        This function import MPI in a seperate process to safely check if
+        MPI is available. This precaution is necessary as on Cray systems
+        importing MPI can lead to a crash on, e.g., login nodes where the
+        use of MPI is not permitted. By executing the import in a separate
+        process we avoid crashing the main process. 
+        """ 
+        def test_func():
+           from mpi4py import MPI
+        from multiprocessing import Process
+        p = Process(target=test_func)
+        p.start()
+        return p.exitcode == 0
+    MPI_AVAILABLE = test_mpi_available()
+    if MPI_AVAILABLE:    
+        from mpi4py import MPI
 except ImportError:
     MPI_AVAILABLE = False
 import numpy as np
