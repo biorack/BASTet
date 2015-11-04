@@ -80,8 +80,8 @@ class img_file(file_reader_base):
         # Initialize the x and y length
         hdr = open(hdr_filename, 'rb')
         hdrdata = np.fromfile(file=hdr_filename, dtype='int16', count=-1)
-        self.shape[0] = hdrdata[23]
-        self.shape[1] = hdrdata[22]
+        self.shape[0] = int(hdrdata[23])
+        self.shape[1] = int(hdrdata[22])
         hdr.close()
 
         # Initialize the z length
