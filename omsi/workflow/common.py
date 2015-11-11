@@ -244,7 +244,7 @@ class analysis_task_list(list):
                     pass  # Ignore dependencies on data files. We do not need to execute those
                 else:
                     log_helper.warning(__name__, 'Unknown dependency object type that cannot be processed by workflow.'
-                                       + str(dependency_analysis))
+                                       + str(dependency_param_obj))
         return missing_dependencies
 
     def get_all_dependency_data(self):

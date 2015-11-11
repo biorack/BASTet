@@ -719,7 +719,7 @@ class cl_workflow_driver(workflow_driver_base):
             # TODO we should compute the minimum and maximum start time and compute the total runtime that way as well
             # TODO add MPI Barrier at the beginning to make sure everyone has started up before we do anything
 
-        print self.workflow_executor.analysis_tasks[2]['output_0'][:, :, 24]
+       # print self.workflow_executor.analysis_tasks[2]['output_0'][:, :, 24]
 
 if __name__ == "__main__":
 
