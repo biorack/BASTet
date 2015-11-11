@@ -4,6 +4,7 @@
 from omsi.dataformat.omsi_file.common import omsi_file_common
 import h5py
 import warnings
+from omsi.shared.log import log_helper
 
 
 class dependency_dict(dict):
@@ -29,12 +30,12 @@ class dependency_dict(dict):
         the default value of 'parameter' is assumed.
 
     """
-    dependency_types = {'parameter' : 'parameter',    # Default value, defining that this dependency defines a parameter
-                        'link': 'link',               # A not further defined link to a related dataset
-                        'co_modality': 'co_modality', # Data acquired from a related data modality
-                        'subset': 'subset',           # The source is a subset of the object we link to
-                        'contains': 'contains',       # The dataset we link to is contained in the source
-                        'undefined': None             # Undefined dependency type
+    dependency_types = {'parameter': 'parameter',      # Default value, defining that this dependency is a parameter
+                        'link': 'link',                # A not further defined link to a related dataset
+                        'co_modality': 'co_modality',  # Data acquired from a related data modality
+                        'subset': 'subset',            # The source is a subset of the object we link to
+                        'contains': 'contains',        # The dataset we link to is contained in the source
+                        'undefined': None              # Undefined dependency type
                         }
 
     def __init__(self,
@@ -122,8 +123,8 @@ class dependency_dict(dict):
                     dict.__setitem__(self, 'omsi_object', value)
                 else:
                     raise ValueError(str(value) +
-                                     " invalid omsi_object parameter for "
-                                     + "dependency_dict without valid data dependency.")
+                                     " invalid omsi_object parameter for " +
+                                     "dependency_dict without valid data dependency.")
             elif key == 'selection':
                 if value is None or (isinstance(value, basestring) and len(value) == 0):
                     new_value = None
@@ -166,18 +167,27 @@ class dependency_dict(dict):
                     key):
         """Custom slicing. Return the value associated with the given key if it is one of our predefined keys.
            Otherwise, assume that the user wants to slice into the data associated with the dependency and
-           return get_data()[key] instead.
+           return get_data()[key] instead. If get_data() is not ready (i.e., creates a dependency), then a
+           new dependency_dict is returned that adds the selection.
 
            :param key: The key to be used for slicing
 
-           :returns: Value.
+           :returns: Value. May return a dependency_dict if the selection refers to the data object and the
+                dependency cannot be resolved yet.
         """
         if key in self.keys():
             return dict.__getitem__(self, key)
         else:
             data_ref = self.get_data()
             if isinstance(data_ref, dependency_dict):
-               return None
+                if self['selection'] is not None:
+                    log_helper.error(__name__, "The current dependency already has a selection. Refinement of " +
+                                     "existing selections is not yet supported. A new dependency with the full " +
+                                     "current selection will be used instead.")
+
+                copy_ref = self.copy()
+                copy_ref['selection'] = key
+                return copy_ref
             else:
                 return self.get_data()[key]
 
@@ -198,9 +208,12 @@ class dependency_dict(dict):
                      the selected data will be loaded and returned as numpy array.
                      Otherwise the ['omsi_object'] is returned.
         """
+        # Return preloaded data if available
         if self['_data'] is not None:
             return self['_data']
+        # Check if we can access the data object
         else:
+            # Retrieve the data object
             if self['dataname']:
                 data_object = self['omsi_object'][self['dataname']]
                 # Ensure that the dependency can actually be resolved. E.g, if the data the dependency points to
@@ -211,6 +224,7 @@ class dependency_dict(dict):
                         return self
             else:
                 data_object = self['omsi_object']
+            # Resolve any data seletions
             try:
                 if self['selection'] is None:
                     # data = data_object[:]
@@ -226,5 +240,5 @@ class dependency_dict(dict):
                 return self['_data']
             except:
                 import sys
-                warnings.warn("ERROR: "+str(sys.exc_info()))
+                log_helper.error(__name__, "ERROR: Application of data selection failed. " + str(sys.exc_info()))
                 return data_object
