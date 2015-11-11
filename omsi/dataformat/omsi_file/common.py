@@ -3,6 +3,8 @@ Module for common data format classes and functionality.
 """
 from omsi.dataformat.omsi_file.format import *
 
+# TODO Extend parse_path_string(..) and create_path_string(...) to allow for the inclusing of data selections
+
 
 class omsi_file_object_manager(object):
     """

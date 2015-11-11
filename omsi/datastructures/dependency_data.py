@@ -95,7 +95,9 @@ class dependency_dict(dict):
             if key == '_data':
                 new_dependency._force_set_data(value)
             else:
-                new_dependency[key] = value
+                # Force setting all keys when we copy as we may need to copy a partially defined link
+                super(dependency_dict, new_dependency).__setitem__(key, value)
+                # new_dependency[key] = value
         return new_dependency
 
     def __setitem__(self,
@@ -184,7 +186,6 @@ class dependency_dict(dict):
                     log_helper.error(__name__, "The current dependency already has a selection. Refinement of " +
                                      "existing selections is not yet supported. A new dependency with the full " +
                                      "current selection will be used instead.")
-
                 copy_ref = self.copy()
                 copy_ref['selection'] = key
                 return copy_ref
@@ -239,6 +240,7 @@ class dependency_dict(dict):
                         raise ValueError('Invalid selection string')
                 return self['_data']
             except:
+                raise
                 import sys
-                log_helper.error(__name__, "ERROR: Application of data selection failed. " + str(sys.exc_info()))
+                log_helper.error(__name__, "Application of data selection failed. " + str(sys.exc_info()))
                 return data_object
