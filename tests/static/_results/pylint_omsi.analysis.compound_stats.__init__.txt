@@ -1,4 +1,5 @@
 ************* Module omsi.analysis.compound_stats
 F: 12, 8: Unable to import 'MIDAS' (import-error)
 W: 12, 8: Unused variable 'MIDAS' (unused-variable)
+F: 24, 8: Unable to import 'pactolus' (import-error)
 W: 24, 8: Unused variable 'pactolus' (unused-variable)

@@ -9,10 +9,14 @@ W:162, 0: FIXME  Get the precursor_mz from the MS2 data (fixme)
 W:165, 0: FIXME  Is this an input or should we get this from file (fixme)
 W:177, 0: TODO: Possible further optimization by reading only on self.mpi_root and then sending the list to all (fixme)
 W:223, 0: TODO NEED to update since collect now returns a single list not a list of lists (fixme)
+W:251, 0: FIXME The initalization of the hit_table is only valid if we assume that all spectra have the same precursor m/z, which may not be the case (fixme)
+W:301, 0: FIXME the number of hits may be different for different spectra if we have varying precursor m/z (fixme)
+W:307, 0: FIXME the number of hits may be different for different spectra if we have varying precursor m/z (fixme)
 C: 37, 0: Wrong continued indentation.
                                 'group in the file or the omsi_findpeaks_local analysis object',
                            |    ^ (bad-continuation)
 W:164, 0: Bad indentation. Found 13 spaces, expected 12 (bad-indentation)
+C:251, 0: Line too long (167/120) (line-too-long)
 C:262, 0: Line too long (162/120) (line-too-long)
 C:262, 0: Exactly one space required after assignment
                 time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
@@ -21,6 +25,8 @@ C:291, 0: Line too long (174/120) (line-too-long)
 C:291, 0: Exactly one space required after assignment
             time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
                      ^ (bad-whitespace)
+C:301, 0: Line too long (179/120) (line-too-long)
+C:307, 0: Line too long (166/120) (line-too-long)
 F: 12, 4: Unable to import 'MIDAS' (import-error)
 W: 21, 0: Method 'write_analysis_data' is abstract in class 'analysis_base' but is not overridden (abstract-method)
 W:122, 4: Arguments number differs from overridden method (arguments-differ)

@@ -16,22 +16,31 @@ C: 93, 0: Exactly one space required after comma
         self.data_names = ['hit_table','pixel_index']
                                       ^ (bad-whitespace)
 W:129, 0: Bad indentation. Found 13 spaces, expected 12 (bad-indentation)
-C:240, 0: Line too long (162/120) (line-too-long)
-C:240, 0: Exactly one space required after assignment
+C:241, 0: Line too long (162/120) (line-too-long)
+C:241, 0: Exactly one space required after assignment
                 time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
                          ^ (bad-whitespace)
 C:259, 0: Line too long (174/120) (line-too-long)
 C:259, 0: Exactly one space required after assignment
             time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
                      ^ (bad-whitespace)
-C:287, 0: Wrong continued indentation.
-                table_file=file_lookup_table)
-                ^                  | (bad-continuation)
+C:260, 0: Exactly one space required around comparison
+            time_str += " : num hits : " + str((current_hits>0).sum())
+                                                            ^ (bad-whitespace)
+C:264, 0: Exactly one space required after comma
+            hit_table[current_index,:] = current_hits[0,:]
+                                   ^ (bad-whitespace)
+C:264, 0: Exactly one space required after comma
+            hit_table[current_index,:] = current_hits[0,:]
+                                                       ^ (bad-whitespace)
+C:283, 0: No space allowed after keyword argument assignment
+    cl_analysis_driver(analysis_class= omsi_score_pactolus).main()
+                                     ^ (bad-whitespace)
+F: 12, 4: Unable to import 'pactolus' (import-error)
 W: 20, 0: Method 'write_analysis_data' is abstract in class 'analysis_base' but is not overridden (abstract-method)
 W: 96, 4: Arguments number differs from overridden method (arguments-differ)
 R: 96, 4: Too many local variables (39/15) (too-many-locals)
-E:285,24: Unexpected keyword argument 'table_file' in function call (unexpected-keyword-arg)
-E:285,35: No value for argument 'table_file' in function call (no-value-for-parameter)
-E:285,35: No value for argument 'original_db' in function call (no-value-for-parameter)
-R: 96, 4: Too many branches (24/12) (too-many-branches)
+E:229,70: Instance of 'memmap' has no 'shape' member (but some types could not be inferred) (maybe-no-member)
+E:229,70: Instance of 'NpzFile' has no 'shape' member (but some types could not be inferred) (maybe-no-member)
+R: 96, 4: Too many branches (21/12) (too-many-branches)
 R: 20, 0: Too many public methods (53/20) (too-many-public-methods)

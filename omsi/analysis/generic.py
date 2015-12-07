@@ -106,33 +106,41 @@ class analysis_generic(analysis_base):
         Overwrite the __getitem__ behavior to allow the use of a wrapped function
         analysis as part of a regular workflow when the outputs are not known yet
         """
-        re = super(analysis_generic, self).__getitem__(key)
-        if re is None:
+        return_item = super(analysis_generic, self).__getitem__(key)
+        if return_item is None:
             if isinstance(key, basestring) and key.startswith(self.DEFAULT_OUTPUT_PREFIX):
-                re = dependency_dict(param_name=None,
-                                     link_name=None,
-                                     dataname=key,
-                                     omsi_object=self,
-                                     selection=None,
-                                     help=None)
-        return re
+                return_item = dependency_dict(param_name=None,
+                                              link_name=None,
+                                              dataname=key,
+                                              omsi_object=self,
+                                              selection=None,
+                                              help=None)
+        return return_item
 
     def execute(self, **kwargs):
+        """
+        Overwrite the default implementation of execute to update parameter specifications/types
+        when wrapping functions where the types are not known a priori.
+
+        :param kwargs: Custom analysis parameters
+
+        :return: The result of execute_analysis()
+        """
         # Update the dtype of all the input parameters to ensure we save them correctly to file
         log_helper.debug(__name__, "Setting parameters based on the given inputs")
         ana_dtypes = data_dtypes.get_dtypes()
         for k, v in kwargs.iteritems():
-            for p in self.parameters:
-                if p['name'] == k:
+            for param in self.parameters:
+                if param['name'] == k:
                     if hasattr(v, 'dtype'):
-                        p['dtype'] = ana_dtypes['ndarray']
+                        param['dtype'] = ana_dtypes['ndarray']
                     else:
-                        p['dtype'] = type(v)
+                        param['dtype'] = type(v)
         # Determine the custom parameters
         custom_parameters = kwargs
 
         # Execute the analysis as usual
-        result = super(analysis_generic, self).execute(**kwargs)
+        result = super(analysis_generic, self).execute(**custom_parameters)
         return result
 
     def execute_analysis(self):
