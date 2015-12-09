@@ -9,19 +9,32 @@ try:
         MPI is available. This precaution is necessary as on Cray systems
         importing MPI can lead to a crash on, e.g., login nodes where the
         use of MPI is not permitted. By executing the import in a separate
-        process we avoid crashing the main process. 
-        """ 
-        def test_func():
-           from mpi4py import MPI
-        from multiprocessing import Process
-        p = Process(target=test_func)
-        p.start()
-        return p.exitcode == 0
+        process we avoid crashing the main process and we can safely check
+        whether the process aborted or not.
+
+        :return: False if the import failed, otherwise return True
+        """
+        import sys
+        from subprocess import Popen, PIPE
+        process = Popen('%s -c "from mpi4py import MPI as mpi"'%( \
+                         sys.executable), shell=True, stderr=PIPE, stdout=PIPE)
+        import_failed = process.wait()
+        return not import_failed
+
     MPI_AVAILABLE = test_mpi_available()
-    if MPI_AVAILABLE:    
+
+    if MPI_AVAILABLE:
         from mpi4py import MPI
 except ImportError:
     MPI_AVAILABLE = False
+
+if not MPI_AVAILABLE:
+    try:
+        from omsi.shared.log import log_helper
+        log_helper.warning(__name__, "MPI not available. Running in serial.")
+    except:
+        print "MPI not available. Running in serial."
+
 import numpy as np
 import itertools
 import warnings
