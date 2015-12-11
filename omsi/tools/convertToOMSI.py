@@ -694,8 +694,11 @@ class ConvertSettings(object):
             elif current_arg == "--jobid":
                 start_index += 2
                 ConvertSettings.job_id = str(argv[i + 1])
+                # Discover the job id from the environment variable if requested
                 if ConvertSettings.job_id == 'auto':
                     ConvertSettings.job_id = os.environ.get('PBS_JOBID')
+                    if ConvertSettings.job_id is None:
+                        ConvertSettings.job_id = os.environ.get('SLURM_JOB_ID')
                 log_helper.info(__name__, "Set jobid: " + ConvertSettings.job_id)
             elif current_arg == "--email":
                 # Consume all email addresses that follow

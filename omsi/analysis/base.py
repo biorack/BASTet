@@ -154,7 +154,7 @@ class analysis_base(parameter_manager):
     OrderedDict are used to store weak references. The values are set to None in
     all cases. I.e., we are taking advantage of the uniqueness of dict keys and the
     order-preserving feature of the OrderedDict to ensure that analyses are not
-    duplicated and that refernces are retrieved in order of creation.
+    duplicated and that references are retrieved in order of creation.
     """
 
     def __init__(self):
@@ -166,7 +166,7 @@ class analysis_base(parameter_manager):
         self.data_names = []
         self.run_info = run_info_dict()
         self.omsi_analysis_storage = []
-        self._analysis_instances[weakref.ref(self)] = None
+        self._analysis_instances[weakref.ref(self)] = None  # Register the object with analysis_base._analysis_instance
         self.mpi_comm = mpi_helper.get_comm_world()
         self.mpi_root = 0
         self.update_analysis = True
@@ -272,13 +272,15 @@ class analysis_base(parameter_manager):
         iteration is complete.
         :return: References to analysis_base objects
         """
-        invalid_references = set()
+        # 1) Yield all valid references in order of creation
+        invalid_references = set()   # Collect invalid references for clean-up
         for ref in cls._analysis_instances.keys():
-            obj = ref()
+            obj = ref()              # Retrieve the reference
             if obj is not None:
-                yield obj
+                yield obj            # Yield the reference if it is valid
             else:
-                invalid_references.add(ref)
+                invalid_references.add(ref)   # Record invalid reference for removal
+        # 2) Remove all invalid references
         for ref in invalid_references:
             cls._analysis_instances.pop(ref)
 
@@ -288,7 +290,7 @@ class analysis_base(parameter_manager):
                         include_parameters=False):
         """
         Given a data_object try to locate the analysis that creates the object as an
-        output of its execution.
+        output of its execution (and optionally analyses that have the object as an input).
 
         :param data_object: The data object of interest.
         :param include_parameters: Boolean indicating whether also input parameters should be considered
@@ -304,6 +306,9 @@ class analysis_base(parameter_manager):
             for dataname in ana_params_and_outputs:
                 obj = ana_obj[dataname]
                 if obj is data_object:
+                    # These types are hashed by Python so we cannot uniquely decide from which analysis they come from
+                    # e.g., if two analysis return the string 'test', then the condition of obj is data_object will be
+                    # True in both cases.
                     if type(obj) not in (float, int, bool, long, complex, str, unicode):
                         return dependency_dict(param_name=None,
                                                link_name=None,
