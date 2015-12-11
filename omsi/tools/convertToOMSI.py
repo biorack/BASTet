@@ -82,11 +82,13 @@ def main(argv=None):
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
         if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='error')
-
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='error')
+            except ValueError as e:
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
         raise ValueError(emailmsg)
     if input_warning:
         emailmsg = "WARNINGS occurred while parsing command line inputs (e.g., conflicting options). \n"
@@ -100,10 +102,13 @@ def main(argv=None):
                              email_error_recipients=ConvertSettings.email_error_recipients)
         log_helper.warning(__name__, emailmsg)
         if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='error')
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='error')
+            except ValueError as e:
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
         raise ValueError(emailmsg)
 
     # Notify the system that the job is running
@@ -150,6 +155,9 @@ def main(argv=None):
             except urllib2.URLError as e:
                 log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
                 ConvertSettings.recorded_warnings.append("Update of job-status to error failed " + unicode(e))
+            except ValueError as e:
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
+                ConvertSettings.recorded_warnings.append("Update of job-status to error failed " + unicode(e))
         raise
 
     ####################################################################
@@ -174,10 +182,13 @@ def main(argv=None):
                              email_error_recipients=ConvertSettings.email_error_recipients)
         log_helper.warning(__name__, emailmsg)
         if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='error')
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='error')
+            except ValueError as e:
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
         raise
 
     ####################################################################
@@ -233,10 +244,13 @@ def main(argv=None):
                              email_success_recipients=ConvertSettings.email_success_recipients,
                              email_error_recipients=ConvertSettings.email_error_recipients)
         if ConvertSettings.job_id is not None:
-            WebHelper.update_job_status(filepath=omsi_outfile,
-                                        db_server=ConvertSettings.db_server_url,
-                                        jobid=ConvertSettings.job_id,
-                                        status='error')
+            try:
+                WebHelper.update_job_status(filepath=omsi_outfile,
+                                            db_server=ConvertSettings.db_server_url,
+                                            jobid=ConvertSettings.job_id,
+                                            status='error')
+            except ValueError as e:
+                log_helper.warning(__name__, "Update of job-status to error failed " + unicode(e))
         # Pass on which-ever error has occurred
         raise
 
