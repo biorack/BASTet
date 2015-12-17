@@ -231,10 +231,10 @@ class  omsi_score_pactolus(analysis_base):
         # Iterate through all the pixel we were asked to process in serial
         for current_index, spectrum_index in enumerate(spectrum_indexes):
             # Determine the start and stop index for the m/z and intensity data of the current spectrum
-            start = fpl_peak_arrayindex[spectrum_index, 2]
-            stop = fpl_peak_arrayindex[(spectrum_index+1), 2] \
-                if spectrum_index < (num_spectra-1) \
-                else fpl_peak_value.size
+            start = int(fpl_peak_arrayindex[spectrum_index, 2])
+            stop = int(fpl_peak_arrayindex[(spectrum_index+1), 2]
+                if spectrum_index < (num_spectra-1)
+                else fpl_peak_value.size)
             spectrum_length = stop - start
             # Skip empty spectra
             if spectrum_length == 0:
