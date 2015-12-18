@@ -11,7 +11,9 @@ from omsi.dataformat.omsi_file.common import omsi_file_common
 from omsi.dataformat.omsi_file.format import omsi_format_file
 from omsi.dataformat.omsi_file.experiment import omsi_experiment_manager
 try:
-    from mpi4py import MPI
+    from omsi.shared import mpi_helper
+    if mpi_helper.MPI_AVAILABLE:
+        from mpi4py import MPI
 except:
     pass
 
