@@ -15,7 +15,7 @@ except ImportError:
 import os
 import numpy as np
 import time
-
+import sys
 
 
 class omsi_score_midas(analysis_base):
@@ -291,6 +291,7 @@ class omsi_score_midas(analysis_base):
             time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
             time_str += " : num hits : " + str(current_hits.shape[0])
             print time_str
+            sys.stdout.flush()
 
             # Initialize the hit_table if necessary
             if hit_table is None:

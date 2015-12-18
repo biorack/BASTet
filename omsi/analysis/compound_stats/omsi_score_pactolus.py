@@ -118,6 +118,7 @@ class  omsi_score_pactolus(analysis_base):
                 * 'n_match', int,   number of peaks in data matched
 
         """
+        log_helper.debug(__name__, 'Reading inputs', comm=self.mpi_comm, root=self.mpi_root)
         # Get the data we need to process
         fpl_data = self['fpl_data']
         fpl_peak_mz = fpl_data['peak_mz']
@@ -137,6 +138,7 @@ class  omsi_score_pactolus(analysis_base):
         # Make the numpy array with the list of tree files and their MS1 masses
         if file_lookup_table is None:
             # TODO: Possible further optimization by reading only on self.mpi_root and then sending the list to all
+            log_helper.debug(__name__, 'Preparing file lookup table', comm=self.mpi_comm, root=self.mpi_root)
             if os.path.isfile(self['trees']):
                 if self['trees'].endswith('.npy'):
                     file_lookup_table = np.load(self['trees'])
@@ -176,6 +178,7 @@ class  omsi_score_pactolus(analysis_base):
             # We were not asked to process a specific data subblock from a parallel process
             # but we need to initiate the parallel processing.
             if enable_parallel:
+                log_helper.debug(__name__, 'Preparing parallel execution', comm=self.mpi_comm, root=self.mpi_root)
                 # Setup the parallel processing using mpi_helper.parallel_over_axes
                 split_axis = [0, ]
                 scheduler = mpi_helper.parallel_over_axes(
@@ -222,6 +225,7 @@ class  omsi_score_pactolus(analysis_base):
         #############################################################
         # Serial processing of the current data block
         #############################################################
+        log_helper.debug(__name__, 'Processing spectra', comm=self.mpi_comm, root=self.mpi_root)
         # Initialize the output data structures
         pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
         if len(pixel_index.shape) == 1:
