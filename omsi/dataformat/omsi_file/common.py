@@ -267,7 +267,10 @@ class omsi_file_common(object):
                     return None
                 return omsi_file_common.get_omsi_object(file_object, resolve_dependencies=True)
             else:
-                raise ValueError('omsi_file_common.Invalid path or file')
+                if isinstance(curr_omsi_file, omsi_file):
+                    return curr_omsi_file
+                else:
+                    raise ValueError('omsi_file_common.Invalid path or file')
         else:
             return None
 
