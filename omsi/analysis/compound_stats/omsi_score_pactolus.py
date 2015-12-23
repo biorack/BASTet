@@ -17,7 +17,7 @@ import numpy as np
 import time
 
 
-class  omsi_score_pactolus(analysis_base):
+class omsi_score_pactolus(analysis_base):
     """
     Class for executing Pactolus on a local peak finding dataset.
     """
@@ -49,7 +49,7 @@ class  omsi_score_pactolus(analysis_base):
                            default="",
                            group=groups['settings'])
         self.add_parameter(name='trees',
-                           help='1) Path to the sub-directory with all relevent .h5 pactolus fragmentation trees. or '+
+                           help='1) Path to the sub-directory with all relevent .h5 pactolus fragmentation trees. or ' +
                                 '2) path to a text-file with a list of names of the tree files, or 3) Path to the' +
                                 '.npy file with the pactolus file lookup table',
                            dtype=dtypes['str'],
@@ -57,12 +57,12 @@ class  omsi_score_pactolus(analysis_base):
                            group=groups['settings'])
         self.add_parameter(name='ms1_mass_tolerance',
                            help='float, max. diff. in Da of tree_parent_mass & MS1_precursor_mass',
-                           dtype=dtypes['float'], #dtypes['ndarray'],
+                           dtype=dtypes['float'],   # dtypes['ndarray'],
                            default=[0, ],
                            group=groups['settings'])
         self.add_parameter(name='ms2_mass_tolerance',
                            help='float, max. mass in Da by which two MS2/MSn peaks can differ',
-                           dtype=dtypes['float'], # dtypes['ndarray']
+                           dtype=dtypes['float'],  # dtypes['ndarray']
                            default=0.01,
                            group=groups['settings'])
         self.add_parameter(name='max_depth',
@@ -90,8 +90,7 @@ class  omsi_score_pactolus(analysis_base):
                            required=False,
                            group=groups['parallel'],
                            default=True)
-        self.data_names = ['hit_table','pixel_index']
-
+        self.data_names = ['pixel_index', 'score', 'id', 'name', 'mass', 'n_peaks', 'n_match']
 
     def execute_analysis(self, spectrum_indexes=None, file_lookup_table=None):
         """
@@ -105,11 +104,12 @@ class  omsi_score_pactolus(analysis_base):
 
         :param file_lookup_table: The Pactolus lookup table with the list of tree files and their mass.
 
-        :returns: A tuple with an array of hit_tables with the scores for each pixel and a 2D array
-            of pixel indices describing for each spectrum the (x,y) pixel location in the image. The
-            hit_table is an array of (#spectra x #compounds). The hit_table is a structured numpy
-            array with the following columns:
+        :returns: A series of numpy arrays  with the score data for each pixel and a 2D array
+            of pixel indices describing for each spectrum the (x,y) pixel location in the image.
 
+            ['pixel_index', 'score', 'id', 'name', 'mass', 'n_peaks', 'n_match']
+                * 'pixel_index'  , int,  2D array of pixel indices describing for each spectrum \
+                   the (x,y) pixel location in the imag
                 * 'score',  float,  MIDAS score of row
                 * 'id',     str,    database ID e.g. 'MetaCyC_7884'
                 * 'name',   str,    database name, e.g. 'glycine'
@@ -127,7 +127,7 @@ class  omsi_score_pactolus(analysis_base):
         # Calculate the parent_mass
         precursor_mz = self['precursor_mz']
         if precursor_mz == -1:
-             precursor_mz = self['fpl_data']['precursor_mz'][:]
+            precursor_mz = self['fpl_data']['precursor_mz'][:]
         # Assign parameter settings to local variables for convenience
         metabolite_database = self['metabolite_database']
         ms1_mass_tol = self['ms1_mass_tolerance']
@@ -197,8 +197,14 @@ class  omsi_score_pactolus(analysis_base):
                     result = scheduler.collect_data()
 
                 # Compile the data from the parallel execution
-                hit_table = np.zeros((0, 0), dtype=score_frag_dag.HIT_TABLE_DTYPE)  # initialize hit_table as empty
                 pixel_index = np.zeros((0, 2), dtype='int')
+                score = np.zeros((0,), dtype='f4')
+                id_data = np.zeros((0,), dtype='a100')
+                name = np.zeros((0,), dtype='a100')
+                mass = np.zeros((0,), dtype='f4')
+                n_peaks = np.zeros((0,), dtype='i4')
+                n_match = np.zeros((0,), dtype='i4')
+
                 use_dynamic_schedule = (self['schedule'] == mpi_helper.parallel_over_axes.SCHEDULES['DYNAMIC'])
 
                 # TODO NEED to update since collect now returns a single list not a list of lists
@@ -206,7 +212,7 @@ class  omsi_score_pactolus(analysis_base):
                     # We did not process any data on the root process when using dynamic scheduling
                     # and we did not collect the data to the root either
                     pass
-                #elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
+                # elif self['collect'] and mpi_helper.get_rank() == self.mpi_root:
                 #    temp_data = [ri[0] for rt in result[0] for ri in rt]
                 #    if len(temp_data) > 0:
                 #        hit_table = np.concatenate(tuple(temp_data), axis=-1)
@@ -214,35 +220,59 @@ class  omsi_score_pactolus(analysis_base):
                 #    if len(temp_data) > 0:
                 #        pixel_index = np.concatenate(tuple(temp_data), axis=0) # axis=-1
                 else:
+                    # Compile pixel_index
                     temp_data = [ri[0] for ri in result[0]]
                     if len(temp_data) > 0:
-                        hit_table = np.concatenate(tuple(temp_data), axis=-1)
-                    temp_data = [ri[1] for ri in result[0]]
-                    if len(temp_data) > 0:
                         pixel_index = np.concatenate(tuple(temp_data), axis=0)
-                return hit_table, pixel_index
+                    temp_data = [ri[1] for ri in result[0]]
+                    # Compile scores
+                    if len(temp_data) > 0:
+                        score = np.concatenate(tuple(temp_data), axis=0)
+                    # Compile id
+                    temp_data = [ri[2] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        id_data = np.concatenate(tuple(temp_data), axis=0)
+                    # Compile name
+                    temp_data = [ri[3] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        name = np.concatenate(tuple(temp_data), axis=0)
+                    # Compile mass
+                    temp_data = [ri[4] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        mass = np.concatenate(tuple(temp_data), axis=0)
+                    # Compile n_peaks
+                    temp_data = [ri[5] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        n_peaks = np.concatenate(tuple(temp_data), axis=0)
+                    # Compile n_match
+                    temp_data = [ri[6] for ri in result[0]]
+                    if len(temp_data) > 0:
+                        n_match = np.concatenate(tuple(temp_data), axis=0)
+                # Return the compiled output
+                return pixel_index, score, id_data, name, mass, n_peaks, n_match
 
         #############################################################
         # Serial processing of the current data block
         #############################################################
         log_helper.debug(__name__, 'Processing spectra', comm=self.mpi_comm, root=self.mpi_root)
         # Initialize the output data structures
-        pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
-        if len(pixel_index.shape) == 1:
-            pixel_index = pixel_index[np.newaxis, :]
-        hit_table = hit_table = np.zeros(shape=(pixel_index.shape[0], file_lookup_table.shape[0]),
-                                         dtype=score_frag_dag.HIT_TABLE_DTYPE)
+        # pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
+        # if len(pixel_index.shape) == 1:
+        #    pixel_index = pixel_index[np.newaxis, :]
+        hit_matrix = []
+
         # Iterate through all the pixel we were asked to process in serial
         for current_index, spectrum_index in enumerate(spectrum_indexes):
             # Determine the start and stop index for the m/z and intensity data of the current spectrum
             start = int(fpl_peak_arrayindex[spectrum_index, 2])
             stop = int(fpl_peak_arrayindex[(spectrum_index+1), 2]
-                if spectrum_index < (num_spectra-1)
-                else fpl_peak_value.size)
+                   if spectrum_index < (num_spectra-1)
+                   else fpl_peak_value.size)
             spectrum_length = stop - start
             # Skip empty spectra
             if spectrum_length == 0:
-                time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
+                time_str = "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + \
+                           str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " Spectrum not scored."
                 log_helper.info(__name__, time_str, comm=self.mpi_comm, root=None)
                 continue
             # Load the m/z and intensity values for the current spectrum
@@ -255,34 +285,57 @@ class  omsi_score_pactolus(analysis_base):
 
             start_time = time.time()
             # Call MIDAS to score the current spectrum against all compounds in the database
-            current_hits = score_frag_dag.score_scan_list_against_trees(scan_list=[current_peaks_list,],
-                                                                        ms1_mz=[current_parent_mass,],
+            current_hits = score_frag_dag.score_scan_list_against_trees(scan_list=[current_peaks_list, ],
+                                                                        ms1_mz=[current_parent_mass, ],
                                                                         params=pactolus_parameters)
             end_time = time.time()
             execution_time = end_time - start_time
-            time_str =  "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
-            time_str += " : num hits : " + str((current_hits>0).sum())
+            time_str = "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + \
+                       str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
+            time_str += " : num hits : " + str((current_hits > 0).sum())
             log_helper.info(__name__, time_str, comm=self.mpi_comm, root=None)
 
             # Save the hits for the current pixel
-            hit_table[current_index,:] = current_hits[0,:]
-
-        if hit_table is None:
-            hit_table = np.zeros(shape=(pixel_index.shape[0], 0),
-                                 dtype=score_frag_dag.HIT_TABLE_DTYPE)
+            hit_matrix.append(current_hits[0, :])
 
         # Index the results based on the given metabolite database
+        score = []
+        id_data = []
+        name = []
+        mass = []
+        n_peaks = []
+        n_match = []
+        pixel_index = []
         if len(metabolite_database) > 0:  # We don't have an empty string
-            print metabolite_database
-            hit_table = np.asarray(score_frag_dag.make_pactolus_hit_table(
-                pactolus_results=hit_table,
-                table_file=file_lookup_table,
-                original_db=metabolite_database))
+            for current_index, spectrum_index in enumerate(spectrum_indexes):
+                non_zero_scores = np.where(hit_matrix[current_index] > 0)
+                if non_zero_scores.size > 0:
+                    current_hit_table = np.asarray(score_frag_dag.make_pactolus_hit_table(
+                        pactolus_results=hit_matrix[current_index],
+                        table_file=file_lookup_table,
+                        original_db=metabolite_database))
+                    for score_index in non_zero_scores:
+                        pixel_index.append(fpl_peak_arrayindex[spectrum_index, 0:2])
+                        score.append(current_hit_table['score'][score_index])
+                        id_data.append(current_hit_table['id'][score_index])
+                        name.append(current_hit_table['name'][score_index])
+                        mass.append(current_hit_table['mass'][score_index])
+                        n_peaks.append(current_hit_table['n_peaks'][score_index])
+                        n_match.append(current_hit_table['n_match'][score_index])
+        else:
+            pixel_index = fpl_peak_arrayindex[spectrum_indexes, 0:2]
+            score = np.asarray(hit_matrix)
 
         # Return the hit_table and the index of the pixel each hit_table applies to
-        return hit_table, pixel_index
+        return np.asarray(pixel_index), \
+               np.asarray(score), \
+               np.asarray(id_data), \
+               np.asarray(name), \
+               np.asarray(mass), \
+               np.asarray(n_peaks), \
+               np.asarray(n_match)
 
 if __name__ == "__main__":
     from omsi.workflow.driver.cl_analysis_driver import cl_analysis_driver
-    cl_analysis_driver(analysis_class= omsi_score_pactolus).main()
+    cl_analysis_driver(analysis_class=omsi_score_pactolus).main()
 
