@@ -15,7 +15,7 @@ except ImportError:
 import os
 import numpy as np
 import time
-
+import sys
 
 class omsi_score_pactolus(analysis_base):
     """
@@ -220,6 +220,7 @@ class omsi_score_pactolus(analysis_base):
                 #    if len(temp_data) > 0:
                 #        pixel_index = np.concatenate(tuple(temp_data), axis=0) # axis=-1
                 else:
+                    log_helper.debug(__name__, 'Compiling output')
                     # Compile pixel_index
                     temp_data = [ri[0] for ri in result[0]]
                     if len(temp_data) > 0:
@@ -248,6 +249,7 @@ class omsi_score_pactolus(analysis_base):
                     temp_data = [ri[6] for ri in result[0]]
                     if len(temp_data) > 0:
                         n_match = np.concatenate(tuple(temp_data), axis=0)
+                    log_helper.log_var(__name__, score=score)
                 # Return the compiled output
                 return pixel_index, score, id_data, name, mass, n_peaks, n_match
 
@@ -293,7 +295,10 @@ class omsi_score_pactolus(analysis_base):
             time_str = "rank : " + str(mpi_helper.get_rank()) + " : pixel_index : " + \
                        str(fpl_peak_arrayindex[spectrum_index, 0:2]) + " : time in s : " + str(execution_time)
             time_str += " : num hits : " + str((current_hits > 0).sum())
-            log_helper.info(__name__, time_str, comm=self.mpi_comm, root=None)
+            #log_helper.info(__name__, time_str, comm=self.mpi_comm, root=None)
+            #sys.stdout.flush()
+            print time_str
+            sys.stdout.flush()
 
             # Save the hits for the current pixel
             hit_matrix.append(current_hits[0, :])
@@ -327,6 +332,8 @@ class omsi_score_pactolus(analysis_base):
             score = np.asarray(hit_matrix)
 
         # Return the hit_table and the index of the pixel each hit_table applies to
+        print "rank : " + str(mpi_helper.get_rank()) + " : scores " + str(score)
+        sys.stdout.flush()
         return np.asarray(pixel_index), \
                np.asarray(score), \
                np.asarray(id_data), \
