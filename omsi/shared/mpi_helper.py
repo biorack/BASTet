@@ -387,6 +387,22 @@ def imports_mpi(python_object):
     return object_imports_mpi
 
 
+def broadcast(data, comm=None, root=0):
+    """
+    MPI broadcast operation to broadcast data from one rank to all other ranks
+
+    :param data: The data to be gathered
+    :param comm: MPI communicator. If None, then MPI.COMM_WORLD will be used.
+    :param root: The rank where the data is sned from
+    :return: The data object
+    """
+    if MPI_AVAILABLE:
+        my_comm = comm if comm is not None else MPI.COMM_WORLD
+        return my_comm.bcast(data, root)
+    else:
+        return data
+
+
 def gather(data, comm=None, root=0):
     """
     MPI gather operation or return a list with just [data,] if MPI is not available
