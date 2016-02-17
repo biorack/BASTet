@@ -58,7 +58,7 @@ class mzml_file(file_reader_base_multidata):
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         log_helper.info(__name__, 'Read %s scans from mzML file.' % self.num_scans)
-        self.scan_types, self.scan_indices = self.__compute_scan_types_and_indices(filename=self.basename)
+        self.scan_types, self.scan_indices, self.scan_profiled = self.__compute_scan_types_and_indices(filename=self.basename)
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types,
                                                                   basename=basename)
         log_helper.info(__name__, 'Found %s different scan types in mzML file.' % len(self.scan_types))
@@ -73,7 +73,7 @@ class mzml_file(file_reader_base_multidata):
         # Compute the mz axis
         self.mz_all = self.__compute_mz_axis(filename=self.basename,
                                              mzml_filetype=self.mzml_type,
-                                             scan_types=self.scan_types,
+                                             scan_types=self.scan_types
                                              )
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
@@ -163,22 +163,31 @@ class mzml_file(file_reader_base_multidata):
         if mzml_filetype == cls.available_mzml_types['thermo']:
 
             mz_axes = [np.array([]) for _ in scan_types]
-            all_centroid = True
+            # all_centroid = True
             for spectrum in reader:
                 scanfilt = spectrum['scanList']['scan'][0]['filter string']
                 scantype_idx = scan_types.index(scanfilt)
                 mz = spectrum['m/z array']
+                try:
+                    len_axes = len(mz_axes[scantype_idx])
+                except TypeError:
+                    len_axes = 1
                 if spectrum.has_key('profile spectrum'):
-                    all_centroid = False
-                    if len(mz) > len(mz_axes[scantype_idx]):
+                    # all_centroid = False
+                    if len(mz) > len_axes:
                         mzdiff = np.diff(mz).min()
                         mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
                         mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
                         mz_axes[scantype_idx] = np.arange(start=mzmin, stop=mzmax, step=mzdiff)
                         mz_axes[scantype_idx] = np.append(arr=mz_axes[scantype_idx], values=mzmax)
-            if all_centroid:
-                print 'Error: openMSI currently incapable of centroid-mode data'
-                raise AttributeError
+                else:
+                    if len(mz) > len_axes:
+                        mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
+                        mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
+                        ppm = 5  # TODO make this a parameter
+                        f = np.ceil(1e6 * np.log(mzmax/mzmin)/ppm)
+                        mz_axes[scantype_idx] = np.logspace(np.log10(mzmin), np.log10(mzmax), f)
+                        # ['count', 'index', 'highest observed m/z', 'm/z array', 'total ion current', 'ms level', 'spotID', 'lowest observed m/z', 'defaultArrayLength', 'intensity array', 'centroid spectrum', 'positive scan', 'MS1 spectrum', 'spectrum title', 'base peak intensity', 'scanList', 'id', 'base peak m/z']
 
             return mz_axes
 
@@ -188,6 +197,7 @@ class mzml_file(file_reader_base_multidata):
             mz_axes = [np.array([]) for _ in scan_types]
 
             for spectrum in reader:
+                scanfilt = spectrum['scanList']['scan'][0]['filter string']
                 scantype_idx = scan_types.index(scanfilt)
                 # grossly inefficient reassignment of m/z array at each scan
                 mz_axes[scantype_idx] = spectrum['m/z array']
@@ -258,17 +268,19 @@ class mzml_file(file_reader_base_multidata):
         reader = mzml.read(filename)
         scantypes = []
         scan_indices = []
+        scan_profiled = []
         for idx, spectrum in enumerate(reader):
             try:
                 scanfilter = spectrum['scanList']['scan'][0]['filter string']
                 if scanfilter not in scantypes:
                     scantypes.append(scanfilter)
+                    scan_profiled.append(spectrum.has_key('profile spectrum'))
                 scan_indices.append(scantypes.index(scanfilter))
             except:
                 log_helper.debug(__name__, idx)
 
         assert len(scan_indices) == self.num_scans
-        return scantypes, scan_indices
+        return scantypes, scan_indices, scan_profiled
 
     @staticmethod
     def __parse_scan_parameters(self):
