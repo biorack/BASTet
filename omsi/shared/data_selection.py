@@ -139,7 +139,8 @@ reduction_allowed_numpy_function = ['all',
                                     'squeeze',
                                     'std',
                                     'var',
-                                    'transpose']
+                                    'transpose',
+                                    'sum']
 """List of allowed numpy data reduction operations.
    Reduction operations are any single data operations that
    may change the shape of the data.
@@ -202,6 +203,7 @@ reduction_allowed_numpy_function = ['all',
     * 'swapaxes: out = numpy.swapaxes(x1, axis1, axis2)
     * 'var'       : out = numpy.var(data, axis)
     * 'transpose' : out = numpy.transpose(data)
+    * 'sum'       : out = numpy.sum(data, axis)
 
     None-numpy data reduction operations:
 
@@ -857,6 +859,7 @@ def transform_and_reduce_data(data,
 
     # 4) Iterate over all operations and apply them on after another.
     current_data = data
+
     for current_operation in operations:
         # print "---------------------------"
         # print op
@@ -942,8 +945,7 @@ def transform_and_reduce_data(data,
 
 
 def transform_data_single(data,
-                          transformation=transformation_type[
-                              'minusMinDivideMax'],
+                          transformation=transformation_type['minusMinDivideMax'],
                           axes=None,
                           secondary_data=None,
                           http_error=False,
@@ -1041,8 +1043,7 @@ def transform_data_single(data,
 
 
 def transform_datachunk(data,
-                        transformation=transformation_type[
-                            'minusMinDivideMax'],
+                        transformation=transformation_type['minusMinDivideMax'],
                         secondary_data=None,
                         **kwargs):
     """ Helper function used to transform a given data chunk.
@@ -1103,16 +1104,13 @@ def transform_datachunk(data,
         # Retrieve the requested operation
         if 'operation' in kwargs:
             if kwargs['operation'] not in transformation_allowed_numpy_dual_data:
-                raise AttributeError(
-                    'Requested data operations not supported.')
+                raise AttributeError('Requested data operations not supported.')
             try:
                 operation = getattr(np, kwargs.pop('operation'))
             except AttributeError:
-                raise AttributeError(
-                    'Requested data operations not supported.')
+                raise AttributeError('Requested data operations not supported.')
         else:
-            raise KeyError(
-                "Missing operation key for arithmetic data transformation.")
+            raise KeyError("Missing operation key for arithmetic data transformation.")
         # Evalute the parameters x1 and x2
         if 'x1' in kwargs:
             x1 = evaluate_transform_parameter(parameter=kwargs.pop('x1'),
