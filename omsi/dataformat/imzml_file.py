@@ -317,7 +317,7 @@ class imzml_file(file_reader_base):
         """
         Define the current dataset to be read.
         """
-        super(mzml_file, self).set_dataset_selection(dataset_index)
+        super(imzml_file, self).set_dataset_selection(dataset_index)
         self.shape = self.shape_all_data[self.select_dataset]
         self.mz = self.mz_all[self.select_dataset]
 
