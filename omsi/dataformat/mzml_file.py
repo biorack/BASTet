@@ -28,7 +28,7 @@ class mzml_file(file_reader_base_multidata):
                             'bruker': 'bruker',
                             'thermo': 'thermo'}
 
-    def __init__(self, basename, requires_slicing=True):
+    def __init__(self, basename, requires_slicing=True, resolution=5):
         """
         Open an img file for data reading.
 
@@ -54,15 +54,20 @@ class mzml_file(file_reader_base_multidata):
 
         # Call super constructor. This sets self.basename and self.readall
         super(mzml_file, self).__init__(basename=basename, requires_slicing=requires_slicing)
+        self.resolution = resolution
         self.mzml_type = self.__compute_filetype(filename=self.basename)
         self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
         self.num_scans = self.__compute_num_scans(filename=self.basename)
         log_helper.info(__name__, 'Read %s scans from mzML file.' % self.num_scans)
+        log_helper.debug(__name__, 'Compute scan types and indicies')
         self.scan_types, self.scan_indices, self.scan_profiled = self.__compute_scan_types_and_indices(filename=self.basename)
+        log_helper.debug(__name__, 'Compute scan dependencies')
         self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types,
                                                                   basename=basename)
         log_helper.info(__name__, 'Found %s different scan types in mzML file.' % len(self.scan_types))
+        log_helper.debug(__name__, 'Compute coordinates')
         self.coordinates = self.__compute_coordinates()
+        log_helper.debug(__name__, 'Parse scan parameters')
         self.scan_params = self.__parse_scan_parameters(self)
 
         # Compute the spatial configuration of the matrix
@@ -71,10 +76,11 @@ class mzml_file(file_reader_base_multidata):
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
+        log_helper.debug(__name__, 'Compute mz axes')
         self.mz_all = self.__compute_mz_axis(filename=self.basename,
                                              mzml_filetype=self.mzml_type,
-                                             scan_types=self.scan_types
-                                             )
+                                             scan_types=self.scan_types,
+                                             resolution=self.resolution)
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
         self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all]
@@ -97,6 +103,12 @@ class mzml_file(file_reader_base_multidata):
         for scan_idx, scantype in enumerate(self.scan_types):
             reader = mzml.read(self.basename)
             spectrumid = 0
+            if not self.scan_profiled[scan_idx]:
+                shift = np.diff(self.mz_all[scan_idx]).mean()
+                bin_edges = np.append(self.mz_all[scan_idx], self.mz_all[scan_idx][-1]+ shift)
+            else:
+                bin_edges = None
+
             for spectrum in reader:
                 if spectrum['scanList']['scan'][0]['filter string'] == scantype:
                     x = spectrum['m/z array']
@@ -104,7 +116,10 @@ class mzml_file(file_reader_base_multidata):
                         y = spectrum['intensity array']
                     except KeyError:
                         raise KeyError
-                    yi = np.interp(self.mz_all[scan_idx], x, y, 0, 0)
+                    if bin_edges is None:
+                        yi = np.interp(self.mz_all[scan_idx], x, y, 0, 0)  # Re-interpolate the data in profiled mode
+                    else:
+                         yi, _ = np.histogram(x, bins=bin_edges, weights=y)   # Re-histogram the data in centroided mode
                     xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
                     yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
                     try:
@@ -141,7 +156,12 @@ class mzml_file(file_reader_base_multidata):
                 except KeyError:
                     raise KeyError('Key "intensity array" not found in this mzml file')
 
-                yi = np.interp(mz, x, y, 0, 0)
+                if self.scan_profiled[current_scan_index]:
+                    yi = np.interp(mz, x, y, 0, 0)      # Interpolate the data onto the new axes in profiles mode
+                else:
+                    shift = np.diff(mz).mean()
+                    bin_edges = np.append(mz, mz[-1]+ shift)
+                    yi, _ = np.histogram(x, bins=bin_edges, weights=y)   # Re-histogram the data in centroided mode
                 xidx = np.nonzero(self.x_pos == self.coordinates[idx, 0])[0][0]
                 yidx = np.nonzero(self.y_pos == self.coordinates[idx, 1])[0][0]
 
@@ -149,7 +169,7 @@ class mzml_file(file_reader_base_multidata):
 
 
     @classmethod
-    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
+    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types, resolution):
         ## TODO completely refactor this to make it smartly handle profile or centroid datasets
         ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
         ## TODO: profile datasets should work as is
@@ -184,8 +204,7 @@ class mzml_file(file_reader_base_multidata):
                     if len(mz) > len_axes:
                         mzmin = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window lower limit']
                         mzmax = spectrum['scanList']['scan'][0]['scanWindowList']['scanWindow'][0]['scan window upper limit']
-                        ppm = 5  # TODO make this a parameter
-                        f = np.ceil(1e6 * np.log(mzmax/mzmin)/ppm)
+                        f = np.ceil(1e6 * np.log(mzmax/mzmin)/resolution)
                         mz_axes[scantype_idx] = np.logspace(np.log10(mzmin), np.log10(mzmax), f)
                         # ['count', 'index', 'highest observed m/z', 'm/z array', 'total ion current', 'ms level', 'spotID', 'lowest observed m/z', 'defaultArrayLength', 'intensity array', 'centroid spectrum', 'positive scan', 'MS1 spectrum', 'spectrum title', 'base peak intensity', 'scanList', 'id', 'base peak m/z']
 
