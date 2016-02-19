@@ -69,12 +69,19 @@ class omsi_kmeans(analysis_base):
         normalize_vals = self['normalize']
         cluster_images = self['clusterImages']
         current_mask = self['mask']
-        if current_mask is not None:
-            current_mask = np.where(current_mask)[0]
+        #if current_mask is not None:
+        #    current_mask = np.where(current_mask)[0]
 
         # Copy the input data
         data = current_msidata[:]
         indata_shape = data.shape
+        # Set masked data to a single value
+        if current_mask is not None:
+            if not cluster_images:
+                data = data[current_mask, :]
+            else:
+               data =  data[...,current_mask]
+
 
         # Normalize the data values to a range 0,1
         if normalize_vals:
@@ -89,11 +96,6 @@ class omsi_kmeans(analysis_base):
         data = data.reshape(num_pixels, num_bins)
         if cluster_images:
             data = np.transpose(data)
-        num_samples_all = data.shape[0]
-
-        # Remove masked samples
-        if current_mask is not None:
-            data = data[ current_mask.reshape(current_mask.size), :]
 
         # Execute clustering
         centers, _ = kmeans(data,
@@ -104,16 +106,16 @@ class omsi_kmeans(analysis_base):
 
         # Fill the clusters
         if current_mask is not None:
-            out_cluster = np.zeros(num_samples_all, dtype='int')
-            out_cluster[ np.where(current_mask)[0] ] = -1
-            out_cluster[ np.where(np.invert(current_mask))[0] ] = cluster
+            out_cluster = np.zeros(current_mask.shape, dtype='int')
+            out_cluster[:] = -1
+            out_cluster[current_mask] = cluster
             cluster = out_cluster
-
-        # Reshape the clusters to the original shape
-        if cluster_images:
-            pass  # Nothing to be done
         else:
-            cluster = cluster.reshape(indata_shape[:-1])
+            # Reshape the clusters to the original shape
+            if cluster_images:
+                pass  # Nothing to be done
+            else:
+                cluster = cluster.reshape(indata_shape[:-1])
 
         return cluster, centers
 
