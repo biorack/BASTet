@@ -21,5 +21,5 @@ __all__ = ["findpeaks",
            "analysis_data",
            "analysis_base",
            "AnalysisReadyError",
-           "analysis_generic"] + findpeaks.all__ + multivariate_stats.all__ + msi_filtering.all__ + compound_stats.__all__
+           "analysis_generic"] + findpeaks.__all__ + multivariate_stats.__all__ + msi_filtering.__all__ + compound_stats.__all__
 
