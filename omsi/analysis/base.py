@@ -3,6 +3,8 @@ Module specifying the base analysis API for integrating new analysis with the to
 OpenMSI science gateway.
 """
 
+# TODO Rename self.driver to self.executor
+
 import warnings
 import weakref
 from collections import OrderedDict
@@ -505,9 +507,8 @@ class analysis_base(parameter_manager):
             value is None, in which case the function creates a default executor to be used.
 
         """
-        # TODO get root and comm from the executor if available
-        root = 0
-        comm = mpi_helper.get_comm_world()
+        root = 0 if executor is None else executor.mpi_root
+        comm = mpi_helper.get_comm_world() if executor is None else executor.mpi_comm
         log_helper.info(__name__, "Execute all analyses", root=root, comm=comm)
         log_helper.log_var(__name__, force_update=force_update, level='DEBUG', root=root, comm=comm)
         if executor is not None:
@@ -522,7 +523,7 @@ class analysis_base(parameter_manager):
                 ana_obj.update_analysis = True
             executor.add_analysis(ana_obj)
         log_helper.debug(__name__, "Execute the workflow using the default executor", root=root, comm=comm)
-        executor.execute()
+        return executor.execute()
 
     @classmethod
     def v_qslice(cls,
