@@ -82,7 +82,10 @@ class omsi_file_common(object):
         :param in_object: The object to be checked
         :type in_object: Any omsi_file API object or h5py.Dataset or h5py.Group or h5py.File object.
         """
-        managed_object = omsi_file_common.get_omsi_object(in_object)
+        try:
+            managed_object = omsi_file_common.get_omsi_object(in_object)
+        except ValueError:
+            managed_object = None
         if isinstance(managed_object, omsi_file_common):
             return True
         else:
