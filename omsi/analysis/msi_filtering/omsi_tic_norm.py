@@ -41,7 +41,7 @@ class omsi_tic_norm(analysis_base):
                            group=groups['settings'],
                            default=0)
         self.add_parameter(name='mzTol',
-                           help='MZ tolerance',
+                           help='MZ tolerance for the infIons',
                            dtype=dtypes['float'],
                            group=groups['settings'],
                            default=0.1,
