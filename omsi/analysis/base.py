@@ -506,6 +506,7 @@ class analysis_base(parameter_manager):
             The executor will be cleared and then all analyses will be added to executor. Default
             value is None, in which case the function creates a default executor to be used.
 
+        :return: The workflow executor used
         """
         root = 0 if executor is None else executor.mpi_root
         comm = mpi_helper.get_comm_world() if executor is None else executor.mpi_comm
@@ -523,7 +524,8 @@ class analysis_base(parameter_manager):
                 ana_obj.update_analysis = True
             executor.add_analysis(ana_obj)
         log_helper.debug(__name__, "Execute the workflow using the default executor", root=root, comm=comm)
-        return executor.execute()
+        executor.execute()
+        return executor
 
     @classmethod
     def v_qslice(cls,
