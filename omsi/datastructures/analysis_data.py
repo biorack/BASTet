@@ -430,7 +430,7 @@ class parameter_manager(object):
 
     def __setitem__(self, key, value):
         """
-        Set worflow driver parameter options directly via slicing
+        Set parameter options directly via slicing
 
         Overwrite this function in child classes to implement custom setting behavior, e.g., error
         checking for valid values before setting a non-standard parameter.
@@ -591,8 +591,21 @@ class parameter_manager(object):
         for param in self.parameters:
             param.clear_data()
 
+    def set_parameter_default_value(self, name, value):
+        """
+        Set the default value of the parameter with the given name
 
+        :param name: Name of the parameter
+        :param value: New value
 
+        :raises: KeyError if parameter not found
+        """
+        log_helper.debug(__name__, "Setting default value of " +str(name) + " to " + str(value))
+        param = self.get_parameter_data_by_name(dataname=name)
+        if isinstance(param, parameter_data):
+            param['default'] = value
+        else:
+            raise KeyError('Unknown parameter ' + str(name))
 
 
 
