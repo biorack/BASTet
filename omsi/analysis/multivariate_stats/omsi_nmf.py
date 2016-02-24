@@ -7,7 +7,13 @@ from omsi.analysis.base import analysis_base
 
 
 class omsi_nmf(analysis_base):
-    """Class defining a basic nmf analysis for a 2D MSI data file or slice of the data"""
+    """
+    Class defining a basic nmf analysis.
+
+    The function has primarily been tested we MSI datasets but should support
+    arbitrary n-D arrays (n>=2). The last dimension of the input array must be the
+    spectrum dimnensions.
+    """
 
     def __init__(self, name_key="undefined"):
         """Initalize the basic data members"""
@@ -16,7 +22,7 @@ class omsi_nmf(analysis_base):
         dtypes = self.get_default_dtypes()
         groups = self.get_default_parameter_groups()
         self.add_parameter(name='msidata',
-                           help='The MSI matrix to be analyzed',
+                           help='The data matrix to be analyzed.',
                            dtype=dtypes['ndarray'],
                            required=True,
                            group=groups['input'])
@@ -44,6 +50,12 @@ class omsi_nmf(analysis_base):
                            default=0.0001,
                            required=True,
                            group=groups['stop'])
+        self.add_parameter(name='mask',
+                           help='A n-1 dimensional boolean mask indicating the elements to be clustered',
+                           dtype=dtypes['ndarray'],
+                           default=None,
+                           required=False,
+                           group=groups['settings'])
         self.data_names = ['wo', 'ho']
 
     @classmethod
@@ -159,28 +171,28 @@ class omsi_nmf(analysis_base):
         current_time_out = self['timeOut']
         current_num_iter = self['numIter']
         current_tolerance = self['tolerance']
+        current_mask = self['mask']
 
         # Copy the input data
         data = current_msidata[:]
-        shape_x = data.shape[0]
-        shape_y = data.shape[1]
-        # Determine the input shape
+        indata_shape = data.shape
+        output_shape = (indata_shape[:-1] + (current_num_components,))
+
+        # Mask the data if requested
+        if current_mask is not None:
+            data = data[current_mask, :]
+
+        # Determine the input shape after masking
         num_bins = data.shape[-1]
         num_pixels = data.size / num_bins  # The last data dimension is assumed to contain the spectra
 
         # Reshape the data
         data = data.reshape(num_pixels, num_bins)
         data = data.transpose()
-        # temp = data.max(axis = 1)
-        # idx = argwhere(temp>1000)
-        # idx = ravel(idx)
-        # data = data[idx,:];
-        # Nz = idx.shape[0];
-        shape_z = num_bins
 
         # Execute nmf
         (wo_matrix, ho_matrix) = nmf(data,
-                                     np.random.randn(shape_z, current_num_components),
+                                     np.random.randn(num_bins, current_num_components),
                                      np.random.randn(current_num_components, num_pixels),
                                      current_tolerance,
                                      current_time_out,
@@ -188,7 +200,12 @@ class omsi_nmf(analysis_base):
 
         # Reshape the ho matrix to be a 3D image cube
         ho_matrix = ho_matrix.transpose()
-        ho_matrix = ho_matrix.reshape((shape_x, shape_y, current_num_components))
+        if current_mask is not None:
+            out_ho = np.zeros(output_shape, dtype=ho_matrix.dtype)
+            out_ho[current_mask, :] = ho_matrix
+            ho_matrix = out_ho
+        else:
+            ho_matrix = ho_matrix.reshape(output_shape)
 
         return wo_matrix, ho_matrix
 
