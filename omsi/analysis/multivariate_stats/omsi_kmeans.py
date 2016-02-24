@@ -69,8 +69,6 @@ class omsi_kmeans(analysis_base):
         normalize_vals = self['normalize']
         cluster_images = self['clusterImages']
         current_mask = self['mask']
-        #if current_mask is not None:
-        #    current_mask = np.where(current_mask)[0]
 
         # Copy the input data
         data = current_msidata[:]
@@ -80,7 +78,7 @@ class omsi_kmeans(analysis_base):
             if not cluster_images:
                 data = data[current_mask, :]
             else:
-               data =  data[...,current_mask]
+                data = data[...,current_mask]
 
 
         # Normalize the data values to a range 0,1
