@@ -427,16 +427,18 @@ class omsi_file_analysis(omsi_dependencies_manager,
         parameter_group = analysis_group.require_group(omsi_format_analysis.analysis_parameter_group)
         for param_data in parameters:
             if param_data['required'] or param_data.data_set() or param_data['default'] is not None:
-                anadata = analysis_data(name=param_data['name'],
-                                        data=param_data.get_data_or_default(),
-                                        dtype=param_data['dtype'])
-                cls.__write_omsi_analysis_data__(parameter_group, anadata)
-                # Try to add the help string attribute
-                try:
-                    help_attr = omsi_format_analysis.analysis_parameter_help_attr
-                    parameter_group[param_data['name']].attrs[help_attr] = param_data['help']
-                except KeyError:
-                    pass
+                temp_data = param_data.get_data_or_default()
+                if temp_data is not None:
+                    anadata = analysis_data(name=param_data['name'],
+                                            data=param_data.get_data_or_default(),
+                                            dtype=param_data['dtype'])
+                    cls.__write_omsi_analysis_data__(parameter_group, anadata)
+                    # Try to add the help string attribute
+                    try:
+                        help_attr = omsi_format_analysis.analysis_parameter_help_attr
+                        parameter_group[param_data['name']].attrs[help_attr] = param_data['help']
+                    except KeyError:
+                        pass
 
         # 6. Write all the runtime execution information
         runinfo_group = analysis_group.require_group(omsi_format_analysis.analysis_runinfo_group)
