@@ -9,6 +9,7 @@ import pickle
 from omsi.analysis.base import analysis_base
 from omsi.datastructures.analysis_data import data_dtypes
 from omsi.datastructures.dependency_data import dependency_dict
+from omsi.datastructures.analysis_data import parameter_data
 from omsi.shared.log import log_helper
 
 try:
@@ -25,7 +26,7 @@ except ImportError:
 import numpy as np
 
 
-def bastet_analysis(output_names=None):
+def bastet_analysis(output_names=None, parameter_specs=None, name_key="undefined"):
     """
     Decorator used to wrap a function and replace it with an analysis_generic object
     that behaves like a function but adds the ability for saving the
@@ -34,11 +35,18 @@ def bastet_analysis(output_names=None):
     This is essentially the same as analysis_generic.from_function(....).
 
     :param func: The function to be wrapped
+    :param output_names: Optional list of strings with the names of the outputs
+    :param parameter_specs: Optional list of omsi.datastructures.analysis_data.parameter_data with
+        additional information about the parameters of the function.
+    :param name_key: Optional name for the analysis, i.e., the analysis identifier
+
     :return: analysis_generic instance for the wrapped function
     """
     def main_decorator(func):
         return analysis_generic.from_function(analysis_function=func,
-                                              output_names=output_names)
+                                              output_names=output_names,
+                                              name_key=name_key,
+                                              parameter_specs=parameter_specs)
     return main_decorator
 
 
@@ -51,7 +59,7 @@ class analysis_generic(analysis_base):
     DEFAULT_OUTPUT_PREFIX = "output_"
 
     @classmethod
-    def from_function(cls, analysis_function, output_names=None, name_key="undefined"):
+    def from_function(cls, analysis_function, output_names=None, parameter_specs=None, name_key="undefined"):
         """
         Create a generic analysis class for a given analysis function.
 
@@ -62,34 +70,85 @@ class analysis_generic(analysis_base):
 
         :param analysis_function: The analysis function to be wrapped for provenance tracking and storage
         :param output_names: Optionally, define a list of the names of the outputs
+        :param parameter_specs: Optional list of omsi.datastructures.analysis_data.parameter_data with
+            additional information about the parameters of the function.
         :param name_key: The name for the analysis, i.e., the analysis  identifier
 
         :return: A new generic analysis class
         """
         log_helper.debug(__name__, "Creating generic analysis from function")
+        ana_dtypes = data_dtypes.get_dtypes()
         generic_analysis = cls(name_key=name_key)
         generic_analysis.real_analysis_type = analysis_function.__code__.co_name
-        function_argcount = analysis_function.__code__.co_argcount
-        function_args = analysis_function.__code__.co_varnames[0:function_argcount]
+        function_argcount = analysis_function.__code__.co_argcount   # Get the number of function parameters
+        function_args = analysis_function.__code__.co_varnames[0:function_argcount] # Get the function arguments
+        # Get the default values for the function parameters
         function_defaults = ()
         if hasattr(analysis_function, 'func_defaults'):
             if analysis_function.func_defaults is not None:
                 function_defaults = analysis_function.func_defaults
         function_nondefaults = function_argcount - len(function_defaults)
         default_pos = 0
+        # Add all parameters of the function to our generic analysis
         for varindex, varname in enumerate(function_args):
+            # Determine the default value (if any) for the current parameter
             has_default = varindex >= function_nondefaults
             default = None
             if has_default:
                 default = function_defaults[default_pos]
                 default_pos += 1
-            generic_analysis.add_parameter(name=varname, help='', default=default)
+            # Check if the user has supplied an additional specification for the current parameter
+            param_spec = None
+            if parameter_specs is not None:
+                for ps in parameter_specs:
+                    if isinstance(ps, dict) or isinstance(ps, parameter_data):
+                        if ps['name'] == varname:
+                            param_spec = ps
+                    else:
+                        raise ValueError("Invalid parameter specification. Spec is not a dict or parameter_data object")
+             # Try to determine the dtype from the default values of the function
+            dtype = None
+            if default is not None:
+                if isinstance(default, list) or isinstance(default, np.ndarray):
+                    dtype = ana_dtypes['ndarray']
+                elif isinstance(default, bool):
+                    dtype = ana_dtypes['bool']
+                elif isinstance(default, basestring):
+                    dtype=str
+                else:
+                    for k, v in ana_dtypes.iteritems():
+                        try:
+                            if isinstance(default, v):
+                                dtype = v
+                                break
+                        except:
+                            pass
+            # Add the parameter to our analysis
+            if param_spec is None:
+                generic_analysis.add_parameter(name=varname,
+                                               help='',
+                                               dtype=dtype,
+                                               default=default)
+            else:
+                generic_analysis.add_parameter(
+                        name=varname,
+                        help='' if 'help' not in param_spec else param_spec['help'],
+                        dtype=dtype if 'dtype' not in param_spec else param_spec['dtype'],
+                        required=(not has_default) if 'required' not in param_spec else param_spec['required'],
+                        default=default if 'default' not in param_spec else param_spec['default'],
+                        choices=None if 'choices' not in param_spec else param_spec['choices'],
+                        group=None if 'group' not in param_spec else param_spec['group'],
+                        data=None if 'data' not in param_spec else param_spec['data'])
+        # Add the analysis function as an internal parameter to our analysis
         generic_analysis.add_parameter(name='__analysis_function',
                                        help='The analysis function we want to execute',
                                        dtype=str)
+        # Assign the names of the outputs
         if output_names is not None:
             generic_analysis.data_names = output_names
+        # Pickle out analysis function and save it
         generic_analysis['__analysis_function'] = cloudpickle.dumps(analysis_function)
+        # Return our initalized analysis
         return generic_analysis
 
     def __init__(self, name_key="undefined"):
