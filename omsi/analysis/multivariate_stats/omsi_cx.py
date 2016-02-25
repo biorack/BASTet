@@ -40,6 +40,18 @@ class omsi_cx(analysis_base):
                            default=self.dimension_index['imageDim'],
                            dtype=dtypes['int'],
                            group=groups['settings'])
+        self.add_parameter(name='pixelMask',
+                           help='A boolean or integer mask indicating the spectra to be used',
+                           dtype=dtypes['ndarray'],
+                           default=None,
+                           required=False,
+                           group=groups['settings'])
+        self.add_parameter(name='maskIndex',
+                           help='If an integer mask is used, which index should we do CX for',
+                           dtype=dtypes['int'],
+                           default=None,
+                           required=False,
+                           group=groups['settings'])
         self.data_names = ['infIndices', 'levScores']
         self.analysis_identifier = name_key
 
@@ -60,27 +72,55 @@ class omsi_cx(analysis_base):
 
         """
         # getting the values into local variables
-        msidata = self['msidata'][:]  # Load all MSI data
+        msidata = np.copy(self['msidata'][:])  # Copy all MSI data
         original_shape = msidata.shape
         rank = self['rank']
         objective_dimensions = self['objectiveDim']
+        mask_index = self['maskIndex']
+        current_pixel_mask = self['pixelMask']
+        if mask_index is not None and current_pixel_mask is not None:
+            temp_mask = np.zeros(shape=current_pixel_mask.shape, dtype=bool)
+            temp_mask[current_pixel_mask == mask_index] = True
+            current_pixel_mask = temp_mask
 
-        # Convert the input data to a 2D matrix for processing by the leverage score algorithm
+        # Mask the data if requested
+        if current_pixel_mask is not None:
+            msidata = msidata[current_pixel_mask, :]
+
+        # Determine the number of pixels and bins
         num_bins = msidata.shape[-1]
         num_pixels = msidata.size / num_bins  # The last data dimension is assumed to contain the spectra
+
+        # Reshape the data to a 2D matrix for CX
         msidata = msidata.reshape(num_pixels, num_bins).transpose()
 
         # Compute the CX decomposition
         leverage_scores = self.comp_lev_exact(msidata, rank, objective_dimensions)
         informative_indices = leverage_scores.argsort()[::-1]
 
-        # If the leverage scores are computed for pixels, then, convert back to image space
-        if self['objectiveDim'] == self.dimension_index['pixelDim']:
-            leverage_scores = leverage_scores.reshape(original_shape[0:-1])
-            informative_indices = informative_indices.reshape(original_shape[0:-1])
+        # Fill in the values that we removed with the mask and reshape the data for the output
+        if current_pixel_mask is not None:
+            if self['objectiveDim'] == self.dimension_index['pixelDim']:
+                out_leverage_scores = np.zeros(shape=original_shape[0:-1], dtype=leverage_scores.dtype)
+                out_leverage_scores[:] = -1
+                out_leverage_scores[current_pixel_mask] = leverage_scores
+                out_informative_indices = np.zeros(shape=original_shape[0:-1], dtype=informative_indices.dtype)
+                out_informative_indices[:] = -1
+                out_informative_indices[current_pixel_mask] = informative_indices
+            elif self['objectiveDim'] == self.dimension_index['imageDim']:
+                out_leverage_scores = leverage_scores
+                out_informative_indices = informative_indices
+        # Reshape the data for the output
+        else:
+            # If the leverage scores are computed for pixels, then, convert back to image space
+            if self['objectiveDim'] == self.dimension_index['pixelDim']:
+                leverage_scores = leverage_scores.reshape(original_shape[0:-1])
+                informative_indices = informative_indices.reshape(original_shape[0:-1])
+            out_leverage_scores = leverage_scores
+            out_informative_indices = informative_indices
 
         # Safe the output results
-        return informative_indices, leverage_scores
+        return out_informative_indices, out_leverage_scores
 
     @classmethod
     def comp_lev_exact(cls,
