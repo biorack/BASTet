@@ -126,13 +126,13 @@ class analysis_generic(analysis_base):
             # Add the parameter to our analysis
             if param_spec is None:
                 generic_analysis.add_parameter(name=varname,
-                                               help='',
+                                               help=' ',
                                                dtype=dtype,
                                                default=default)
             else:
                 generic_analysis.add_parameter(
                         name=varname,
-                        help='' if 'help' not in param_spec else param_spec['help'],
+                        help=' ' if 'help' not in param_spec else param_spec['help'],
                         dtype=dtype if 'dtype' not in param_spec else param_spec['dtype'],
                         required=(not has_default) if 'required' not in param_spec else param_spec['required'],
                         default=default if 'default' not in param_spec else param_spec['default'],
