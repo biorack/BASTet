@@ -213,8 +213,12 @@ class analysis_views(object):
             # Remove the omsi.analysis module name from the beginning if present
             if class_name.startswith('omsi.analysis.'):
                 class_name = class_name.split(".")[-1]
-            # Get the class that corresponds to the given name
-            class_object = getattr(sys.modules[__name__], class_name)
+            if class_name == "generic":
+                from omsi.analysis.generic import analysis_generic
+                class_object = analysis_generic
+            else:
+                # Get the class that corresponds to the given name
+                class_object = getattr(sys.modules[__name__], class_name)
             if isinstance(class_object, (types.ClassType, types.TypeType)):
                 return class_object
             else:
