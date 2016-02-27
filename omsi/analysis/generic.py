@@ -333,6 +333,8 @@ class analysis_generic(analysis_base):
             load_runtime_data=load_runtime_data,
             dependencies_omsi_format=dependencies_omsi_format,
             ignore_type_conflict=ignore_type_conflict)
+        # Fill in the list of output names
+        self.data_names = [dat['name'] for dat in self._analysis_base__data_list]
         # Load the real data type.
         self.real_analysis_type = unicode(analysis_object.get_analysis_type()[:])
         # Return the output data
