@@ -171,7 +171,7 @@ class omsi_nmf(analysis_base):
         current_time_out = self['timeOut']
         current_num_iter = self['numIter']
         current_tolerance = self['tolerance']
-        current_mask = self['mask']
+        current_mask = self['mask'][:]
 
         # Copy the input data
         data = current_msidata[:]
