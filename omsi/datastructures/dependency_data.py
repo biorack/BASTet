@@ -9,7 +9,7 @@ from omsi.shared.log import log_helper
 
 class dependency_dict(dict):
     """
-    Define a dependency to another omsi file-based data object
+    Define a dependency to another omsi file-based data object or in-memory analysis_base object
 
     **Required Keyword Arguments**:
 

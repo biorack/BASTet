@@ -1191,6 +1191,7 @@ class analysis_base(parameter_manager):
                 # Set any possibly missing parameters
                 value['param_name'] = name
                 value['link_name'] = name
+                value['dependency_type'] = dependency_dict.dependency_types['parameter']
                 value['help'] = curr_parameter['help'] if curr_parameter is not None else ''
                 value['dependency_type'] = dependency_dict.dependency_types['parameter']
             else:
@@ -1200,6 +1201,7 @@ class analysis_base(parameter_manager):
                 if check_param is not None:
                     check_param['param_name'] = name  # Define the name of the dependent parameter
                     check_param['link_name'] = name   # Define the name of the object when stored to file
+                    check_param['dependency_type'] = dependency_dict.dependency_types['parameter']
                     # If the analysis has been saved to file already, then change the dependency to point
                     # to the corresponding file object instead
                     # if len(check_param['omsi_object'].get_omsi_analysis_storage()) > 0:
