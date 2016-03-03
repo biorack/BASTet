@@ -241,6 +241,16 @@ class run_info_dict(dict):
         except:
             warnings.warn("Recording of svn version information failed: "+str(sys.exc_info()))
 
+        # Attempt to record software library version
+        try:
+            import numpy as np
+            self['numpy_version_full_version'] = unicode(np.version.full_version)
+            self['numpy_version_release'] = unicode(np.version.release)
+            self['numpy_version_git_revision'] = unicode(np.version.git_revision)
+        except ImportError:
+            log_helper.warning(__name__, 'Recording of numpy version not possible.',
+                               root=self.mpi_root, comm=self.mpi_comm)
+
         # Attempt to record psutil data
         try:
             import psutil
