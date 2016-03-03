@@ -890,11 +890,11 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  re-executing the analysis. None is returned in case the analysis object
                  cannot be created.
         """
-        from omsi.analysis import analysis_generic
+        #from omsi.analysis import analysis_generic
         analysis_instance = self.restore_analysis(load_runtime_data=False)  # We don't need the runtime data
-        if isinstance(analysis_instance, analysis_generic):
-            return None
-        else:
-            analysis_instance.execute(**kwargs)
-            return analysis_instance
+        #if isinstance(analysis_instance, analysis_generic):
+        #    return None
+        #else:
+        analysis_instance.execute(**kwargs)
+        return analysis_instance
 
