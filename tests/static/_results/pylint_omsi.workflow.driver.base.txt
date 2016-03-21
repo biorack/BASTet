@@ -1,2 +1,0 @@
-************* Module omsi.workflow.driver.base
-R: 73, 0: Too few public methods (1/2) (too-few-public-methods)

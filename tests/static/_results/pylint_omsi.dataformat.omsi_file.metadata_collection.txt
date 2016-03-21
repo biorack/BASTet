@@ -1,6 +1,0 @@
-************* Module omsi.dataformat.omsi_file.metadata_collection
-C:305, 0: Exactly one space required after comma
-        if isinstance(metadata,  metadata_dict):
-                              ^ (bad-whitespace)
-C: 17, 0: Invalid class name "omsi_metadata_collection_manager" (invalid-name)
-R:149, 4: Too many arguments (7/5) (too-many-arguments)

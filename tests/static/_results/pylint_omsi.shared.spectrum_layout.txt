@@ -1,3 +1,0 @@
-************* Module omsi.shared.spectrum_layout
-C: 42, 8: Invalid variable name "ax" (invalid-name)
-R: 52, 0: Too many local variables (16/15) (too-many-locals)

@@ -1,5 +1,0 @@
-************* Module omsi.dataformat.omsi_file.experiment
-R:112, 0: Too many ancestors (8/7) (too-many-ancestors)
-R:112, 0: Too many public methods (37/20) (too-many-public-methods)
-W: 11, 0: Unused import omsi_file_msidata (unused-import)
-W:  7, 0: Unused import omsi_format_msidata (unused-import)

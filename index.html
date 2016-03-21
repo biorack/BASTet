@@ -1,0 +1,454 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Documentation BASTet: &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="#"/>
+        <link rel="next" title="Introduction" href="introduction.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Documentation BASTet:</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="documentation-bastet">
+<h1>Documentation BASTet:<a class="headerlink" href="#documentation-bastet" title="Permalink to this headline">¶</a></h1>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/bastet_logo_full.png"><img alt="BASTet Logo" src="_images/bastet_logo_full.png" style="width: 378.0px; height: 342.65px;" /></a>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#some-important-features-of-analysis-base">Some important features of <code class="docutils literal"><span class="pre">analysis_base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#slicing">Slicing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#important-member-variables">Important Member Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#i-o-functions">I/O functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#web-api-functions">Web API Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#executing-saving-and-restoring-an-analysis-object">Executing, saving, and restoring an analysis object</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#step-1-basic-integration">Step 1) Basic integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#creating-a-new-analysis-skeleton">1.1 Creating a new analysis skeleton</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#specifying-analysis-inputs-and-outputs">1.2 Specifying analysis inputs and outputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#implementing-the-execute-analysis-function">1.3: Implementing the <code class="docutils literal"><span class="pre">execute_analysis</span></code> function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#step-2-integrating-the-analysis-with-the-openmsi-web-api">Step 2) Integrating the Analysis with the OpenMSI Web API:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#implementing-the-qslice-pattern">2.1 Implementing the <code class="docutils literal"><span class="pre">qslice</span></code> pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#implementing-the-qspectrum-pattern">2.2 Implementing the <code class="docutils literal"><span class="pre">qspectrum</span></code> pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#implementing-the-qmz-pattern">2.3 Implementing the <code class="docutils literal"><span class="pre">qmz</span></code> pattern</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#step-3-making-your-analysis-self-sufficient">Step 3) Making your analysis self-sufficient</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#custom-data-save">Custom data save</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#custom-analysis-restore">Custom analysis restore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#custom-analysis-execution">Custom analysis execution</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#customizing-setting-of-parameters">Customizing setting of parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#customizing-setting-of-default-settings">Customizing setting of default settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#customizing-the-recording-of-runtime-information">Customizing the recording of runtime information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#customizing-the-analysis-execution">Customizing the analysis execution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="custom_analysis.html#customizing-the-recording-of-analysis-outputs">Customizing the recording of analysis outputs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#option-1-explicitly-track-specific-excutions-of-a-function">Option 1: Explicitly track specific excutions of a function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#option-2-implicitly-track-the-last-execution-of-a-function">Option 2: Implicitly track the last execution of a function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_analysis.html#example-1-defining-and-using-wrapped-functions">Example 1: Defining and using wrapped functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="basic_workflows.html#executing-a-single-analysis">Executing a single analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_workflows.html#executing-a-single-sub-workflow">Executing a single sub-workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_workflows.html#executing-all-analyses">Executing all analyses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_workflows.html#executing-multiple-sub-workflows">Executing multiple sub-workflows</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#hopper-nersc-gov"><code class="docutils literal"><span class="pre">hopper.nersc.gov</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#portal-auth-nersc-gov"><code class="docutils literal"><span class="pre">portal-auth.nersc.gov</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#case-1-m-z-slice-selection">Case 1: m/z Slice Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#case-2-spectra-selection">Case 2: Spectra Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#case-3-3d-subcube-selection">Case 3: 3D Subcube Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#case-4-data-write">Case 4: Data Write</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#case-5-file-size">Case 5: File Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#test-data">Test Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#baseline-performance">Baseline Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#file-size">File Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#data-write">Data Write</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#selection-performance">Selection Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#image-aligned-chunking">Image-aligned Chunking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#compression-ratio">Compression Ratio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#id4">Data Write</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#id5">Selection Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#aggression-parameter-study">Aggression Parameter Study</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#data-layout">Data Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#system-performance">System Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF5_format_performance.html#future-work">Future Work</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.html">analysis Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#id1"><code class="docutils literal"><span class="pre">analysis</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.analysis_views"><code class="docutils literal"><span class="pre">analysis_views</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.findpeaks.html">findpeaks Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.findpeaks.html#findpeaks-third-party-package">findpeaks.third_party Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.findpeaks.html#findpeaks-experimental-package">findpeaks.experimental Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.multivariate_stats.html">multivariate_stats Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#multivariate-stats-third-party-package">multivariate_stats.third_party Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#multivariate-stats-experimental-package">multivariate_stats.experimental Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.msi_filtering.html">msi_filtering Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.msi_filtering.html#msi-filtering-third-party-package">msi_filtering.third_party Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.msi_filtering.html#msi-filtering-experimental-package">msi_filtering.experimental Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.compound_stats.html">compound_stats Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.compound_stats.html#compound-stats-third-party-package">compound_stats.third_party Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.analysis.compound_stats.html#compound-stats-experimental-package">compound_stats.experimental Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.dataformat.omsi_file.html">OMSI Dataformat Package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file"><code class="docutils literal"><span class="pre">omsi_file</span></code> Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.format"><code class="docutils literal"><span class="pre">format</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.main_file"><code class="docutils literal"><span class="pre">main_file</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.experiment"><code class="docutils literal"><span class="pre">experiment</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.metadata_collection"><code class="docutils literal"><span class="pre">metadata_collection</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.instrument"><code class="docutils literal"><span class="pre">instrument</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.methods"><code class="docutils literal"><span class="pre">methods</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.msidata"><code class="docutils literal"><span class="pre">msidata</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.analysis"><code class="docutils literal"><span class="pre">analysis</span></code> Module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.dependencies"><code class="docutils literal"><span class="pre">dependencies</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.file_reader_base"><code class="docutils literal"><span class="pre">file_reader_base</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.img_file"><code class="docutils literal"><span class="pre">img_file</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.dataformat.html#mzml-file-module"><code class="docutils literal"><span class="pre">mzml_file</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.bruckerflex_file"><code class="docutils literal"><span class="pre">bruckerflex_file</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.html#id1"><code class="docutils literal"><span class="pre">datastructures</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.analysis_data"><code class="docutils literal"><span class="pre">analysis_data</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.dependency_data"><code class="docutils literal"><span class="pre">dependency_data</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.run_info_data"><code class="docutils literal"><span class="pre">run_info_data</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="omsi.datastructures.metadata.html">metadata Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.shared.html">shared Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.data_selection"><code class="docutils literal"><span class="pre">data_selection</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.omsi_web_helper"><code class="docutils literal"><span class="pre">omsi_web_helper</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.spectrum_layout"><code class="docutils literal"><span class="pre">spectrum_layout</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.log"><code class="docutils literal"><span class="pre">log</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.mpi_helper"><code class="docutils literal"><span class="pre">mpi_helper</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.html">workflow Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#id1"><code class="docutils literal"><span class="pre">workflow</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#module-omsi.workflow.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="omsi.workflow.driver.html">driver Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.workflow.executor.html">executor Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.convertToOMSI"><code class="docutils literal"><span class="pre">convertToOMSI</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.run_analysis"><code class="docutils literal"><span class="pre">run_analysis</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.run_analysis"><code class="docutils literal"><span class="pre">run_workflow</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="omsi.tools.experimental.html">tools.experimental Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="omsi.tools.misc.html">tools.misc Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.simple_viewer"><code class="docutils literal"><span class="pre">simple_viewer</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testHDF5Optimization"><code class="docutils literal"><span class="pre">testHDF5Optimization</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testHDF5Optimization_alignedWrite"><code class="docutils literal"><span class="pre">testHDF5Optimization_alignedWrite</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_multiprocess_slice"><code class="docutils literal"><span class="pre">test_multiprocess_slice</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_par"><code class="docutils literal"><span class="pre">test_par</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_peakcube"><code class="docutils literal"><span class="pre">test_peakcube</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testhdf5_file_read"><code class="docutils literal"><span class="pre">testhdf5_file_read</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.templates.html#id1"><code class="docutils literal"><span class="pre">templates</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.templates.html#module-omsi.templates.analysis_template"><code class="docutils literal"><span class="pre">analysis_template</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

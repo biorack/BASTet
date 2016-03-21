@@ -1,9 +1,0 @@
-************* Module omsi.workflow.common
-C:  8, 0: Invalid class name "RawDescriptionDefaultHelpArgParseFormatter" (invalid-name)
-W: 66,12: Use of exec (exec-used)
-W: 69,16: Use of exec (exec-used)
-W:139, 8: Unused variable 'analysis_base' (unused-variable)
-C:226, 4: Invalid method name "get_additional_analysis_dependencies" (invalid-name)
-C:342, 4: Invalid method name "set_undefined_analysis_identifiers" (invalid-name)
-C:363, 4: Invalid method name "make_analysis_identifiers_unique" (invalid-name)
-R: 21, 0: Too many public methods (28/20) (too-many-public-methods)

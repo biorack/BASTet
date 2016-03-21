@@ -1,5 +1,0 @@
-************* Module omsi.dataformat
-W: 12, 8: Unused variable 'pyteomics' (unused-variable)
-W: 13, 8: Unused variable 'lxml' (unused-variable)
-F: 25, 8: Unable to import 'pyimzml.ImzMLParser' (import-error)
-W: 25, 8: Unused variable 'ImzMLParser' (unused-variable)

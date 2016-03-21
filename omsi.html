@@ -1,0 +1,549 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>omsi Package &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="next" title="analysis Package" href="omsi.analysis.html"/>
+        <link rel="prev" title="HDF5 I/O Performance" href="HDF5_format_performance.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.html">analysis Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.shared.html">shared Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.html">workflow Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>omsi Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/omsi.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="omsi-package">
+<h1>omsi Package<a class="headerlink" href="#omsi-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<p>The omsi package defines the main BASTet software stack used, e.g., by the OpenMSI project.
+It contains a large range of functionality for interacting analyses, OpenMSI HDF5 data files,
+analysis workflows and other related infrastructure. The following is a rough overview
+of the various packages and modules</p>
+<ul class="simple">
+<li><strong>Analysis</strong> <a class="reference internal" href="omsi.analysis.html#module-omsi.analysis" title="omsi.analysis"><code class="xref py py-mod docutils literal"><span class="pre">omsi.analysis</span></code></a> Package containing the base classes that facilitate the integration of new analysis with the BASTet software stack (e.g, the file format) and collection of specific analysis functionality.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis" title="omsi.analysis"><code class="xref py py-obj docutils literal"><span class="pre">omsi.analysis</span></code></a></td>
+<td>Package containing the base classes that facilitate the integration of new analysis with the BASTet software stack (e.g, the file format) and collection of specific analysis functionality.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="omsi.analysis.compound_stats.html#module-omsi.analysis.compound_stats" title="omsi.analysis.compound_stats"><code class="xref py py-obj docutils literal"><span class="pre">omsi.analysis.compound_stats</span></code></a></td>
+<td>Package containing shared third-party code modules included here to reduce the need for external dependencies when only small parts of external code are used.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks" title="omsi.analysis.findpeaks"><code class="xref py py-obj docutils literal"><span class="pre">omsi.analysis.findpeaks</span></code></a></td>
+<td>Package of peak-finding related analysis modules.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="omsi.analysis.msi_filtering.html#module-omsi.analysis.msi_filtering" title="omsi.analysis.msi_filtering"><code class="xref py py-obj docutils literal"><span class="pre">omsi.analysis.msi_filtering</span></code></a></td>
+<td>Module with third-party modules, functions, classes used by some of the analysis modules in the containing package.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="omsi.analysis.multivariate_stats.html#module-omsi.analysis.multivariate_stats" title="omsi.analysis.multivariate_stats"><code class="xref py py-obj docutils literal"><span class="pre">omsi.analysis.multivariate_stats</span></code></a></td>
+<td>Multivariate statistics analysis</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Data Format</strong> <code class="xref py py-mod docutils literal"><span class="pre">omsi.dataformat</span></code> Package for implementation and specification of file formats. In particular this package contains the base API for interacting with OpenMSI HDF5 datasets.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.dataformat</span></code></td>
+<td>Package for implementation and specification of file formats.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file" title="omsi.dataformat.omsi_file"><code class="xref py py-obj docutils literal"><span class="pre">omsi.dataformat.omsi_file</span></code></a></td>
+<td>Module for specification of the OpenMSI file API.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Workflow</strong> <a class="reference internal" href="omsi.workflow.html#module-omsi.workflow" title="omsi.workflow"><code class="xref py py-mod docutils literal"><span class="pre">omsi.workflow</span></code></a> Package with modules for specification and execution of analysis tasks and complex analysis workflows.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="omsi.workflow.html#module-omsi.workflow" title="omsi.workflow"><code class="xref py py-obj docutils literal"><span class="pre">omsi.workflow</span></code></a></td>
+<td>Package with modules for specification and execution of analysis tasks and complex analysis workflows.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.worflow.dirver</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="omsi.workflow.executor.html#module-omsi.workflow.executor" title="omsi.workflow.executor"><code class="xref py py-obj docutils literal"><span class="pre">omsi.workflow.executor</span></code></a></td>
+<td>Package with executors of analysis workflows.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Data Structures</strong> <code class="xref py py-mod docutils literal"><span class="pre">omsi.datastructure</span></code> Package with a collection of various data structures and related classes used throughout the software stack, e.g., for metadata, analysis parameter data, runtime information data etc.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures" title="omsi.datastructures"><code class="xref py py-obj docutils literal"><span class="pre">omsi.datastructures</span></code></a></td>
+<td>Package with a collection of various data structures and related classes used throughout the software stack, e.g., for metadata, analysis parameter data, runtime information data etc.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="omsi.datastructures.metadata.html#module-omsi.datastructures.metadata" title="omsi.datastructures.metadata"><code class="xref py py-obj docutils literal"><span class="pre">omsi.datastructures.metadata</span></code></a></td>
+<td>Package with metadata datastructures</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Shared</strong> <code class="xref py py-mod docutils literal"><span class="pre">omsi.shared</span></code> Package used to implement shared functionality and helper functions.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared</span></code></td>
+<td>Package used to implement shared functionality and helper functions.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.thirdparty</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Tools</strong> <code class="xref py py-mod docutils literal"><span class="pre">omsi.tools</span></code> Package for collecting tools (e.g,. command-line programs) to help with particular tasks. This includes, e.g, tools for data conversion, document generation, etc.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.tools</span></code></td>
+<td>Package for collecting tools (e.g,.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="omsi.tools.misc.html#module-omsi.tools.misc" title="omsi.tools.misc"><code class="xref py py-obj docutils literal"><span class="pre">omsi.tools.misc</span></code></a></td>
+<td>Collection of miscellaneous tools.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Templates</strong> <a class="reference internal" href="omsi.templates.html#module-omsi.templates" title="omsi.templates"><code class="xref py py-mod docutils literal"><span class="pre">omsi.templates</span></code></a> This package provides a collection of code templates to ease the development of additional components, e.g., analysis modules. As such, this package is NOT intended for direct usage but is rather just a library of code templates.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="omsi.templates.html#module-omsi.templates" title="omsi.templates"><code class="xref py py-obj docutils literal"><span class="pre">omsi.templates</span></code></a></td>
+<td>This package provides a collection of code templates to ease the development of additional components, e.g., analysis modules.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><strong>Examples</strong> <code class="xref py py-mod docutils literal"><span class="pre">omsi.examples</span></code> Package with a collection of various misc. example scripts.</li>
+</ul>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.examples</span></code></td>
+<td>Package with a collection of various misc.</td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="omsi.analysis.html">analysis Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.analysis.html#id1"><code class="docutils literal"><span class="pre">analysis</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.analysis_views"><code class="docutils literal"><span class="pre">analysis_views</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.analysis.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.findpeaks.html">findpeaks Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#id1"><code class="docutils literal"><span class="pre">findpeaks</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.omsi_findpeaks_global"><code class="docutils literal"><span class="pre">omsi_findpeaks_global</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.omsi_findpeaks_local"><code class="docutils literal"><span class="pre">omsi_findpeaks_local</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.findpeaks.html#findpeaks-third-party-package">findpeaks.third_party Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#id2"><code class="docutils literal"><span class="pre">findpeaks.third_party</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.third_party.findpeaks"><code class="docutils literal"><span class="pre">findpeaks</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.findpeaks.html#findpeaks-experimental-package">findpeaks.experimental Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#id3"><code class="docutils literal"><span class="pre">findpeaks.experimental</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.experimental.omsi_peakcube"><code class="docutils literal"><span class="pre">omsi_peakcube</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.experimental.pfrun"><code class="docutils literal"><span class="pre">pfrun</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.experimental.omsi_lpf"><code class="docutils literal"><span class="pre">omsi_lpf</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.experimental.omsi_npg"><code class="docutils literal"><span class="pre">omsi_npg</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.findpeaks.html#module-omsi.analysis.findpeaks.experimental.mypeakfinder"><code class="docutils literal"><span class="pre">mypeakfinder</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.multivariate_stats.html">multivariate_stats Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#id1"><code class="docutils literal"><span class="pre">multivariate_stats</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#module-omsi.analysis.multivariate_stats.omsi_nmf"><code class="docutils literal"><span class="pre">omsi_nmf</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#multivariate-stats-third-party-package">multivariate_stats.third_party Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#id2"><code class="docutils literal"><span class="pre">multivariate_stats.third_party</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#module-omsi.analysis.multivariate_stats.third_party.nmf"><code class="docutils literal"><span class="pre">nmf</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#multivariate-stats-experimental-package">multivariate_stats.experimental Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.multivariate_stats.html#id5"><code class="docutils literal"><span class="pre">multivariate_stats.experimental</span></code> Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.msi_filtering.html">msi_filtering Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#id1"><code class="docutils literal"><span class="pre">msi_filtering</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#module-omsi.analysis.msi_filtering.omsi_tic_norm"><code class="docutils literal"><span class="pre">omsi_tic_norm</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.msi_filtering.html#msi-filtering-third-party-package">msi_filtering.third_party Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#id2"><code class="docutils literal"><span class="pre">msi_filtering.third_party</span></code> Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.msi_filtering.html#msi-filtering-experimental-package">msi_filtering.experimental Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#id3"><code class="docutils literal"><span class="pre">msi_filtering.experimental</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#module-omsi.analysis.msi_filtering.experimental.omsi_filter_by_mask"><code class="docutils literal"><span class="pre">omsi_filter_by_mask</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.msi_filtering.html#module-omsi.analysis.msi_filtering.experimental.omsi_mask_by_cluster"><code class="docutils literal"><span class="pre">omsi_mask_by_cluster</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.compound_stats.html">compound_stats Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.compound_stats.html#id1"><code class="docutils literal"><span class="pre">compound_stats</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.compound_stats.html#module-omsi.analysis.compound_stats.omsi_score_midas"><code class="docutils literal"><span class="pre">omsi_score_midas</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.compound_stats.html#module-omsi.analysis.compound_stats.omsi_score_pactolus"><code class="docutils literal"><span class="pre">omsi_score_pactolus</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.compound_stats.html#compound-stats-third-party-package">compound_stats.third_party Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.compound_stats.html#id2"><code class="docutils literal"><span class="pre">compound_stats.third_party</span></code> Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.compound_stats.html#compound-stats-experimental-package">compound_stats.experimental Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.compound_stats.html#id3"><code class="docutils literal"><span class="pre">compound_stats.experimental</span></code> Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.dataformat.omsi_file.html">OMSI Dataformat Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file"><code class="docutils literal"><span class="pre">omsi_file</span></code> Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.format"><code class="docutils literal"><span class="pre">format</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.main_file"><code class="docutils literal"><span class="pre">main_file</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.experiment"><code class="docutils literal"><span class="pre">experiment</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.metadata_collection"><code class="docutils literal"><span class="pre">metadata_collection</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.instrument"><code class="docutils literal"><span class="pre">instrument</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.methods"><code class="docutils literal"><span class="pre">methods</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.msidata"><code class="docutils literal"><span class="pre">msidata</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.analysis"><code class="docutils literal"><span class="pre">analysis</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.omsi_file.html#module-omsi.dataformat.omsi_file.dependencies"><code class="docutils literal"><span class="pre">dependencies</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.file_reader_base"><code class="docutils literal"><span class="pre">file_reader_base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.img_file"><code class="docutils literal"><span class="pre">img_file</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.dataformat.html#mzml-file-module"><code class="docutils literal"><span class="pre">mzml_file</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.dataformat.html#module-omsi.dataformat.bruckerflex_file"><code class="docutils literal"><span class="pre">bruckerflex_file</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.datastructures.html#id1"><code class="docutils literal"><span class="pre">datastructures</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.analysis_data"><code class="docutils literal"><span class="pre">analysis_data</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.dependency_data"><code class="docutils literal"><span class="pre">dependency_data</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.datastructures.html#module-omsi.datastructures.run_info_data"><code class="docutils literal"><span class="pre">run_info_data</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.datastructures.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.metadata.html">metadata Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.metadata.html#id1"><code class="docutils literal"><span class="pre">metadata</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.metadata.html#module-omsi.datastructures.metadata.metadata_data"><code class="docutils literal"><span class="pre">metadata_data</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.datastructures.metadata.html#module-omsi.datastructures.metadata.metadata_ontologies"><code class="docutils literal"><span class="pre">metadata_ontologies</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.shared.html">shared Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.data_selection"><code class="docutils literal"><span class="pre">data_selection</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.omsi_web_helper"><code class="docutils literal"><span class="pre">omsi_web_helper</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.spectrum_layout"><code class="docutils literal"><span class="pre">spectrum_layout</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.log"><code class="docutils literal"><span class="pre">log</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.shared.html#module-omsi.shared.mpi_helper"><code class="docutils literal"><span class="pre">mpi_helper</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.workflow.html">workflow Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.workflow.html#id1"><code class="docutils literal"><span class="pre">workflow</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.workflow.html#module-omsi.workflow.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.workflow.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.driver.html">driver Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.driver.html#id1"><code class="docutils literal"><span class="pre">driver</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.driver.html#module-omsi.workflow.driver.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.driver.html#module-omsi.workflow.driver.cl_analysis_driver"><code class="docutils literal"><span class="pre">cl_analysis_driver</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.driver.html#module-omsi.workflow.driver.cl_workflow_driver"><code class="docutils literal"><span class="pre">cl_workflow_driver</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.executor.html">executor Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.executor.html#id1"><code class="docutils literal"><span class="pre">executor</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.executor.html#module-omsi.workflow.executor.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.executor.html#module-omsi.workflow.executor.greedy_executor"><code class="docutils literal"><span class="pre">greedy_executor</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.tools.html">tools Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.convertToOMSI"><code class="docutils literal"><span class="pre">convertToOMSI</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.run_analysis"><code class="docutils literal"><span class="pre">run_analysis</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.tools.html#module-omsi.tools.run_analysis"><code class="docutils literal"><span class="pre">run_workflow</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.tools.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.experimental.html">tools.experimental Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.experimental.html#id1"><code class="docutils literal"><span class="pre">tools.experimental</span></code> Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.misc.html">tools.misc Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.misc.html#id1"><code class="docutils literal"><span class="pre">tools.misc</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.misc.html#module-omsi.tools.misc.make_thumb"><code class="docutils literal"><span class="pre">make_thumb</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.tools.misc.html#module-omsi.tools.misc.create_peak_cube_overview"><code class="docutils literal"><span class="pre">create_peak_cube_overview</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.examples.html">examples Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.simple_viewer"><code class="docutils literal"><span class="pre">simple_viewer</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testHDF5Optimization"><code class="docutils literal"><span class="pre">testHDF5Optimization</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testHDF5Optimization_alignedWrite"><code class="docutils literal"><span class="pre">testHDF5Optimization_alignedWrite</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_multiprocess_slice"><code class="docutils literal"><span class="pre">test_multiprocess_slice</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_par"><code class="docutils literal"><span class="pre">test_par</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.test_peakcube"><code class="docutils literal"><span class="pre">test_peakcube</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.examples.html#module-omsi.examples.testhdf5_file_read"><code class="docutils literal"><span class="pre">testhdf5_file_read</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.templates.html">templates Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.templates.html#id1"><code class="docutils literal"><span class="pre">templates</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="omsi.templates.html#module-omsi.templates.analysis_template"><code class="docutils literal"><span class="pre">analysis_template</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="omsi.analysis.html" class="btn btn-neutral float-right" title="analysis Package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="HDF5_format_performance.html" class="btn btn-neutral" title="HDF5 I/O Performance" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

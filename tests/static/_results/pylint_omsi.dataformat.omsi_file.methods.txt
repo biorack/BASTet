@@ -1,3 +1,0 @@
-************* Module omsi.dataformat.omsi_file.methods
-W: 70,12: No exception type(s) specified (bare-except)
-W:105, 4: Arguments number differs from overridden method (arguments-differ)

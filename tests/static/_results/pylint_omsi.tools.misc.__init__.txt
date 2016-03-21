@@ -1,2 +1,0 @@
-************* Module omsi.tools.misc.__init__
-C:  3, 0: Final newline missing (missing-final-newline)

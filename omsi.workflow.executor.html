@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>executor Package &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="up" title="workflow Package" href="omsi.workflow.html"/>
+        <link rel="next" title="tools Package" href="omsi.tools.html"/>
+        <link rel="prev" title="driver Package" href="omsi.workflow.driver.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="omsi.html">omsi Package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.html">analysis Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.shared.html">shared Package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="omsi.workflow.html">workflow Package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#id1"><code class="docutils literal"><span class="pre">workflow</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#module-omsi.workflow.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="omsi.workflow.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="omsi.html">omsi Package</a> &raquo;</li>
+      
+          <li><a href="omsi.workflow.html">workflow Package</a> &raquo;</li>
+      
+    <li>executor Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/omsi.workflow.executor.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="executor-package">
+<h1>executor Package<a class="headerlink" href="#executor-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">executor</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-omsi.workflow.executor"></span><p>Package with executors of analysis workflows. Executors perform and control the execution of workflows.
+The setup of workflows is often performed by the user or via dedicated workflow drivers.</p>
+</div>
+<div class="section" id="module-omsi.workflow.executor.base">
+<span id="base-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">base</span></code> Module<a class="headerlink" href="#module-omsi.workflow.executor.base" title="Permalink to this headline">¶</a></h2>
+<p>Module containing base classes for workflow executors.</p>
+<p>Workflow executors control the execution of workflows. The setup of workflows is often controlled
+either by a workflow driver or the user.</p>
+<dl class="class">
+<dt id="omsi.workflow.executor.base.workflow_executor_base">
+<em class="property">class </em><code class="descclassname">omsi.workflow.executor.base.</code><code class="descname">workflow_executor_base</code><span class="sig-paren">(</span><em>analysis_objects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="omsi.datastructures.html#omsi.datastructures.analysis_data.parameter_manager" title="omsi.datastructures.analysis_data.parameter_manager"><code class="xref py py-class docutils literal"><span class="pre">omsi.datastructures.analysis_data.parameter_manager</span></code></a></p>
+<p>Base class used to execute a workflow of one or many analyses. This is an object-based execution,
+i.e., the user defines a set of analyses to be executed.</p>
+<p>We are given a set of existing analysis objects for which we need to coordinate the execution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>analysis_objects</strong> &#8211; Private set of analysis objects to be executed</li>
+<li><a class="reference internal" href="#omsi.workflow.executor.base.workflow_executor_base.DEFAULT_EXECUTOR_CLASS" title="omsi.workflow.executor.base.workflow_executor_base.DEFAULT_EXECUTOR_CLASS"><strong>DEFAULT_EXECUTOR_CLASS</strong></a> &#8211; Define the derived workflow_executor_base class to be used as default executor
+The default value is None, in which case the greedy_workflow_executor is used. This variable is used
+by the get_default_executor function to instantiate a  default workflow executor on request. Using this
+variable we can change the default executor to our own preferred executor, e.g., to change the executor
+used by the omsi.analysis.base.analysis_base functions execute_all(...) and execute_recursive(...)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>To implement a derived workflow executor, we need to implement a derived class that implements the main()
+function.</p>
+<p>Initialize the workflow executor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis_objects</strong> &#8211; A list of analysis objects to be executed</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.DEFAULT_EXECUTOR_CLASS">
+<code class="descname">DEFAULT_EXECUTOR_CLASS</code><em class="property"> = None</em><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.DEFAULT_EXECUTOR_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default executor class to be used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.add_analysis">
+<code class="descname">add_analysis</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.add_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a given analysis to the set of object to be executed by the workflow</p>
+<p>Shorthand for: self.analysis_tasks.add(analysis_object)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.add_analysis_all">
+<code class="descname">add_analysis_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.add_analysis_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add all known analyses to the workflow.</p>
+<p>Shorthand for: self.analysis_tasks.add_analysis_all()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.add_analysis_dependencies">
+<code class="descname">add_analysis_dependencies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.add_analysis_dependencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the dependencies of all analyses to the workflow in case they are missing.</p>
+<p>This function is recursive, step-by-step adding all dependencies of the workflow to the list of
+tasks to be executed, until no more dependencies are found.</p>
+<p>Usually this function is called by the workflow executor itself before running the analysis and
+should not need to be called by the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Integer indicating the number of dependencies added to the list of tasks</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.add_analysis_from_scripts">
+<code class="descname">add_analysis_from_scripts</code><span class="sig-paren">(</span><em>script_files</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.add_analysis_from_scripts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the list of scripts and add all (i.e., zero, one, or multiple) analyses to this workflow</p>
+<p>NOTE: This function executes scripts using exec(..), i.e., there are NO safeguards against malicious codes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script_files</strong> &#8211; List of strings with the paths to the script files. If only a single
+script is used, then a single string may be used as well.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all analyses from the workflow.</p>
+<p>Shorthand for: self.analysis_tasks.clear()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the workflow. This uses the main() function to run the actual workflow.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.from_script_files">
+<em class="property">classmethod </em><code class="descname">from_script_files</code><span class="sig-paren">(</span><em>script_files</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.from_script_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as from_script, but the scripts are read from the given list of files.</p>
+<p>NOTE: This function executes scripts using exec(..), i.e., there are NO safeguards against malicious codes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>script_files</strong> &#8211; List of strings with the paths to the script files. If only a single
+script is used, then a single string may be used as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Instance of the current workflow executor class for running the given workflow</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.from_scripts">
+<em class="property">classmethod </em><code class="descname">from_scripts</code><span class="sig-paren">(</span><em>scripts</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.from_scripts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and initalize a worklflow executor of the current class type to execute the workflow defined
+in the given set of scripts.</p>
+<p>This function using analysis_task_list.from_scripts to evaluate the workflow scripts to extract all
+analyses to be created.</p>
+<p>NOTE: This function executes scripts using exec(..), i.e., there are NO safeguards against malicious codes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scripts</strong> &#8211; The script with the setup of the workflow. This should only include
+the definition of analyses and their inputs.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Instance of the current workflow executor class for running the given workflow</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.get_analyses">
+<code class="descname">get_analyses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.get_analyses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of analyses to be run.</p>
+<p>Shorthand for: self.analysis_tasks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.get_analysis">
+<code class="descname">get_analysis</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.get_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the analysis with the given index</p>
+<blockquote>
+<div>Shorthand for: self.analysis_tasks[index]</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> &#8211; Integer index of the analysis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">omsi.analysis.base.analysis_base object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">IndexError in case that the index is invalid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.get_default_executor">
+<em class="property">classmethod </em><code class="descname">get_default_executor</code><span class="sig-paren">(</span><em>analysis_objects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.get_default_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an instance of the default workflow executor to be used.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis_objects</strong> &#8211; A set or unique list of analysis objects to be executed by the workflow</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Instance of the default workflow executor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.get_default_executor_class">
+<em class="property">classmethod </em><code class="descname">get_default_executor_class</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.get_default_executor_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the default executor class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Derived class of workflow_executor_base</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.executor.base.workflow_executor_base.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.base.workflow_executor_base.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement the execution of the workflow. We should always call execute(..) or __call__(..) to run
+the workflow. This function is intended to implementd the executor-specific exeuction behavior and
+must be implemented in child classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.workflow.executor.greedy_executor">
+<span id="greedy-executor-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">greedy_executor</span></code> Module<a class="headerlink" href="#module-omsi.workflow.executor.greedy_executor" title="Permalink to this headline">¶</a></h2>
+<p>Module used to help with the execution of complex analyses workflows</p>
+<dl class="class">
+<dt id="omsi.workflow.executor.greedy_executor.greedy_executor">
+<em class="property">class </em><code class="descclassname">omsi.workflow.executor.greedy_executor.</code><code class="descname">greedy_executor</code><span class="sig-paren">(</span><em>analysis_objects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.greedy_executor.greedy_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#omsi.workflow.executor.base.workflow_executor_base" title="omsi.workflow.executor.base.workflow_executor_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.workflow.executor.base.workflow_executor_base</span></code></a></p>
+<p>Execute a set of analysis objects and their dependencies</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>run_info</strong> &#8211; The runtime information dictionary for the overall workflow</li>
+<li><strong>mpi_comm</strong> &#8211; The MPI communicator to be used when running in parallel</li>
+<li><strong>mpi_root</strong> &#8211; The MPI root rank when running in parallel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Additional parameters:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reduce_memory_usage</strong> &#8211; Boolean indicating whether we should reduce memory usage by pushing analysis
+data to file after an analysis has been completed. This reduces the amount of data we keep in memory
+but results in additional overhead for I/O and temporary disk storage.</td>
+</tr>
+</tbody>
+</table>
+<p>Initalize the workflow driver</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis_objects</strong> &#8211; A list of analysis objects to be executed</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="omsi.workflow.executor.greedy_executor.greedy_executor.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.executor.greedy_executor.greedy_executor.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the analysis workflow</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="omsi.tools.html" class="btn btn-neutral float-right" title="tools Package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="omsi.workflow.driver.html" class="btn btn-neutral" title="driver Package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

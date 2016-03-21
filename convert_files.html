@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Converting and Files and Making them Accessible &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Integrating new file formats" href="custom_filereader.html"/>
+        <link rel="prev" title="Introduction" href="introduction.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Converting and Files and Making them Accessible</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/convert_files.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="converting-and-files-and-making-them-accessible">
+<span id="converting-files"></span><h1>Converting and Files and Making them Accessible<a class="headerlink" href="#converting-and-files-and-making-them-accessible" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="converting-an-msi-file-at-nersc">
+<h2>Converting an MSI file at NERSC<a class="headerlink" href="#converting-an-msi-file-at-nersc" title="Permalink to this headline">¶</a></h2>
+<p>To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>ssh edison.nersc.gov
+cd /project/projectdirs/openmsi/devel/convert
+source setupEnvironment.csh
+python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
+</pre></div>
+</div>
+<p>Note if you use the bash shell then use <code class="docutils literal"><span class="pre">setupEnvironment.bash</span></code> instead.</p>
+<p>Note, if you want to use the output file from openmsi.nersc.gov then the output file path should be:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>/project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
+</pre></div>
+</div>
+<p>where username is the name of the primary user that owns the file.</p>
+</div>
+<div class="section" id="making-a-converted-file-accessible-to-openmsi-private">
+<h2>Making a converted file accessible to OpenMSI (Private)<a class="headerlink" href="#making-a-converted-file-accessible-to-openmsi-private" title="Permalink to this headline">¶</a></h2>
+<p>The conversion script will by default automatically try to register new files with the OpenMSI site and
+assign them private to a single user if the output file is placed in the OpenMSI private data location:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>python convertToOMSI.py &lt;infile1&gt; /project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
+</pre></div>
+</div>
+<p>The username in the path will determine the user the file is assigned to. E.g: The filename will also be
+the name used in the listing on the site. In order to generate the HDF5 file without adding to the
+database, use the <code class="docutils literal"><span class="pre">--no-add-to-db</span></code> command line option, e.g,:</p>
+</div>
+<div class="section" id="changing-file-permissions">
+<h2>Changing file permissions:<a class="headerlink" href="#changing-file-permissions" title="Permalink to this headline">¶</a></h2>
+<p>Using the OpenMSI website the owner of the file can assign permissions to files online:</p>
+<p><a class="reference external" href="https://openmsi.nersc.gov/openmsi/resources/filemanager">https://openmsi.nersc.gov/openmsi/resources/filemanager</a>?file=&lt;filename&gt;</p>
+</div>
+<div class="section" id="converttoomsi-usage-and-options">
+<h2><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options<a class="headerlink" href="#converttoomsi-usage-and-options" title="Permalink to this headline">¶</a></h2>
+<p>NOTE: In order to view a current, complete list of conversions options use:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python convertToOMSI.py --help
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre><span></span>python convertToOMSI.py --help
+USAGE: Call &quot;convertToOMSI [options] imgBaseFile1 imgBaseFile2 ... imgBaseFileN HDF5File&quot;
+
+This converter script takes the basename (i.e., path+basefilename) of a single
+or multiple MSI files as input and converts them to HDF5. Each MSI file is
+stored as a separate experiment in the output HDF5 file. If an input file
+defines multiple regions, then those regions can either be stored as separate
+datasets of the same experiment and/or merged to a single MSI dataset.
+Using the various paramter settings described below, one can define how the
+conversion should be performed, how the data should be stored in HDF5, and
+indicate which analyses should be executed.
+
+===HELPER OPTIONS===
+--suggest-chunking : Iterate over all given input files and suggest a chunking strategy.
+                     No data is converted when this option is given, i.e., no name for the
+                     HDF5File should be given, but only input files should be listed.
+
+===ERROR HANDLING OPTIONS===
+--error-handling &lt;options&gt;: Define how errors should be handled. Options are:
+                   i)   terminate-and-cleanup (default) : Terminate the conversion, delete the
+                           the HDF5 file and do not add the file to the database.
+                   ii)  terminate-only, : Leave the generated HDF5 output file in place but  do not
+                            add the file to the database.
+                   iii) continue-on-error: Ignore errors if possible and continue, even if this
+                            means that some data may be missing from the output.
+--email &lt;email1 email2 ...&gt;: Send notification in case of both error or success to the given email address.
+--email-success &lt;email1 email2 ...&gt;&gt;: Send notification in case of success to the given email address.
+--email-error &lt;email1 email2 ...&gt;&gt;: Send notification in case of error to the given email address.
+
+===INPUT DATA OPTIONS===
+
+Default input data options: --format auto --regions split+merge
+--format &lt;option&gt;: Define which file format is used as input. By default the program tries to
+           automatically determine the input format. This option can be used to indicate
+           the format explicitly to in case the auto option fails. Available options are:
+          {&#39;bruckerflex_file&#39;: &lt;class &#39;omsi.dataformat.bruckerflex_file.bruckerflex_file&#39;&gt;, &#39;img_file&#39;: &lt;class &#39;omsi.dataformat.img_file.img_file&#39;&gt;}
+--regions &lt;option&gt;: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored
+           in a single file. This option allows one to specify how these regions should be
+           treated during file conversion. E.g., one may want to store i) each region as a
+           separate dataset in the output file (--regions split), ii) all regions combined
+           in a single dataset (--regions merge), or both (--regions split+merge)
+           Available options are:
+          [&#39;split&#39;, &#39;merge&#39;, &#39;split+merge&#39;]
+
+===FILE WRITE OPTIONS===
+
+---FILE WRITE OPTIONS: Chunking---
+
+Default HDF5 Chunking options: Enabled by default using --auto-chunking :
+--auto-chunking : Automatically decide which chunking should be used. This option
+                automatically generates two copies of the data, one with a chunking
+                optimized for selection of spectra and another one optimized for
+                selection of ion image slices. All --chunking, --no-chunking, and
+                --optimized-chunking options are ignored if this paramter is given
+--chunking &lt;x y z&gt; : Use chunking when writing the HDF5 file. (DEFAULT, x=4,y=4,z=2048)
+--no-chunking : Disable chunking when writing the HDF5 file. Use in combination with
+                --no-compression since compression depends on chunking and will enable
+                it if compression is used.
+--optimized-chunking &lt;x y z&gt; : Use this option to generate additional copies of the data
+                with different chunked data layouts. Generating multiple copies of the
+                data with different chunked data layouts can be help accelerate selective
+                data read opeations. (DEFAULT OFF). We recommend a spectra-aligned chunking
+                for the raw data, e.g., &#39;--chunking 1 1 32768&#39; and an image-aligned chunked
+                secondary copy of the data, e.g., &#39;--optimzied-chunking 20 20 100&#39;.
+
+---FILE WRITE OPTIONS: Compression---
+HDF5 Compression: Default ON using (gzip, 4):
+--compression: Enable compression using (gzip,4). NOTE: Compression requires the use of chunking.
+--no-compression: Disable the use of compression.
+
+===I/O OPTIONS===
+--io &lt;option&gt;: Available options are: [&#39;chunk&#39;, &#39;spectrum&#39;, &#39;all&#39;]
+             i) all : Read the full data in memory and write it at once
+             ii) spectrum : Read one spectrum at a time and write it to the file.
+             iii) chunk : Read one chunk at a time and write it to the file.
+
+===DATABSE OPTIONS===
+
+These options control whether the generated output file should be added to a server database
+to manage web file access permissions
+Default options are: --add-to-db --db-server http://openmsi.nersc.gov
+--add-to-db : Add the output HDF5 file to the database.
+--no-add-to-db : Disable adding the file to the database.
+--db-server : Specify the online server where the file should be registers. Default is
+              http://openmsi.nersc.gov
+--owner : Name of the user that should be assigned as owner. By default the owner is
+          determined automatically based on the file path.
+
+===ANALYSIS OPTIONS===
+
+NMF: Default ON: (nc=20, timeout=600, niter=2000, tolerance=0.0001, raw=False)
+--nmf : Compute the nmf for all the input data files and store the results in the
+        HDF5 file. NOTE: If global peak-finding (fpg) is performed, then
+        nmf will be performed on the peak-cube, otherwise on the raw data
+--no-nmf: Disable the execution of nmf
+--nmf-nc &lt;number&gt;: Number of components to be computed by the NMF. (default nc=20)
+--nmf-timeout &lt;number&gt;: Maximum time in seconds to be used for computing the NMF. (default timeout=600)
+--nmf-niter &lt;number&gt;: Number of iterations (minimum is 2)(default niter=2000)
+--nmf-tolerance &lt;number&gt;: Tolerance value for a relative stopping condition. (default tolerance=0.0001)
+--nmf-raw &lt;number&gt;: Force execution of the NMF on the raw data. By default the results from
+            the global peak finding (--fpg) are used to compute the NMF.
+
+Global Peak Finding: Default ON:
+--fpg : Compute the global peak finding for all input data files and save results
+           in the HDF5 file (DEFAULT)
+--no-fpg: Disable the global peak finding
+
+Local Peak Finding: Default OFF:
+--fpl : Compute the local peak finding for all input data files and save results
+        in the HDF5 file
+--no-fpl: Disable the local peak finding (DEFAULT)
+
+---OTHER OPTIONS---
+
+Generate Thumbnail image: Default OFF:
+--thumbnail: Generate thumbnail image for the file based on, in order of availability:
+             * The first three components of the NMF
+             * The three most intense peaks from the global peak finding (fpg)
+             * The three most intense peaks in the raw data that are at least 1 percent
+               of the total m/z range apart.
+--no-thumbnail: Do not generate a thumbnail image.
+
+Generate XDMF header file for output file: Default OFF:
+--xdmf: Write XDMF XML-based header-file for the output HDF5 file.
+--no-xdmf: Do not generate a XDMF XML-based header for the HDF5 file.
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="custom_filereader.html" class="btn btn-neutral float-right" title="Integrating new file formats" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
