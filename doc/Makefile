@@ -39,6 +39,9 @@ help:
 	@echo "  changes    to make an overview of all changed/added/deprecated items"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  htmlpublic to rebuild the html docs and to copy the docs to the $(PUBLIC_BUILDDIR) repo with the gh-pages branch"
+	@echo "  latexpdfpublic to rebuild the latex and pdf and to copy the pdf to the $(PUBLIC_BUILDDIR) repo with the gh-pages branch"
+	@echo "  updatepublic rebuild the html and pdf docs for publications and push all changes to the docs to GitHub for publication"
 
 clean:
 	-rm -rf $(BUILDDIR)/*
@@ -50,13 +53,7 @@ html:
 
 updatepublic: htmlpublic latexpdfpublic
 	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
-	cd $(PUBLIC_BUILDDIR)/html; echo $(PWD)
-#	echo "Adding files to gh-pages repo"
-#	git add .
-#	echo "Commiting changes to gh-pages repo"
-#	git commit -m "rebuilt the public docs" .
-#	echo "Pushing changes to gh-pages repo"
-#	git push origin gh-pages
+	cd $(PUBLIC_BUILDDIR)/html; echo "Adding files to gh-pages repo"; git add .; echo "Commiting changes to gh-pages repo"; git commit -m "rebuilt the public docs" .; echo "Pushing changes to gh-pages repo"; git push origin gh-pages
 
 htmlpublic: html
 	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
