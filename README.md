@@ -3,22 +3,38 @@ Berkeley Analysis and Storage Toolkit (BASTet)
 
 <img src="https://raw.githubusercontent.com/oruebel/BASTet/master/doc/_static/bastet_logo_full.png" width="400" />
 
+## Documentation
+
+The online documentation for BASTet is available at:
+
+* HTML: [https://oruebel.github.io/BASTet/](https://oruebel.github.io/BASTet/). 
+* PDF: [https://oruebel.github.io/BASTet/_static/bastet_doc.pdf](https://oruebel.github.io/BASTet/_static/bastet_doc.pdf)
+
+## Developer Notes
+
+### Building the online documentation
+
+The sources for the sphinx docs are part of the doc/ folder and can be build locally as usual via, e.g., "make html." This will build the documentation locally only as part of the doc/_build folder. 
+
+The online documentation is hosted via GitHub pages and are part of gh-pages branch. The sphinx docs build scripts are conveniently set up to simply the update of the online documentation as part of the regular development process. However, we need to do the following simple setup first:
+
+* `cd` to the your local copy of the BASTet repo (i.e., where the /omsi and /doc folder are located)
+* `cd ..`
+* `mkdir bastet_doc`
+* `cd bastet_doc`
+* `git clone https://github.com/oruebel/BASTet.git html`
+* `git checkout -b gh-pages remotes/origin/ghpages`
+
+Once we have created and setup our `bastet_doc` repo for the `gh-pages` branch we can now build the online documentation as usual from the `doc` folder of our development repo via the following commands:
+
+* `make htmlpublic` : Rebuild the html docs locally and then copy the docs to the ../../bastet_docs repo with the gh-pages branch. This will only make local changes without commiting or publishing anything.
+* `make latexpdfpublic` : Rebuild the latex and pdf and then copy the pdf to the ../../bastet_docs repo with the gh-pages branch.  This will only make local changes without commiting or publishing anything.
+* `make updatepublic` : Once you have confirmed that the docs are correct, you can rebuild the html and pdf docs for publications using this command. The command also commits and pushes all changes to the docs back to GitHub for publication, so that they become immediatly available online.
+
 ## Licence
 
-See licence.txt
+See [license.txt](license.txt)
 
 ## Copyright Notice
 
-BASTet  Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory
-(subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
-
-If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's
-Innovation & Partnerships Office at IPO@lbl.gov.
-
-NOTICE.  This software was developed under funding from the U.S. Department of Energy.  As such, the U.S. Government
-has been granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license
-in the Software to reproduce, prepare derivative works, and perform publicly and display publicly.  Beginning five (5)
-years after the date permission to assert copyright is obtained from the U.S. Department of Energy, and subject to
-any subsequent five (5) year renewals, the U.S. Government is granted for itself and others acting on its behalf a
-paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, prepare derivative works,
-distribute copies to the public, perform publicly and display publicly, and to permit others to do so.
+See [copyright.txt](copyright.txt)
