@@ -51,8 +51,13 @@ html:
 updatepublic: htmlpublic latexpdfpublic
 	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
 	cd $(PUBLIC_BUILDDIR)/html
+	echo 
+	echo $(PWD)
+	echo "Adding files to gh-pages repo"
 	git add .
-	git commit -m "rebuilt the public docs" .
+	echo "Commiting changes to gh-pages repo"
+	git commit -m "rebuilt the public docs"
+	echo "Pushing changes to gh-pages repo"
 	git push origin gh-pages
 
 htmlpublic: html
