@@ -6,7 +6,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Index &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -16,6 +15,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -34,7 +34,7 @@
     <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -44,27 +44,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,30 +56,71 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+      </div>
 
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
           
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-            
-            
-                <ul>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 
-            
           
-        </div>
+        
       </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -110,27 +135,18 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li></li>
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
 
 <h1 id="index">Index</h1>
@@ -166,6 +182,40 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_coordinates">_mzml_file__compute_coordinates() (omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_filetype">_mzml_file__compute_filetype() (omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_mz_axis">_mzml_file__compute_mz_axis() (omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_num_scans">_mzml_file__compute_num_scans() (omsi.dataformat.mzml_file.mzml_file static method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_scan_dependencies">_mzml_file__compute_scan_dependencies() (omsi.dataformat.mzml_file.mzml_file static method)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__compute_scan_types_and_indices">_mzml_file__compute_scan_types_and_indices() (omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__parse_scan_parameters">_mzml_file__parse_scan_parameters() (omsi.dataformat.mzml_file.mzml_file static method)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file._mzml_file__read_all">_mzml_file__read_all() (omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.dependencies.omsi_file_dependencies._omsi_file_dependencies__create_dependency_graph_node">_omsi_file_dependencies__create_dependency_graph_node() (omsi.dataformat.omsi_file.dependencies.omsi_file_dependencies static method)</a>
   </dt>
@@ -405,6 +455,10 @@
   </dt>
 
       
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.available_mzml_types">available_mzml_types (omsi.dataformat.mzml_file.mzml_file attribute)</a>
+  </dt>
+
+      
   <dt><a href="omsi.tools.html#omsi.tools.convertToOMSI.ConvertSettings.available_region_options">available_region_options (omsi.tools.convertToOMSI.ConvertSettings attribute)</a>
   </dt>
 
@@ -567,6 +621,10 @@
 
         
   <dt><a href="omsi.dataformat.html#omsi.dataformat.img_file.img_file.close_file">(omsi.dataformat.img_file.img_file method)</a>
+  </dt>
+
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.close_file">(omsi.dataformat.mzml_file.mzml_file method)</a>
   </dt>
 
         
@@ -1551,11 +1609,21 @@
   <dt><a href="omsi.dataformat.html#omsi.dataformat.file_reader_base.file_reader_base_with_regions.get_dataset_dependencies">(omsi.dataformat.file_reader_base.file_reader_base_with_regions method)</a>
   </dt>
 
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.get_dataset_dependencies">(omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
       </dl></dd>
       
   <dt><a href="omsi.dataformat.html#omsi.dataformat.file_reader_base.file_reader_base.get_dataset_metadata">get_dataset_metadata() (omsi.dataformat.file_reader_base.file_reader_base method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.get_dataset_metadata">(omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.dependencies.omsi_file_dependencydata.get_dataset_name">get_dataset_name() (omsi.dataformat.omsi_file.dependencies.omsi_file_dependencydata method)</a>
   </dt>
@@ -1646,6 +1714,12 @@
   <dt><a href="omsi.dataformat.html#omsi.dataformat.img_file.img_file.get_files_from_dir">get_files_from_dir() (omsi.dataformat.img_file.img_file class method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.get_files_from_dir">(omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="omsi.datastructures.html#omsi.datastructures.analysis_data.parameter_data.get_group_description">get_group_description() (omsi.datastructures.analysis_data.parameter_data method)</a>
   </dt>
@@ -1829,6 +1903,10 @@
       <dd><dl>
         
   <dt><a href="omsi.dataformat.html#omsi.dataformat.file_reader_base.file_reader_base_multidata.get_number_of_datasets">(omsi.dataformat.file_reader_base.file_reader_base_multidata method)</a>
+  </dt>
+
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.get_number_of_datasets">(omsi.dataformat.mzml_file.mzml_file method)</a>
   </dt>
 
       </dl></dd>
@@ -2192,6 +2270,10 @@
   </dt>
 
         
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.is_valid_dataset">(omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
+        
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.main_file.omsi_file.is_valid_dataset">(omsi.dataformat.omsi_file.main_file.omsi_file class method)</a>
   </dt>
 
@@ -2412,12 +2494,12 @@
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.format.omsi_format_methods.methods_groupname">methods_groupname (omsi.dataformat.omsi_file.format.omsi_format_methods attribute)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.format.omsi_format_methods.methods_name">methods_name (omsi.dataformat.omsi_file.format.omsi_format_methods attribute)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.format.omsi_format_methods.methods_old_groupname">methods_old_groupname (omsi.dataformat.omsi_file.format.omsi_format_methods attribute)</a>
   </dt>
@@ -2448,6 +2530,10 @@
 
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.format.omsi_format_msidata.mzdata_name">mzdata_name (omsi.dataformat.omsi_file.format.omsi_format_msidata attribute)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file">mzml_file (class in omsi.dataformat.mzml_file)</a>
   </dt>
 
   </dl></td>
@@ -2638,6 +2724,10 @@
 
       
   <dt><a href="omsi.dataformat.html#module-omsi.dataformat.img_file">omsi.dataformat.img_file (module)</a>
+  </dt>
+
+      
+  <dt><a href="omsi.dataformat.html#module-omsi.dataformat.mzml_file">omsi.dataformat.mzml_file (module)</a>
   </dt>
 
       
@@ -3418,6 +3508,12 @@
   <dt><a href="omsi.dataformat.html#omsi.dataformat.file_reader_base.file_reader_base_multidata.set_dataset_selection">set_dataset_selection() (omsi.dataformat.file_reader_base.file_reader_base_multidata method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.set_dataset_selection">(omsi.dataformat.mzml_file.mzml_file method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="omsi.dataformat.omsi_file.html#omsi.dataformat.omsi_file.experiment.omsi_file_experiment.set_experiment_identifier">set_experiment_identifier() (omsi.dataformat.omsi_file.experiment.omsi_file_experiment method)</a>
   </dt>
@@ -3489,6 +3585,10 @@
   <dt><a href="omsi.dataformat.html#omsi.dataformat.img_file.img_file.size">(omsi.dataformat.img_file.img_file class method)</a>
   </dt>
 
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.size">(omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
       </dl></dd>
       
   <dt><a href="omsi.examples.html#omsi.examples.test_multiprocess_slice.sliceSelect">sliceSelect() (in module omsi.examples.test_multiprocess_slice)</a>
@@ -3525,6 +3625,10 @@
       <dd><dl>
         
   <dt><a href="omsi.dataformat.html#omsi.dataformat.img_file.img_file.spectrum_iter">(omsi.dataformat.img_file.img_file method)</a>
+  </dt>
+
+        
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.spectrum_iter">(omsi.dataformat.mzml_file.mzml_file method)</a>
   </dt>
 
       </dl></dd>
@@ -3620,6 +3724,10 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="omsi.dataformat.html#omsi.dataformat.mzml_file.mzml_file.test">test() (omsi.dataformat.mzml_file.mzml_file class method)</a>
+  </dt>
+
       
   <dt><a href="omsi.shared.html#omsi.shared.mpi_helper.test_mpi_available">test_mpi_available() (in module omsi.shared.mpi_helper)</a>
   </dt>
@@ -4305,7 +4413,6 @@
 
 
 
-           </div>
           </div>
           <footer>
   
@@ -4315,13 +4422,12 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 

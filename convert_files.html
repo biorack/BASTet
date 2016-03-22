@@ -5,7 +5,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Converting and Files and Making them Accessible &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -15,6 +14,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -35,7 +35,7 @@
         <link rel="prev" title="Introduction" href="introduction.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -45,27 +45,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,16 +57,19 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+      </div>
 
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
           
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-            
-            
-                <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Converting and Files and Making them Accessible</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
@@ -90,19 +77,56 @@
 <li class="toctree-l2"><a class="reference internal" href="#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 
-            
           
-        </div>
+        
       </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -117,36 +141,27 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>Converting and Files and Making them Accessible</li>
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/convert_files.txt" rel="nofollow"> View page source</a>
-          
+          <a href="_sources/convert_files.txt" rel="nofollow"> View page source</a>
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
   <div class="section" id="converting-and-files-and-making-them-accessible">
 <span id="converting-files"></span><h1>Converting and Files and Making them Accessible<a class="headerlink" href="#converting-and-files-and-making-them-accessible" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="converting-an-msi-file-at-nersc">
 <h2>Converting an MSI file at NERSC<a class="headerlink" href="#converting-an-msi-file-at-nersc" title="Permalink to this headline">¶</a></h2>
 <p>To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:</p>
-<div class="highlight-none"><div class="highlight"><pre><span></span>ssh edison.nersc.gov
+<div class="highlight-none"><div class="highlight"><pre>ssh edison.nersc.gov
 cd /project/projectdirs/openmsi/devel/convert
 source setupEnvironment.csh
 python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
@@ -154,7 +169,7 @@ python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
 </div>
 <p>Note if you use the bash shell then use <code class="docutils literal"><span class="pre">setupEnvironment.bash</span></code> instead.</p>
 <p>Note, if you want to use the output file from openmsi.nersc.gov then the output file path should be:</p>
-<div class="highlight-none"><div class="highlight"><pre><span></span>/project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
+<div class="highlight-none"><div class="highlight"><pre>/project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
 </pre></div>
 </div>
 <p>where username is the name of the primary user that owns the file.</p>
@@ -163,7 +178,7 @@ python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
 <h2>Making a converted file accessible to OpenMSI (Private)<a class="headerlink" href="#making-a-converted-file-accessible-to-openmsi-private" title="Permalink to this headline">¶</a></h2>
 <p>The conversion script will by default automatically try to register new files with the OpenMSI site and
 assign them private to a single user if the output file is placed in the OpenMSI private data location:</p>
-<div class="highlight-none"><div class="highlight"><pre><span></span>python convertToOMSI.py &lt;infile1&gt; /project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
+<div class="highlight-none"><div class="highlight"><pre>python convertToOMSI.py &lt;infile1&gt; /project/projectdirs/openmsi/omsi_data_private/&lt;username&gt;/&lt;filename&gt;
 </pre></div>
 </div>
 <p>The username in the path will determine the user the file is assigned to. E.g: The filename will also be
@@ -178,10 +193,10 @@ database, use the <code class="docutils literal"><span class="pre">--no-add-to-d
 <div class="section" id="converttoomsi-usage-and-options">
 <h2><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options<a class="headerlink" href="#converttoomsi-usage-and-options" title="Permalink to this headline">¶</a></h2>
 <p>NOTE: In order to view a current, complete list of conversions options use:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>python convertToOMSI.py --help
+<div class="highlight-bash"><div class="highlight"><pre>python convertToOMSI.py --help
 </pre></div>
 </div>
-<div class="highlight-none"><div class="highlight"><pre><span></span>python convertToOMSI.py --help
+<div class="highlight-none"><div class="highlight"><pre>python convertToOMSI.py --help
 USAGE: Call &quot;convertToOMSI [options] imgBaseFile1 imgBaseFile2 ... imgBaseFileN HDF5File&quot;
 
 This converter script takes the basename (i.e., path+basefilename) of a single
@@ -312,16 +327,15 @@ Generate XDMF header file for output file: Default OFF:
 </div>
 
 
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="custom_filereader.html" class="btn btn-neutral float-right" title="Integrating new file formats" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="custom_filereader.html" class="btn btn-neutral float-right" title="Integrating new file formats">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral" title="Introduction"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -331,13 +345,12 @@ Generate XDMF header file for output file: Default OFF:
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 

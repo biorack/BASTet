@@ -5,7 +5,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Defining and Executing Analysis Workflows &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -15,6 +14,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -35,7 +35,7 @@
         <link rel="prev" title="Developing a new Analysis for BASTet" href="custom_analysis.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -45,27 +45,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,29 +57,42 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+      </div>
 
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
           
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-            
-            
-                <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Defining and Executing Analysis Workflows</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-3-execute">Step 3: Execute</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#executing-a-single-analysis">Executing a single analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#executing-a-single-sub-workflow">Executing a single sub-workflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#executing-all-analyses">Executing all analyses</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#executing-multiple-sub-workflows">Executing multiple sub-workflows</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-execute">Step 3: Execute</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-normalizing-an-image">Example: Normalizing an image</a></li>
 </ul>
 </li>
@@ -103,15 +100,33 @@
 <li class="toctree-l2"><a class="reference internal" href="#workflow-scripts">Workflow Scripts</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 
-            
           
-        </div>
+        
       </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -126,29 +141,20 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>Defining and Executing Analysis Workflows</li>
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/basic_workflows.txt" rel="nofollow"> View page source</a>
-          
+          <a href="_sources/basic_workflows.txt" rel="nofollow"> View page source</a>
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
   <div class="section" id="defining-and-executing-analysis-workflows">
 <h1>Defining and Executing Analysis Workflows<a class="headerlink" href="#defining-and-executing-analysis-workflows" title="Permalink to this headline">¶</a></h1>
@@ -178,19 +184,19 @@
 10
 11
 12
-13</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
+13</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.multivariate_stats.omsi_nmf</span> <span class="kn">import</span> <span class="n">omsi_nmf</span>
 
-<span class="c1"># Open a file to get some MSI data</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s1">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="c"># Open a file to get some MSI data</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
 <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># Specify the analysis workflow</span>
-<span class="c1"># Create a global peak finding analysis</span>
-<span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>      <span class="c1"># Create the analysis</span>
-<span class="c1"># Create an NMF that processes our peak cube</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>                 <span class="c1"># Set input to perform 2 iterations only</span>
+<span class="c"># Specify the analysis workflow</span>
+<span class="c"># Create a global peak finding analysis</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>      <span class="c"># Create the analysis</span>
+<span class="c"># Create an NMF that processes our peak cube</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>                 <span class="c"># Set input to perform 2 iterations only</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -202,12 +208,12 @@
 3
 4
 5
-6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Define the inputs of the global peak finder</span>
-<span class="n">a1</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>                 <span class="c1"># Set the input msidata</span>
-<span class="n">a1</span><span class="p">[</span><span class="s1">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>               <span class="c1"># Set the input mz data</span>
-<span class="c1"># Define the inputs of the NMF</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>   <span class="c1"># Set the input data to the peak cube</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>                 <span class="c1"># Set input to perform 2 iterations only</span>
+6</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># Define the inputs of the global peak finder</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>                 <span class="c"># Set the input msidata</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>               <span class="c"># Set the input mz data</span>
+<span class="c"># Define the inputs of the NMF</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>   <span class="c"># Set the input data to the peak cube</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>                 <span class="c"># Set input to perform 2 iterations only</span>
 </pre></div>
 </td></tr></table></div>
 <p>NOTE: So far we have only specified our workflow. We have not executed any analysis yet, nor have we loaded any actual data yet.</p>
@@ -218,17 +224,17 @@
 <div class="section" id="executing-a-single-analysis">
 <h3>Executing a single analysis<a class="headerlink" href="#executing-a-single-analysis" title="Permalink to this headline">¶</a></h3>
 <p>To execute a single analysis, we can simply call the <code class="docutils literal"><span class="pre">execute()</span></code> function of our analysis. Note, the execute may raise and <code class="docutils literal"><span class="pre">AnalysisReadyError</span></code> in case that the inputs of the analsis are not ready. E.g.:</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">a2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>   <span class="c1"># Will fail with ``AnalysisReadyError``</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">a2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>   <span class="c"># Will fail with ``AnalysisReadyError``</span>
 </pre></div>
 </td></tr></table></div>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">a1</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>   <span class="c1"># Will successfully execute a1</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">a1</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>   <span class="c"># Will successfully execute a1</span>
 </pre></div>
 </td></tr></table></div>
 </div>
 <div class="section" id="executing-a-single-sub-workflow">
 <h3>Executing a single sub-workflow<a class="headerlink" href="#executing-a-single-sub-workflow" title="Permalink to this headline">¶</a></h3>
 <p>To execute a single analysis including any missing dependencies, we can simply call the <code class="docutils literal"><span class="pre">execute_recursive()</span></code> function. E.g.:</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">a2</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>   <span class="c1"># Will successfully execute a1</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">a2</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>   <span class="c"># Will successfully execute a1</span>
 </pre></div>
 </td></tr></table></div>
 <p>The above will execute <code class="docutils literal"><span class="pre">a1</span></code> as well as <code class="docutils literal"><span class="pre">a2</span></code> since <code class="docutils literal"><span class="pre">a2</span></code> depends on <code class="docutils literal"><span class="pre">a1</span></code>.</p>
@@ -238,7 +244,7 @@
 <div class="section" id="executing-all-analyses">
 <h3>Executing all analyses<a class="headerlink" href="#executing-all-analyses" title="Permalink to this headline">¶</a></h3>
 <p>To run all analyses that have been created&#8212;independent of whether they depend on each other or not&#8212;we can simply call <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base.execute_all" title="omsi.analysis.base.analysis_base.execute_all"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.base.analysis_base.execute_all()</span></code></a>.</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">a1</span><span class="o">.</span><span class="n">execute_all</span><span class="p">()</span>   <span class="c1"># Execute all analyses</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">a1</span><span class="o">.</span><span class="n">execute_all</span><span class="p">()</span>   <span class="c"># Execute all analyses</span>
 </pre></div>
 </td></tr></table></div>
 <p>The above will execute any analysis that have not up-to-date. NOTE: In contrast to py:meth:<cite>omsi.analysis.base.analysis_base.execute</cite> and py:meth:<cite>omsi.analysis.base.analysis_base.execute_recursive</cite>, this is a class-level method and not an object-method. Again, the function uses a workflow driver, which we can customize by providing as driver as input to the function.</p>
@@ -250,18 +256,18 @@
 2
 3
 4
-5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.workflow.driver.greedy_executor</span> <span class="kn">import</span> <span class="n">greedy_executor</span>
-<span class="n">driver</span> <span class="o">=</span> <span class="n">greedy_executor</span><span class="p">()</span>  <span class="c1"># Create a driver</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">add_analysis</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>            <span class="c1"># Add one ore more analyses</span>
+5</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.workflow.driver.greedy_executor</span> <span class="kn">import</span> <span class="n">greedy_executor</span>
+<span class="n">driver</span> <span class="o">=</span> <span class="n">greedy_executor</span><span class="p">()</span>  <span class="c"># Create a driver</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">add_analysis</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>            <span class="c"># Add one ore more analyses</span>
 <span class="n">driver</span><span class="o">.</span><span class="n">add_analysis</span><span class="p">(</span><span class="n">a2</span><span class="p">)</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>                   <span class="c1"># Execute the workflow and its dependencies</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>                   <span class="c"># Execute the workflow and its dependencies</span>
 </pre></div>
 </td></tr></table></div>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
-3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">driver2</span> <span class="o">=</span> <span class="n">greedy_executor</span><span class="p">()</span>
-<span class="n">driver2</span><span class="o">.</span><span class="n">add_analysis_all</span><span class="p">()</span>  <span class="c1"># Add all analyses</span>
-<span class="n">driver2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>  <span class="c1"># Execute all analyses</span>
+3</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">driver2</span> <span class="o">=</span> <span class="n">greedy_executor</span><span class="p">()</span>
+<span class="n">driver2</span><span class="o">.</span><span class="n">add_analysis_all</span><span class="p">()</span>  <span class="c"># Add all analyses</span>
+<span class="n">driver2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>  <span class="c"># Execute all analyses</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -286,18 +292,18 @@
  9
 10
 11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Illustration of the basic image normalization workflow defined below:</span>
-<span class="c1">#</span>
-<span class="c1"># +-----------a1------------+       +-------------a2----------------+       +-----------a3--------------+</span>
-<span class="c1"># +---global-peak-finder----+       +------total_intensities--------+       +---normalize_intensities---+</span>
-<span class="c1"># |                         |       |                               |       |                           |</span>
-<span class="c1"># | msidata       peak_cube +---+---&gt; msidata      total_intensities+-------&gt; norm_factors     output_0 |</span>
-<span class="c1"># |                         |   |   |                               |       |                           |</span>
-<span class="c1"># | mzdata                  |   |   | axis=2                        |   +---&gt; msidata                   |</span>
-<span class="c1"># +-------------------------+   |   +-------------------------------+   |   +---------------------------+</span>
-<span class="c1">#                               |                                       |</span>
-<span class="c1">#                               |                                       |</span>
-<span class="c1">#                               +---------------------------------------+</span>
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># Illustration of the basic image normalization workflow defined below:</span>
+<span class="c">#</span>
+<span class="c"># +-----------a1------------+       +-------------a2----------------+       +-----------a3--------------+</span>
+<span class="c"># +---global-peak-finder----+       +------total_intensities--------+       +---normalize_intensities---+</span>
+<span class="c"># |                         |       |                               |       |                           |</span>
+<span class="c"># | msidata       peak_cube +---+---&gt; msidata      total_intensities+-------&gt; norm_factors     output_0 |</span>
+<span class="c"># |                         |   |   |                               |       |                           |</span>
+<span class="c"># | mzdata                  |   |   | axis=2                        |   +---&gt; msidata                   |</span>
+<span class="c"># +-------------------------+   |   +-------------------------------+   |   +---------------------------+</span>
+<span class="c">#                               |                                       |</span>
+<span class="c">#                               |                                       |</span>
+<span class="c">#                               +---------------------------------------+</span>
 </pre></div>
 </td></tr></table></div>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
@@ -344,50 +350,50 @@
 42
 43
 44
-45</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+45</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
 <span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
 
-<span class="c1"># Define a simple function to compute the total intensity image</span>
+<span class="c"># Define a simple function to compute the total intensity image</span>
 <span class="k">def</span> <span class="nf">total_intensity</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
-<span class="c1"># Define a simple function to normalize an MSI data cube by per-spectrum normalization factors</span>
+<span class="c"># Define a simple function to normalize an MSI data cube by per-spectrum normalization factors</span>
 <span class="k">def</span> <span class="nf">normalize_intensities</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">normfactors</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
     <span class="k">return</span> <span class="n">msidata</span> <span class="o">/</span> <span class="n">normfactors</span><span class="p">[:,:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
-<span class="c1"># Get an ezample MSI image</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s1">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="c"># Get an ezample MSI image</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
 <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="hll">
-</span><span class="hll"><span class="c1"># Define the global peak finder</span>
+</span><span class="hll"><span class="c"># Define the global peak finder</span>
 </span><span class="hll"><span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>
-</span><span class="n">a1</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
-<span class="n">a1</span><span class="p">[</span><span class="s1">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
+</span><span class="n">a1</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
 <span class="hll">
-</span><span class="hll"><span class="c1"># Define compute of total intensity image</span>
+</span><span class="hll"><span class="c"># Define compute of total intensity image</span>
 </span><span class="hll"><span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">analysis_function</span><span class="o">=</span><span class="n">total_intensity</span><span class="p">,</span>
-</span>                                    <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;total_intensities&#39;</span><span class="p">])</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>
+</span>                                    <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;total_intensities&#39;</span><span class="p">])</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>
 <span class="hll">
-</span><span class="hll"><span class="c1"># Define the normalization of the peak cube</span>
+</span><span class="hll"><span class="c"># Define the normalization of the peak cube</span>
 </span><span class="hll"><span class="n">a3</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">normalize_intensities</span><span class="p">)</span>
-</span><span class="n">a3</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>
-<span class="n">a3</span><span class="p">[</span><span class="s1">&#39;normfactors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s1">&#39;total_intensities&#39;</span><span class="p">]</span>
+</span><span class="n">a3</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;normfactors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s">&#39;total_intensities&#39;</span><span class="p">]</span>
 
-<span class="c1"># To run the workflow we now have several basic options</span>
-<span class="c1">#</span>
-<span class="c1"># 1) a3.execute_recursive()  : Recursively execute the last analysis and all its dependencies (i.e., a1, a2)</span>
-<span class="c1"># 2) a1.execute_all() : Tell any analysis to execute all available analyses (i.e., a1,a2,a3)</span>
-<span class="c1"># 3) Create our own workflow driver to control the execution of the analyses</span>
-<span class="c1"># 4) Manually call execute on a1, a2, and a3 in order of their dependencies</span>
+<span class="c"># To run the workflow we now have several basic options</span>
+<span class="c">#</span>
+<span class="c"># 1) a3.execute_recursive()  : Recursively execute the last analysis and all its dependencies (i.e., a1, a2)</span>
+<span class="c"># 2) a1.execute_all() : Tell any analysis to execute all available analyses (i.e., a1,a2,a3)</span>
+<span class="c"># 3) Create our own workflow driver to control the execution of the analyses</span>
+<span class="c"># 4) Manually call execute on a1, a2, and a3 in order of their dependencies</span>
 <span class="hll">
-</span><span class="c1"># Execute the workflow</span>
+</span><span class="c"># Execute the workflow</span>
 <span class="n">a3</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
@@ -426,38 +432,38 @@
 24
 25
 26
-27</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+27</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
 <span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
 
-<span class="c1"># Define a simple function to compute the total intensity image</span>
+<span class="c"># Define a simple function to compute the total intensity image</span>
 <span class="k">def</span> <span class="nf">total_intensity</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
-<span class="c1"># Define a simple function to normalize an MSI data cube by per-spectrum normalization factors</span>
+<span class="c"># Define a simple function to normalize an MSI data cube by per-spectrum normalization factors</span>
 <span class="k">def</span> <span class="nf">normalize_intensities</span><span class="p">(</span><span class="n">msidata</span><span class="p">,</span> <span class="n">normfactors</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
     <span class="k">return</span> <span class="n">msidata</span> <span class="o">/</span> <span class="n">normfactors</span><span class="p">[:,:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
-<span class="c1"># Define the global peak finder</span>
+<span class="c"># Define the global peak finder</span>
 <span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>
 
-<span class="c1"># Define compute of total intensity image</span>
+<span class="c"># Define compute of total intensity image</span>
 <span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">analysis_function</span><span class="o">=</span><span class="n">total_intensity</span><span class="p">,</span>
-                                    <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;total_intensities&#39;</span><span class="p">])</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>
+                                    <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;total_intensities&#39;</span><span class="p">])</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>
 
-<span class="c1"># Define the normalization of the peak cube</span>
+<span class="c"># Define the normalization of the peak cube</span>
 <span class="n">a3</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">normalize_intensities</span><span class="p">)</span>
-<span class="n">a3</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>
-<span class="n">a3</span><span class="p">[</span><span class="s1">&#39;normfactors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s1">&#39;total_intensities&#39;</span><span class="p">]</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;normfactors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s">&#39;total_intensities&#39;</span><span class="p">]</span>
 </pre></div>
 </td></tr></table></div>
 <p>When using our command-line tool, all parameters that are not defined for any of the analyses are automatically exposed via command-line options. In contrast to our previous example, we here, e.g., do not set the input msidata and mzdata parameters for our global peak finder (a1). In this way, we can now easily set the input file we want to process directly via the command line. In cases where we want to expose a parameter via the command line but still want to provide a good default setting for the user, we can set the default value of a parameter via, e.g, <code class="docutils literal"><span class="pre">a1.get_parameter_data_by_name('peakheight')['default']</span> <span class="pre">=</span> <span class="pre">3</span></code>.</p>
 <p>To execute our above example from the command line we can now simply do the following:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>python run_workflow.py --script normalize_image.py
+<div class="highlight-bash"><div class="highlight"><pre>python run_workflow.py --script normalize_image.py
                        --ana_0:msidata <span class="nv">$HOME</span>/20120711_Brain.h5:/entry_0/data_0
                        --ana_0:mzdata  <span class="nv">$HOME</span>/20120711_Brain.h5:/entry_0/data_0/mz
 </pre></div>
@@ -557,7 +563,7 @@
 92
 93
 94
-95</pre></div></td><td class="code"><div class="highlight"><pre><span></span>newlappy:tools oruebel$ python run_workflow.py --script normalize_image.py --help
+95</pre></div></td><td class="code"><div class="highlight"><pre>newlappy:tools oruebel$ python run_workflow.py --script normalize_image.py --help
 usage: run_workflow.py --script SCRIPT [--save SAVE] [--profile]
                        [--memprofile]
                        [--loglevel {INFO,WARNING,CRITICAL,ERROR,DEBUG,NOTSET}]
@@ -658,16 +664,15 @@ This command-line tool has been auto-generated by BASTet (Berkeley Analysis &amp
 </div>
 
 
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="HDF5_format.html" class="btn btn-neutral float-right" title="OMSI Data Format" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="HDF5_format.html" class="btn btn-neutral float-right" title="OMSI Data Format">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="custom_analysis.html" class="btn btn-neutral" title="Developing a new Analysis for BASTet" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="custom_analysis.html" class="btn btn-neutral" title="Developing a new Analysis for BASTet"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -677,13 +682,12 @@ This command-line tool has been auto-generated by BASTet (Berkeley Analysis &amp
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 

@@ -5,7 +5,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Developing a new Analysis for BASTet &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -15,6 +14,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -35,7 +35,7 @@
         <link rel="prev" title="Integrating new file formats" href="custom_filereader.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -45,27 +45,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,78 +57,76 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-                <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Developing a new Analysis for BASTet</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview:</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#some-important-features-of-analysis-base">Some important features of <code class="docutils literal"><span class="pre">analysis_base</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#slicing">Slicing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#important-member-variables">Important Member Variables</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#i-o-functions">I/O functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#web-api-functions">Web API Functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#executing-saving-and-restoring-an-analysis-object">Executing, saving, and restoring an analysis object</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#step-1-basic-integration">Step 1) Basic integration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#creating-a-new-analysis-skeleton">1.1 Creating a new analysis skeleton</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#specifying-analysis-inputs-and-outputs">1.2 Specifying analysis inputs and outputs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#implementing-the-execute-analysis-function">1.3: Implementing the <code class="docutils literal"><span class="pre">execute_analysis</span></code> function</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#step-2-integrating-the-analysis-with-the-openmsi-web-api">Step 2) Integrating the Analysis with the OpenMSI Web API:</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#implementing-the-qslice-pattern">2.1 Implementing the <code class="docutils literal"><span class="pre">qslice</span></code> pattern</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#implementing-the-qspectrum-pattern">2.2 Implementing the <code class="docutils literal"><span class="pre">qspectrum</span></code> pattern</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#implementing-the-qmz-pattern">2.3 Implementing the <code class="docutils literal"><span class="pre">qmz</span></code> pattern</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#step-3-making-your-analysis-self-sufficient">Step 3) Making your analysis self-sufficient</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-customizing-core-features">Advanced: Customizing core features</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#custom-data-save">Custom data save</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#custom-analysis-restore">Custom analysis restore</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#custom-analysis-execution">Custom analysis execution</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#customizing-setting-of-parameters">Customizing setting of parameters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#customizing-setting-of-default-settings">Customizing setting of default settings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#customizing-the-recording-of-runtime-information">Customizing the recording of runtime information</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#customizing-the-analysis-execution">Customizing the analysis execution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#customizing-the-recording-of-analysis-outputs">Customizing the recording of analysis outputs</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-1-explicitly-track-specific-excutions-of-a-function">Option 1: Explicitly track specific excutions of a function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-2-implicitly-track-the-last-execution-of-a-function">Option 2: Implicitly track the last execution of a function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-1-defining-and-using-wrapped-functions">Example 1: Defining and using wrapped functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
-</ul>
-
-            
-          
-        </div>
       </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -159,29 +141,20 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>Developing a new Analysis for BASTet</li>
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/custom_analysis.txt" rel="nofollow"> View page source</a>
-          
+          <a href="_sources/custom_analysis.txt" rel="nofollow"> View page source</a>
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
   <div class="section" id="developing-a-new-analysis-for-bastet">
 <h1>Developing a new Analysis for BASTet<a class="headerlink" href="#developing-a-new-analysis-for-bastet" title="Permalink to this headline">¶</a></h1>
@@ -246,13 +219,13 @@
 <div class="section" id="executing-saving-and-restoring-an-analysis-object">
 <h4>Executing, saving, and restoring an analysis object<a class="headerlink" href="#executing-saving-and-restoring-an-analysis-object" title="Permalink to this headline">¶</a></h4>
 <p>Using the command-line driver we can directly execute analysis as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span> <span class="o">&lt;</span><span class="n">analysis_module_class</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">analysis_parameters</span><span class="o">&gt;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span> <span class="o">&lt;</span><span class="n">analysis_module_class</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">analysis_parameters</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>E.g. to execute a non-negative matrix factorization (NMF) using the <cite>omsi.analysis.multivariate_stats.omsi_nmf</cite> module we can simply:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span><span class="o">.</span><span class="n">py</span> <span class="n">multivariate_stats</span><span class="o">/</span><span class="n">omsi_nmf</span><span class="o">.</span><span class="n">py</span>
-    <span class="o">--</span><span class="n">msidata</span> <span class="s2">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
-    <span class="o">--</span><span class="n">save</span> <span class="s2">&quot;test_ana_save.h5&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span><span class="o">.</span><span class="n">py</span> <span class="n">multivariate_stats</span><span class="o">/</span><span class="n">omsi_nmf</span><span class="o">.</span><span class="n">py</span>
+    <span class="o">--</span><span class="n">msidata</span> <span class="s">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
+    <span class="o">--</span><span class="n">save</span> <span class="s">&quot;test_ana_save.h5&quot;</span>
 </pre></div>
 </div>
 <p>Any analysis based on the infrastructure provided by <code class="docutils literal"><span class="pre">analysis_base</span></code> is fully integrated with OpenMSI file API provided by``omsi.dataformat.omsi_file``. This means the analysis can be directly saved to an OMSI HDF5 file and  the saved analysis can be restored from file. In OMSI files, analyses are generally associated with experiments, so that we use the <code class="docutils literal"><span class="pre">omsi.dataformat.omsi_file.omsi_file_experiment</span></code> API here.</p>
@@ -313,63 +286,63 @@
 55
 56
 57
-58</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Open the MSI file and get the desired experiment</span>
+58</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># Open the MSI file and get the desired experiment</span>
 <span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span> <span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span> <span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span> <span class="n">filename</span><span class="p">,</span> <span class="s">&#39;a&#39;</span> <span class="p">)</span>
 <span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># Execute the analysis</span>
+<span class="c"># Execute the analysis</span>
 <span class="n">d</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">omsi_myanalysis</span><span class="p">()</span>
 <span class="n">a</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">msidata</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">integration_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">msidata_dependency</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
 
-<span class="c1"># Save the analysis object.</span>
+<span class="c"># Save the analysis object.</span>
 <span class="hll"><span class="n">analysis_object</span> <span class="p">,</span> <span class="n">analysis_index</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">create_analysis</span><span class="p">(</span> <span class="n">a</span> <span class="p">)</span>
 </span>
-<span class="c1"># This single line is sufficient to store the complete analysis to the omsi file.</span>
-<span class="c1"># By default the call will block until the write is complete. Setting the</span>
-<span class="c1"># parameter flushIO=False enables buffered write, so that the call will</span>
-<span class="c1"># return once all data write operations have been scheduled. Here we get</span>
-<span class="c1"># an omsi.dataformat.omsi_file.omsi_file_analysis</span>
-<span class="c1"># object for management of the data stored in HDF5 and the integer index of the analysis.</span>
+<span class="c"># This single line is sufficient to store the complete analysis to the omsi file.</span>
+<span class="c"># By default the call will block until the write is complete. Setting the</span>
+<span class="c"># parameter flushIO=False enables buffered write, so that the call will</span>
+<span class="c"># return once all data write operations have been scheduled. Here we get</span>
+<span class="c"># an omsi.dataformat.omsi_file.omsi_file_analysis</span>
+<span class="c"># object for management of the data stored in HDF5 and the integer index of the analysis.</span>
 
-<span class="hll"><span class="c1"># To restore an analysis from file, i.e., read all the analysis data from file</span>
-</span><span class="hll"><span class="c1"># and store it in a corresponding analysis object we can do the following.</span>
-</span><span class="hll"><span class="c1"># Similar to the read_from_omsi_file(...) function of analysis_base</span>
-</span><span class="hll"><span class="c1"># mentioned below, we can decide via parameter settings of the function,</span>
-</span><span class="c1"># which portions of the analysis should be loaded into memory</span>
+<span class="hll"><span class="c"># To restore an analysis from file, i.e., read all the analysis data from file</span>
+</span><span class="hll"><span class="c"># and store it in a corresponding analysis object we can do the following.</span>
+</span><span class="hll"><span class="c"># Similar to the read_from_omsi_file(...) function of analysis_base</span>
+</span><span class="hll"><span class="c"># mentioned below, we can decide via parameter settings of the function,</span>
+</span><span class="c"># which portions of the analysis should be loaded into memory</span>
 <span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_object</span><span class="o">.</span><span class="n">restore_analysis</span><span class="p">()</span>
 
-<span class="c1"># If we want to now re-execute the same analysis we can simply call</span>
+<span class="c"># If we want to now re-execute the same analysis we can simply call</span>
 <span class="n">a2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 
-<span class="c1"># If we want to rerun the analysis but change one or more parameter settings,</span>
-<span class="c1"># then we can simply change those parameters when calling the execute function</span>
-<span class="n">d2</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># Get another MSI dataset</span>
-<span class="n">a2</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">msidata</span><span class="o">=</span><span class="n">d2</span><span class="p">)</span>  <span class="c1"># Execute the analysis on the new MSI dataset</span>
+<span class="c"># If we want to rerun the analysis but change one or more parameter settings,</span>
+<span class="c"># then we can simply change those parameters when calling the execute function</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c"># Get another MSI dataset</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">msidata</span><span class="o">=</span><span class="n">d2</span><span class="p">)</span>  <span class="c"># Execute the analysis on the new MSI dataset</span>
 
-<span class="c1"># The omsi_file_analysis class also provides a convenient function that allows us</span>
-<span class="c1"># to recreate, i.e., restore and run the analysis, in a single function call</span>
+<span class="c"># The omsi_file_analysis class also provides a convenient function that allows us</span>
+<span class="c"># to recreate, i.e., restore and run the analysis, in a single function call</span>
 <span class="n">a3</span> <span class="o">=</span> <span class="n">analysis_object</span><span class="o">.</span><span class="n">recreate_analysis</span><span class="p">()</span>
 
-<span class="c1"># The recreate_analysis(...) function supports additional keyword arguments</span>
-<span class="c1"># which will be passed to the execute(...) call of the analysis, so that we</span>
-<span class="c1"># can change parameter settings for the analysis also when using the</span>
-<span class="c1"># recreate analysis call.</span>
+<span class="c"># The recreate_analysis(...) function supports additional keyword arguments</span>
+<span class="c"># which will be passed to the execute(...) call of the analysis, so that we</span>
+<span class="c"># can change parameter settings for the analysis also when using the</span>
+<span class="c"># recreate analysis call.</span>
 
-<span class="c1"># If we know the type of analysis object (which we can also get from file), then we</span>
-<span class="c1"># naturally also restore the analysis from file ourselves via</span>
+<span class="c"># If we know the type of analysis object (which we can also get from file), then we</span>
+<span class="c"># naturally also restore the analysis from file ourselves via</span>
 <span class="n">a4</span> <span class="o">=</span> <span class="n">omsi_myanalysis</span><span class="p">()</span><span class="o">.</span><span class="n">read_from_omsi_file</span><span class="p">(</span><span class="n">analysisGroup</span><span class="o">=</span><span class="n">analysis_object</span><span class="p">,</span> \
                                            <span class="n">load_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
                                            <span class="n">load_parameters</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>\
                                            <span class="n">load_runtime_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
                                            <span class="n">dependencies_omsi_format</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span>
-<span class="c1"># By setting load_data and/or load_parameters to False, we create h5py instead of</span>
-<span class="c1"># numpy objects, avoiding the actual load of the data. CAUTION: To avoid the accidental</span>
-<span class="c1"># overwrite of data we recommend to use load_data and load_parameters as False only</span>
-<span class="c1"># when the file has been opened in read-only mode &#39;r&#39;.</span>
+<span class="c"># By setting load_data and/or load_parameters to False, we create h5py instead of</span>
+<span class="c"># numpy objects, avoiding the actual load of the data. CAUTION: To avoid the accidental</span>
+<span class="c"># overwrite of data we recommend to use load_data and load_parameters as False only</span>
+<span class="c"># when the file has been opened in read-only mode &#39;r&#39;.</span>
 
-<span class="c1"># Rerunning the same analysis again</span>
+<span class="c"># Rerunning the same analysis again</span>
 <span class="n">a4</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
@@ -444,68 +417,68 @@
 61
 62
 63
-64</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">omsi_mypeakfinder</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
+64</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">omsi_mypeakfinder</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_key</span><span class="o">=</span><span class="s2">&quot;undefined&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_key</span><span class="o">=</span><span class="s">&quot;undefined&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initalize the basic data members&quot;&quot;&quot;</span>
 
 <span class="hll">        <span class="nb">super</span><span class="p">(</span><span class="n">omsi_mypeakfinder</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 </span><span class="hll">
 </span>        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_identifier</span> <span class="o">=</span> <span class="n">name_key</span>
-        <span class="c1"># Define the names of the outputs generated by the analysis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;peak_cube&#39;</span> <span class="p">,</span> <span class="s1">&#39;peak_mz&#39;</span> <span class="p">]</span>
+        <span class="c"># Define the names of the outputs generated by the analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;peak_cube&#39;</span> <span class="p">,</span> <span class="s">&#39;peak_mz&#39;</span> <span class="p">]</span>
 
-        <span class="c1"># Define the input parameters of the analysis</span>
+        <span class="c"># Define the input parameters of the analysis</span>
         <span class="n">dtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_dtypes</span><span class="p">()</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_parameter_groups</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;msidata&#39;</span><span class="p">,</span>
-                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The MSI dataset to be analyzed&#39;</span><span class="p">,</span>
-                           <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s1">&#39;ndarray&#39;</span><span class="p">],</span>
-                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">],</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;msidata&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;The MSI dataset to be analyzed&#39;</span><span class="p">,</span>
+                           <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s">&#39;ndarray&#39;</span><span class="p">],</span>
+                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">],</span>
                            <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;mzdata&#39;</span><span class="p">,</span>
-                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The m/z values for the spectra of the MSI dataset&#39;</span><span class="p">,</span>
-                           <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s1">&#39;ndarray&#39;</span><span class="p">],</span>
-                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">],</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;mzdata&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;The m/z values for the spectra of the MSI dataset&#39;</span><span class="p">,</span>
+                           <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s">&#39;ndarray&#39;</span><span class="p">],</span>
+                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">],</span>
                            <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;integration_width&#39;</span><span class="p">,</span>
-                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The window over which peaks should be integrated&#39;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;integration_width&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;The window over which peaks should be integrated&#39;</span><span class="p">,</span>
 <span class="hll">                           <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
 </span><span class="hll">                           <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-</span><span class="hll">                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">],</span>
+</span><span class="hll">                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;settings&#39;</span><span class="p">],</span>
 </span>                           <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;peakheight&#39;</span><span class="p">,</span>
-                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Peak height parameter&#39;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;peakheight&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;Peak height parameter&#39;</span><span class="p">,</span>
                            <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
                            <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">],</span>
+                           <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;settings&#39;</span><span class="p">],</span>
                            <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">execute_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;...&quot;&quot;&quot;</span>
-        <span class="c1"># Copy parameters to local variables. This is purely for convenience and is not mandatory.</span>
-        <span class="c1"># NOTE: Input parameters are automatically record (i.e., we don&#39;t need to to anything special.</span>
-        <span class="n">msidata</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span>
-        <span class="n">mzdata</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mzdata&#39;</span><span class="p">]</span>
-        <span class="n">integration_width</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;integration_width&#39;</span><span class="p">]</span>
-        <span class="n">peakheight</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;peakheight&#39;</span><span class="p">]</span>
+        <span class="c"># Copy parameters to local variables. This is purely for convenience and is not mandatory.</span>
+        <span class="c"># NOTE: Input parameters are automatically record (i.e., we don&#39;t need to to anything special.</span>
+        <span class="n">msidata</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span>
+        <span class="n">mzdata</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span>
+        <span class="n">integration_width</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;integration_width&#39;</span><span class="p">]</span>
+        <span class="n">peakheight</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;peakheight&#39;</span><span class="p">]</span>
 
-        <span class="c1"># Implementation of my peakfinding algorithm</span>
+        <span class="c"># Implementation of my peakfinding algorithm</span>
 
         <span class="o">...</span>
 
-        <span class="c1"># Return the result.</span>
-        <span class="c1"># NOTE: We need to return the output in the order we specified them in self.data_names</span>
-        <span class="c1"># NOTE: The outputs will be automatically recorded (i.e., we don&#39;t need to anything special).</span>
+        <span class="c"># Return the result.</span>
+        <span class="c"># NOTE: We need to return the output in the order we specified them in self.data_names</span>
+        <span class="c"># NOTE: The outputs will be automatically recorded (i.e., we don&#39;t need to anything special).</span>
         <span class="k">return</span> <span class="n">peakCube</span><span class="p">,</span> <span class="n">peakMZ</span>
-        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peakCube</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peakCube</span>
 
     <span class="o">...</span>
 
-<span class="c1"># Defining a main function is optional. However, allowing a user to directly execute your analysis</span>
-<span class="c1"># from the command line is simple, as we can easily reuse the command-line driver module</span>
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="c"># Defining a main function is optional. However, allowing a user to directly execute your analysis</span>
+<span class="c"># from the command line is simple, as we can easily reuse the command-line driver module</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">omsi.analysis.omsi_analysis_driver</span> <span class="kn">import</span> <span class="n">cl_analysis_driver</span>
     <span class="n">cl_analysis_driver</span><span class="p">(</span><span class="n">analysis_class</span><span class="o">=</span><span class="n">omsi_mypeakfinder</span><span class="p">)</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
 </pre></div>
@@ -515,13 +488,13 @@
 <ul class="simple">
 <li>Copy the analysis template to the appropriate location where your analysis should live (NOTE: The analysis template may have been updated since this documentation was written). Any new analysis should be located in a submodule of the <code class="docutils literal"><span class="pre">omsi.analysis.</span></code> module. E.g., if you implement a new peak finding algorithm, it should be placed in omsi/analysis/findpeaks. For example:</li>
 </ul>
-<div class="highlight-none"><div class="highlight"><pre><span></span>cp omsi/templates/omsi_analysis_template.py openmsi-tk/omsi/analysis/findpeaks/omsi_mypeakfinder.py
+<div class="highlight-none"><div class="highlight"><pre>cp omsi/templates/omsi_analysis_template.py openmsi-tk/omsi/analysis/findpeaks/omsi_mypeakfinder.py
 </pre></div>
 </div>
 <ul class="simple">
 <li>Replace all occurrences of <code class="docutils literal"><span class="pre">omsi_analysis_template</span></code> in the file with the name of your analysis class, e.g, omsi_mypeakfinder. You can do this easily using &#8220;Replace All&#8221; feature of most text editors.  or on most Unix systems  (e.g, Linux or MacOS) on the commandline via:</li>
 </ul>
-<div class="highlight-none"><div class="highlight"><pre><span></span>cd openmsi-tk/omsi/analysis/findpeaks
+<div class="highlight-none"><div class="highlight"><pre>cd openmsi-tk/omsi/analysis/findpeaks
 sed -i.bak &#39;s/omsi_analysis_template/omsi_mypeakfinder/&#39; omsi_mypeakfinder.py
 rm omsi_mypeakfinder.py.bak
 </pre></div>
@@ -532,7 +505,7 @@ rm omsi_mypeakfinder.py.bak
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="hll"><span class="n">all__</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;omsi_mypeakfinder&quot;</span><span class="p">,</span>  <span class="s2">&quot;omsi_findpeaks_global&quot;</span> <span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+4</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="n">all__</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&quot;omsi_mypeakfinder&quot;</span><span class="p">,</span>  <span class="s">&quot;omsi_findpeaks_global&quot;</span> <span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </span><span class="kn">from</span> <span class="nn">omsi_findpeaks_global</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">omsi_findpeaks_local</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="o">...</span>
@@ -581,42 +554,42 @@ rm omsi_mypeakfinder.py.bak
 34
 35
 36
-37</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_key</span><span class="o">=</span><span class="s2">&quot;undefined&quot;</span><span class="p">):</span>
+37</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_key</span><span class="o">=</span><span class="s">&quot;undefined&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initalize the basic data members&quot;&quot;&quot;</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">omsi_mypeakfinder</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 <span class="hll">    <span class="bp">self</span><span class="o">.</span><span class="n">analysis_identifier</span> <span class="o">=</span> <span class="n">name_key</span>
 </span><span class="hll">
-</span>    <span class="c1"># Define the names of the outputs</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">,</span> <span class="s1">&#39;peak_mz&#39;</span><span class="p">]</span>
+</span>    <span class="c"># Define the names of the outputs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">,</span> <span class="s">&#39;peak_mz&#39;</span><span class="p">]</span>
 
-    <span class="c1"># Define the input parameters</span>
-    <span class="n">dtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_dtypes</span><span class="p">()</span>  <span class="c1"># List of default data types. Build-in types are</span>
-                                        <span class="c1"># available as well but can be safely used directly as well</span>
-    <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_parameter_groups</span><span class="p">()</span> <span class="c1"># List of default groups to organize parameters. We suggest</span>
-                                                 <span class="c1"># to use the &#39;input&#39; group for all input data to be analyzed</span>
-                                                 <span class="c1"># as this will make the integration with OpenMSI easier</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;msidata&#39;</span><span class="p">,</span>
-                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The MSI dataset to be analyzed&#39;</span><span class="p">,</span>
-                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s1">&#39;ndarray&#39;</span><span class="p">],</span>
-                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">],</span>
+    <span class="c"># Define the input parameters</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_dtypes</span><span class="p">()</span>  <span class="c"># List of default data types. Build-in types are</span>
+                                        <span class="c"># available as well but can be safely used directly as well</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_parameter_groups</span><span class="p">()</span> <span class="c"># List of default groups to organize parameters. We suggest</span>
+                                                 <span class="c"># to use the &#39;input&#39; group for all input data to be analyzed</span>
+                                                 <span class="c"># as this will make the integration with OpenMSI easier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;msidata&#39;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&#39;The MSI dataset to be analyzed&#39;</span><span class="p">,</span>
+                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s">&#39;ndarray&#39;</span><span class="p">],</span>
+                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">],</span>
                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;mzdata&#39;</span><span class="p">,</span>
-                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The m/z values for the spectra of the MSI dataset&#39;</span><span class="p">,</span>
-                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s1">&#39;ndarray&#39;</span><span class="p">],</span>
-                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">],</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;mzdata&#39;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&#39;The m/z values for the spectra of the MSI dataset&#39;</span><span class="p">,</span>
+                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="s">&#39;ndarray&#39;</span><span class="p">],</span>
+                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">],</span>
                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;integration_width&#39;</span><span class="p">,</span>
-                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The window over which peaks should be integrated&#39;</span><span class="p">,</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;integration_width&#39;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&#39;The window over which peaks should be integrated&#39;</span><span class="p">,</span>
                        <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                        <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">],</span>
+                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;settings&#39;</span><span class="p">],</span>
                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;peakheight&#39;</span><span class="p">,</span>
-                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Peak height parameter&#39;</span><span class="p">,</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;peakheight&#39;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&#39;Peak height parameter&#39;</span><span class="p">,</span>
                        <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
                        <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">],</span>
+                       <span class="n">group</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="s">&#39;settings&#39;</span><span class="p">],</span>
                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
@@ -626,17 +599,17 @@ rm omsi_mypeakfinder.py.bak
 <p><strong>1.3.1</strong> Document your execute_analysis function. OpenMSI typically uses Sphynx notation in the doc-string. The doc-string of the execute_analysis(..) function and the class are used by the analysis driver modules to provide a description of your analysis as part of the help and will also be included in the help string generated by the <cite>get_help_string()</cite> inherited via <cite>analysis_base</cite> function.</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
-3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">execute_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+3</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">def</span> <span class="nf">execute_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
 <span class="hll">    <span class="sd">&quot;&quot;&quot;This analysis computes global peaks in MSI data...</span>
 </span><span class="hll"><span class="sd">    &quot;&quot;&quot;</span>
 </span></pre></div>
 </td></tr></table></div>
 <p><strong>1.3.2</strong>  Implement your analysis. For convenience it is often useful to assign the your parameters to local variables, although, this is by no means required. Note, all values are stored as 1D+ numpy arrays, however, are automatically converted for you, so that we can just do:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">integration_width</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;integration_width&#39;</span><span class="p">]</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">integration_width</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;integration_width&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p><strong>1.3.4</strong> Return the outputs of your analysis in the same order as specified in the <cite>self.data_names</cite> you specified in your <cite>__init__</cite> function (here <cite>[&#8216;peak_cube&#8217;, &#8216;peak_mz&#8217;]</cite>):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">peakCube</span><span class="p">,</span> <span class="n">peakMZ</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">return</span> <span class="n">peakCube</span><span class="p">,</span> <span class="n">peakMZ</span>
 </pre></div>
 </div>
 <p>Results returned by your analysis will be automatically saved to the respective output variables. This allows users to conveniently access your results and it enables the OpenMSI file API to save your results to file. We here automatically convert single scalars to 1D numpy arrays to ensure consistency. Although, the data write function can handle a large range of python built_in types by automatically converting them to numpy for storage in HDF5, we generally recommend to convert use numpy directly here to save your data.</p>
@@ -693,7 +666,7 @@ rm omsi_mypeakfinder.py.bak
 42
 43
 44
-45</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
+45</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
     <span class="o">...</span>
 
 <span class="hll">    <span class="nd">@classmethod</span>
@@ -711,32 +684,32 @@ rm omsi_mypeakfinder.py.bak
 
 <span class="sd">        &quot;&quot;&quot;</span>
 <span class="hll">        <span class="kn">from</span> <span class="nn">omsi.shared.omsi_data_selection</span> <span class="kn">import</span> <span class="o">*</span>
-</span>        <span class="c1">#Implement custom analysis viewer options</span>
+</span>        <span class="c">#Implement custom analysis viewer options</span>
 <span class="hll">        <span class="k">if</span> <span class="n">viewer_option</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
-</span><span class="hll">            <span class="n">dataset</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;labels&#39;</span> <span class="p">]</span> <span class="c1">#We assume labels was a 3D image cube of labels</span>
+</span><span class="hll">            <span class="n">dataset</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;labels&#39;</span> <span class="p">]</span> <span class="c">#We assume labels was a 3D image cube of labels</span>
 </span><span class="hll">            <span class="n">zselect</span> <span class="o">=</span> <span class="n">selection_string_to_object</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
 </span><span class="hll">            <span class="k">return</span> <span class="n">dataset</span><span class="p">[</span> <span class="p">:</span> <span class="p">,</span> <span class="p">:,</span> <span class="n">zselect</span> <span class="p">]</span>
 </span>
-        <span class="c1">#Expose recursively the slice options for any data dependencies. This is useful</span>
-        <span class="c1">#to allow one to trace back data and generate comlex visualizations involving</span>
-        <span class="c1">#multiple different data sources that have some from of dependency in that they</span>
-        <span class="c1">#led to the generation of this anlaysis. This behavior is already provided by</span>
-        <span class="c1">#the default implementation of this function ins analysis_base.</span>
+        <span class="c">#Expose recursively the slice options for any data dependencies. This is useful</span>
+        <span class="c">#to allow one to trace back data and generate comlex visualizations involving</span>
+        <span class="c">#multiple different data sources that have some from of dependency in that they</span>
+        <span class="c">#led to the generation of this anlaysis. This behavior is already provided by</span>
+        <span class="c">#the default implementation of this function ins analysis_base.</span>
 <span class="hll">        <span class="k">elif</span> <span class="n">viewer_option</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">:</span>
-</span><span class="hll">            <span class="c1">#Note, the base class does not know out out viewer_options so we need to adjust</span>
-</span><span class="hll">            <span class="c1">#the vieweOption accordingly by substracting the number of our custom options.</span>
+</span><span class="hll">            <span class="c">#Note, the base class does not know out out viewer_options so we need to adjust</span>
+</span><span class="hll">            <span class="c">#the vieweOption accordingly by substracting the number of our custom options.</span>
 </span><span class="hll">            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">omsi_myanalysis</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qslice</span><span class="p">(</span> <span class="n">anaObj</span> <span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">viewer_option</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-</span>        <span class="c1">#Invalid viewer_option</span>
+</span>        <span class="c">#Invalid viewer_option</span>
         <span class="k">else</span> <span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 
 <span class="hll">     <span class="nd">@classmethod</span>
 </span><span class="hll">        <span class="k">def</span> <span class="nf">v_qslice_viewer_options</span><span class="p">(</span><span class="n">cls</span> <span class="p">,</span> <span class="n">anaObj</span> <span class="p">)</span> <span class="p">:</span>
 </span>            <span class="sd">&quot;&quot;&quot;Define which viewer_options are supported for qspectrum URL&#39;s&quot;&quot;&quot;</span>
-            <span class="c1">#Get the options for all data dependencies</span>
+            <span class="c">#Get the options for all data dependencies</span>
 <span class="hll">            <span class="n">dependent_options</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qslice_viewer_options</span><span class="p">(</span><span class="n">anaObj</span><span class="p">)</span>
-</span>            <span class="c1">#Define our custom viewer options</span>
-<span class="hll">            <span class="n">re</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dependent_options</span>
+</span>            <span class="c">#Define our custom viewer options</span>
+<span class="hll">            <span class="n">re</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Labels&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dependent_options</span>
 </span><span class="hll">            <span class="k">return</span> <span class="n">re</span>
 </span></pre></div>
 </td></tr></table></div>
@@ -821,7 +794,7 @@ rm omsi_mypeakfinder.py.bak
 75
 76
 77
-78</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
+78</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
     <span class="o">...</span>
 <span class="hll">    <span class="nd">@classmethod</span>
 </span><span class="hll">    <span class="k">def</span> <span class="nf">v_qspectrum</span><span class="p">(</span> <span class="n">cls</span><span class="p">,</span> <span class="n">anaObj</span> <span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">,</span> <span class="n">viewer_option</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
@@ -860,33 +833,33 @@ rm omsi_mypeakfinder.py.bak
         <span class="n">customMZ</span> <span class="o">=</span> <span class="bp">None</span>
 <span class="hll">        <span class="k">if</span> <span class="n">viewer_option</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
 </span><span class="hll">            <span class="kn">from</span> <span class="nn">omsi.shared.omsi_data_selection</span> <span class="kn">import</span> <span class="o">*</span>
-</span><span class="hll">            <span class="n">dataset</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;labels&#39;</span> <span class="p">]</span>
-</span><span class="hll">            <span class="k">if</span> <span class="p">(</span><span class="n">check_selection_string</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">selection_type</span><span class="p">[</span><span class="s1">&#39;indexlist&#39;</span><span class="p">])</span> <span class="ow">and</span>  \
-</span>               <span class="p">(</span><span class="n">check_selection_string</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">selection_type</span><span class="p">[</span><span class="s1">&#39;indexlist&#39;</span><span class="p">])</span> <span class="p">:</span>
-                <span class="c1">#Assuming that the data is small enough, we can handle the multiple list</span>
-                <span class="c1">#selection case here just by loading the full data use numpy to do the</span>
-                <span class="c1">#subselection. Note, this version would work for all selection types but</span>
-                <span class="c1">#we would like to avoid loading the full data if we don&#39;t have to.</span>
+</span><span class="hll">            <span class="n">dataset</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;labels&#39;</span> <span class="p">]</span>
+</span><span class="hll">            <span class="k">if</span> <span class="p">(</span><span class="n">check_selection_string</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">selection_type</span><span class="p">[</span><span class="s">&#39;indexlist&#39;</span><span class="p">])</span> <span class="ow">and</span>  \
+</span>               <span class="p">(</span><span class="n">check_selection_string</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">selection_type</span><span class="p">[</span><span class="s">&#39;indexlist&#39;</span><span class="p">])</span> <span class="p">:</span>
+                <span class="c">#Assuming that the data is small enough, we can handle the multiple list</span>
+                <span class="c">#selection case here just by loading the full data use numpy to do the</span>
+                <span class="c">#subselection. Note, this version would work for all selection types but</span>
+                <span class="c">#we would like to avoid loading the full data if we don&#39;t have to.</span>
 <span class="hll">                <span class="n">xselect</span> <span class="o">=</span> <span class="n">selection_string_to_object</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span><span class="hll">                <span class="n">yselect</span> <span class="o">=</span> <span class="n">selection_string_to_object</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 </span><span class="hll">                <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:][</span><span class="n">xselect</span><span class="p">,</span><span class="n">yselect</span><span class="p">,:]</span>
-</span>                <span class="c1">#Since we alredy confirmed that both selection strings are index lists we could</span>
-                <span class="c1">#also just do an eval as follows.</span>
-                <span class="c1">#data = eval(&quot;dataset[:][%s,%s, :]&quot; %(x,y))</span>
+</span>                <span class="c">#Since we alredy confirmed that both selection strings are index lists we could</span>
+                <span class="c">#also just do an eval as follows.</span>
+                <span class="c">#data = eval(&quot;dataset[:][%s,%s, :]&quot; %(x,y))</span>
             <span class="k">else</span> <span class="p">:</span>
 <span class="hll">                <span class="n">xselect</span> <span class="o">=</span> <span class="n">selection_string_to_object</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span><span class="hll">                <span class="n">yselect</span> <span class="o">=</span> <span class="n">selection_string_to_object</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 </span><span class="hll">                <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">xselect</span><span class="p">,</span><span class="n">yselect</span><span class="p">,:]</span>
-</span>            <span class="c1">#Return the spectra and indicate that no customMZ data values (i.e. None) are needed</span>
+</span>            <span class="c">#Return the spectra and indicate that no customMZ data values (i.e. None) are needed</span>
 <span class="hll">            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="bp">None</span>
-</span>        <span class="c1">#Expose recursively the slice options for any data dependencies. This is useful</span>
-        <span class="c1">#to allow one to trace back data and generate comlex visualizations involving</span>
-        <span class="c1">#multiple different data sources that have some from of dependency in that they</span>
-        <span class="c1">#led to the generation of this anlaysis. This behavior is already provided by</span>
-        <span class="c1">#the default implementation of this function ins analysis_base.</span>
+</span>        <span class="c">#Expose recursively the slice options for any data dependencies. This is useful</span>
+        <span class="c">#to allow one to trace back data and generate comlex visualizations involving</span>
+        <span class="c">#multiple different data sources that have some from of dependency in that they</span>
+        <span class="c">#led to the generation of this anlaysis. This behavior is already provided by</span>
+        <span class="c">#the default implementation of this function ins analysis_base.</span>
 <span class="hll">        <span class="k">elif</span> <span class="n">viewer_option</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">:</span>
-</span>            <span class="c1">#Note, the base class does not know out out viewer_options so we need to adjust</span>
-            <span class="c1">#the vieweOption accordingly by substracting the number of our custom options.</span>
+</span>            <span class="c">#Note, the base class does not know out out viewer_options so we need to adjust</span>
+            <span class="c">#the vieweOption accordingly by substracting the number of our custom options.</span>
 <span class="hll">            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qspectrum</span><span class="p">(</span> <span class="n">anaObj</span> <span class="p">,</span> <span class="n">x</span> <span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">viewer_option</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 </span>
         <span class="k">return</span> <span class="n">data</span> <span class="p">,</span> <span class="n">customMZ</span>
@@ -894,10 +867,10 @@ rm omsi_mypeakfinder.py.bak
     <span class="nd">@classmethod</span>
 <span class="hll">    <span class="k">def</span> <span class="nf">v_qspectrum_viewer_options</span><span class="p">(</span><span class="n">cls</span> <span class="p">,</span> <span class="n">anaObj</span> <span class="p">)</span> <span class="p">:</span>
 </span>        <span class="sd">&quot;&quot;&quot;Define which viewer_options are supported for qspectrum URL&#39;s&quot;&quot;&quot;</span>
-        <span class="c1">#Get the options for all data dependencies</span>
+        <span class="c">#Get the options for all data dependencies</span>
 <span class="hll">        <span class="n">dependent_options</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qspectrum_viewer_options</span><span class="p">(</span><span class="n">anaObj</span><span class="p">)</span>
-</span>        <span class="c1">#Define our custom viewer options</span>
-<span class="hll">        <span class="n">re</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dependent_options</span>
+</span>        <span class="c">#Define our custom viewer options</span>
+<span class="hll">        <span class="n">re</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Labels&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dependent_options</span>
 </span><span class="hll">        <span class="k">return</span> <span class="n">re</span>
 </span></pre></div>
 </td></tr></table></div>
@@ -982,7 +955,7 @@ rm omsi_mypeakfinder.py.bak
 76
 77
 78
-79</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
+79</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">omsi_myanalysis</span><span class="p">(</span><span class="n">analysis_base</span><span class="p">)</span> <span class="p">:</span>
     <span class="o">...</span>
 
     <span class="nd">@classmethod</span>
@@ -1022,40 +995,40 @@ rm omsi_mypeakfinder.py.bak
 <span class="sd">                 in case that they are identical.</span>
 
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="c1">#The four values to be returned</span>
+            <span class="c">#The four values to be returned</span>
             <span class="n">mzSpectra</span> <span class="o">=</span>  <span class="bp">None</span>
             <span class="n">labelSpectra</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">mzSlice</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">labelSlice</span> <span class="o">=</span> <span class="bp">None</span>
-<span class="hll">            <span class="n">peak_cube_shape</span> <span class="o">=</span> <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;labels&#39;</span> <span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="c1">#We assume labels was a 3D image cube of labels</span>
+<span class="hll">            <span class="n">peak_cube_shape</span> <span class="o">=</span> <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;labels&#39;</span> <span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="c">#We assume labels was a 3D image cube of labels</span>
 </span><span class="hll">            <span class="n">valuesX</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">peak_cube_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span class="hll">            <span class="n">labelX</span> <span class="o">=</span> <span class="s1">&#39;pixel index X&#39;</span>
+</span><span class="hll">            <span class="n">labelX</span> <span class="o">=</span> <span class="s">&#39;pixel index X&#39;</span>
 </span><span class="hll">            <span class="n">valuesY</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">peak_cube_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</span><span class="hll">            <span class="n">labelY</span> <span class="o">=</span> <span class="s1">&#39;pixel index Y&#39;</span>
+</span><span class="hll">            <span class="n">labelY</span> <span class="o">=</span> <span class="s">&#39;pixel index Y&#39;</span>
 </span><span class="hll">            <span class="n">valuesZ</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">peak_cube_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_cube_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="bp">None</span>
-</span><span class="hll">            <span class="n">labelZ</span> <span class="o">=</span> <span class="s1">&#39;pixel index Z&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_cube_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="bp">None</span>
+</span><span class="hll">            <span class="n">labelZ</span> <span class="o">=</span> <span class="s">&#39;pixel index Z&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_cube_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="bp">None</span>
 </span>
-<span class="hll">            <span class="c1">#Both qslice and qspectrum here point to our custom analysis</span>
-</span><span class="hll">            <span class="k">if</span> <span class="n">qspectrum_viewer_option</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">qslice_viewer_option</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1">#Loadings</span>
-</span>                <span class="n">mzSpectra</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;labels&#39;</span> <span class="p">][:]</span>
-                <span class="n">labelSpectra</span> <span class="o">=</span> <span class="s2">&quot;Labels&quot;</span>
-<span class="hll">            <span class="c1">#Both viewer_options point to a data dependency</span>
+<span class="hll">            <span class="c">#Both qslice and qspectrum here point to our custom analysis</span>
+</span><span class="hll">            <span class="k">if</span> <span class="n">qspectrum_viewer_option</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">qslice_viewer_option</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c">#Loadings</span>
+</span>                <span class="n">mzSpectra</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;labels&#39;</span> <span class="p">][:]</span>
+                <span class="n">labelSpectra</span> <span class="o">=</span> <span class="s">&quot;Labels&quot;</span>
+<span class="hll">            <span class="c">#Both viewer_options point to a data dependency</span>
 </span><span class="hll">            <span class="k">elif</span> <span class="n">qspectrum_viewer_option</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">qslice_viewer_option</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
 </span>                <span class="n">mzSpectra</span><span class="p">,</span> <span class="n">labelSpectra</span><span class="p">,</span> <span class="n">mzSlice</span><span class="p">,</span> <span class="n">labelSlice</span> <span class="o">=</span> \
                        <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qmz</span><span class="p">(</span> <span class="n">anaObj</span><span class="p">,</span> \
                              <span class="n">qslice_viewer_option</span><span class="o">-</span><span class="mi">1</span> <span class="p">,</span> <span class="n">qspectrum_viewer_option</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<span class="hll">            <span class="c1">#Only the a qlice options point to a data dependency</span>
+<span class="hll">            <span class="c">#Only the a qlice options point to a data dependency</span>
 </span><span class="hll">            <span class="k">elif</span> <span class="n">qspectrum_viewer_option</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">qslice_viewer_option</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
-</span>                <span class="n">mzSpectra</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;peak_mz&#39;</span> <span class="p">][:]</span>
-                <span class="n">labelSpectra</span> <span class="o">=</span> <span class="s2">&quot;m/z&quot;</span>
+</span>                <span class="n">mzSpectra</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;peak_mz&#39;</span> <span class="p">][:]</span>
+                <span class="n">labelSpectra</span> <span class="o">=</span> <span class="s">&quot;m/z&quot;</span>
                 <span class="n">tempA</span><span class="p">,</span> <span class="n">tempB</span><span class="p">,</span> <span class="n">mzSlice</span><span class="p">,</span> <span class="n">labelSlice</span><span class="p">,</span> <span class="n">valuesX</span><span class="p">,</span> <span class="n">labelX</span><span class="p">,</span> <span class="n">valuesY</span><span class="p">,</span> <span class="n">labelY</span><span class="p">,</span> <span class="n">valuesZ</span><span class="p">,</span> <span class="n">labelZ</span> <span class="o">=</span> \
                         <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qmz</span><span class="p">(</span> <span class="n">anaObj</span><span class="p">,</span> \
                               <span class="n">qslice_viewer_option</span><span class="o">-</span><span class="mi">1</span> <span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="hll">            <span class="c1">#Only the qspectrum option points to a data dependency</span>
+<span class="hll">            <span class="c">#Only the qspectrum option points to a data dependency</span>
 </span><span class="hll">            <span class="k">elif</span> <span class="n">qspectrum_viewer_option</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">qslice_viewer_option</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span>
-</span>                <span class="n">mzSlice</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s1">&#39;peak_mz&#39;</span> <span class="p">][:]</span>
-                <span class="n">labelSlice</span> <span class="o">=</span> <span class="s2">&quot;m/z&quot;</span>
-                <span class="c1"># Ignore the spatial axes and slize axis as we use our own</span>
+</span>                <span class="n">mzSlice</span> <span class="o">=</span>  <span class="n">anaObj</span><span class="p">[</span> <span class="s">&#39;peak_mz&#39;</span> <span class="p">][:]</span>
+                <span class="n">labelSlice</span> <span class="o">=</span> <span class="s">&quot;m/z&quot;</span>
+                <span class="c"># Ignore the spatial axes and slize axis as we use our own</span>
                 <span class="n">mzSpectra</span><span class="p">,</span> <span class="n">labelSpectra</span><span class="p">,</span> <span class="n">tempA</span><span class="p">,</span> <span class="n">tempB</span><span class="p">,</span> <span class="n">vX</span><span class="p">,</span> <span class="n">lX</span><span class="p">,</span> <span class="n">vY</span><span class="p">,</span> <span class="n">lY</span><span class="p">,</span> <span class="n">vZ</span><span class="p">,</span> <span class="n">lZ</span> <span class="o">=</span> \
                         <span class="nb">super</span><span class="p">(</span><span class="n">omsi_findpeaks_global</span><span class="p">,</span><span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">v_qmz</span><span class="p">(</span> <span class="n">anaObj</span><span class="p">,</span> \
                               <span class="mi">0</span> <span class="p">,</span> <span class="n">qspectrum_viewer_option</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -1068,25 +1041,25 @@ rm omsi_mypeakfinder.py.bak
 <div class="section" id="step-3-making-your-analysis-self-sufficient">
 <h3>Step 3) Making your analysis self-sufficient<a class="headerlink" href="#step-3-making-your-analysis-self-sufficient" title="Permalink to this headline">¶</a></h3>
 <p>Making your analysis self sufficient is trivial. If you used the analysis template provided by the toolkit, then you have already completed this step for free. In order to allow a user to run our analysis from the command line we need a main function. We here can simply reuse the command line driver provided by the toolkit. Using the command line driver we can run the analysis via:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span><span class="o">.</span><span class="n">py</span> <span class="n">findpeaks</span><span class="o">.</span><span class="n">omsi_mypeakfinder</span>
-    <span class="o">--</span><span class="n">msidata</span> <span class="s2">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
-    <span class="o">--</span><span class="n">mzdata</span> <span class="s2">&quot;test_brain_convert.h5:/entry_0/data_0/mz&quot;</span>
-    <span class="o">--</span><span class="n">save</span> <span class="s2">&quot;test_ana_save.h5&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">omsi_analysis_driver</span><span class="o">.</span><span class="n">py</span> <span class="n">findpeaks</span><span class="o">.</span><span class="n">omsi_mypeakfinder</span>
+    <span class="o">--</span><span class="n">msidata</span> <span class="s">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
+    <span class="o">--</span><span class="n">mzdata</span> <span class="s">&quot;test_brain_convert.h5:/entry_0/data_0/mz&quot;</span>
+    <span class="o">--</span><span class="n">save</span> <span class="s">&quot;test_ana_save.h5&quot;</span>
 </pre></div>
 </div>
 <p>To now enable us to execute our analysis module itself we simply need to add the following code (which is already part of the template)</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
-3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+3</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">omsi.analysis.omsi_analysis_driver</span> <span class="kn">import</span> <span class="n">cl_analysis_driver</span>
     <span class="n">cl_analysis_driver</span><span class="p">(</span><span class="n">analysis_class</span><span class="o">=</span><span class="n">omsi_mypeakfinder</span><span class="p">)</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
 <p>With this we can now directly execute our analysis from the command line, get a command-line help, specify all our input parameters on the command line, and save our analysis to file. To run the analysis we can now do:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">findpeaks</span><span class="o">/</span><span class="n">omsi_findpeaks_global</span><span class="o">.</span><span class="n">py</span>
-    <span class="o">--</span><span class="n">msidata</span> <span class="s2">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
-    <span class="o">--</span><span class="n">mzdata</span> <span class="s2">&quot;test_brain_convert.h5:/entry_0/data_0/mz&quot;</span>
-    <span class="o">--</span><span class="n">save</span> <span class="s2">&quot;test_ana_save.h5&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">findpeaks</span><span class="o">/</span><span class="n">omsi_findpeaks_global</span><span class="o">.</span><span class="n">py</span>
+    <span class="o">--</span><span class="n">msidata</span> <span class="s">&quot;test_brain_convert.h5:/entry_0/data_0&quot;</span>
+    <span class="o">--</span><span class="n">mzdata</span> <span class="s">&quot;test_brain_convert.h5:/entry_0/data_0/mz&quot;</span>
+    <span class="o">--</span><span class="n">save</span> <span class="s">&quot;test_ana_save.h5&quot;</span>
 </pre></div>
 </div>
 <p>This will run our peak finder on the given input data and save the result to the first experiment in the test_ana_save.h5 (the output file will be automatically created if it does not exist).</p>
@@ -1154,7 +1127,7 @@ rm omsi_mypeakfinder.py.bak
 61
 62
 63
-64</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="hll"><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">findpeaks</span><span class="o">/</span><span class="n">omsi_findpeaks_global</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">help</span>
+64</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="gp">&gt;&gt;&gt; </span><span class="n">python</span> <span class="n">omsi</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">findpeaks</span><span class="o">/</span><span class="n">omsi_findpeaks_global</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">help</span>
 </span>
 <span class="go">usage: omsi_findpeaks_global.py [-h] [--save SAVE] --msidata MSIDATA --mzdata</span>
 <span class="go">                                MZDATA [--integration_width INTEGRATION_WIDTH]</span>
@@ -1250,7 +1223,7 @@ rm omsi_mypeakfinder.py.bak
 21
 22
 23
-24</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="hll"><span class="k">def</span> <span class="nf">add_custom_data_to_omsi_file</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span> <span class="n">analysisGroup</span><span class="p">)</span> <span class="p">:</span>
+24</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="k">def</span> <span class="nf">add_custom_data_to_omsi_file</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span> <span class="n">analysisGroup</span><span class="p">)</span> <span class="p">:</span>
 </span>    <span class="sd">&quot;&quot;&quot;This function can be optionally overwritten to implement a custom data write</span>
 <span class="sd">       function for the analysis to be used by the omsi_file API.</span>
 
@@ -1329,16 +1302,16 @@ rm omsi_mypeakfinder.py.bak
  7
  8
  9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 </span><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
 
-<span class="c1"># Define some example function we want to wrap to track results</span>
+<span class="c"># Define some example function we want to wrap to track results</span>
 <span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-<span class="c1"># Create an analysis object for our function</span>
+<span class="c"># Create an analysis object for our function</span>
 <span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
-<span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># This is the same as:  g(np.arange(10))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c"># This is the same as:  g(np.arange(10))</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -1358,19 +1331,19 @@ rm omsi_mypeakfinder.py.bak
 11
 12
 13
-14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+14</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 </span><span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">bastet_analysis</span>
 <span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
 
-<span class="c1"># Define some example function and wrap it</span>
+<span class="c"># Define some example function and wrap it</span>
 <span class="nd">@bastet_analysis</span>
 <span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Our own sum function&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-<span class="c1"># Execute the analysis</span>
+<span class="c"># Execute the analysis</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">mysum</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 </pre></div>
 </td></tr></table></div>
@@ -1414,43 +1387,43 @@ rm omsi_mypeakfinder.py.bak
 34
 35
 36
-37</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+37</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
 </span><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
 
-<span class="c1"># Define some example function we want to wrap to track results</span>
+<span class="c"># Define some example function we want to wrap to track results</span>
 <span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-<span class="hll"><span class="c1"># Create an analysis object for our function</span>
+<span class="hll"><span class="c"># Create an analysis object for our function</span>
 </span><span class="hll"><span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
 </span>
-<span class="hll"><span class="c1"># Execute the analysis</span>
+<span class="hll"><span class="c"># Execute the analysis</span>
 </span><span class="hll"><span class="n">res</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-</span><span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>  <span class="c1"># Logging the result</span>
+</span><span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>  <span class="c"># Logging the result</span>
 
-<span class="hll"><span class="c1"># Save the analysis to file</span>
-</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s1">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="hll"><span class="c"># Save the analysis to file</span>
+</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
 <span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">()</span>
 <span class="n">exp_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_experiment_index</span><span class="p">()</span>
 <span class="hll"><span class="n">ana_obj</span><span class="p">,</span> <span class="n">ana_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">create_analysis</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-</span><span class="c1"># Close the file</span>
+</span><span class="c"># Close the file</span>
 <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 <span class="k">del</span> <span class="n">f</span>
 
-<span class="hll"><span class="c1"># Restore the analysis from file</span>
-</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s1">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="hll"><span class="c"># Restore the analysis from file</span>
+</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
 <span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="n">exp_index</span><span class="p">)</span>
 <span class="hll"><span class="n">a</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_analysis</span><span class="p">(</span><span class="n">ana_index</span><span class="p">)</span>
 </span><span class="hll"><span class="n">g2</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">restore_analysis</span><span class="p">()</span>
 </span><span class="n">res2</span> <span class="o">=</span> <span class="n">g2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res2</span><span class="o">=</span><span class="n">res2</span><span class="p">)</span>  <span class="c1"># Logging the result</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res2</span><span class="o">=</span><span class="n">res2</span><span class="p">)</span>  <span class="c"># Logging the result</span>
 <span class="k">if</span> <span class="n">res</span> <span class="o">==</span> <span class="n">res2</span><span class="p">:</span>
-    <span class="n">log_helper</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s2">&quot;CONGRATULATIONS---The results matched&quot;</span><span class="p">)</span>
+    <span class="n">log_helper</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;CONGRATULATIONS---The results matched&quot;</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">log_helper</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s2">&quot;SORRY---The results did not match&quot;</span><span class="p">)</span>
+    <span class="n">log_helper</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;SORRY---The results did not match&quot;</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
 <p>When we run our script, we can see that we were able to successfully capture the
@@ -1458,7 +1431,7 @@ execution of our function and recreate the analysis from file.</p>
 <div class="highlight-bash"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span></span>machine:dir username$ python autowrap_function.py
+4</pre></div></td><td class="code"><div class="highlight"><pre>machine:dir username<span class="nv">$ </span>python autowrap_function.py
 2015-09-29 15:21:32,729 - __main__ - INFO - <span class="nv">res</span> <span class="o">=</span> 45
 2015-09-29 15:21:32,778 - __main__ - INFO - <span class="nv">res2</span> <span class="o">=</span> 45
 <span class="hll">2015-09-29 15:21:32,778 - __main__ - INFO - CONGRATULATIONS---The results matched
@@ -1496,33 +1469,33 @@ execution of our function and recreate the analysis from file.</p>
 25
 26
 27
-28</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
+28</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
 <span class="kn">from</span> <span class="nn">omsi.analysis.multivariate_stats.omsi_nmf</span> <span class="kn">import</span> <span class="n">omsi_nmf</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
 </span><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 </span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s1">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
 <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># Specify the analysis workflow</span>
+<span class="c"># Specify the analysis workflow</span>
 <span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>
-<span class="n">a1</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
-<span class="n">a1</span><span class="p">[</span><span class="s1">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
 
-<span class="c1"># Wrap a simple function to filter all peaks with less than 10 counts</span>
+<span class="c"># Wrap a simple function to filter all peaks with less than 10 counts</span>
 <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="n">a</span><span class="p">[</span><span class="n">a</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">a</span>
 <span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<span class="n">a2</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s1">&#39;peak_cube&#39;</span><span class="p">]</span>    <span class="c1"># Use the peak_cube from a1 as input for the filter</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>    <span class="c"># Use the peak_cube from a1 as input for the filter</span>
 
-<span class="c1"># Create an NMF for the filtered data</span>
+<span class="c"># Create an NMF for the filtered data</span>
 <span class="n">a3</span> <span class="o">=</span> <span class="n">omsi_nmf</span><span class="p">()</span>
-<span class="n">a3</span><span class="p">[</span><span class="s1">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s1">&#39;output_0&#39;</span><span class="p">]</span>  <span class="c1"># Make the output of our analysis the input of the NMF</span>
-<span class="n">a3</span><span class="p">[</span><span class="s1">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s">&#39;output_0&#39;</span><span class="p">]</span>  <span class="c"># Make the output of our analysis the input of the NMF</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
 
-<span class="c1"># Run our simple workflow, i.e.,: peak_finder --&gt; our_filter --&gt; nmf</span>
+<span class="c"># Run our simple workflow, i.e.,: peak_finder --&gt; our_filter --&gt; nmf</span>
 <span class="n">a3</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
@@ -1533,16 +1506,15 @@ execution of our function and recreate the analysis from file.</p>
 </div>
 
 
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="basic_workflows.html" class="btn btn-neutral float-right" title="Defining and Executing Analysis Workflows" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="basic_workflows.html" class="btn btn-neutral float-right" title="Defining and Executing Analysis Workflows">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="custom_filereader.html" class="btn btn-neutral" title="Integrating new file formats" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="custom_filereader.html" class="btn btn-neutral" title="Integrating new file formats"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1552,13 +1524,12 @@ execution of our function and recreate the analysis from file.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 

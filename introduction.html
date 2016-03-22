@@ -5,7 +5,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Introduction &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -15,6 +14,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -35,7 +35,7 @@
         <link rel="prev" title="Documentation BASTet:" href="index.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -45,27 +45,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,35 +57,71 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+      </div>
 
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
           
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-            
-            
-                <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 
-            
           
-        </div>
+        
       </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -116,60 +136,51 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>Introduction</li>
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/introduction.txt" rel="nofollow"> View page source</a>
-          
+          <a href="_sources/introduction.txt" rel="nofollow"> View page source</a>
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>This documenation provides an introduction to the omsi HDF-based data format employed by the OpenMSI project as well as the omsi software stack including: i) the omsi file format API, ii) data analysis API, and iii) other tools and modules included in the omsi software stack</p>
-<div class="section" id="mass-spectrometry-imaging">
-<h2>Mass Spectrometry Imaging<a class="headerlink" href="#mass-spectrometry-imaging" title="Permalink to this headline">¶</a></h2>
-<p>Metabolite and protein analysis is vital to understanding the phenotype of a biological sample. Specifically, metabolite levels dynamically vary in response to energy demands, diet, disease, and environment. Typical analysis of metabolite levels begins with homogenization of a sample and the spatial relationships of the biological material are lost. Mass spectrometry imaging of metabolite and protein levels overcomes this limitation by directly measuring the relative abundance of biomolecules and mapping their position. An &#8220;image&#8221; constitutes a relative abundance map for a given biomolecule and large-numbers of molecules can be imaged simultaneously. While this technique is certainly revolutionary, the in-depth analysis of these datasets often provides a barrier to many researchers. OpenMSI provides a gateway for the management and storage of these datafiles (where each file is the size of a typical hard drive), the visualization of the hyper-dimensional contents of the data, and the statistical analysis of the data.</p>
-<p>Mass Spectrometry Imaging (MSI) plays a key role in the study of the metabolism and energetics of cells and cellular communities. Metabolite imaging and metabolomic analysis are used to map the connectivity, dynamics and spatial topography of complex cellular systems. In contrast to optical imaging, using MSI allows us to study large numbers of metabolic compounds in a single image. A mass spectrometry image provides for each pixel information about the entire mass spectrum, which is described by a high-resolution spectrum, currently consisting of up to 200,000 m/z bins. A single high-resolution 2D image slice requires on the order of 50GB and several TB&#8217;s in 3D. Analysis of extremely large and complex MSI data is challenging from both a computational as well as visualization/analysis point of view. Users often require assistance by experts analysts to explore and analyze their MSI data.</p>
-</div>
-<div class="section" id="openmsi-science-gateway">
-<h2>OpenMSI: Science Gateway<a class="headerlink" href="#openmsi-science-gateway" title="Permalink to this headline">¶</a></h2>
-<p>The goal of OpenMSI is to provide a web-based gateway for management and storage of MSI data, the visualization of the hyper-dimensional contents of the data, and the statistical analysis of the data. Initially the gateway should support basic: i) data browsing capabilities and ii) data analysis and visualization capabilities. The visualization would provide easy-to-use selection capabilities allowing a user to: i) select regions of interest in a two-dimensional visualization of the imaging data and to retrieve and plot the spectra for the selected data portions and ii) to select peaks of interest in a spectrum and display an image showing which portions of the image contain similar features. Even such a simple exploratory tool would be extremely valuable in making the imaging data more accessible to end-users. In the longer term we envision to extend this simple browser step-by-step with more sophisticates analysis and interactions capabilities to support: i) interactive annotation of spectra, ii) execution of computationally intensive analysis tasks on remote parallel compute systems at NERSC, and iii) upload data and analysis results to OpenMSI to facilitate sharing of data/results with the MSI community. Similar to the CXIDB project at NERSC, we plan to us HDF5 to enable efficient and flexible: i) data storage, ii) retrieval of data subsets, iii) storage of meta-data information, and iv) extension of the data to include additional derived data. As part of this project we also plan to investigate the use of HPC to speed-up a select set of compute intensive analysis tasks. Many of the analysis tasks currently performed in serial &#8212;such as peak detection and filtering&#8212; involve large numbers of independent computations (e.g., on a per spectrum basis) and could efficiently utilize parallel compute resources to speed-up the analysis.</p>
-</div>
-<div class="section" id="openmsi-software-infrastructure">
-<h2>OpenMSI: Software Infrastructure<a class="headerlink" href="#openmsi-software-infrastructure" title="Permalink to this headline">¶</a></h2>
-<p>The OpenMSI software infrastructure described in this document provides the foundations for interacting with and analyzing MSI data. In order to make MSI data accessible, the OpenMSI project has developed a HDF5 data layout scheme designed for MSI data. The data format enables storage of: i) raw MSI data, ii) metadata information about an experiment, sample and instrument, and iii) derived analysis results, in a single HDF5 file. Multiple experiments, each of which may included multiple MSI datasets and derived analysis results, may be stored in the same HDF5 file.</p>
-<p>The OpenMSI software stack is based on Python using the h5py library for interacting with HDF5 files. omsi provides a custom API for reading/writing omsi HDF5 files. The file API employs a similar strucutre as the file format itself with each high-level HDF5 group being represented by a corresponding python class (see <code class="docutils literal"><span class="pre">omsi.dataformat.omsi_file</span></code>). The <code class="docutils literal"><span class="pre">omsi.analysis</span></code> package then provides an API for integrating new anlaysis functions with the HDF5 format and the OpenMSI software stack (as well as a series of analysis functions currently available within omis). Additional helpful tools are availabel via the <code class="docutils literal"><span class="pre">omsi.tools</span></code> and <code class="docutils literal"><span class="pre">omsi.examples</span></code> packages.</p>
-</div>
+<p>BASTet has been orginially developed as the analysis backend for the [OpenMSI](<a class="reference external" href="https://openmsi.nersc.gov/">https://openmsi.nersc.gov/</a>) science gateway.</p>
+<p>A central goal of BASTet is to facilitate shareable and reproducible analysis and to bridge the gaps between the various stages in the typical life-cycle of new analysis methods, e.g., when transition from a research prototype to production or when integrating an analysis into more complex workflows or when sharing analysis results. BASTet provides users with an environment that makes it easy to develop and deploy analyses via OpenMSI by providing:</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li>standardized analysis interfaces that make analyses easily accessible to users and enable developers to build an accessible ecosystem of domain analytics,</li>
+<li>automatic provenance for reproducible analytics,</li>
+<li>standardized interfaces and a common format for storage, access, sharing and reuse of analysis results and raw MSI data</li>
+<li>support for integration of analyses to complex workflows, providing users a lightweight  and easy-to-use entry-point to define and manage analysis workflows, and</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>integrated tools and analytics to facilitate development and deployment.</li>
+</ul>
+</div></blockquote>
+<p>While the design of BASTet has been motivated by the needs of OpenMSI, its core design and functionality are much more broadly applicable to other applications as well.  Basket is implemented in Python using <cite>NumPy</cite> for data processing, <cite>h5py</cite> for HDF5-based data storage, and <cite>mpi4py</cite> for distributed parallel data processing.</p>
 </div>
 
 
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="convert_files.html" class="btn btn-neutral float-right" title="Converting and Files and Making them Accessible" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="convert_files.html" class="btn btn-neutral float-right" title="Converting and Files and Making them Accessible">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Documentation BASTet:" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Documentation BASTet:"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -179,13 +190,12 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 

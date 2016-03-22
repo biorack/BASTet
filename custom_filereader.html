@@ -5,7 +5,6 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Integrating new file formats &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
@@ -15,6 +14,7 @@
   
 
   
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -35,7 +35,7 @@
         <link rel="prev" title="Converting and Files and Making them Accessible" href="convert_files.html"/> 
 
   
-  <script src="_static/js/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 
 </head>
 
@@ -45,27 +45,11 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                2.0
-              </div>
-            
-          
-
-          
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,34 +57,76 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+      </div>
 
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
           
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-            
-            
-                <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#mass-spectrometry-imaging">Mass Spectrometry Imaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-science-gateway">OpenMSI: Science Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#openmsi-software-infrastructure">OpenMSI: Software Infrastructure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Integrating new file formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#developing-a-file-reader">Developing a file reader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 
-            
           
-        </div>
+        
       </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -115,29 +141,20 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
- 
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
+          <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
     <li>Integrating new file formats</li>
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/custom_filereader.txt" rel="nofollow"> View page source</a>
-          
+          <a href="_sources/custom_filereader.txt" rel="nofollow"> View page source</a>
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+          <div role="main" class="document">
             
   <div class="section" id="integrating-new-file-formats">
 <span id="custom-filereader"></span><h1>Integrating new file formats<a class="headerlink" href="#integrating-new-file-formats" title="Permalink to this headline">¶</a></h1>
@@ -146,11 +163,11 @@
 <p>In order to develop a new file reader we need to implement a corresponding class for the file format that inherits form <code class="docutils literal"><span class="pre">file_reader_base</span></code> (for formats that always contain a single region) or <code class="docutils literal"><span class="pre">file_reader_base_with_regions</span></code> (for formats that support multiple imaging regions in a single file). Both
 base classes are availble in the <code class="docutils literal"><span class="pre">omsi.dataformat.file_reader_base</span></code> module. The developer then needs
 to implement the following functions:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.dataformat.file_reader_base</span> <span class="kn">import</span> <span class="n">file_reader_base</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.file_reader_base</span> <span class="kn">import</span> <span class="n">file_reader_base</span>
 
 <span class="k">class</span> <span class="nc">formatname_file</span><span class="p">(</span><span class="n">file_reader_base</span><span class="p">):</span>
 
-    <span class="c1"># 1. Implement the init function which must accept basename and requires_slicing as inputs</span>
+    <span class="c"># 1. Implement the init function which must accept basename and requires_slicing as inputs</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        basename : Name of the file/folder to be opened</span>
@@ -159,25 +176,25 @@ to implement the following functions:</p>
 <span class="sd">            data formats do not easily support arbitrary slicing of data but rather only</span>
 <span class="sd">            iteration over spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">formatname_file</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="p">)</span>  <span class="c1"># 1.1 Call super __init__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;uint16&#39;</span>   <span class="c1"># 1.2 Define the data type used</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>      <span class="c1"># 1.3 Define the shape of the dataset</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="mi">0</span>                 <span class="c1"># 1.4 Define the m/z axis</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">formatname_file</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="p">)</span>  <span class="c"># 1.1 Call super __init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s">&#39;uint16&#39;</span>   <span class="c"># 1.2 Define the data type used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>      <span class="c"># 1.3 Define the shape of the dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="mi">0</span>                 <span class="c"># 1.4 Define the m/z axis</span>
 
-    <span class="c1"># 2. Implement __getitem__</span>
+    <span class="c"># 2. Implement __getitem__</span>
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="c1"># Implement array-based slicing for the format so that the data can be read</span>
-        <span class="c1"># via [x,y,z]</span>
+        <span class="c"># Implement array-based slicing for the format so that the data can be read</span>
+        <span class="c"># via [x,y,z]</span>
 
-    <span class="c1"># 3. Implement close_file</span>
+    <span class="c"># 3. Implement close_file</span>
     <span class="k">def</span> <span class="nf">close_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Function called to close any open files when deleting the object</span>
+        <span class="c"># Function called to close any open files when deleting the object</span>
 
-    <span class="c1"># 4. Implement is_valid_dataset</span>
+    <span class="c"># 4. Implement is_valid_dataset</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">is_valid_dataset</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="c1"># Given the name of a file or directory, determine whether the given</span>
-        <span class="c1"># data defines a valid dataset for the current format</span>
+        <span class="c"># Given the name of a file or directory, determine whether the given</span>
+        <span class="c"># data defines a valid dataset for the current format</span>
 </pre></div>
 </div>
 <p>For file formats that support multiple regions the implementation is aside from a few additions he same. The main difference are:</p>
@@ -188,35 +205,35 @@ to implement the following functions:</p>
 <li>Implement the <code class="docutils literal"><span class="pre">set_region_selection</span></code> function</li>
 </ol>
 </div></blockquote>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.dataformat.file_reader_base</span> <span class="kn">import</span> <span class="n">file_reader_base_with_regions</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.file_reader_base</span> <span class="kn">import</span> <span class="n">file_reader_base_with_regions</span>
 
 <span class="k">class</span> <span class="nc">formatname_file</span><span class="p">(</span><span class="n">file_reader_base</span><span class="p">):</span>
 
-    <span class="c1"># 1. Implement the init function which must accept basename and requires_slicing as inputs</span>
+    <span class="c"># 1. Implement the init function which must accept basename and requires_slicing as inputs</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">formatname_file</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="p">)</span>  <span class="c1"># 1.1 Call super __init__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;uint16&#39;</span>    <span class="c1"># 1.2 Define the data type used</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>       <span class="c1"># 1.3 Define the shape of the dataset</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c1"># 1.4 Define the m/z axis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">region_dicts</span> <span class="o">=</span> <span class="p">[]</span>       <span class="c1"># 1.5 Define a list of dicts where each dict describes</span>
-                                     <span class="c1">#     the parameters of a region. In the simplest case</span>
-                                     <span class="c1">#     of rectangular regions, a dict would specify the</span>
-                                     <span class="c1">#     `origin` and `extends` of a region.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c1"># 1.6 Define the index of the selected region.</span>
-                                     <span class="c1">#     Set to None to treat dataset as a whole (i.e.,</span>
-                                     <span class="c1">#     merge all regions). If set to a region index,</span>
-                                     <span class="c1">#     then the __getitem__ function is expected to</span>
-                                     <span class="c1">#     behave as if the file consisted of just the</span>
-                                     <span class="c1">#     selected region and the self.shape parameter</span>
-                                     <span class="c1">#     must be set accordingly</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">formatname_file</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="p">)</span>  <span class="c"># 1.1 Call super __init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s">&#39;uint16&#39;</span>    <span class="c"># 1.2 Define the data type used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>       <span class="c"># 1.3 Define the shape of the dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c"># 1.4 Define the m/z axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_dicts</span> <span class="o">=</span> <span class="p">[]</span>       <span class="c"># 1.5 Define a list of dicts where each dict describes</span>
+                                     <span class="c">#     the parameters of a region. In the simplest case</span>
+                                     <span class="c">#     of rectangular regions, a dict would specify the</span>
+                                     <span class="c">#     `origin` and `extends` of a region.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c"># 1.6 Define the index of the selected region.</span>
+                                     <span class="c">#     Set to None to treat dataset as a whole (i.e.,</span>
+                                     <span class="c">#     merge all regions). If set to a region index,</span>
+                                     <span class="c">#     then the __getitem__ function is expected to</span>
+                                     <span class="c">#     behave as if the file consisted of just the</span>
+                                     <span class="c">#     selected region and the self.shape parameter</span>
+                                     <span class="c">#     must be set accordingly</span>
 
-    <span class="c1"># 2-4: Implement the other functions of file_reader_base as described above.</span>
-    <span class="c1">#      Note, __getitem__ must consider the value of self.select_region and</span>
-    <span class="c1">#      treat any data requests as if they referred to the selected region</span>
-    <span class="c1">#      only. Depending on the data format this may require transformation</span>
-    <span class="c1">#      of the selection keys to locate the appropriate data</span>
+    <span class="c"># 2-4: Implement the other functions of file_reader_base as described above.</span>
+    <span class="c">#      Note, __getitem__ must consider the value of self.select_region and</span>
+    <span class="c">#      treat any data requests as if they referred to the selected region</span>
+    <span class="c">#      only. Depending on the data format this may require transformation</span>
+    <span class="c">#      of the selection keys to locate the appropriate data</span>
 
-    <span class="c1"># 5. Implement the set_region_selection function to allow a user to select a region</span>
+    <span class="c"># 5. Implement the set_region_selection function to allow a user to select a region</span>
     <span class="k">def</span> <span class="nf">set_region_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Define which region should be selected for local data reads.</span>
 
@@ -224,14 +241,14 @@ to implement the following functions:</p>
 <span class="sd">                data will be adjusted accordingly. Set to None to select all regions and</span>
 <span class="sd">                treat the data as a single full 3D image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># 5.1 Select all data</span>
+    <span class="c"># 5.1 Select all data</span>
     <span class="k">if</span> <span class="n">region_index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="bp">None</span>           <span class="c1"># 5.1.1 Set the region selection to None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_shape</span>        <span class="c1"># 5.1.2 Define shape of the complete data</span>
-    <span class="c1"># 5.2 Select a particular region</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="bp">None</span>           <span class="c"># 5.1.1 Set the region selection to None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_shape</span>        <span class="c"># 5.1.2 Define shape of the complete data</span>
+    <span class="c"># 5.2 Select a particular region</span>
     <span class="k">elif</span> <span class="n">region_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_regions</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="n">region_index</span>   <span class="c1"># 5.2.1 Set region index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="o">...</span>                    <span class="c1"># 5.2.2 Define the 3D shape of the region</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_region</span> <span class="o">=</span> <span class="n">region_index</span>   <span class="c"># 5.2.1 Set region index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="o">...</span>                    <span class="c"># 5.2.2 Define the 3D shape of the region</span>
 </pre></div>
 </div>
 </div>
@@ -245,7 +262,7 @@ to implement the following functions:</p>
 </ol>
 </div></blockquote>
 <p>Once these steps are complete, the <code class="docutils literal"><span class="pre">omsi.dataformat.file_reader_base</span></code> module will automatically detect the new format and make it available as part of the file conversion script <code class="docutils literal"><span class="pre">omsi.tools.convertToOMSI</span></code>. To check which formats are registered, simply do:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">omsi.dataformat</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">omsi.dataformat</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">formats</span> <span class="o">=</span> <span class="n">file_reader_base</span><span class="o">.</span><span class="n">file_reader_base</span><span class="o">.</span><span class="n">available_formats</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">formats</span>
 <span class="go">{&#39;bruckerflex_file&#39;: &lt;class &#39;omsi.dataformat.bruckerflex_file.bruckerflex_file&#39;&gt;,</span>
@@ -253,9 +270,9 @@ to implement the following functions:</p>
 </pre></div>
 </div>
 <p>Using this basic feature makes it possible to easily iterate over all available formats and the consistent interface described by the <code class="docutils literal"><span class="pre">file_format_base</span></code> module allows us to use all the formats in a consistent manner (avoiding special cases). E.g., if we want to read a file of an unknown format we can simply:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">omsi.dataformat</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">formats</span> <span class="o">=</span> <span class="n">file_reader_base</span><span class="o">.</span><span class="n">file_reader_base</span><span class="o">.</span><span class="n">available_formats</span><span class="p">()</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;my_unknown_file&#39;</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;my_unknown_file&#39;</span>
 <span class="n">filereader</span> <span class="o">=</span> <span class="bp">None</span>
 <span class="n">formatname</span> <span class="o">=</span> <span class="bp">None</span>
 <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">fclass</span> <span class="ow">in</span> <span class="n">formats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -263,7 +280,7 @@ to implement the following functions:</p>
         <span class="n">filereader</span> <span class="o">=</span> <span class="n">fclass</span>
         <span class="n">formatname</span> <span class="o">=</span> <span class="n">fname</span>
 <span class="k">if</span> <span class="n">filereader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s2">&quot;Using &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">formatname</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; to read the file&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Using &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">formatname</span><span class="p">)</span><span class="o">+</span><span class="s">&quot; to read the file&quot;</span>
     <span class="n">openfile</span> <span class="o">=</span> <span class="n">filereader</span><span class="p">(</span><span class="n">basename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">requires_slicing</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -271,16 +288,15 @@ to implement the following functions:</p>
 </div>
 
 
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="custom_analysis.html" class="btn btn-neutral float-right" title="Developing a new Analysis for BASTet" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="custom_analysis.html" class="btn btn-neutral float-right" title="Developing a new Analysis for BASTet">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="convert_files.html" class="btn btn-neutral" title="Converting and Files and Making them Accessible" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="convert_files.html" class="btn btn-neutral" title="Converting and Files and Making them Accessible"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -290,13 +306,12 @@ to implement the following functions:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
-
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
-
         </div>
       </div>
 
