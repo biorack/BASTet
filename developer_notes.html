@@ -158,8 +158,8 @@
 <h1>Developer Notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="building-the-online-documentation">
 <h2>Building the online documentation<a class="headerlink" href="#building-the-online-documentation" title="Permalink to this headline">¶</a></h2>
-<p>The sources for the sphinx docs are part of the doc/ folder and can be build locally as usual via, e.g., &#8220;make html.&#8221; This will build the documentation locally only as part of the doc/_build folder.</p>
-<p>The online documentation is hosted via GitHub pages and are part of gh-pages branch. The sphinx docs build scripts are conveniently set up to simply the update of the online documentation as part of the regular development process. However, we need to do the following simple setup first:</p>
+<p>The sources for the sphinx docs are part of the doc/ folder and can be build locally as usual via, e.g., <code class="docutils literal"><span class="pre">make</span> <span class="pre">html.</span></code> This will build the documentation locally only as part of the doc/_build folder.</p>
+<p>The online documentation is hosted via GitHub pages and are part of the gh-pages branch. The sphinx docs build scripts are conveniently set up to simply the update of the online documentation as part of the regular development process. However, before we can do this we need to do the following simple setup first:</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">cd</span></code> to the your local copy of the BASTet repo (i.e., where the /omsi and /doc folder are located)</li>
 <li><code class="docutils literal"><span class="pre">cd</span> <span class="pre">..</span></code></li>
@@ -172,7 +172,7 @@
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">make</span> <span class="pre">htmlpublic</span></code> : Rebuild the html docs locally and then copy the docs to the ../../bastet_docs repo with the gh-pages branch. This will only make local changes without commiting or publishing anything.</li>
 <li><code class="docutils literal"><span class="pre">make</span> <span class="pre">latexpdfpublic</span></code> : Rebuild the latex and pdf and then copy the pdf to the ../../bastet_docs repo with the gh-pages branch.  This will only make local changes without commiting or publishing anything.</li>
-<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">updatepublic</span></code> : Once you have confirmed that the docs are correct, you can rebuild the html and pdf docs for publications using this command. The command also commits and pushes all changes to the docs back to GitHub for publication, so that they become immediatly available online.</li>
+<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">updatepublic</span></code> : Once you have confirmed that the docs are correct, you can rebuild the html and pdf docs for publications using this command. The command also commits and pushes all changes to the docs back to GitHub for publication, so that they become immediately available online.</li>
 </ul>
 </div>
 </div>
