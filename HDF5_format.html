@@ -65,8 +65,7 @@
           
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting Files at NERSC and Making them Accessible</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
@@ -328,7 +327,7 @@ python
 </div>
 <div class="section" id="convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">
 <span id="convert-img-hdf5"></span><h2>Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format<a class="headerlink" href="#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format" title="Permalink to this headline">¶</a></h2>
-<p>See section <a class="reference internal" href="convert_files.html#converting-files"><span>Converting and Files and Making them Accessible</span></a> for details.</p>
+<p>See section <a class="reference internal" href="convert_files.html#converting-files"><span>Converting Files at NERSC and Making them Accessible</span></a> for details.</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">omsi.tools.convertToOMSI</span></code> : This python script, which is available via the OMSI software toolkit, provides functionality for converting img files to HDF5. The script takes a single or multiple img files as input and writes them to a single HDF5 file. The data of each img file is stored in a separate <code class="docutils literal"><span class="pre">/entry_#/data_#</span></code> object. The script also supports execution of a number of different analysis, such as, peak finding or nmf, directly during the data conversion. For up-to-date information about the usage of the script see <code class="docutils literal"><span class="pre">python</span> <span class="pre">imgToHDF5</span> <span class="pre">--help</span></code>. A summary of the main command-line options of the tool are available below.</li>
 <li><code class="docutils literal"><span class="pre">omsi.dataformat.omsi_file</span></code> : Module containing a set of python class for reading and writing HDF5 data files for the proposed OMSI HDF5 data layout.</li>
