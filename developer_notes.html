@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Developer Notes &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation devel documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation devel documentation" href="index.html"/>
+        <link rel="next" title="OMSI Data Format" href="HDF5_format.html"/>
+        <link rel="prev" title="Defining and Executing Analysis Workflows" href="basic_workflows.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#changing-file-permissions">Changing file permissions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_files.html#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#developing-a-file-reader">Developing a file reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_filereader.html#integrating-the-file-reader-with-openmsi">Integrating the file reader with OpenMSI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-1-overview">Writing a new analysis class for BASTet &#8211; Part 1: Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-2-analysis-template">Writing a new analysis class for BASTet &#8211; Part 2: Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-3-customizing-core-features">Writing a new analysis class for BASTet &#8211; Part 3: Customizing core features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-1-create-the-analysis-tasks">Step 1: Create the analysis tasks:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-2-define-analysis-inputs">Step 2: Define analysis inputs:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#step-3-execute">Step 3: Execute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#example-normalizing-an-image">Example: Normalizing an image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_workflows.html#workflow-scripts">Workflow Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Developer Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-online-documentation">Building the online documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#data-layout">Data Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#accessing-omsi-data-files">Accessing OMSI data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format.html#convert-mass-spectrometry-imaging-data-to-omsi-hdf5-format">Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-platforms">Test Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#test-cases">Test Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#dataset-layout">Dataset Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-1">Chunking: Part 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#chunking-part-2">Chunking: Part 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#compression">Compression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#local-scalability-multi-processing">Local Scalability: Multi-processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HDF5_format_performance.html#discussion">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="omsi.html">omsi Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Developer Notes</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/developer_notes.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="developer-notes">
+<h1>Developer Notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="building-the-online-documentation">
+<h2>Building the online documentation<a class="headerlink" href="#building-the-online-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The sources for the sphinx docs are part of the doc/ folder and can be build locally as usual via, e.g., &#8220;make html.&#8221; This will build the documentation locally only as part of the doc/_build folder.</p>
+<p>The online documentation is hosted via GitHub pages and are part of gh-pages branch. The sphinx docs build scripts are conveniently set up to simply the update of the online documentation as part of the regular development process. However, we need to do the following simple setup first:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">cd</span></code> to the your local copy of the BASTet repo (i.e., where the /omsi and /doc folder are located)</li>
+<li><code class="docutils literal"><span class="pre">cd</span> <span class="pre">..</span></code></li>
+<li><code class="docutils literal"><span class="pre">mkdir</span> <span class="pre">bastet_docs</span></code></li>
+<li><code class="docutils literal"><span class="pre">cd</span> <span class="pre">bastet_docs</span></code></li>
+<li><code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/oruebel/BASTet.git</span> <span class="pre">html</span></code></li>
+<li><code class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">-b</span> <span class="pre">gh-pages</span> <span class="pre">remotes/origin/ghpages</span></code></li>
+</ul>
+<p>Once we have created and setup our <code class="docutils literal"><span class="pre">bastet_docs</span></code> repo for the <code class="docutils literal"><span class="pre">gh-pages</span></code> branch we can now build the online documentation as usual from the <code class="docutils literal"><span class="pre">doc</span></code> folder of our development repo via the following commands:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">htmlpublic</span></code> : Rebuild the html docs locally and then copy the docs to the ../../bastet_docs repo with the gh-pages branch. This will only make local changes without commiting or publishing anything.</li>
+<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">latexpdfpublic</span></code> : Rebuild the latex and pdf and then copy the pdf to the ../../bastet_docs repo with the gh-pages branch.  This will only make local changes without commiting or publishing anything.</li>
+<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">updatepublic</span></code> : Once you have confirmed that the docs are correct, you can rebuild the html and pdf docs for publications using this command. The command also commits and pushes all changes to the docs back to GitHub for publication, so that they become immediatly available online.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="HDF5_format.html" class="btn btn-neutral float-right" title="OMSI Data Format">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="basic_workflows.html" class="btn btn-neutral" title="Defining and Executing Analysis Workflows"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'devel',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

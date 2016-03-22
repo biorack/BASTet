@@ -19,6 +19,7 @@ Documentation BASTet:
    custom_filereader
    custom_analysis
    basic_workflows
+   developer_notes
    HDF5_format
    HDF5_format_performance
    omsi
