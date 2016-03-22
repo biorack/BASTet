@@ -20,8 +20,8 @@ The online documentation is hosted via GitHub pages and are part of gh-pages bra
 
 * `cd` to the your local copy of the BASTet repo (i.e., where the /omsi and /doc folder are located)
 * `cd ..`
-* `mkdir bastet_doc`
-* `cd bastet_doc`
+* `mkdir bastet_docs`
+* `cd bastet_docs`
 * `git clone https://github.com/oruebel/BASTet.git html`
 * `git checkout -b gh-pages remotes/origin/ghpages`
 
