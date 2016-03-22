@@ -56,7 +56,7 @@ updatepublic: htmlpublic latexpdfpublic
 	echo "Adding files to gh-pages repo"
 	git add .
 	echo "Commiting changes to gh-pages repo"
-	git commit -m "rebuilt the public docs"
+	git commit -m "rebuilt the public docs" .
 	echo "Pushing changes to gh-pages repo"
 	git push origin gh-pages
 
