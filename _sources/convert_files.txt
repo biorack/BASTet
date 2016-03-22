@@ -1,16 +1,13 @@
 .. _converting-files:
 
-Converting and Files and Making them Accessible
-===============================================
-
-Converting an MSI file at NERSC
--------------------------------
+Converting Files at NERSC and Making them Accessible
+====================================================
 
 To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:
 
 .. code-block:: none
 
-    ssh edison.nersc.gov
+    ssh cori.nersc.gov
     cd /project/projectdirs/openmsi/devel/convert
     source setupEnvironment.csh
     python convertToOMSI.py <infile1> <output HDF5File>
@@ -86,7 +83,7 @@ NOTE: In order to view a current, complete list of conversions options use:
                                 add the file to the database.
                        iii) continue-on-error: Ignore errors if possible and continue, even if this
                                 means that some data may be missing from the output.
-    --email <email1 email2 ...>: Send notification in case of both error or success to the given email address.
+    --email <email1 email2 ...>: Send notification in case of both error or success to the email address.
     --email-success <email1 email2 ...>>: Send notification in case of success to the given email address.
     --email-error <email1 email2 ...>>: Send notification in case of error to the given email address.
 
@@ -96,7 +93,7 @@ NOTE: In order to view a current, complete list of conversions options use:
     --format <option>: Define which file format is used as input. By default the program tries to
                automatically determine the input format. This option can be used to indicate
                the format explicitly to in case the auto option fails. Available options are:
-              {'bruckerflex_file': <class 'omsi.dataformat.bruckerflex_file.bruckerflex_file'>, 'img_file': <class 'omsi.dataformat.img_file.img_file'>}
+              {'imzml_file': <class 'omsi.dataformat.imzml_file.imzml_file'>, 'bruckerflex_file': <class 'omsi.dataformat.bruckerflex_file.bruckerflex_file'>, 'img_file': <class 'omsi.dataformat.img_file.img_file'>, 'mzml_file': <class 'omsi.dataformat.mzml_file.mzml_file'>}
     --regions <option>: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored
                in a single file. This option allows one to specify how these regions should be
                treated during file conversion. E.g., one may want to store i) each region as a
@@ -136,18 +133,31 @@ NOTE: In order to view a current, complete list of conversions options use:
                  i) all : Read the full data in memory and write it at once
                  ii) spectrum : Read one spectrum at a time and write it to the file.
                  iii) chunk : Read one chunk at a time and write it to the file.
+                 The io option applies only for the generation of subsequent chunkings
+                 and not the initial iteration over the file to generate the first convert.
+                 iv) spectrum-to-image: Default option when creating image chunk version from
+                 a spectrum-chunk MSI dataset. Read a block of spectra at a time to
+                 complete a set of images and then write the block of images at once.
+    --io-block-limit <MB>: When using spectrum-to-image io (default when using auto-chunking),
+                 what should the maximum block in MB that we load into memory. (Default=2000MB)
 
     ===DATABSE OPTIONS===
 
     These options control whether the generated output file should be added to a server database
     to manage web file access permissions
     Default options are: --add-to-db --db-server http://openmsi.nersc.gov
-    --add-to-db : Add the output HDF5 file to the database.
+    --add-to-db : Explicitly add the output HDF5 file to the database. This option has no effect
+                  if --jobid is set as the file is added through the update of the job status
+                  in this case.
     --no-add-to-db : Disable adding the file to the database.
     --db-server : Specify the online server where the file should be registers. Default is
                   http://openmsi.nersc.gov
-    --owner : Name of the user that should be assigned as owner. By default the owner is
+    --user : Name of the user that should be assigned as user. By default the user is
               determined automatically based on the file path.
+    --jobid : ID of the job. If set to 'auto' then the environment variable PBS_JOBID is used.
+              NOTE: If job ID is set then we assume that the job has been scheduled via the
+              the automated system and that the job is managed. As such the file will be added,
+              to the database by updating the job status and NOT by explicitly adding the file.
 
     ===ANALYSIS OPTIONS===
 
@@ -173,6 +183,11 @@ NOTE: In order to view a current, complete list of conversions options use:
             in the HDF5 file
     --no-fpl: Disable the local peak finding (DEFAULT)
 
+
+    TIC normalization:
+    --ticnorm : Compute tic normalization
+    --no-ticnorm : Disable computation of tic normaltization (DEFAULT)
+
     ---OTHER OPTIONS---
 
     Generate Thumbnail image: Default OFF:
@@ -186,3 +201,16 @@ NOTE: In order to view a current, complete list of conversions options use:
     Generate XDMF header file for output file: Default OFF:
     --xdmf: Write XDMF XML-based header-file for the output HDF5 file.
     --no-xdmf: Do not generate a XDMF XML-based header for the HDF5 file.
+
+    ===Metadata Options===
+
+    NOTE: Input datasets are numbers starting from 0 based on there order on the command line.
+
+    --methods : JSON describing the experimental methods
+    --methods# : JSON describing the experimental methods for input file number #
+    --instrument : JSON dictionary describing the instrument
+    --instrument# : JSON dictionary describing the instrument for input file number #
+    --notes : JSON dictionary with additional user notes about the data
+    --notes# : JSON dictionary with additional notes for input file number #
+
+

@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Converting and Files and Making them Accessible &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation devel documentation</title>
+  <title>Converting Files at NERSC and Making them Accessible &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation devel documentation</title>
   
 
   
@@ -65,8 +65,7 @@
           
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Converting and Files and Making them Accessible</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#converting-an-msi-file-at-nersc">Converting an MSI file at NERSC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Converting Files at NERSC and Making them Accessible</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#making-a-converted-file-accessible-to-openmsi-private">Making a converted file accessible to OpenMSI (Private)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#changing-file-permissions">Changing file permissions:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#converttoomsi-usage-and-options"><code class="docutils literal"><span class="pre">convertToOMSI</span></code>: Usage and Options</a></li>
@@ -144,7 +143,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Converting and Files and Making them Accessible</li>
+    <li>Converting Files at NERSC and Making them Accessible</li>
       <li class="wy-breadcrumbs-aside">
         
           <a href="_sources/convert_files.txt" rel="nofollow"> View page source</a>
@@ -155,12 +154,10 @@
 </div>
           <div role="main" class="document">
             
-  <div class="section" id="converting-and-files-and-making-them-accessible">
-<span id="converting-files"></span><h1>Converting and Files and Making them Accessible<a class="headerlink" href="#converting-and-files-and-making-them-accessible" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="converting-an-msi-file-at-nersc">
-<h2>Converting an MSI file at NERSC<a class="headerlink" href="#converting-an-msi-file-at-nersc" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="converting-files-at-nersc-and-making-them-accessible">
+<span id="converting-files"></span><h1>Converting Files at NERSC and Making them Accessible<a class="headerlink" href="#converting-files-at-nersc-and-making-them-accessible" title="Permalink to this headline">¶</a></h1>
 <p>To convert a mass spectrometry imaging file, e.g., in img or bruckerflex format, to HDF5 do the following:</p>
-<div class="highlight-none"><div class="highlight"><pre>ssh edison.nersc.gov
+<div class="highlight-none"><div class="highlight"><pre>ssh cori.nersc.gov
 cd /project/projectdirs/openmsi/devel/convert
 source setupEnvironment.csh
 python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
@@ -172,7 +169,6 @@ python convertToOMSI.py &lt;infile1&gt; &lt;output HDF5File&gt;
 </pre></div>
 </div>
 <p>where username is the name of the primary user that owns the file.</p>
-</div>
 <div class="section" id="making-a-converted-file-accessible-to-openmsi-private">
 <h2>Making a converted file accessible to OpenMSI (Private)<a class="headerlink" href="#making-a-converted-file-accessible-to-openmsi-private" title="Permalink to this headline">¶</a></h2>
 <p>The conversion script will by default automatically try to register new files with the OpenMSI site and
@@ -220,7 +216,7 @@ indicate which analyses should be executed.
                             add the file to the database.
                    iii) continue-on-error: Ignore errors if possible and continue, even if this
                             means that some data may be missing from the output.
---email &lt;email1 email2 ...&gt;: Send notification in case of both error or success to the given email address.
+--email &lt;email1 email2 ...&gt;: Send notification in case of both error or success to the email address.
 --email-success &lt;email1 email2 ...&gt;&gt;: Send notification in case of success to the given email address.
 --email-error &lt;email1 email2 ...&gt;&gt;: Send notification in case of error to the given email address.
 
@@ -230,7 +226,7 @@ Default input data options: --format auto --regions split+merge
 --format &lt;option&gt;: Define which file format is used as input. By default the program tries to
            automatically determine the input format. This option can be used to indicate
            the format explicitly to in case the auto option fails. Available options are:
-          {&#39;bruckerflex_file&#39;: &lt;class &#39;omsi.dataformat.bruckerflex_file.bruckerflex_file&#39;&gt;, &#39;img_file&#39;: &lt;class &#39;omsi.dataformat.img_file.img_file&#39;&gt;}
+          {&#39;imzml_file&#39;: &lt;class &#39;omsi.dataformat.imzml_file.imzml_file&#39;&gt;, &#39;bruckerflex_file&#39;: &lt;class &#39;omsi.dataformat.bruckerflex_file.bruckerflex_file&#39;&gt;, &#39;img_file&#39;: &lt;class &#39;omsi.dataformat.img_file.img_file&#39;&gt;, &#39;mzml_file&#39;: &lt;class &#39;omsi.dataformat.mzml_file.mzml_file&#39;&gt;}
 --regions &lt;option&gt;: Some file formats (e.g., brucker) allow multiple regions to be imaged and stored
            in a single file. This option allows one to specify how these regions should be
            treated during file conversion. E.g., one may want to store i) each region as a
@@ -270,18 +266,31 @@ HDF5 Compression: Default ON using (gzip, 4):
              i) all : Read the full data in memory and write it at once
              ii) spectrum : Read one spectrum at a time and write it to the file.
              iii) chunk : Read one chunk at a time and write it to the file.
+             The io option applies only for the generation of subsequent chunkings
+             and not the initial iteration over the file to generate the first convert.
+             iv) spectrum-to-image: Default option when creating image chunk version from
+             a spectrum-chunk MSI dataset. Read a block of spectra at a time to
+             complete a set of images and then write the block of images at once.
+--io-block-limit &lt;MB&gt;: When using spectrum-to-image io (default when using auto-chunking),
+             what should the maximum block in MB that we load into memory. (Default=2000MB)
 
 ===DATABSE OPTIONS===
 
 These options control whether the generated output file should be added to a server database
 to manage web file access permissions
 Default options are: --add-to-db --db-server http://openmsi.nersc.gov
---add-to-db : Add the output HDF5 file to the database.
+--add-to-db : Explicitly add the output HDF5 file to the database. This option has no effect
+              if --jobid is set as the file is added through the update of the job status
+              in this case.
 --no-add-to-db : Disable adding the file to the database.
 --db-server : Specify the online server where the file should be registers. Default is
               http://openmsi.nersc.gov
---owner : Name of the user that should be assigned as owner. By default the owner is
+--user : Name of the user that should be assigned as user. By default the user is
           determined automatically based on the file path.
+--jobid : ID of the job. If set to &#39;auto&#39; then the environment variable PBS_JOBID is used.
+          NOTE: If job ID is set then we assume that the job has been scheduled via the
+          the automated system and that the job is managed. As such the file will be added,
+          to the database by updating the job status and NOT by explicitly adding the file.
 
 ===ANALYSIS OPTIONS===
 
@@ -307,6 +316,11 @@ Local Peak Finding: Default OFF:
         in the HDF5 file
 --no-fpl: Disable the local peak finding (DEFAULT)
 
+
+TIC normalization:
+--ticnorm : Compute tic normalization
+--no-ticnorm : Disable computation of tic normaltization (DEFAULT)
+
 ---OTHER OPTIONS---
 
 Generate Thumbnail image: Default OFF:
@@ -320,6 +334,17 @@ Generate Thumbnail image: Default OFF:
 Generate XDMF header file for output file: Default OFF:
 --xdmf: Write XDMF XML-based header-file for the output HDF5 file.
 --no-xdmf: Do not generate a XDMF XML-based header for the HDF5 file.
+
+===Metadata Options===
+
+NOTE: Input datasets are numbers starting from 0 based on there order on the command line.
+
+--methods : JSON describing the experimental methods
+--methods# : JSON describing the experimental methods for input file number #
+--instrument : JSON dictionary describing the instrument
+--instrument# : JSON dictionary describing the instrument for input file number #
+--notes : JSON dictionary with additional user notes about the data
+--notes# : JSON dictionary with additional notes for input file number #
 </pre></div>
 </div>
 </div>
