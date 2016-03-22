@@ -1,3 +1,3 @@
 ************* Module omsi.workflow.executor.base
 C: 37, 4: Invalid class attribute name "DEFAULT_EXECUTOR_CLASS" (invalid-name)
-R: 16, 0: Too many public methods (24/20) (too-many-public-methods)
+R: 16, 0: Too many public methods (25/20) (too-many-public-methods)

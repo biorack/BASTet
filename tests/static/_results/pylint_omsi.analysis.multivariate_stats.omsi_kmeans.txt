@@ -1,0 +1,10 @@
+************* Module omsi.analysis.multivariate_stats.omsi_kmeans
+C: 37, 0: Wrong continued indentation.
+                                'since the last k-means iteration is less than thresh.',
+                           |    ^ (bad-continuation)
+C: 81, 0: Exactly one space required after comma
+                data = data[...,current_mask]
+                               ^ (bad-whitespace)
+W: 10, 0: Method 'write_analysis_data' is abstract in class 'analysis_base' but is not overridden (abstract-method)
+R: 59, 4: Too many local variables (17/15) (too-many-locals)
+R: 10, 0: Too many public methods (54/20) (too-many-public-methods)

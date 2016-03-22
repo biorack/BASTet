@@ -1,5 +1,5 @@
 ************* Module omsi.analysis.__init__
-C: 24, 0: Line too long (122/120) (line-too-long)
+C: 24, 0: Line too long (128/120) (line-too-long)
 ************* Module omsi.analysis
 W:  6, 0: Wildcard import omsi.analysis.findpeaks (wildcard-import)
 W:  7, 0: Wildcard import omsi.analysis.multivariate_stats (wildcard-import)
@@ -8,6 +8,6 @@ W:  9, 0: Wildcard import omsi.analysis.base (wildcard-import)
 W: 10, 0: Wildcard import omsi.analysis.generic (wildcard-import)
 W: 11, 0: Wildcard import omsi.analysis.compound_stats (wildcard-import)
 E: 24,33: Undefined variable 'findpeaks' (undefined-variable)
-E: 24,51: Undefined variable 'multivariate_stats' (undefined-variable)
-E: 24,78: Undefined variable 'msi_filtering' (undefined-variable)
-E: 24,100: Undefined variable 'compound_stats' (undefined-variable)
+E: 24,53: Undefined variable 'multivariate_stats' (undefined-variable)
+E: 24,82: Undefined variable 'msi_filtering' (undefined-variable)
+E: 24,106: Undefined variable 'compound_stats' (undefined-variable)

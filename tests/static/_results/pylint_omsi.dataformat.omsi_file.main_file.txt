@@ -1,6 +1,6 @@
 ************* Module omsi.dataformat.omsi_file.main_file
-W: 15, 0: No exception type(s) specified (bare-except)
-W: 88, 8: No exception type(s) specified (bare-except)
-R: 19, 0: Too many public methods (22/20) (too-many-public-methods)
+W: 17, 0: No exception type(s) specified (bare-except)
+W: 90, 8: No exception type(s) specified (bare-except)
+R: 21, 0: Too many public methods (22/20) (too-many-public-methods)
 W:  8, 0: Unused import np (unused-import)
-W: 14, 4: Unused import MPI (unused-import)
+W: 16, 8: Unused import MPI (unused-import)

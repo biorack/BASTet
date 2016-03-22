@@ -1,0 +1,10 @@
+************* Module omsi.workflow.analysis_driver.greedy_workflow_driver
+E:  4, 0: No name 'base' in module 'omsi.workflow' (no-name-in-module)
+F:  4, 0: Unable to import 'omsi.workflow.base' (import-error)
+E:  5, 0: No name 'run_info_data' in module 'omsi.shared' (no-name-in-module)
+F:  5, 0: Unable to import 'omsi.shared.run_info_data' (import-error)
+E: 12, 4: Use of super on an old style class (super-on-old-class)
+E: 23,15: Instance of 'greedy_workflow_driver' has no 'get_analyses' member (no-member)
+E: 30, 8: Instance of 'greedy_workflow_driver' has no 'add_analysis_dependencies' member (no-member)
+E: 39,23: Instance of 'greedy_workflow_driver' has no 'get_analyses' member (no-member)
+R:  8, 0: Too few public methods (1/2) (too-few-public-methods)

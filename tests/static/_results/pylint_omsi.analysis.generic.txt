@@ -1,11 +1,45 @@
 ************* Module omsi.analysis.generic
-C:154, 0: Line too long (134/120) (line-too-long)
-F: 15, 4: Unable to import 'cloudpickle' (import-error)
-W: 24, 8: Reimport 'pickle' (imported line 7) (reimported)
-C: 49, 4: Invalid class attribute name "DEFAULT_OUTPUT_PREFIX" (invalid-name)
-W:143,17: Used * or ** magic (star-args)
-W:166,21: Used * or ** magic (star-args)
-R:146, 4: Too many branches (13/12) (too-many-branches)
-R:240, 4: Too many arguments (7/5) (too-many-arguments)
-W:265, 8: No exception type(s) specified (bare-except)
-R: 43, 0: Too many public methods (55/20) (too-many-public-methods)
+C:117, 0: Exactly one space required around assignment
+                    dtype=str
+                         ^ (bad-whitespace)
+C:134, 0: Wrong hanging indentation.
+                        name=varname,
+                    |   ^ (bad-continuation)
+C:135, 0: Wrong hanging indentation.
+                        help=' ' if 'help' not in param_spec else param_spec['help'],
+                    |   ^ (bad-continuation)
+C:136, 0: Wrong hanging indentation.
+                        dtype=dtype if 'dtype' not in param_spec else param_spec['dtype'],
+                    |   ^ (bad-continuation)
+C:137, 0: Wrong hanging indentation.
+                        required=(not has_default) if 'required' not in param_spec else param_spec['required'],
+                    |   ^ (bad-continuation)
+C:138, 0: Wrong hanging indentation.
+                        default=default if 'default' not in param_spec else param_spec['default'],
+                    |   ^ (bad-continuation)
+C:139, 0: Wrong hanging indentation.
+                        choices=None if 'choices' not in param_spec else param_spec['choices'],
+                    |   ^ (bad-continuation)
+C:140, 0: Wrong hanging indentation.
+                        group=None if 'group' not in param_spec else param_spec['group'],
+                    |   ^ (bad-continuation)
+C:141, 0: Wrong hanging indentation.
+                        data=None if 'data' not in param_spec else param_spec['data'])
+                    |   ^ (bad-continuation)
+C:215, 0: Line too long (134/120) (line-too-long)
+F: 16, 4: Unable to import 'cloudpickle' (import-error)
+W: 25, 8: Reimport 'pickle' (imported line 7) (reimported)
+C: 45, 4: Missing function docstring (missing-docstring)
+C: 59, 4: Invalid class attribute name "DEFAULT_OUTPUT_PREFIX" (invalid-name)
+R: 62, 4: Too many local variables (21/15) (too-many-locals)
+C:103,20: Invalid variable name "ps" (invalid-name)
+W:124,24: No exception type(s) specified (bare-except)
+W:119,24: Unused variable 'k' (unused-variable)
+R: 62, 4: Too many branches (20/12) (too-many-branches)
+W:204,17: Used * or ** magic (star-args)
+W:227,21: Used * or ** magic (star-args)
+R:207, 4: Too many branches (13/12) (too-many-branches)
+R:301, 4: Too many arguments (7/5) (too-many-arguments)
+W:326, 8: No exception type(s) specified (bare-except)
+E:337,50: Instance of 'analysis_generic' has no '_analysis_base__data_list' member (no-member)
+R: 53, 0: Too many public methods (56/20) (too-many-public-methods)
