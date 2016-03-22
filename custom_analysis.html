@@ -78,10 +78,10 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Developing a new Analysis for BASTet</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-a-new-analysis-class-for-bastet-part-1-overview">Writing a new analysis class for BASTet &#8211; Part 1: Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-a-new-analysis-class-for-bastet-part-2-analysis-template">Writing a new analysis class for BASTet &#8211; Part 2: Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-a-new-analysis-class-for-bastet-part-3-customizing-core-features">Writing a new analysis class for BASTet &#8211; Part 3: Customizing core features</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
@@ -153,8 +153,228 @@
             
   <div class="section" id="developing-a-new-analysis-for-bastet">
 <h1>Developing a new Analysis for BASTet<a class="headerlink" href="#developing-a-new-analysis-for-bastet" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="overview">
-<h2>Overview:<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>BASTet provides developers with two easy ways to integrate new analyses. First, the simplest and most basic solution is to wrap analysis functions using either the <cite>&#64;bastet_analysis</cite> Python decorator or by explicitly wrapping a function via wrapped funct = analysis generic.from function(my function). Second, to easily share and fully integrate an analysis with BASTet, we then create a new class that inherits from BASTet’s base analysis interface class</p>
+<div class="section" id="wrapping-a-function-the-quick-and-dirty-way">
+<h2>Wrapping a function: The quick-and-dirty way<a class="headerlink" href="#wrapping-a-function-the-quick-and-dirty-way" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The <a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.generic" title="omsi.analysis.generic"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic()</span></code></a> provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process.</p>
+<p>Using the <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic.from_function" title="omsi.analysis.generic.analysis_generic.from_function"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic.from_function()</span></code></a> or <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.bastet_analysis" title="omsi.analysis.generic.bastet_analysis"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.bastet_analysis()</span></code></a> decorator, we can easily construct a generic <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a> instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. Here we briefly outline the two main options to do this.</p>
+<p><strong>NOTE:</strong> Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.</p>
+<div class="section" id="option-1-explicitly-track-specific-excutions-of-a-function">
+<h3>Option 1: Explicitly track specific excutions of a function<a class="headerlink" href="#option-1-explicitly-track-specific-excutions-of-a-function" title="Permalink to this headline">¶</a></h3>
+<p>Instead of calling our analysis function <code class="docutils literal"><span class="pre">f()</span></code> directly, we create an instance of <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic" title="omsi.analysis.generic.analysis_generic"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic()</span></code></a> via <code class="docutils literal"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">analysis_generic.from_function(f)</span></code> which we then use instead of our function. To execute our function we can now either call <code class="docutils literal"><span class="pre">g.execute(...)</span></code> as usual or treat <code class="docutils literal"><span class="pre">g</span></code> as a function and call it directly <code class="docutils literal"><span class="pre">g(...)</span></code></p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</span><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
+
+<span class="c"># Define some example function we want to wrap to track results</span>
+<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+<span class="c"># Create an analysis object for our function</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c"># This is the same as:  g(np.arange(10))</span>
+</pre></div>
+</td></tr></table></div>
+<p>See <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic.from_function" title="omsi.analysis.generic.analysis_generic.from_function"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic.from_function()</span></code></a> for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.</p>
+</div>
+<div class="section" id="option-2-implicitly-track-the-last-execution-of-a-function">
+<h3>Option 2: Implicitly track the last execution of a function<a class="headerlink" href="#option-2-implicitly-track-the-last-execution-of-a-function" title="Permalink to this headline">¶</a></h3>
+<p>If we are only interested in recording the last execution of our function, then we can alternatively wrap our function directly using the <code class="docutils literal"><span class="pre">&#64;bastet_analysis</span></code> decorator. The main difference between the two approaches is that using the decorator we only record the last execution of our function, while using the explicit approach of option 1, we can create as many wrapped instances of our functions as we want and track the execution of each independently.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</span><span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">bastet_analysis</span>
+<span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
+
+<span class="c"># Define some example function and wrap it</span>
+<span class="nd">@bastet_analysis</span>
+<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Our own sum function&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+<span class="c"># Execute the analysis</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">mysum</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</td></tr></table></div>
+<p>See <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.bastet_analysis" title="omsi.analysis.generic.bastet_analysis"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.bastet_analysis()</span></code></a> for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.</p>
+</div>
+<div class="section" id="example-1-defining-and-using-wrapped-functions">
+<h3>Example 1: Defining and using wrapped functions<a class="headerlink" href="#example-1-defining-and-using-wrapped-functions" title="Permalink to this headline">¶</a></h3>
+<p>The code example shown below illustrates the &#8220;wrapping&#8221; of a simple example function <code class="docutils literal"><span class="pre">mysum(a)</span></code>, which simply uses <code class="docutils literal"><span class="pre">numpy.sum</span></code> to compute the sum of objects in an array. (NOTE: We could naturally also use <code class="docutils literal"><span class="pre">numpy.sum</span></code> directly, we use <code class="docutils literal"><span class="pre">mysum(a)</span></code> mainly to illustrate that this approach also works wit functions defined in the interpreter.)</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
+</span><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
+
+<span class="c"># Define some example function we want to wrap to track results</span>
+<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+<span class="hll"><span class="c"># Create an analysis object for our function</span>
+</span><span class="hll"><span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
+</span>
+<span class="hll"><span class="c"># Execute the analysis</span>
+</span><span class="hll"><span class="n">res</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</span><span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>  <span class="c"># Logging the result</span>
+
+<span class="hll"><span class="c"># Save the analysis to file</span>
+</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">()</span>
+<span class="n">exp_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_experiment_index</span><span class="p">()</span>
+<span class="hll"><span class="n">ana_obj</span><span class="p">,</span> <span class="n">ana_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">create_analysis</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+</span><span class="c"># Close the file</span>
+<span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">f</span>
+
+<span class="hll"><span class="c"># Restore the analysis from file</span>
+</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="n">exp_index</span><span class="p">)</span>
+<span class="hll"><span class="n">a</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_analysis</span><span class="p">(</span><span class="n">ana_index</span><span class="p">)</span>
+</span><span class="hll"><span class="n">g2</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">restore_analysis</span><span class="p">()</span>
+</span><span class="n">res2</span> <span class="o">=</span> <span class="n">g2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+<span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res2</span><span class="o">=</span><span class="n">res2</span><span class="p">)</span>  <span class="c"># Logging the result</span>
+<span class="k">if</span> <span class="n">res</span> <span class="o">==</span> <span class="n">res2</span><span class="p">:</span>
+    <span class="n">log_helper</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;CONGRATULATIONS---The results matched&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">log_helper</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;SORRY---The results did not match&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>When we run our script, we can see that we were able to successfully capture the
+execution of our function and recreate the analysis from file.</p>
+<div class="highlight-bash"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre>machine:dir username<span class="nv">$ </span>python autowrap_function.py
+2015-09-29 15:21:32,729 - __main__ - INFO - <span class="nv">res</span> <span class="o">=</span> 45
+2015-09-29 15:21:32,778 - __main__ - INFO - <span class="nv">res2</span> <span class="o">=</span> 45
+<span class="hll">2015-09-29 15:21:32,778 - __main__ - INFO - CONGRATULATIONS---The results matched
+</span></pre></div>
+</td></tr></table></div>
+<p>The figure below shows a view of the file generated by our wrapped function execution example shown above.</p>
+<div class="figure" id="wrap-function-result-figure">
+<a class="reference internal image-reference" href="_images/wrap_function_result.png"><img alt="Baseline performance for slice selection" src="_images/wrap_function_result.png" style="width: 747.0px; height: 872.0px;" /></a>
+</div>
+<p>Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intensities that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
+<span class="kn">from</span> <span class="nn">omsi.analysis.multivariate_stats.omsi_nmf</span> <span class="kn">import</span> <span class="n">omsi_nmf</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
+</span><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># Specify the analysis workflow</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+<span class="n">a1</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
+
+<span class="c"># Wrap a simple function to filter all peaks with less than 10 counts</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">[</span><span class="n">a</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">a</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">a2</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>    <span class="c"># Use the peak_cube from a1 as input for the filter</span>
+
+<span class="c"># Create an NMF for the filtered data</span>
+<span class="n">a3</span> <span class="o">=</span> <span class="n">omsi_nmf</span><span class="p">()</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s">&#39;output_0&#39;</span><span class="p">]</span>  <span class="c"># Make the output of our analysis the input of the NMF</span>
+<span class="n">a3</span><span class="p">[</span><span class="s">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c"># Run our simple workflow, i.e.,: peak_finder --&gt; our_filter --&gt; nmf</span>
+<span class="n">a3</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>By default, the outputs are named and numbered using the schema <code class="docutils literal"><span class="pre">output_#</span></code>, i.e., in the above example we used <code class="docutils literal"><span class="pre">a2['output_0']</span></code> to access the output our wrapped function. To define user-defined names for the outputs of a wrapped function we can simply provide a list of strings to the input parameter <code class="docutils literal"><span class="pre">output_names</span></code> of the <code class="docutils literal"><span class="pre">analysis_generic.from_function(...)</span></code>.</p>
+</div>
+</div>
+<div class="section" id="writing-a-new-analysis-class-for-bastet-part-1-overview">
+<h2>Writing a new analysis class for BASTet &#8211; Part 1: Overview<a class="headerlink" href="#writing-a-new-analysis-class-for-bastet-part-1-overview" title="Permalink to this headline">¶</a></h2>
 <p>The OpenMSI Toolkit includes a basic template for implementing new analyses as part of OpenMSI. The template is located in <code class="docutils literal"><span class="pre">omsi.templates.omsi_analysis_template.py</span></code>. The template provides step-by-step instructions on how to implement a new analysis. Simply search top-to-bottom for EDIT_ME markers to find locations that need to be edited and what changes need to be made.</p>
 <p>The implementation of a new analysis is divided into three main steps. We here provide a brief overview of these steps. A detailed walk-through the required implementation is provided in the following sections.</p>
 <p><strong>Step 1) Basic integration of your analysis with OpenMSI (Required)</strong></p>
@@ -172,7 +392,7 @@
 <p><strong>Step 2)  Integrating your analysis with the OpenMSI web-based viewer (Recommended)</strong></p>
 <p>Once the basic integration is complete, you may want integrate your analysis fully with the OpenMSI online viewer, in order to make your analysis easily accesible to the OpenMSI user community. This step requires the implementation of the <code class="docutils literal"><span class="pre">qslice</span></code>, <code class="docutils literal"><span class="pre">qspectrum</span></code>, and <code class="docutils literal"><span class="pre">qmz</span></code> URL patterns for the analysis. This step completes the integration with the OpenMSI framework itself.</p>
 <p><strong>Step 3) Making your analysis self-sufficient (Recommended)</strong></p>
-<p>This step makes your analysis &#8220;self-sufficient&#8221; in that it allows you to execute your analysis from the command-line.</p>
+<p>This step makes your analysis &#8220;self-sufficient&#8221; in that it allows you to execute your analysis from the command-line. This step is usually very simple as we can just use BASTet&#8217;s integrated analysis driver to do the job for us.</p>
 <div class="section" id="some-important-features-of-analysis-base">
 <h3>Some important features of <code class="docutils literal"><span class="pre">analysis_base</span></code><a class="headerlink" href="#some-important-features-of-analysis-base" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal"><span class="pre">omsi.analysis.analysis_base</span></code> is the base class for all omsi analysis functionality. The class provides a large set of functionality designed to facilitate i) storage of analysis data in the omsi HDF5 file format and ii) integration of new analysis capabilities with the OpenMSI web API and the OpenMSI web-based viewer (see Viewer functions below for details), iii) support for data provenance, and iv) in combination with the <cite>omsi_analysis_driver</cite> module enable the direct execution of analysis, e.g, from the command line</p>
@@ -344,8 +564,9 @@
 </div>
 </div>
 </div>
-<div class="section" id="integrating-a-new-analysis-using-the-openmsi-analysis-template">
-<h2>Integrating a new Analysis using the OpenMSI Analysis Template<a class="headerlink" href="#integrating-a-new-analysis-using-the-openmsi-analysis-template" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="writing-a-new-analysis-class-for-bastet-part-2-analysis-template">
+<h2>Writing a new analysis class for BASTet &#8211; Part 2: Analysis Template<a class="headerlink" href="#writing-a-new-analysis-class-for-bastet-part-2-analysis-template" title="Permalink to this headline">¶</a></h2>
+<p>In this section we describe the basic development of a new analysis using the analysis template provided by BASTet.</p>
 <div class="section" id="step-1-basic-integration">
 <h3>Step 1) Basic integration<a class="headerlink" href="#step-1-basic-integration" title="Permalink to this headline">¶</a></h3>
 <p>The simple steps outlined below provide you now with full integration of your analysis with the OpenMSI file format and API and full support for OpenMSI&#8217;s data provenance capabilities. It also provides basic integration of your analysis with the OpenMSI website, in that a user will be able to browse your analysis in the online file browser. The basic integration also automatically provides full support for the <code class="docutils literal"><span class="pre">qmetadata</span></code> and <code class="docutils literal"><span class="pre">qcube</span></code> URL data access patterns, so that you can start to program against your analysis remotely. The basic integration provides limited support for the <code class="docutils literal"><span class="pre">qslice</span></code>, <code class="docutils literal"><span class="pre">qspectrum</span></code>, and <code class="docutils literal"><span class="pre">qmz</span></code> patterns, in that it automatically exposes all dependencies of the analysis that support these patterns but it does not expose the data of your analysis itself. This is part of step 2. Once you have completed the basic integation yout final analysis code should look something like this:</p>
@@ -1190,8 +1411,8 @@ rm omsi_mypeakfinder.py.bak
 </td></tr></table></div>
 </div>
 </div>
-<div class="section" id="advanced-customizing-core-features">
-<h2>Advanced: Customizing core features<a class="headerlink" href="#advanced-customizing-core-features" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="writing-a-new-analysis-class-for-bastet-part-3-customizing-core-features">
+<h2>Writing a new analysis class for BASTet &#8211; Part 3: Customizing core features<a class="headerlink" href="#writing-a-new-analysis-class-for-bastet-part-3-customizing-core-features" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="custom-data-save">
 <h3>Custom data save<a class="headerlink" href="#custom-data-save" title="Permalink to this headline">¶</a></h3>
 <p>In most cases the default data save and restore functions should be sufficient. However, the <code class="docutils literal"><span class="pre">analysis_base</span></code> API also supports implementation of custom HDF5 write. To extend the existing data write code, simple implement the following function provided by <code class="docutils literal"><span class="pre">analysis_base</span></code> .</p>
@@ -1279,223 +1500,6 @@ rm omsi_mypeakfinder.py.bak
 <h4>Customizing the recording of analysis outputs<a class="headerlink" href="#customizing-the-recording-of-analysis-outputs" title="Permalink to this headline">¶</a></h4>
 <p>Finally (i.e., right before returning analysis results), <code class="docutils literal"><span class="pre">execute(..)</span></code> uses the <code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.analysis_base.analysis_base.record_execute_analysis_outputs()</span></code> function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., <cite>self[output_name] = my_output</cite>. By overwriting <cite>record_execute_analysis_outputs(...)</cite> we can customize the recording of data outputs.</p>
 </div>
-</div>
-</div>
-<div class="section" id="wrapping-a-function-the-quick-and-dirty-way">
-<h2>Wrapping a function: The quick-and-dirty way<a class="headerlink" href="#wrapping-a-function-the-quick-and-dirty-way" title="Permalink to this headline">¶</a></h2>
-<p>Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The <a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.generic" title="omsi.analysis.generic"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic()</span></code></a> provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process.</p>
-<p>Using the <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic.from_function" title="omsi.analysis.generic.analysis_generic.from_function"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic.from_function()</span></code></a> or <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.bastet_analysis" title="omsi.analysis.generic.bastet_analysis"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.bastet_analysis()</span></code></a> decorator, we can easily construct a generic <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a> instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. Here we briefly outline the two main options to do this:</p>
-<div class="section" id="option-1-explicitly-track-specific-excutions-of-a-function">
-<h3>Option 1: Explicitly track specific excutions of a function<a class="headerlink" href="#option-1-explicitly-track-specific-excutions-of-a-function" title="Permalink to this headline">¶</a></h3>
-<p>Instead of calling our analysis function <code class="docutils literal"><span class="pre">f()</span></code> directly, we create an instance of <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic" title="omsi.analysis.generic.analysis_generic"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic()</span></code></a> via <code class="docutils literal"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">analysis_generic.from_function(f)</span></code> which we then use instead of our function. To execute our function we can now either call <code class="docutils literal"><span class="pre">g.execute(...)</span></code> as usual or treat <code class="docutils literal"><span class="pre">g</span></code> as a function and call it directly <code class="docutils literal"><span class="pre">g(...)</span></code></p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</span><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
-
-<span class="c"># Define some example function we want to wrap to track results</span>
-<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-
-<span class="c"># Create an analysis object for our function</span>
-<span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
-<span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c"># This is the same as:  g(np.arange(10))</span>
-</pre></div>
-</td></tr></table></div>
-</div>
-<div class="section" id="option-2-implicitly-track-the-last-execution-of-a-function">
-<h3>Option 2: Implicitly track the last execution of a function<a class="headerlink" href="#option-2-implicitly-track-the-last-execution-of-a-function" title="Permalink to this headline">¶</a></h3>
-<p>If we are only interested in recording the last execution of our function, then we can alternatively wrap our function directly using the <code class="docutils literal"><span class="pre">&#64;bastet_analysis</span></code> decorator. The main difference between the two approaches is that using the decorator we only record the last execution of our function, while using the explicit approach of option 1, we can create as many wrapped instances of our functions as we want and track the execution of each independently.</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</span><span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">bastet_analysis</span>
-<span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
-
-<span class="c"># Define some example function and wrap it</span>
-<span class="nd">@bastet_analysis</span>
-<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Our own sum function&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-
-<span class="c"># Execute the analysis</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">mysum</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-</pre></div>
-</td></tr></table></div>
-</div>
-<div class="section" id="example-1-defining-and-using-wrapped-functions">
-<h3>Example 1: Defining and using wrapped functions<a class="headerlink" href="#example-1-defining-and-using-wrapped-functions" title="Permalink to this headline">¶</a></h3>
-<p>The code example shown below illustrates the &#8220;wrapping&#8221; of a simple example function <code class="docutils literal"><span class="pre">mysum(a)</span></code>, which simply uses <code class="docutils literal"><span class="pre">numpy.sum</span></code> to compute the sum of objects in an array. (NOTE: We could naturally also use <code class="docutils literal"><span class="pre">numpy.sum</span></code> directly, we use <code class="docutils literal"><span class="pre">mysum(a)</span></code> mainly to illustrate that this approach also works wit functions defined in the interpreter.)</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
-</span><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
-
-<span class="c"># Define some example function we want to wrap to track results</span>
-<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-
-<span class="hll"><span class="c"># Create an analysis object for our function</span>
-</span><span class="hll"><span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
-</span>
-<span class="hll"><span class="c"># Execute the analysis</span>
-</span><span class="hll"><span class="n">res</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-</span><span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>  <span class="c"># Logging the result</span>
-
-<span class="hll"><span class="c"># Save the analysis to file</span>
-</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
-<span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">()</span>
-<span class="n">exp_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_experiment_index</span><span class="p">()</span>
-<span class="hll"><span class="n">ana_obj</span><span class="p">,</span> <span class="n">ana_index</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">create_analysis</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-</span><span class="c"># Close the file</span>
-<span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-<span class="k">del</span> <span class="n">f</span>
-
-<span class="hll"><span class="c"># Restore the analysis from file</span>
-</span><span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;autowrap_test.h5&#39;</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
-<span class="n">e</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="n">exp_index</span><span class="p">)</span>
-<span class="hll"><span class="n">a</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">get_analysis</span><span class="p">(</span><span class="n">ana_index</span><span class="p">)</span>
-</span><span class="hll"><span class="n">g2</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">restore_analysis</span><span class="p">()</span>
-</span><span class="n">res2</span> <span class="o">=</span> <span class="n">g2</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-<span class="n">log_helper</span><span class="o">.</span><span class="n">log_var</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">res2</span><span class="o">=</span><span class="n">res2</span><span class="p">)</span>  <span class="c"># Logging the result</span>
-<span class="k">if</span> <span class="n">res</span> <span class="o">==</span> <span class="n">res2</span><span class="p">:</span>
-    <span class="n">log_helper</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;CONGRATULATIONS---The results matched&quot;</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">log_helper</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;SORRY---The results did not match&quot;</span><span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-<p>When we run our script, we can see that we were able to successfully capture the
-execution of our function and recreate the analysis from file.</p>
-<div class="highlight-bash"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4</pre></div></td><td class="code"><div class="highlight"><pre>machine:dir username<span class="nv">$ </span>python autowrap_function.py
-2015-09-29 15:21:32,729 - __main__ - INFO - <span class="nv">res</span> <span class="o">=</span> 45
-2015-09-29 15:21:32,778 - __main__ - INFO - <span class="nv">res2</span> <span class="o">=</span> 45
-<span class="hll">2015-09-29 15:21:32,778 - __main__ - INFO - CONGRATULATIONS---The results matched
-</span></pre></div>
-</td></tr></table></div>
-<p>The figure below shows a view of the file generated by our wrapped function execution example shown above.</p>
-<div class="figure" id="wrap-function-result-figure">
-<a class="reference internal image-reference" href="_images/wrap_function_result.png"><img alt="Baseline performance for slice selection" src="_images/wrap_function_result.png" style="width: 747.0px; height: 872.0px;" /></a>
-</div>
-<p>Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intensities that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">omsi.analysis.findpeaks.omsi_findpeaks_global</span> <span class="kn">import</span> <span class="n">omsi_findpeaks_global</span>
-<span class="kn">from</span> <span class="nn">omsi.analysis.multivariate_stats.omsi_nmf</span> <span class="kn">import</span> <span class="n">omsi_nmf</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
-</span><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">omsi_file</span><span class="p">(</span><span class="s">&#39;/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5&#39;</span> <span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_experiment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_msidata</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="c"># Specify the analysis workflow</span>
-<span class="n">a1</span> <span class="o">=</span> <span class="n">omsi_findpeaks_global</span><span class="p">()</span>
-<span class="n">a1</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
-<span class="n">a1</span><span class="p">[</span><span class="s">&#39;mzdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">mz</span>
-
-<span class="c"># Wrap a simple function to filter all peaks with less than 10 counts</span>
-<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="n">a</span><span class="p">[</span><span class="n">a</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">a</span>
-<span class="n">a2</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<span class="n">a2</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[</span><span class="s">&#39;peak_cube&#39;</span><span class="p">]</span>    <span class="c"># Use the peak_cube from a1 as input for the filter</span>
-
-<span class="c"># Create an NMF for the filtered data</span>
-<span class="n">a3</span> <span class="o">=</span> <span class="n">omsi_nmf</span><span class="p">()</span>
-<span class="n">a3</span><span class="p">[</span><span class="s">&#39;msidata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="s">&#39;output_0&#39;</span><span class="p">]</span>  <span class="c"># Make the output of our analysis the input of the NMF</span>
-<span class="n">a3</span><span class="p">[</span><span class="s">&#39;numIter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-
-<span class="c"># Run our simple workflow, i.e.,: peak_finder --&gt; our_filter --&gt; nmf</span>
-<span class="n">a3</span><span class="o">.</span><span class="n">execute_recursive</span><span class="p">()</span>
-</pre></div>
-</td></tr></table></div>
-<p>By default, the outputs are named and numbered using the schema <code class="docutils literal"><span class="pre">output_#</span></code>, i.e., in the above example we used <code class="docutils literal"><span class="pre">a2['output_0']</span></code> to access the output our wrapped function. To define user-defined names for the outputs of a wrapped function we can simply provide a list of strings to the input parameter <code class="docutils literal"><span class="pre">output_names</span></code> of the <code class="docutils literal"><span class="pre">analysis_generic.from_function(...)</span></code>.</p>
-<p><strong>NOTE:</strong> Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.</p>
 </div>
 </div>
 </div>

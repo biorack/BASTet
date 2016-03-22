@@ -1,8 +1,188 @@
 Developing a new Analysis for BASTet
 ====================================
 
-Overview:
----------
+BASTet provides developers with two easy ways to integrate new analyses. First, the simplest and most basic solution is to wrap analysis functions using either the `@bastet_analysis` Python decorator or by explicitly wrapping a function via wrapped funct = analysis generic.from function(my function). Second, to easily share and fully integrate an analysis with BASTet, we then create a new class that inherits from BASTet’s base analysis interface class
+
+
+Wrapping a function: The quick-and-dirty way
+--------------------------------------------
+
+Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The :py:meth:`omsi.analysis.generic` provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process.
+
+Using the :py:meth:`omsi.analysis.generic.analysis_generic.from_function` or :py:meth:`omsi.analysis.generic.bastet_analysis` decorator, we can easily construct a generic :py:class:`omsi.analysis.base.analysis_base` instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. Here we briefly outline the two main options to do this.
+
+**NOTE:** Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.
+
+
+Option 1: Explicitly track specific excutions of a function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Instead of calling our analysis function ``f()`` directly, we create an instance of :py:meth:`omsi.analysis.generic.analysis_generic` via ``g = analysis_generic.from_function(f)`` which we then use instead of our function. To execute our function we can now either call ``g.execute(...)`` as usual or treat ``g`` as a function and call it directly ``g(...)``
+
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    import numpy as np
+    from omsi.analysis.generic import analysis_generic
+
+    # Define some example function we want to wrap to track results
+    def mysum(a):
+        return np.sum(a)
+
+    # Create an analysis object for our function
+    g = analysis_generic.from_function(mysum)
+    g.execute(np.arange(10))  # This is the same as:  g(np.arange(10))
+
+
+See :py:meth:`omsi.analysis.generic.analysis_generic.from_function` for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.
+
+
+Option 2: Implicitly track the last execution of a function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If we are only interested in recording the last execution of our function, then we can alternatively wrap our function directly using the ``@bastet_analysis`` decorator. The main difference between the two approaches is that using the decorator we only record the last execution of our function, while using the explicit approach of option 1, we can create as many wrapped instances of our functions as we want and track the execution of each independently.
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    import numpy as np
+    from omsi.shared.log import log_helper
+    log_helper.set_log_level('DEBUG')
+    from omsi.analysis.generic import bastet_analysis
+    from omsi.dataformat.omsi_file.main_file import omsi_file
+
+    # Define some example function and wrap it
+    @bastet_analysis
+    def mysum(a):
+        """Our own sum function"""
+        return np.sum(a)
+
+    # Execute the analysis
+    res = mysum(a=np.arange(10))
+
+
+See :py:meth:`omsi.analysis.generic.bastet_analysis` for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.
+
+
+Example 1: Defining and using wrapped functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The code example shown below illustrates the "wrapping" of a simple example function ``mysum(a)``, which simply uses ``numpy.sum`` to compute the sum of objects in an array. (NOTE: We could naturally also use ``numpy.sum`` directly, we use ``mysum(a)`` mainly to illustrate that this approach also works wit functions defined in the interpreter.)
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 4,11,12,14,15,18,22,27,30,31
+
+    import numpy as np
+    from omsi.shared.log import log_helper
+    log_helper.set_log_level('INFO')
+    from omsi.analysis.generic import analysis_generic
+    from omsi.dataformat.omsi_file.main_file import omsi_file
+
+    # Define some example function we want to wrap to track results
+    def mysum(a):
+        return np.sum(a)
+
+    # Create an analysis object for our function
+    g = analysis_generic.from_function(mysum)
+
+    # Execute the analysis
+    res = g.execute(a=np.arange(10))
+    log_helper.log_var(__name__, res=res)  # Logging the result
+
+    # Save the analysis to file
+    f = omsi_file('autowrap_test.h5', 'a')
+    e = f.create_experiment()
+    exp_index = e.get_experiment_index()
+    ana_obj, ana_index = e.create_analysis(g)
+    # Close the file
+    f.flush()
+    del f
+
+    # Restore the analysis from file
+    f = omsi_file('autowrap_test.h5', 'a')
+    e = f.get_experiment(exp_index)
+    a = e.get_analysis(ana_index)
+    g2 = a.restore_analysis()
+    res2 = g2.execute()
+    log_helper.log_var(__name__, res2=res2)  # Logging the result
+    if res == res2:
+        log_helper.info(__name__, "CONGRATULATIONS---The results matched")
+    else:
+        log_helper.error(__name__, "SORRY---The results did not match")
+
+
+When we run our script, we can see that we were able to successfully capture the
+execution of our function and recreate the analysis from file.
+
+.. code-block:: bash
+    :linenos:
+    :emphasize-lines: 4
+
+    machine:dir username$ python autowrap_function.py
+    2015-09-29 15:21:32,729 - __main__ - INFO - res = 45
+    2015-09-29 15:21:32,778 - __main__ - INFO - res2 = 45
+    2015-09-29 15:21:32,778 - __main__ - INFO - CONGRATULATIONS---The results matched
+
+The figure below shows a view of the file generated by our wrapped function execution example shown above.
+
+
+.. _wrap_function_result_figure:
+
+.. figure:: _static/wrap_function_result.*
+   :scale: 50 %
+   :alt: Baseline performance for slice selection
+
+Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intensities that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.
+
+
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 4,5
+
+    from omsi.dataformat.omsi_file import *
+    from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
+    from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
+    from omsi.analysis.generic import analysis_generic
+    import numpy as np
+
+    f = omsi_file('/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5' , 'r')
+    d = f.get_experiment(0).get_msidata(0)
+
+    # Specify the analysis workflow
+    a1 = omsi_findpeaks_global()
+    a1['msidata'] = d
+    a1['mzdata'] = d.mz
+
+    # Wrap a simple function to filter all peaks with less than 10 counts
+    def f(a):
+        a[a<10] = 0
+        return a
+    a2 = analysis_generic.from_function(f)
+    a2['a'] = a1['peak_cube']    # Use the peak_cube from a1 as input for the filter
+
+    # Create an NMF for the filtered data
+    a3 = omsi_nmf()
+    a3['msidata'] = a2['output_0']  # Make the output of our analysis the input of the NMF
+    a3['numIter'] = 2
+
+    # Run our simple workflow, i.e.,: peak_finder --> our_filter --> nmf
+    a3.execute_recursive()
+
+
+By default, the outputs are named and numbered using the schema ``output_#``, i.e., in the above example we used ``a2['output_0']`` to access the output our wrapped function. To define user-defined names for the outputs of a wrapped function we can simply provide a list of strings to the input parameter ``output_names`` of the ``analysis_generic.from_function(...)``.
+
+
+
+
+
+
+
+Writing a new analysis class for BASTet -- Part 1: Overview
+------------------------------------------------------------
 
 The OpenMSI Toolkit includes a basic template for implementing new analyses as part of OpenMSI. The template is located in ``omsi.templates.omsi_analysis_template.py``. The template provides step-by-step instructions on how to implement a new analysis. Simply search top-to-bottom for EDIT_ME markers to find locations that need to be edited and what changes need to be made.
 
@@ -23,7 +203,7 @@ Once the basic integration is complete, you may want integrate your analysis ful
 
 **Step 3) Making your analysis self-sufficient (Recommended)**
 
-This step makes your analysis "self-sufficient" in that it allows you to execute your analysis from the command-line.
+This step makes your analysis "self-sufficient" in that it allows you to execute your analysis from the command-line. This step is usually very simple as we can just use BASTet's integrated analysis driver to do the job for us.
 
 
 Some important features of ``analysis_base``
@@ -155,9 +335,10 @@ Any analysis based on the infrastructure provided by ``analysis_base`` is fully 
 
 
 
+Writing a new analysis class for BASTet -- Part 2: Analysis Template
+--------------------------------------------------------------------
 
-Integrating a new Analysis using the OpenMSI Analysis Template
---------------------------------------------------------------
+In this section we describe the basic development of a new analysis using the analysis template provided by BASTet.
 
 Step 1) Basic integration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -686,8 +867,8 @@ The command line driver also provides us a well-formated help based on the our p
 
 
 
-Advanced: Customizing core features
------------------------------------
+Writing a new analysis class for BASTet -- Part 3: Customizing core features
+----------------------------------------------------------------------------
 
 Custom data save
 ^^^^^^^^^^^^^^^^
@@ -760,170 +941,4 @@ The analysis is completely implemented in the :py:meth:`omsi.analysis.analysis_b
 Customizing the recording of analysis outputs
 """""""""""""""""""""""""""""""""""""""""""""
 Finally (i.e., right before returning analysis results), ``execute(..)`` uses the :py:meth:`omsi.analysis.analysis_base.analysis_base.record_execute_analysis_outputs` function to save all analysis outputs. Analysis outputs are stored in the self.__data_list variable. We can save analysis outputs simply by slicing and assignment, e.g., `self[output_name] = my_output`. By overwriting `record_execute_analysis_outputs(...)` we can customize the recording of data outputs.
-
-
-Wrapping a function: The quick-and-dirty way
---------------------------------------------
-
-Sometimes developers just want to debug some analysis function or experiment with different variants of a code. At the same time, we want to be able to track the results of these kind of experiments in a simple fashion. The :py:meth:`omsi.analysis.generic` provides us with such a quick-and-dirty solution. We say quick-and-dirty because it sacrifices some generality and features in favor for a very simple process.
-
-Using the :py:meth:`omsi.analysis.generic.analysis_generic.from_function` or :py:meth:`omsi.analysis.generic.bastet_analysis` decorator, we can easily construct a generic :py:class:`omsi.analysis.base.analysis_base` instance container object for a given function. We can then use this container object to execute our function, while tracking its provenance as well as save the results to file as we would with any other analysis object. This approach allows us to easily track, record, safe, share and reproduce code experiments with only minimal extra effort needed. Here we briefly outline the two main options to do this:
-
-Option 1: Explicitly track specific excutions of a function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Instead of calling our analysis function ``f()`` directly, we create an instance of :py:meth:`omsi.analysis.generic.analysis_generic` via ``g = analysis_generic.from_function(f)`` which we then use instead of our function. To execute our function we can now either call ``g.execute(...)`` as usual or treat ``g`` as a function and call it directly ``g(...)``
-
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 1
-
-    import numpy as np
-    from omsi.analysis.generic import analysis_generic
-
-    # Define some example function we want to wrap to track results
-    def mysum(a):
-        return np.sum(a)
-
-    # Create an analysis object for our function
-    g = analysis_generic.from_function(mysum)
-    g.execute(np.arange(10))  # This is the same as:  g(np.arange(10))
-
-Option 2: Implicitly track the last execution of a function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If we are only interested in recording the last execution of our function, then we can alternatively wrap our function directly using the ``@bastet_analysis`` decorator. The main difference between the two approaches is that using the decorator we only record the last execution of our function, while using the explicit approach of option 1, we can create as many wrapped instances of our functions as we want and track the execution of each independently.
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 1
-
-    import numpy as np
-    from omsi.shared.log import log_helper
-    log_helper.set_log_level('DEBUG')
-    from omsi.analysis.generic import bastet_analysis
-    from omsi.dataformat.omsi_file.main_file import omsi_file
-
-    # Define some example function and wrap it
-    @bastet_analysis
-    def mysum(a):
-        """Our own sum function"""
-        return np.sum(a)
-
-    # Execute the analysis
-    res = mysum(a=np.arange(10))
-
-
-Example 1: Defining and using wrapped functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The code example shown below illustrates the "wrapping" of a simple example function ``mysum(a)``, which simply uses ``numpy.sum`` to compute the sum of objects in an array. (NOTE: We could naturally also use ``numpy.sum`` directly, we use ``mysum(a)`` mainly to illustrate that this approach also works wit functions defined in the interpreter.)
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 4,11,12,14,15,18,22,27,30,31
-
-    import numpy as np
-    from omsi.shared.log import log_helper
-    log_helper.set_log_level('INFO')
-    from omsi.analysis.generic import analysis_generic
-    from omsi.dataformat.omsi_file.main_file import omsi_file
-
-    # Define some example function we want to wrap to track results
-    def mysum(a):
-        return np.sum(a)
-
-    # Create an analysis object for our function
-    g = analysis_generic.from_function(mysum)
-
-    # Execute the analysis
-    res = g.execute(a=np.arange(10))
-    log_helper.log_var(__name__, res=res)  # Logging the result
-
-    # Save the analysis to file
-    f = omsi_file('autowrap_test.h5', 'a')
-    e = f.create_experiment()
-    exp_index = e.get_experiment_index()
-    ana_obj, ana_index = e.create_analysis(g)
-    # Close the file
-    f.flush()
-    del f
-
-    # Restore the analysis from file
-    f = omsi_file('autowrap_test.h5', 'a')
-    e = f.get_experiment(exp_index)
-    a = e.get_analysis(ana_index)
-    g2 = a.restore_analysis()
-    res2 = g2.execute()
-    log_helper.log_var(__name__, res2=res2)  # Logging the result
-    if res == res2:
-        log_helper.info(__name__, "CONGRATULATIONS---The results matched")
-    else:
-        log_helper.error(__name__, "SORRY---The results did not match")
-
-
-When we run our script, we can see that we were able to successfully capture the
-execution of our function and recreate the analysis from file.
-
-.. code-block:: bash
-    :linenos:
-    :emphasize-lines: 4
-
-    machine:dir username$ python autowrap_function.py
-    2015-09-29 15:21:32,729 - __main__ - INFO - res = 45
-    2015-09-29 15:21:32,778 - __main__ - INFO - res2 = 45
-    2015-09-29 15:21:32,778 - __main__ - INFO - CONGRATULATIONS---The results matched
-
-The figure below shows a view of the file generated by our wrapped function execution example shown above.
-
-
-.. _wrap_function_result_figure:
-
-.. figure:: _static/wrap_function_result.*
-   :scale: 50 %
-   :alt: Baseline performance for slice selection
-
-Note, we can use the wrapped function objects as usual in an analysis workflow to combine our functions with other analyses. For example, the simple example shown below shows how we can quickly define a simple filter to set all intensities that are less than 10 to a value of 0 before executing an analysis. We here first execute global peak finding to reduce the data, than apply a simple wrapped filter function to filter the data values, and then compute NMF on the filtered data.
-
-
-.. code-block:: python
-    :linenos:
-    :emphasize-lines: 4,5
-
-    from omsi.dataformat.omsi_file import *
-    from omsi.analysis.findpeaks.omsi_findpeaks_global import omsi_findpeaks_global
-    from omsi.analysis.multivariate_stats.omsi_nmf import omsi_nmf
-    from omsi.analysis.generic import analysis_generic
-    import numpy as np
-
-    f = omsi_file('/Users/oruebel/Devel/openmsi-data/msidata/20120711_Brain.h5' , 'r')
-    d = f.get_experiment(0).get_msidata(0)
-
-    # Specify the analysis workflow
-    a1 = omsi_findpeaks_global()
-    a1['msidata'] = d
-    a1['mzdata'] = d.mz
-
-    # Wrap a simple function to filter all peaks with less than 10 counts
-    def f(a):
-        a[a<10] = 0
-        return a
-    a2 = analysis_generic.from_function(f)
-    a2['a'] = a1['peak_cube']    # Use the peak_cube from a1 as input for the filter
-
-    # Create an NMF for the filtered data
-    a3 = omsi_nmf()
-    a3['msidata'] = a2['output_0']  # Make the output of our analysis the input of the NMF
-    a3['numIter'] = 2
-
-    # Run our simple workflow, i.e.,: peak_finder --> our_filter --> nmf
-    a3.execute_recursive()
-
-
-By default, the outputs are named and numbered using the schema ``output_#``, i.e., in the above example we used ``a2['output_0']`` to access the output our wrapped function. To define user-defined names for the outputs of a wrapped function we can simply provide a list of strings to the input parameter ``output_names`` of the ``analysis_generic.from_function(...)``.
-
-
-**NOTE:** Wrapping functions directly is not recommended for production workflows but is intended for development and debugging purposes only. This mechanism relies on that the library does the right thing in automatically determining input parameters, outputs, and their types and that we can handle all those types in the end-to-end process, from definition to storage. We do our best to make this mechanism work with a broad set of cases but we do not guarantee that the simple wrapping always work.
-
 
