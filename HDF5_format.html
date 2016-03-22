@@ -78,10 +78,10 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#overview">Overview:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#integrating-a-new-analysis-using-the-openmsi-analysis-template">Integrating a new Analysis using the OpenMSI Analysis Template</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#advanced-customizing-core-features">Advanced: Customizing core features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#wrapping-a-function-the-quick-and-dirty-way">Wrapping a function: The quick-and-dirty way</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-1-overview">Writing a new analysis class for BASTet &#8211; Part 1: Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-2-analysis-template">Writing a new analysis class for BASTet &#8211; Part 2: Analysis Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_analysis.html#writing-a-new-analysis-class-for-bastet-part-3-customizing-core-features">Writing a new analysis class for BASTet &#8211; Part 3: Customizing core features</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a><ul>
@@ -229,6 +229,8 @@
 <li><code class="docutils literal"><span class="pre">/entry_#/analysis_#/dependency/.../selection</span></code> <em>(String dataset)</em> : Optional Numpy selection string, indicating the subset of the data used.</li>
 </ul>
 </div></blockquote>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">/entry_#/analysis_#/runinfo/</span></code> <em>(HDF5 Group)</em> : Group containing all runtime information data, e.g., start, stop and execution times, system and OS metadata etc.</p>
 </li>
 </ul>
 </li>

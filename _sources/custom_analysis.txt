@@ -22,7 +22,7 @@ Instead of calling our analysis function ``f()`` directly, we create an instance
 
 .. code-block:: python
     :linenos:
-    :emphasize-lines: 1
+    :emphasize-lines: 2,10,11
 
     import numpy as np
     from omsi.analysis.generic import analysis_generic
@@ -33,7 +33,8 @@ Instead of calling our analysis function ``f()`` directly, we create an instance
 
     # Create an analysis object for our function
     g = analysis_generic.from_function(mysum)
-    g.execute(np.arange(10))  # This is the same as:  g(np.arange(10))
+    g['a'] = np.arange(10)   # We can set all parameters prior to executing the function
+    g.execute()  # This is the same as:  g(np.arange(10))
 
 
 See :py:meth:`omsi.analysis.generic.analysis_generic.from_function` for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.
@@ -46,13 +47,12 @@ If we are only interested in recording the last execution of our function, then 
 
 .. code-block:: python
     :linenos:
-    :emphasize-lines: 1
+    :emphasize-lines: 4,7,17
 
     import numpy as np
     from omsi.shared.log import log_helper
     log_helper.set_log_level('DEBUG')
     from omsi.analysis.generic import bastet_analysis
-    from omsi.dataformat.omsi_file.main_file import omsi_file
 
     # Define some example function and wrap it
     @bastet_analysis
@@ -60,8 +60,12 @@ If we are only interested in recording the last execution of our function, then 
         """Our own sum function"""
         return np.sum(a)
 
+    # mysum['a'] = np.arange(10)
+    # As with the any wrapped function we can delay execution and set
+    # parameters before we actuall run the analysis
+
     # Execute the analysis
-    res = mysum(a=np.arange(10))
+    res = mysum(a=np.arange(10))  # Or we can set parameters and execute in the same call
 
 
 See :py:meth:`omsi.analysis.generic.bastet_analysis` for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.

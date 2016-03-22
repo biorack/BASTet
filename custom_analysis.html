@@ -171,17 +171,19 @@
  7
  8
  9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</span><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
-
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">analysis_generic</span>
+</span>
 <span class="c"># Define some example function we want to wrap to track results</span>
 <span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
 <span class="c"># Create an analysis object for our function</span>
 <span class="n">g</span> <span class="o">=</span> <span class="n">analysis_generic</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">mysum</span><span class="p">)</span>
-<span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c"># This is the same as:  g(np.arange(10))</span>
-</pre></div>
+<span class="hll"><span class="n">g</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>   <span class="c"># We can set all parameters prior to executing the function</span>
+</span><span class="hll"><span class="n">g</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>  <span class="c"># This is the same as:  g(np.arange(10))</span>
+</span></pre></div>
 </td></tr></table></div>
 <p>See <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.analysis_generic.from_function" title="omsi.analysis.generic.analysis_generic.from_function"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.analysis_generic.from_function()</span></code></a> for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.</p>
 </div>
@@ -201,21 +203,27 @@
 11
 12
 13
-14</pre></div></td><td class="code"><div class="highlight"><pre><span class="hll"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</span><span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">omsi.shared.log</span> <span class="kn">import</span> <span class="n">log_helper</span>
 <span class="n">log_helper</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">bastet_analysis</span>
-<span class="kn">from</span> <span class="nn">omsi.dataformat.omsi_file.main_file</span> <span class="kn">import</span> <span class="n">omsi_file</span>
-
+<span class="hll"><span class="kn">from</span> <span class="nn">omsi.analysis.generic</span> <span class="kn">import</span> <span class="n">bastet_analysis</span>
+</span>
 <span class="c"># Define some example function and wrap it</span>
-<span class="nd">@bastet_analysis</span>
-<span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="hll"><span class="nd">@bastet_analysis</span>
+</span><span class="k">def</span> <span class="nf">mysum</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Our own sum function&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
+<span class="c"># mysum[&#39;a&#39;] = np.arange(10)</span>
+<span class="c"># As with the any wrapped function we can delay execution and set</span>
+<span class="c"># parameters before we actuall run the analysis</span>
+
 <span class="c"># Execute the analysis</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">mysum</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-</pre></div>
+<span class="hll"><span class="n">res</span> <span class="o">=</span> <span class="n">mysum</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>  <span class="c"># Or we can set parameters and execute in the same call</span>
+</span></pre></div>
 </td></tr></table></div>
 <p>See <a class="reference internal" href="omsi.analysis.html#omsi.analysis.generic.bastet_analysis" title="omsi.analysis.generic.bastet_analysis"><code class="xref py py-meth docutils literal"><span class="pre">omsi.analysis.generic.bastet_analysis()</span></code></a> for further details on additional optional inputs of the wrapping, e.g., to specify additional information about inputs and outputs.</p>
 </div>
