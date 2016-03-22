@@ -12,11 +12,11 @@ The online documentation for BASTet is available at:
 
 ## Developer Notes
 
- * Developer documentation of the main `omsi` package see [https://oruebel.github.io/BASTet/omsi.html](here)
+ * Developer documentation of the main `omsi` package see [here](https://oruebel.github.io/BASTet/omsi.html)
  * Building the online documentation see [here](https://oruebel.github.io/BASTet/developer_notes.html#building-the-online-documentation)
- * Developing a new analysis see [https://oruebel.github.io/BASTet/custom_analysis.html](here)
- * Defining and executing workflows see [https://oruebel.github.io/BASTet/basic_workflows.html](here)
- * High-level description of the OpenMSI data format see [https://oruebel.github.io/BASTet/HDF5_format.html](here)
+ * Developing a new analysis see [here](https://oruebel.github.io/BASTet/custom_analysis.html)
+ * Defining and executing workflows see [here](https://oruebel.github.io/BASTet/basic_workflows.html)
+ * High-level description of the OpenMSI data format see [here](https://oruebel.github.io/BASTet/HDF5_format.html)
 
 ## Licence
 
