@@ -1,0 +1,1940 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>shared Package &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="up" title="omsi Package" href="omsi.html"/>
+        <link rel="next" title="workflow Package" href="omsi.workflow.html"/>
+        <link rel="prev" title="metadata Package" href="omsi.datastructures.metadata.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="omsi.html">omsi Package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.html">analysis Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">shared Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-omsi.shared.data_selection"><code class="docutils literal"><span class="pre">data_selection</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-omsi.shared.omsi_web_helper"><code class="docutils literal"><span class="pre">omsi_web_helper</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-omsi.shared.spectrum_layout"><code class="docutils literal"><span class="pre">spectrum_layout</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-omsi.shared.log"><code class="docutils literal"><span class="pre">log</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-omsi.shared.mpi_helper"><code class="docutils literal"><span class="pre">mpi_helper</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.html">workflow Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="omsi.html">omsi Package</a> &raquo;</li>
+      
+    <li>shared Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/omsi.shared.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="shared-package">
+<h1>shared Package<a class="headerlink" href="#shared-package" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared</span></code></td>
+<td>Package used to implement shared functionality and helper functions.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#module-omsi.shared.data_selection" title="omsi.shared.data_selection"><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.data_selection</span></code></a></td>
+<td>Module for defining and processing data selections.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#module-omsi.shared.log" title="omsi.shared.log"><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.log</span></code></a></td>
+<td>Module providing functionality for logging based on the python logging module.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#module-omsi.shared.mpi_helper" title="omsi.shared.mpi_helper"><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.mpi_helper</span></code></a></td>
+<td>Module used to ease the use of MPI and distributed parallel implementations using MPI</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#module-omsi.shared.omsi_web_helper" title="omsi.shared.omsi_web_helper"><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.omsi_web_helper</span></code></a></td>
+<td>Module with helper functions for interactions with the OpenMSI web infrastructure, e.g.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#module-omsi.shared.spectrum_layout" title="omsi.shared.spectrum_layout"><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.spectrum_layout</span></code></a></td>
+<td>This module provides capabilities for computing different layouts for spectra</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.third_party</span></code></td>
+<td>Package containing shared third-party code modules included here to reduce the need for external dependencies when only small parts of external code are used.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">omsi.shared.thirs_party.cloudpickle</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="module-omsi.shared.data_selection">
+<span id="data-selection-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">data_selection</span></code> Module<a class="headerlink" href="#module-omsi.shared.data_selection" title="Permalink to this headline">¶</a></h2>
+<p>Module for defining and processing data selections. This includes the definition of
+selections using strings as well as transformation and reduction of data.</p>
+<dl class="docutils">
+<dt>TODO: We may want to expose some of the following numpy functions currently not yet</dt>
+<dd><blockquote class="first">
+<div>supported through the transform and reduce data operations:</div></blockquote>
+<ul class="last simple">
+<li>array2string</li>
+<li>array_equal</li>
+<li>array_equiv</li>
+<li>array_repr</li>
+<li>array_split</li>
+<li>array_str</li>
+<li>asanyarray</li>
+<li>asarray</li>
+<li>asarray_chkfinite</li>
+<li>ascontiguousarray</li>
+<li>asfarray</li>
+<li>asfortranarray</li>
+<li>asmatrix</li>
+<li>asscalar</li>
+<li>atleast_1d</li>
+<li>atleast_2d</li>
+<li>atleast_3d</li>
+<li>binary_repr</li>
+<li>convolve</li>
+<li>conjugate</li>
+<li>cross</li>
+<li>dot</li>
+<li>extract</li>
+<li>fft.*</li>
+<li>histogram, histogram2D, histogramdd</li>
+<li>kron</li>
+<li>linalg.*</li>
+<li>swapaxes(a, axis1, axis2)</li>
+<li>transpose</li>
+</ul>
+</dd>
+</dl>
+<p>#Simple data transformation and reduction example
+from omsi.shared.omsi_data_selection import *
+import numpy as np
+import json
+t = [ {&#8216;transformation&#8217;:&#8217;threshold&#8217;, &#8216;threshold&#8217;:60} , {&#8216;reduction&#8217;:&#8217;max&#8217;, &#8216;axis&#8217;:2} ]
+tj = json.dumps(t)
+tj
+a = np.arange(125).reshape((5,5,5))
+apro = transform_and_reduce_data(data=a, operations=tj, http_error=True)
+apro</p>
+<p>#Another simple example
+from omsi.shared.omsi_data_selection import *
+import numpy as np
+import json
+a = np.arange(10)+5
+print a
+# 1) substract minimum
+# 2) divide by the maximum value with the maximum value converted to float
+# NOTE: The conversion to float is to avoid division of integers, i.e.,
+#       5/10 = 0, whereas 5/float(10) = 0.5
+# NOTE: The specification of &#8216;x1&#8217;:&#8217;data&#8217; can be omitted as this is the default.
+#       &#8216;x1&#8217;:&#8217;data&#8217; simply explicitly specifies that the input data should be
+#       assigned to the first operand of the arithmetic operation.
+t = [{&#8216;transformation&#8217;:&#8217;dualDataTransform&#8217; , &#8216;operation&#8217;:&#8217;subtract&#8217;, &#8216;x1&#8217;:&#8217;data&#8217;, &#8216;x2&#8217;:[{&#8216;reduction&#8217;:&#8217;min&#8217;}]} ,</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{&#8216;transformation&#8217;:&#8217;dualDataTransform&#8217; , &#8216;operation&#8217;:&#8217;divide&#8217;  , &#8216;x1&#8217;:&#8217;data&#8217;, &#8216;x2&#8217;:[{&#8216;reduction&#8217;:&#8217;max&#8217;} ,</dt>
+<dd>{&#8216;transformation&#8217;:&#8217;astype&#8217;, &#8216;dtype&#8217;:&#8217;float&#8217;} ]}]</dd>
+</dl>
+</div></blockquote>
+<p>b = transform_and_reduce_data(data=a, operations=t)
+print b
+t = [{&#8216;transformation&#8217;:&#8217;threshold&#8217; , &#8216;threshold&#8217;:[{&#8216;reduction&#8217;:&#8217;median&#8217;}]}]
+print t
+c = transform_and_reduce_data(data=a, operations=t)
+print c</p>
+<p>#Construct a JSON description of a transformation/reduction
+from omsi.shared.omsi_data_selection import *
+#Construct the different pieces of the transformation and reduction pipeline
+#1) Compute the maximum data value and convert it to float
+#1.1) Compute the maximum value
+max_value = construct_reduce_dict( reduction_type=&#8217;max&#8217; , axis=None)
+#1.2) Convert data to float
+value_as_float = construct_transform_dict( trans_type=&#8217;astype&#8217; , dtype=&#8217;float&#8217; )
+#1.3) Merge the two steps to compute the maximum data value as float
+max_value_as_float = construct_transform_reduce_list( max_value, value_as_float )
+#2) Normalize the data by dividing by the maximum value
+divide_by_max_value = construct_transform_dict( trans_type=&#8217;dualDataTransform&#8217;,</p>
+<blockquote>
+<div>operation=&#8217;divide&#8217; , axes=None , x2=max_value_as_float)</div></blockquote>
+<p>#3) Project along the last axis (i.e., the mz axis) to compute a maximum project image
+max_projection = construct_reduce_dict( reduction_type=&#8217;max&#8217; , axis=-1)
+#4) Merge the different steps and construct the json string
+json_string = transform_reduce_description_to_json( divide_by_max_value , max_projection )
+#Just copy the result of the following print statement as your JSON description
+print json_string</p>
+<dl class="function">
+<dt id="omsi.shared.data_selection.check_selection_string">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">check_selection_string</code><span class="sig-paren">(</span><em>selection_string</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.check_selection_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the given selection string is valid, and indicate which type of selection
+the string defined. Checking the selection string is meant as a safeguard to prevent
+attackers from being able to insert malicious code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>selection_string</strong> &#8211; String given by the user with the desired selection</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">String indicating the type of selection as defined in selection_type:<ul class="simple">
+<li>&#8216;indexlist&#8217; : Selection of the form [1,2,3]</li>
+<li>&#8216;all&#8217; : Selection of the form &#8216;:&#8217;</li>
+<li>&#8216;range: Selection of the form &#8216;a:b&#8217;</li>
+<li>&#8216;index: A single index selection, e.g., &#8216;1&#8217;</li>
+<li>&#8216;invalid&#8217;: An unsupported selection</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.construct_reduce_dict">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">construct_reduce_dict</code><span class="sig-paren">(</span><em>reduction_type</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.construct_reduce_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to construct reduction dictionary.</p>
+<p>Required Keyword arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reduction_type</strong> &#8211; The reduction type to be used.</td>
+</tr>
+</tbody>
+</table>
+<p>Optional Keyword arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axis</strong> &#8211; Some reduction functions support the axis parameters,
+describing along which axis the reduction should be performed.</li>
+<li><strong>x1</strong> &#8211; By default the reductions are performed on the output of the
+previous data operation (x1=&#8217;data&#8217;). We may reference the output
+of, e.g., the fifth data operation by setting x1=&#8217;data5&#8217;. x1
+itself may also specify a separate data transformation and
+reduction pipeline that operates on &#8216;data&#8217;.</li>
+<li><strong>min_dim</strong> &#8211; Minimum number of dimensions the input data should have in
+order for the reduction should be applied.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary with the description of the reduction operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.construct_transform_dict">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">construct_transform_dict</code><span class="sig-paren">(</span><em>trans_type</em>, <em>axes=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.construct_transform_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to construct a dictionary describing a data transformation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trans_type</strong> &#8211; The transformation type to be used. See transformation_type dict.</li>
+<li><strong>axes</strong> &#8211; The axes along which the data should be split. Default is None.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword parameters for the transformation functions.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dictionary with the description of the transformation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">KeyError is raised in case that a parameter is missing.
+ValueError is raised in case that a given parameter value
+is invalid.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.construct_transform_reduce_list">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">construct_transform_reduce_list</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.construct_transform_reduce_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge a series of transformations and reductions into a single
+list describing a pipeline of transformation and reduction
+operations to be performed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Args:</th><td class="field-body">Ordered series of dictionaries describing transformation
+and reduction operations.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of all transformation and reduction operations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.evaluate_transform_parameter">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">evaluate_transform_parameter</code><span class="sig-paren">(</span><em>parameter</em>, <em>data=None</em>, <em>secondary_data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.evaluate_transform_parameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the given query parameter. This function is used to
+enable the use of data transformation and reductions as part
+of transformation parameters. E.g., a user may want to substract
+the minimum, or divide by the maximum etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameter</strong> &#8211; The parameter to be evaluated. This may be
+a JSON string or list/dictionary-based description of a
+data transformation. Or any other valid data parameter.
+If the parameter describes as data reduction or transformation
+then the transformation will be evaluated and the result
+is returned, otherwise the parameter itself is returned.</li>
+<li><strong>data</strong> &#8211; The input numpy array that should be transformed.</li>
+<li><strong>secondary_data</strong> &#8211; Other data from previous data iterations a user may reference.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The evaluated parameter result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.is_transform_or_reduce">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">is_transform_or_reduce</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.is_transform_or_reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the given parameter defines a description of a
+data transformation or data reduction</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> (<em>JSON string, dict or list of dicts with transformation parameter.</em>) &#8211; The parameter to be checked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.json_to_transform_reduce_description">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">json_to_transform_reduce_description</code><span class="sig-paren">(</span><em>json_string</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.json_to_transform_reduce_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the json string to the transformation/reduction dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_string</strong> &#8211; The json string to be converted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Python list or dict with the description</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.perform_reduction">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">perform_reduction</code><span class="sig-paren">(</span><em>data</em>, <em>reduction</em>, <em>secondary_data</em>, <em>min_dim=None</em>, <em>http_error=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.perform_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used reduce the data of a given numpy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The input numpy array that should be reduced</li>
+<li><strong>reduction</strong> (<em>String</em>) &#8211; Data reduction to be applied to the input data.
+Reduction operations are defined as strings indicating
+the numpy function to be used for reduction. Valid
+reduction operations include e.g.: mins, max, mean,
+median, std, var etc.</li>
+<li><strong>axis</strong> &#8211; The axis along which the reduction should be applied</li>
+<li><strong>secondary_data</strong> &#8211; Other data from previous data iterations a user may reference.</li>
+<li><strong>http_error</strong> &#8211; Define which type of error message the function should return.
+If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.</li>
+<li><strong>min_dim</strong> &#8211; Minimum number of dimensions the input data must have in order for the reduction to be applied.</li>
+<li><strong>kwargs</strong> &#8211; Additional optional keyword arguments.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Reduced numpy data array or in case of error None or HttpResonse with a
+description of the error that occurred (see http_error option).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="omsi.shared.data_selection.reduction_allowed_numpy_function">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">reduction_allowed_numpy_function</code><em class="property"> = ['all', 'alltrue', 'amax', 'amin', 'angle', 'any', 'append', 'argmax', 'argmin', 'argwhereaverage', 'bincount', 'corrcoef', 'cumprod', 'cumproduct', 'cumsum', 'count_nonzero', 'diag', 'diag_indices', 'diagflat', 'diagonal', 'diff', 'max', 'min', 'median', 'mean', 'percentile', 'product', 'prod', 'ptp', 'select_values', 'squeeze', 'std', 'var', 'transpose', 'sum']</em><a class="headerlink" href="#omsi.shared.data_selection.reduction_allowed_numpy_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of allowed numpy data reduction operations.
+Reduction operations are any single data operations that
+may change the shape of the data.
+NOTE: Some operations may have additional optional or required keyword arguments.
+HELP: For full documentation of the different functions see the numpy documentation.</p>
+<p>Additional input parameters are often:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>&#8216;x1&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">The data operand specifying the data the reduction should be performed on. \</span></dt>
+<dd><p class="first last">The input data will be used by default if x1 is not specified. You may also specify &#8216;data&#8217; to explicitly indicate that the input data should be assigned to x1. You may specify data0 to indicate that the output of another data operation should be used. Note, data0 here refers to the input to the full data operation pipeline. Data from other parts of the pipeline, are then indexed using 1-based indices. E.g,. to access the output of the first data operation set x1=&#8217;data0&#8217;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;axis&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Integer indicating the axis along which the data should be reduced. \</span></dt>
+<dd><p class="first last">The default behavior, if axis is not specified, depends on the behavior of the corresponding numpy function. However, in most cases (if not all cases) the data operation will be applied to the full input data if no axis is specified.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;min_dim&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Integer specifying the minimum number of data dimensions the input data \</span></dt>
+<dd><p class="first last">must have in order for the reduction operation to be applied.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Here the list of allowed data reduction operations.</p>
+<blockquote>
+<div><ul class="simple">
+<li>&#8216;all&#8217;       : out = numpy.all(data, axis)</li>
+<li>&#8216;amax&#8217;      : out = numpy.amax(data, axis)</li>
+<li>&#8216;amin&#8217;      : out = numpy.amin(data, axis)</li>
+<li>&#8216;alltrue&#8217;   : out = numpy.alltrue(data, axis)</li>
+<li>&#8216;angle&#8217;     : out = numpy.angle(z, deg)</li>
+<li>&#8216;any&#8217;       : out = numpy.any(data, axis)</li>
+<li>&#8216;append&#8217;    : out = numpy.append(data, values, axis)</li>
+<li>&#8216;argmax&#8217;    : out = numpy.argmax(data, axis)</li>
+<li>&#8216;argmin&#8217;    : out = numpy.argmin(data, axis)</li>
+<li>&#8216;argwhere&#8217;  : out = numpy.argwhere(data)</li>
+<li>&#8216;average&#8217;   : out = numpy.average(data, axis)</li>
+<li>&#8216;bincount&#8217;  : out = numpy.bincount(x, weights=None, minlength=None)</li>
+<li>&#8216;corrcoef&#8217;  : out = numpy.corrcoef(data)</li>
+<li>&#8216;count_nonzero&#8217; : out = numpy.count_nonzero(data)</li>
+<li>&#8216;cumprod&#8217;   : out = numpy.cumprod(data,axis)</li>
+<li>&#8216;cumproduct&#8217;: out = numpy.cumproduct(data,axis)</li>
+<li>&#8216;cumsum&#8217;    : out = numpy.cumsum(data,axis)</li>
+<li>&#8216;diag&#8217;      : out = numpy.diag(data,k=0)</li>
+<li>&#8216;diag_indices: out = numpu.diag_indices(data, ndim=2)</li>
+<li>&#8216;diagflat&#8217;  : out = numpy.diagflat(data, k=0)</li>
+<li>&#8216;diagonal&#8217;  : out = numpy.diagonal(data, offset=0, axis1=0, axis2=1)</li>
+<li>&#8216;diff&#8217;      : out = numpy.diff(a, n=1, axis=-1)</li>
+<li>&#8216;max&#8217;       : out = numpy.max(data, axis)</li>
+<li>&#8216;min&#8217;       : out = numpy.min(data, axis)</li>
+<li>&#8216;median&#8217;    : out = numpy.median(data, axis)</li>
+<li>&#8216;mean&#8217;      : out = numpy.mean(data, axis)</li>
+<li>&#8216;percentile&#8217;: out = numpy.percentile(data, q, axis)</li>
+<li>&#8216;product&#8217;   : out = numpy.product(data, axis)</li>
+<li>&#8216;prod&#8217;      : out = numpy.prod(data,axis)</li>
+<li>&#8216;ptp&#8217;       : out = numpy.ptp(data,axis)</li>
+<li>&#8216;squeeze&#8217;   : out = numpy.squeeze(data)</li>
+<li>&#8216;std&#8217;       : out = numpy.std(data, axis)</li>
+<li>&#8216;swapaxes: out = numpy.swapaxes(x1, axis1, axis2)</li>
+<li>&#8216;var&#8217;       : out = numpy.var(data, axis)</li>
+<li>&#8216;transpose&#8217; : out = numpy.transpose(data)</li>
+<li>&#8216;sum&#8217;       : out = numpy.sum(data, axis)</li>
+</ul>
+<p>None-numpy data reduction operations:</p>
+<ul class="simple">
+<li>&#8216;select_values&#8217; : out = data[ selection ]</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.selection_string_to_object">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">selection_string_to_object</code><span class="sig-paren">(</span><em>selection_string</em>, <em>list_to_index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.selection_string_to_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the given selection string to a python selection object, i.e., either a slice, list or integer index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>selection_string</strong> &#8211; A selection string of the type indexlist</li>
+<li><strong>list_to_index</strong> &#8211; Should we turn the list into an index if the list contains only a single value.
+Default value is False, i.e., the list is not modified.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li>An integer index if an index selection is specified</li>
+<li>A python list of indices if a list specified in the string</li>
+<li>A python slice object if a slice operation is specified by the string</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.selection_to_indexlist">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">selection_to_indexlist</code><span class="sig-paren">(</span><em>selection_string</em>, <em>axis_size=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.selection_to_indexlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the indexlist selection string and return a python list of indices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>selection_string</strong> &#8211; A selection string of the type indexlist</li>
+<li><strong>axis_size</strong> &#8211; Size of the dimensions for which the selection is defined.
+Only needed in case that a range selection is given. This should be
+a list of sizes, in case that a multiaxis selection is given.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li>A python list of point indices for the selection.</li>
+<li>None in case the list is empty or in case an error occurred.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.selection_to_string">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">selection_to_string</code><span class="sig-paren">(</span><em>selection</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.selection_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the given selection, which may be either an int, a list of ints, a slice object or
+a tuple of the mentioned types which is used to define a selection along multiple axes.
+:param selection: The selection to be converted to a string
+:type selection: int, list, slice, or a tuple of int, list, slice objects
+:return: The selection string</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="omsi.shared.data_selection.selection_type">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">selection_type</code><em class="property"> = {'index': 0, 'all': 3, 'indexlist': 2, 'invalid': -1, 'range': 4, 'multiaxis': 5}</em><a class="headerlink" href="#omsi.shared.data_selection.selection_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>This an extended list of types indicated by the check_selection_string function.
+Indices &lt;0 are assumed to be invalid selections.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.transform_and_reduce_data">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transform_and_reduce_data</code><span class="sig-paren">(</span><em>data</em>, <em>operations</em>, <em>secondary_data=None</em>, <em>http_error=False</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.transform_and_reduce_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to apply a series of potentially multiple
+operations to a given numpy dataset. This function uses
+the transform_data_single(...) function to apply each indicated
+transformation to the data. This function uses the perform_reduction function to
+perform data reduction operations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The input numpy array that should be transformed.</li>
+<li><strong>operations</strong> &#8211; <p>JSON string with list of dictionaries or a python
+list of dictionaries. Each dict specifies a single data
+transformation or data reduction. The operations are applied
+in order, i.e., operations[0] is applied first, then operations[1]
+and so on. The dicts must be structured according to one of
+the following specifications:</p>
+<ul>
+<li><cite>{&#8216;transformation&#8217;:&lt;op&gt;}</cite> : Single transformation applied to all data at once.</li>
+<li><cite>{&#8216;transformation&#8217;:&lt;op&gt;, &#8216;axes&#8217;:[..]}</cite> : Apply a single transformation to                              data chunks defined by the axes parameter. The data is split into chunks along                              the dimensions defined by the axes parameter. E.g., if we have a 3D MSI dataset                              and we want to op ion images independently, then we need to set axes=[2].                              Accordingly,  if we want to op spectra individually, then we need to split                              the two image dimensions into chunks by setting axes=[0,1].</li>
+<li><cite>{&#8216;reduction&#8217;:&lt;reduction&gt;, &#8216;axis&#8217;:int}</cite> : Define the reduction operations to be                              applied and the axis along which the data should be reduced. If reduction along                              all axis should be done then set axis ot None (in python) or null in JSON.</li>
+</ul>
+</li>
+<li><strong>secondary_data</strong> &#8211; Other data from previous data iterations a user may reference.</li>
+<li><strong>http_error</strong> &#8211; Define which type of error message the function should return.
+If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Reduced numpy data array or HttpResonse with a description of the error that occurred.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.transform_data_single">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transform_data_single</code><span class="sig-paren">(</span><em>data</em>, <em>transformation='minusMinDivideMax'</em>, <em>axes=None</em>, <em>secondary_data=None</em>, <em>http_error=False</em>, <em>transform_kwargs=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.transform_data_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to transform data of a numpy array. The function
+potentially splits the array into independent chunks that are
+normalized separately (depending on how the axes parameter is defined).
+The actual data transformations are implemented by transform_datachunk(...).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The input numpy array that should be transformed.</li>
+<li><strong>transformation</strong> &#8211; Data transformation option to be used. Available options are:
+&#8216;minusMinDivideMax&#8217; ,...</li>
+<li><strong>axes</strong> &#8211; List of data axis that should be split into chunks that are treated
+independently during the transformation. By default transformation is
+applied based on the full dataset (axes=None). E.g, if transformation
+should be performed on a per image basis, then we need to split the
+m/z dimension into individual chunks and set axes=[2]. If we want
+to transform spectra individually, then we need to split the two
+image dimensions into chunks by setting axes=[0,1].</li>
+<li><strong>secondary_data</strong> &#8211; Other data from previous data iterations a user may reference.</li>
+<li><strong>http_error</strong> &#8211; Define which type of error message the function should return.
+If false then None is returned in case of error. Otherwise a DJANGO HttpResponse is returned.</li>
+<li><strong>transform_kwargs</strong> &#8211; Dictionary of additional keyword arguments to be passed to the
+transform_datachunk(...) function.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Reduced numpy data array or HttpResonse with a description of the error that occurred.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.transform_datachunk">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transform_datachunk</code><span class="sig-paren">(</span><em>data</em>, <em>transformation='minusMinDivideMax'</em>, <em>secondary_data=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.transform_datachunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to transform a given data chunk.
+In contrast to transform_data, this function applies the transformation
+directly to the data provided, without consideration of axis information.
+This function is used by transform_data(...) to implement the actual
+normalization for independent data chunks that need to be normalized.</p>
+<p>Required keyword arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; The input numpy array that should be transformed.</li>
+<li><strong>transformation</strong> &#8211; Data transformation option to be used. For available options
+see the transformation_type dictionary.</li>
+<li><strong>secondary_data</strong> &#8211; Other data from previous data iterations a user may reference.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Additional transformation-dependent keyword arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; <p>Additional keyword arguments that are specific for different
+data transformation. Below a list of additional keyword arguments
+used for different transformation options</p>
+<ul>
+<li><dl class="first docutils">
+<dt>transformation: &#8216;threshold&#8217;</dt>
+<dd><dl class="first last docutils">
+<dt>** &#8216;threshold&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">The threshold parameter to be used for</span></dt>
+<dd>the thresold operation. If threshold is
+not specified, then the 5th %tile will
+be used as threshold value instead, ie.,
+the bottom 5% of the data are set to 0.</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">This function returns the normalized data array. If an unsupported
+transformation option is given, then the function simply return the
+unmodified input array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.data_selection.transform_reduce_description_to_json">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transform_reduce_description_to_json</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.data_selection.transform_reduce_description_to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the dictionary describing the transformation/reduction operations
+to a JSON string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; The list or dictionaries with the description of the transformation
+and reduction operations.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="omsi.shared.data_selection.transformation_allowed_numpy_dual_data">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transformation_allowed_numpy_dual_data</code><em class="property"> = ['add', 'arctan2', 'bitwise_and', 'bitwise_not', 'bitwise_or', 'bitwise_xor', 'corrcoef', 'cov', 'divide', 'equal', 'fmax', 'fmin', 'fmod', 'greater', 'greater_equal', 'left_shift', 'less', 'less_equal', 'logical_and', 'logical_or', 'logical_xor', 'mod', 'multiply', 'not_equal', 'power', 'right_shift', 'subtract']</em><a class="headerlink" href="#omsi.shared.data_selection.transformation_allowed_numpy_dual_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of allowed dual data transformations. Dual data transformation,
+are operation that operate on a two data input datasets but which do not change
+the shape of the data. Below a list of available numpy function options.
+NOTE: Some operations may have additional optional or required keyword arguments.
+HELP: For full documentation of the different functions see the numpy documentation.</p>
+<ul class="simple">
+<li>&#8216;add&#8217;           : out = x1 + x2 = numpy.add(x1,x2)</li>
+<li>&#8216;arctan2&#8217;       : out = numpy.arctan2(x1,x2)</li>
+<li>&#8216;bitwise_and&#8217;   : out = x1 &amp;&amp; x2 = numpy.bitwise_and(x1,x2)</li>
+<li>&#8216;bitwise_not&#8217;   : out = numpy.bitwise_not(x1,x2)</li>
+<li>&#8216;bitwise_or&#8217;,   : out = x1 || x2 = numpy.bitwise_or(x1,x2)</li>
+<li>&#8216;bitwise_xor&#8217;   : out = numpy.bitwise_xor(x1,x2)</li>
+<li>&#8216;corrcoef&#8217;      : out = numpy.corrcoef(x1,x2)</li>
+<li>&#8216;cov&#8217;           : out = numpy.cov(x1, x2, rowvar=1, bias=0, ddof=None)</li>
+<li>&#8216;divide&#8217;        : out = x1 / x2 = numpy.divide(x1,x2)</li>
+<li>&#8216;equal&#8217;         : out = x1 == x2 = numpy.equal(x1,x2)</li>
+<li>&#8216;fmax&#8217;          : out = numpy.fmax(x1,x2)</li>
+<li>&#8216;fmin&#8217;          : out = numpy.fmin(x1,x2)</li>
+<li>&#8216;fmod&#8217;          : out = numpy.fmod(x1,x2)</li>
+<li>&#8216;greater&#8217;       : out = x1 &gt; x2 = numpy.greater(x1,x2)</li>
+<li>&#8216;greater_equal&#8217; : out = x1 &gt;= x2 = numpy.greater_equal(x1,x2)</li>
+<li>&#8216;left_shift&#8217;    : out = numpy.left_shift(x1,x2)</li>
+<li>&#8216;less&#8217;          : out = x1 &lt; x2 = numpy.less(x1,x2)</li>
+<li>&#8216;less_equal&#8217;    : out = x1 &lt;= x2 = numpy.less_equal(x1,x2)</li>
+<li>&#8216;logical_and&#8217;   : out = numpy.logical_and(x1,x2)</li>
+<li>&#8216;logical_not&#8217;   : See transformation_allowed_numpy_single_data instead.</li>
+<li>&#8216;logical_or&#8217;    : out = numpy.logical_or(x1,x2)</li>
+<li>&#8216;logical_xor&#8217;   : out = numpy.logical_xor(x1,x2)</li>
+<li>&#8216;mod&#8217;           : out = numpy.mod(x1,x2)</li>
+<li>&#8216;multiply&#8217;      : out = x1 * x2  = numpy.multiply(x1,x2)</li>
+<li>&#8216;not_equal&#8217;     : out = x1 != x2 = numpy.not_equal(x1,x2)</li>
+<li>&#8216;power&#8217;         : out = numpy.power(x1,x2)</li>
+<li>&#8216;subtract&#8217;      : out = x1 - x2  = numpy.subtract(x1,x2)</li>
+<li>&#8216;right_shift    : out = np.right_shift(x1,x2)</li>
+</ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="omsi.shared.data_selection.transformation_allowed_numpy_single_data">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transformation_allowed_numpy_single_data</code><em class="property"> = ['abs', 'arccos', 'arccosh', 'arcsin', 'arcsinh', 'arctan', 'arctanh', 'argsort', 'around', 'ceil', 'clip', 'cos', 'cosh', 'deg2rad', 'degrees', 'exp', 'exp2', 'fabs', 'floor', 'hypot', 'invert', 'log', 'log2', 'log10', 'logical_not', 'negative', 'sign', 'round', 'sin', 'sinc', 'sinhsqrt', 'sort', 'tan', 'tanh']</em><a class="headerlink" href="#omsi.shared.data_selection.transformation_allowed_numpy_single_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of allowed single data transformations. Single data transformation,
+are operations that operate on a single data input and which do not change
+the shape of the data. Below a list of available numpy options.
+NOTE: Some operations may have additional optional or required keyword arguments.
+HELP: For full documentation of the different functions see the numpy documentation.</p>
+<ul>
+<li><p class="first">&#8216;abs&#8217;    : out = numpy.abs(x1)</p>
+</li>
+<li><p class="first">&#8216;arccos&#8217; : out = numpy.arccos(x1)</p>
+</li>
+<li><p class="first">&#8216;arccosh&#8217;: out = numpy.arccosh(x1)</p>
+</li>
+<li><p class="first">&#8216;arcsin&#8217; : out = numpy.arcsin(x1)</p>
+</li>
+<li><p class="first">&#8216;arcsinh&#8217;: out = numpy.arcsinh(x1)</p>
+</li>
+<li><p class="first">&#8216;arctan&#8217; : out = numpy.arctan(x1)</p>
+</li>
+<li><p class="first">&#8216;arctanh&#8217;: out = numpy.arctanh1(x1)</p>
+</li>
+<li><p class="first">&#8216;argsort&#8217;   : out = numpy.argsort(data, axis, kind=&#8217;quicksort&#8217;, order=None)</p>
+</li>
+<li><p class="first">&#8216;around&#8217; : out = numpy.around(x1, decimals)</p>
+</li>
+<li><p class="first">&#8216;ceil&#8217;   : out = numpy.ceil(x1)</p>
+</li>
+<li><p class="first">&#8216;cos&#8217;    : out = numpy.cos(x1)</p>
+</li>
+<li><p class="first">&#8216;cosh&#8217;   : out = numpy.cosh(x1)</p>
+</li>
+<li><p class="first">&#8216;clip&#8217;   : out = numpy.clip(x1, a_min, a_max)</p>
+</li>
+<li><p class="first">&#8216;deg2rad&#8217;: out = numpy.deg2rad(x1)</p>
+</li>
+<li><p class="first">&#8216;degrees : out = numpy.degrees(x1)</p>
+</li>
+<li><p class="first">&#8216;exp&#8217;    : out = numpy.exp(x1)</p>
+</li>
+<li><p class="first">&#8216;exp2&#8217;   : out = numpy.exp2(x1)</p>
+</li>
+<li><p class="first">&#8216;fabs&#8217;   : out = numpy.fabs(x1)</p>
+</li>
+<li><p class="first">&#8216;floor&#8217;  : out = numpy.floor(x1)</p>
+</li>
+<li><p class="first">&#8216;hypot&#8217;  : out = numpy.hypot(x1)</p>
+</li>
+<li><p class="first">&#8216;invert&#8217; : out = numpy.invert(x1)</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;log&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">out[x1&gt;0] = log(x1[x1&gt;0]) \</span></dt>
+<dd><p class="first last">out[x1&lt;0] = log(x1[x1&lt;0]*-1)*-1 out[x1==0] = 0</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;log2 &#8216;: out[x1&gt;0] = log2(x1[x1&gt;0]) </dt>
+<dd><p class="first last">out[x1&lt;0] = log2(x1[x1&lt;0]*-1)*-1 out[x1==0] = 0</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;log10&#8217;: out[x1&gt;0] = log10(x1[x1&gt;0]) </dt>
+<dd><p class="first last">out[x1&lt;0] = log10(x1[x1&lt;0]*-1)*-1 out[x1==0] = 0</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">&#8216;logical_not&#8217; : out = numpy.logical_not(x1)</p>
+</li>
+<li><p class="first">&#8216;negative&#8217; : out = np.negative(x1)</p>
+</li>
+<li><p class="first">&#8216;round&#8217; : out = numpy.round(x1, decimals)</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;sqrt&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">out[x1&gt;0] = sqrt(x1[x1&gt;0]) \</span></dt>
+<dd><p class="first last">out[x1&lt;0] = sqrt(x1[x1&lt;0]*-1)*-1 out[x1==0] = 0</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">&#8216;sign&#8217; : out = numpy.sign(x1)</p>
+</li>
+<li><p class="first">&#8216;sin&#8217;  : out = numpy.sin(x1)</p>
+</li>
+<li><p class="first">&#8216;sinc&#8217; : out = numpy.sinc(x1)</p>
+</li>
+<li><p class="first">&#8216;sinh&#8217; : out = numpy.sinh(x1)</p>
+</li>
+<li><p class="first">&#8216;sort&#8217; : out = numpy.sort(x1, axis=-1, kind=&#8217;quicksort&#8217;, order=None)</p>
+</li>
+<li><p class="first">&#8216;swapaxes: out = numpy.swapaxes(x1, axis1, axis2)</p>
+</li>
+<li><p class="first">&#8216;tan&#8217;  : out = numpy.tan(x1)</p>
+</li>
+<li><p class="first">&#8216;tanh&#8217; : out = numpy.tanh(x1)</p>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="omsi.shared.data_selection.transformation_type">
+<code class="descclassname">omsi.shared.data_selection.</code><code class="descname">transformation_type</code><em class="property"> = {'singleDataTransform': 'singleDataTransform', 'scale': 'scale', 'divideMax': 'divideMax', 'astype': 'astype', 'threshold': 'threshold', 'minusMinDivideMax': 'minusMinDivideMax', 'dualDataTransform': 'dualDataTransform', 'arithmetic': 'arithmetic'}</em><a class="headerlink" href="#omsi.shared.data_selection.transformation_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary of available data transformation options. Available options are:</p>
+<ul>
+<li><p class="first">&#8216;arithmetic&#8217; : Same as &#8216;dualDataTransform&#8217;. See &#8216;dualDataTransform&#8217; below for details.</p>
+</li>
+<li><p class="first">&#8216;divideMax&#8217; : Divide the data by the current maximum value.</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;minusMinDivideMax&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Substract the minimum value from the data and \</span></dt>
+<dd><p class="first last">then divide the data by maximum of the data (with the minimum already substracted.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;dualDataTransform&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Apply arbitrary arithmetic operation to the data. Additional parameter \</span></dt>
+<dd><p class="first">required for this option are:</p>
+<blockquote class="last">
+<div><ul>
+<li><p class="first"><cite>operation</cite> : String defining the arithmetic operations to be applied. Supported operations are: &#8216;add&#8217;, &#8216;divide&#8217;, &#8216;greater&#8217;, &#8216;greater_equal&#8217;, &#8216;multiply&#8217;, &#8216;subtract&#8217;</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;x1&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">The first data operand of the arithmetic operation. \</span></dt>
+<dd><p class="first last">The input data will be used by default if x1 is not specified. You may also specify &#8216;data&#8217; to explicitly indicate that the input data should be assigned to x1. You may specify data0 to indicate that the output of another data operation should be used. Note, data0 here refers to the input to the full data operation pipeline. Data from other parts of the pipeline, are then indexed using 1-based indices. E.g,. to access the output of the first data operation set x1=&#8217;data0&#8217;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;x2&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">The second data operand of the arithmetic operation. \</span></dt>
+<dd><p class="first last">The input data will be used by default if x2 is not specified. You may also specify &#8216;data&#8217; to explicitly indicate that the input data should be assigned to x2. You may specify data0 to indicate that the output of another data operation should be used. Note, data0 here refers to the input to the full data operation pipeline. Data from other parts of the pipeline, are then indexed using 1-based indices. E.g,. to access the output of the first data operation set x2=&#8217;data0&#8217;</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">... any additional parameters needed for the numpy function.</p>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;singleDataTransform&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Apply scaling transformation to the data.  Additional parameters \</span></dt>
+<dd><p class="first">required for this options are. NOTE: operation==&#8217;log or operation==&#8217;sqrt&#8217;: If the minimum value is 0 then the transformation is applied topositive values only and 0 values remain as is. If the minimum value is larger then 0, then the log-scale is applied as is, i.e., np.log(data). If the minimum data value is negative, then the log scale is applied independently to the positive values and the negative values, ie., outdata[posvalues] = np.log(data[posvalues]) outdata[negvalues] = np.log(data[negvalues]*-1.)*-1.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">&#8216;operation&#8217; : String defining the scaling operations to be applied. See the transformation_allowed_numpy_single_data list for a complete list
+of allowed scaling operations. Some of the more commonly used scalingoperations include: &#8216;abs&#8217;, &#8216;log&#8217;, &#8216;sqrt&#8217;, &#8216;around&#8217; etc.</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;x1&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">The first data operand for the scaling.</span></dt>
+<dd><p class="first last">The input data will be used by default if x1 is not specified. You may also specify &#8216;data&#8217; to explicitly indicate that the input data should be assigned to x1.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Additional optional keyword arguments depending on the used operation:</p>
+<blockquote class="last">
+<div><ul>
+<li><dl class="first docutils">
+<dt>&#8216;decimals&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Number of decimal places to round to when using numpy.around or numpy.round \</span></dt>
+<dd><p class="first last">(default: 0).  If decimals is negative, it specifies the
+number of positions to the left of the decimal point.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">&#8216;a_min&#8217;, &#8216;a_max&#8217; : Lower and upper bound when using numpy.clip.</p>
+</li>
+<li><p class="first">&#8216;axis&#8217;, &#8216;kind&#8217;, &#8216;order&#8217; : Additional optional arguments for numpy.argsort and numpy.sort.</p>
+</li>
+<li><p class="first">...</p>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+</ul>
+<blockquote>
+<div><ul>
+<li><p class="first">&#8216;scale&#8217; : Same as &#8216;singleDataTransform&#8217;. See &#8216;singleDataTransform&#8217; for details.</p>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;threshold&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Threshold the data. Set all values that are smaller than threshold \</span></dt>
+<dd><p class="first">to 0. Additional parameters required for this option are:</p>
+<blockquote class="last">
+<div><ul class="simple">
+<li>&#8216;threshold&#8217;. If threshold is missing, then the threshold will be </li>
+</ul>
+<blockquote>
+<div><p>set ot the 5%&#8217;ile so that the bottom 5% of the data will be set to 0.</p>
+</div></blockquote>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><p class="first">&#8216;astype&#8217; : Change the type of the data. Additional required parameters are: </p>
+<blockquote>
+<div><ul class="simple">
+<li>&#8216;dtype&#8217; : The numpy data type to be used. Default dtype=&#8217;float&#8217;.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.shared.omsi_web_helper">
+<span id="omsi-web-helper-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">omsi_web_helper</span></code> Module<a class="headerlink" href="#module-omsi.shared.omsi_web_helper" title="Permalink to this headline">¶</a></h2>
+<p>Module with helper functions for interactions with the OpenMSI web infrastructure,
+e.g. update job status, explicitly add a file to the OpenMSI database,
+update file permissions so that Apache can access it etc.</p>
+<dl class="class">
+<dt id="omsi.shared.omsi_web_helper.UserInput">
+<em class="property">class </em><code class="descclassname">omsi.shared.omsi_web_helper.</code><code class="descname">UserInput</code><a class="headerlink" href="#omsi.shared.omsi_web_helper.UserInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Collection of helper functions used to collect user input</p>
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout">
+<em class="property">static </em><code class="descname">userinput_with_timeout</code><span class="sig-paren">(</span><em>timeout</em>, <em>default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read user input. Return default value given after timeout.
+This function decides which platform-dependent version should
+be used to retrieve the user input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timeout</strong> &#8211; Number of seconds till timeout</li>
+<li><strong>default</strong> (<em>String</em>) &#8211; Default string to be returned after timeout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout_default">
+<em class="property">static </em><code class="descname">userinput_with_timeout_default</code><span class="sig-paren">(</span><em>timeout</em>, <em>default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read user input. Return default value given after timeout.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timeout</strong> &#8211; Number of seconds till timeout</li>
+<li><strong>default</strong> (<em>String</em>) &#8211; Default string to be returned after timeout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout_windows">
+<em class="property">static </em><code class="descname">userinput_with_timeout_windows</code><span class="sig-paren">(</span><em>timeout</em>, <em>default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.UserInput.userinput_with_timeout_windows" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Read user input. Return default value given after timeout.</dt>
+<dd>This function is used when running on windows-based systems.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timeout</strong> &#8211; Number of seconds till timeout</li>
+<li><strong>default</strong> (<em>String</em>) &#8211; Default string to be returned after timeout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.shared.omsi_web_helper.WebHelper">
+<em class="property">class </em><code class="descclassname">omsi.shared.omsi_web_helper.</code><code class="descname">WebHelper</code><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class providing a collection of functions for web-related file conversion
+tasks, e.g, : i) adding files to the web database, ii) notifying users via email,
+iii) setting file permissions for web-access.</p>
+<dl class="attribute">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.allowed_nersc_locations">
+<code class="descname">allowed_nersc_locations</code><em class="property"> = ['/project/projectdirs/openmsi/omsi_data_private', '/global/project/projectdirs/openmsi/omsi_data_private', '/data/openmsi/omsi_data']</em><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.allowed_nersc_locations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.default_db_server_url">
+<code class="descname">default_db_server_url</code><em class="property"> = 'https://openmsi.nersc.gov/'</em><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.default_db_server_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.register_file_with_db">
+<em class="property">static </em><code class="descname">register_file_with_db</code><span class="sig-paren">(</span><em>filepath</em>, <em>db_server</em>, <em>file_user_name</em>, <em>jobid=None</em>, <em>check_add_nersc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.register_file_with_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function used to register a given file with the database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filepath</strong> &#8211; Path of the file to be added to the database</li>
+<li><strong>db_server</strong> &#8211; The database server url</li>
+<li><strong>file_user_name</strong> &#8211; The user to be used, or None if the user should
+be determined based on the file URL.</li>
+<li><strong>jobid</strong> &#8211; Optional input parameter defining the jobid to be updated.
+If the jobid is given then the job will be updated with the
+database instead of adding the file explicitly. I.e.,
+instead of register_filer_with_db the update_job_status call
+is executed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Boolean indicating whether the operation was successful</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.send_email">
+<em class="property">static </em><code class="descname">send_email</code><span class="sig-paren">(</span><em>subject</em>, <em>body</em>, <em>sender='convert&#64;openmsi.nersc.gov'</em>, <em>email_type='success'</em>, <em>email_success_recipients=None</em>, <em>email_error_recipients=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.send_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send email notification to users.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject</strong> &#8211; Subject line of the email</li>
+<li><strong>body</strong> &#8211; Body text of the email.</li>
+<li><strong>sender</strong> &#8211; The originating email address</li>
+<li><strong>email_type</strong> &#8211; One of &#8216;success, &#8216;error&#8217;, &#8216;warning&#8217;. Error messages are sent
+to ConvertSettings.email_error_recipients, success messages to
+ConvertSettings.email_success_recipients and warning messages are sent to both lists.</li>
+<li><strong>email_success_recipients</strong> &#8211; List of user that should receive an email if the status is success
+or warning.</li>
+<li><strong>email_error_recipients</strong> &#8211; List of users that should receive an email if the status is error
+or warning.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.set_apache_acl">
+<em class="property">static </em><code class="descname">set_apache_acl</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.set_apache_acl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function used to set acl permissions for apache to make the given file accesible
+to Apache at NERSC. This necessary to make the file readable for adding it to the
+database.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.super_users">
+<code class="descname">super_users</code><em class="property"> = ['bpb', 'oruebel']</em><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.super_users" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="omsi.shared.omsi_web_helper.WebHelper.update_job_status">
+<em class="property">static </em><code class="descname">update_job_status</code><span class="sig-paren">(</span><em>filepath</em>, <em>db_server</em>, <em>jobid</em>, <em>status='complete'</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.omsi_web_helper.WebHelper.update_job_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function used to update the status of the job on the server</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> &#8211; Path of the file to be added to the database (only needed update file permissions)</li>
+<li><strong>db_server</strong> &#8211; The database server url</li>
+<li><strong>jobid</strong> &#8211; The id of the current job.</li>
+<li><strong>status</strong> &#8211; One of &#8216;running&#8217;, &#8216;complete&#8217; or &#8216;error&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.shared.spectrum_layout">
+<span id="spectrum-layout-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">spectrum_layout</span></code> Module<a class="headerlink" href="#module-omsi.shared.spectrum_layout" title="Permalink to this headline">¶</a></h2>
+<p>This module provides capabilities for computing different layouts for spectra</p>
+<dl class="function">
+<dt id="omsi.shared.spectrum_layout.compute_hilbert_spectrum">
+<code class="descclassname">omsi.shared.spectrum_layout.</code><code class="descname">compute_hilbert_spectrum</code><span class="sig-paren">(</span><em>original_coords</em>, <em>original_intensities</em>, <em>left=0</em>, <em>right=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.spectrum_layout.compute_hilbert_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a 1D spectrum, interpolate the spectrum onto the closest 2D hilbert curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>original_coords</strong> (<em>1D numpy array in increasing order.</em>) &#8211; The original coordinate values (m/z). Values must be increasing.</li>
+<li><strong>original_intensities</strong> (<em>1D numpy array of same length as original_coords</em>) &#8211; The original intensity values. Same length as original_coords.</li>
+<li><strong>left</strong> &#8211; Optional. Value to be used for padding data at the lower bound during interpolation</li>
+<li><strong>right</strong> &#8211; Optional. Value to be used for padding data at the upper bound during interpolation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">float</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><p class="first">float</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">2D numpy array with the coordinate (m/z) values for the hilbert spectrum and separate
+2D numpy array for the interpolated intensity values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError If original_coords and original_intensities have different length.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.spectrum_layout.hilbert_curve">
+<code class="descclassname">omsi.shared.spectrum_layout.</code><code class="descname">hilbert_curve</code><span class="sig-paren">(</span><em>order=2</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.spectrum_layout.hilbert_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute  a 2D hilbert curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>order</strong> (<em>Integer that defines a power of 2 (&gt;=2)</em>) &#8211; The order of the hilber curve. This is the length of the sides of the square, i.e.,
+the number of points in x and y.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns two numpy arrays of integers x,y, indicating the locations of the
+vertices of the hilbert curve.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.spectrum_layout.plot_2d_spectrum_as_image">
+<code class="descclassname">omsi.shared.spectrum_layout.</code><code class="descname">plot_2d_spectrum_as_image</code><span class="sig-paren">(</span><em>hilbert_intensities</em>, <em>show_plot=False</em>, <em>show_axis=False</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.spectrum_layout.plot_2d_spectrum_as_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot image with pixels colored according to hilbert_intensities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hilbert_intensities</strong> (<em>2D numpy array.</em>) &#8211; 2D numpy array with the intensity values for the spectrum.</li>
+<li><strong>show_plot</strong> (<em>Boolean</em>) &#8211; Show the generated plot in a window.</li>
+<li><strong>show_axis</strong> (<em>Boolean</em>) &#8211; Show x,y axis for the plot. Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">matplotlib image plot or None in case that the plotting failed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.spectrum_layout.reinterpolate_spectrum">
+<code class="descclassname">omsi.shared.spectrum_layout.</code><code class="descname">reinterpolate_spectrum</code><span class="sig-paren">(</span><em>coords</em>, <em>original_coords</em>, <em>original_intensitities</em>, <em>left=0</em>, <em>right=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.spectrum_layout.reinterpolate_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a 1D spectrum, interpolate the spectrum onto a new axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coords</strong> &#8211; The coordinate values (m/z) for which intensities should be computed.</li>
+<li><strong>original_coords</strong> &#8211; The original coordinate values (m/z). Values must be increasing.</li>
+<li><strong>original_intensitities</strong> &#8211; The original intensity values. Same length as original_coords.</li>
+<li><strong>left</strong> &#8211; Optional. Value to be used if coords &lt; orignal_coords</li>
+<li><strong>right</strong> &#8211; Optional. Value to be used if coords &gt; orignal_coords</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">y : {float, ndarray} The interpolated values, same shape as coords.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">ValueError If original_coords and original_intensities have different length.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.shared.log">
+<span id="log-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">log</span></code> Module<a class="headerlink" href="#module-omsi.shared.log" title="Permalink to this headline">¶</a></h2>
+<p>Module providing functionality for logging based on the python logging module.
+The module is intended toease the use of logging while a developer
+can still access the standard python logging mechanism if needed.</p>
+<dl class="class">
+<dt id="omsi.shared.log.log_helper">
+<em class="property">class </em><code class="descclassname">omsi.shared.log.</code><code class="descname">log_helper</code><a class="headerlink" href="#omsi.shared.log.log_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>BASTet helper module to ease the use of logging</p>
+<p>Class Variables:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#omsi.shared.log.log_helper.log_levels" title="omsi.shared.log.log_helper.log_levels"><strong>log_levels</strong></a> &#8211; Dictionary describing the different available logging levels.</td>
+</tr>
+</tbody>
+</table>
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.critical">
+<em class="property">classmethod </em><code class="descname">critical</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.critical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a critical log entry. This function is typically called as:</p>
+<p>log_helper.critical(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.debug">
+<em class="property">classmethod </em><code class="descname">debug</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a debug log entry. This function is typically called as:</p>
+<p>log_helper.debug(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.error">
+<em class="property">classmethod </em><code class="descname">error</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a error log entry. This function is typically called as:</p>
+<p>log_helper.error(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.exception">
+<em class="property">classmethod </em><code class="descname">exception</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a exception log entry. This function is typically called as:</p>
+<p>log_helper.exception(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.get_default_format">
+<em class="property">classmethod </em><code class="descname">get_default_format</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.get_default_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default formatting string.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.get_logger">
+<em class="property">classmethod </em><code class="descname">get_logger</code><span class="sig-paren">(</span><em>module_name</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the logger for a particular module. The module_name
+should always be set to the __name__ variable of the calling module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Python logging.Logger retrieved via logging.getLogger.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.log.log_helper.global_log_level">
+<code class="descname">global_log_level</code><em class="property"> = 20</em><a class="headerlink" href="#omsi.shared.log.log_helper.global_log_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.info">
+<em class="property">classmethod </em><code class="descname">info</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a info log entry. This function is typically called as:</p>
+<p>log_helper.info(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.log.log_helper.initialized">
+<code class="descname">initialized</code><em class="property"> = False</em><a class="headerlink" href="#omsi.shared.log.log_helper.initialized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.log">
+<em class="property">classmethod </em><code class="descname">log</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>level=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function used to select the log message level using an input parameter
+rathern than by selecting the approbriate function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determine the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>level</strong> &#8211; To which logging level should we send the message</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.log.log_helper.log_levels">
+<code class="descname">log_levels</code><em class="property"> = {'INFO': 20, 'WARNING': 30, 'CRITICAL': 50, 'ERROR': 40, 'DEBUG': 10, 'NOTSET': 0}</em><a class="headerlink" href="#omsi.shared.log.log_helper.log_levels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.log_var">
+<em class="property">classmethod </em><code class="descname">log_var</code><span class="sig-paren">(</span><em>module_name</em>, <em>root=0</em>, <em>comm=None</em>, <em>level=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.log_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log one or more variable values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>kwargs</strong> &#8211; Variables+values to be logged</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.set_log_level">
+<em class="property">classmethod </em><code class="descname">set_log_level</code><span class="sig-paren">(</span><em>level</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.set_log_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the logging level for all BASTet loggers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>level</strong> &#8211; The logging levels to be used, one of the values specified in log_helper.log_levels.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.setup_logging">
+<em class="property">classmethod </em><code class="descname">setup_logging</code><span class="sig-paren">(</span><em>level=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.setup_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this function at the beginning of your code to initiate logging.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>level</strong> &#8211; The default log level to be used. One of <code class="docutils literal"><span class="pre">log_helper.log_level</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.shared.log.log_helper.warning">
+<em class="property">classmethod </em><code class="descname">warning</code><span class="sig-paren">(</span><em>module_name</em>, <em>message</em>, <em>root=0</em>, <em>comm=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.log.log_helper.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a warning log entry. This function is typically called as:</p>
+<p>log_helper.warning(module_name=__name__, message=&#8221;your message&#8221;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_name</strong> &#8211; __name__ of the calling module or None in case the ROOT logger should be used.</li>
+<li><strong>message</strong> &#8211; The message to be added to the log</li>
+<li><strong>root</strong> &#8211; The root process to be used for output when running in parallel. If None, then all
+calling ranks will perform logging. Default is 0.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator to be used to determin the MPI rank. None by default, in which case
+mpi.comm_world is used.</li>
+<li><strong>args</strong> &#8211; Additional positional arguments for the python logger.debug function. See the python docs.</li>
+<li><strong>kwargs</strong> &#8211; Additional keyword arguments for the python logger.debug function. See the python docs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.shared.mpi_helper">
+<span id="mpi-helper-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">mpi_helper</span></code> Module<a class="headerlink" href="#module-omsi.shared.mpi_helper" title="Permalink to this headline">¶</a></h2>
+<p>Module used to ease the use of MPI and distributed parallel implementations using MPI</p>
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.barrier">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">barrier</code><span class="sig-paren">(</span><em>comm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.barrier" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPI barrier operation or no-op when running without MPI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>comm</strong> &#8211; MPI communicator. If None, then MPI.COMM_WORLD will be used.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.broadcast">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">broadcast</code><span class="sig-paren">(</span><em>data</em>, <em>comm=None</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.broadcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPI broadcast operation to broadcast data from one rank to all other ranks</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The data to be gathered</li>
+<li><strong>comm</strong> &#8211; MPI communicator. If None, then MPI.COMM_WORLD will be used.</li>
+<li><strong>root</strong> &#8211; The rank where the data is sned from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The data object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.gather">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">gather</code><span class="sig-paren">(</span><em>data</em>, <em>comm=None</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.gather" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPI gather operation or return a list with just [data,] if MPI is not available</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The data to be gathered</li>
+<li><strong>comm</strong> &#8211; MPI communicator. If None, then MPI.COMM_WORLD will be used.</li>
+<li><strong>root</strong> &#8211; The rank where the data should be collected to. Default value is 0</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of data objects from all the ranks</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.get_comm_world">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">get_comm_world</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.get_comm_world" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get MPI.COMM_WORLD
+:return: mpi communicator or None if MPI is not available</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.get_rank">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">get_rank</code><span class="sig-paren">(</span><em>comm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.get_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current process rank
+:param comm: MPI communicator. If None, then MPI.COMM_WORLD will be used.
+:return: The integer index of the rank</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.get_size">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">get_size</code><span class="sig-paren">(</span><em>comm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.get_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the size of the current communication domain/
+:param comm: MPI communicator. If None, then MPI.COMM_WORLD will be used.
+:return: The integer index of the rank</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.imports_mpi">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">imports_mpi</code><span class="sig-paren">(</span><em>python_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.imports_mpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the given class import mpi</p>
+<p>The implementation inspects the source code of the
+analysis to see if MPI is imported by the code.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.is_mpi_available">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">is_mpi_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.is_mpi_available" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if MPI is available. Same as MPI_AVAILABLE
+:return: bool indicating whether MPI is available</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.mpi_type_from_dtype">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">mpi_type_from_dtype</code><span class="sig-paren">(</span><em>dtype</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.mpi_type_from_dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ge the the corresponding MPI type for the given basic numpy dtype</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dtype</strong> &#8211; Basic numpy dtype to be mapped to the MPI type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The MPI type or None if not found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.shared.mpi_helper.parallel_over_axes">
+<em class="property">class </em><code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">parallel_over_axes</code><span class="sig-paren">(</span><em>task_function</em>, <em>task_function_params</em>, <em>main_data</em>, <em>split_axes</em>, <em>main_data_param_name</em>, <em>schedule='STATIC_1D'</em>, <em>root=0</em>, <em>comm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.parallel_over_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Helper class used to parallelize the execution of a function using MPI by splitting the
+input data into sub-blocks along a given set of axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><strong>task_function</strong> &#8211; The function we should run.</li>
+<li><strong>task_function_params</strong> &#8211; Dict with the input parameters for the function.
+may be None or {} if no parameters are needed.</li>
+<li><strong>main_data</strong> &#8211; Dataset over which we should parallelize</li>
+<li><strong>split_axes</strong> &#8211; List of integer axis indicies over which we should parallelize</li>
+<li><strong>main_data_param_name</strong> &#8211; The name of data input parameter of the task function</li>
+<li><strong>root</strong> &#8211; The master MPI rank (Default=0)</li>
+<li><strong>schedule</strong> &#8211; The task scheduling schema to be used (see parallel_over_axes.SCHEDULES</li>
+<li><strong>collect_output</strong> &#8211; Should we collect all the output from the ranks on the master rank?</li>
+<li><strong>schedule</strong> &#8211; The parallelization schedule to be used. See also parallel_over_axes.schedule</li>
+<li><strong>result</strong> &#8211; The result form the task_function. If self.__data_collected  is set and we are the root
+then this will a list with the the output of all tasks</li>
+<li><strong>blocks</strong> &#8211; List with tuples describing the selected subset of data processed by the given block task.
+If self.__data_collected is set and we are the root rank then this is a list of all the blocks
+processed by each rank.</li>
+<li><strong>block_times</strong> &#8211; List of times in seconds used to process the data block with the given index.
+NOTE: The block times include also any required communications and other operations to initialize
+and complete the task, and not just the execution of the task function itself.</li>
+<li><strong>run_time</strong> &#8211; Float time in seconds for executing the run function.</li>
+<li><strong>comm</strong> &#8211; The MPI communicator used for the parallelization. Default value is MPI.COMM_WORLD</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>task_function</strong> &#8211; The function we should run.</li>
+<li><strong>task_function_params</strong> &#8211; Dict with the input parameters for the function.
+May be None or {} if no parameters are needed.</li>
+<li><strong>main_data</strong> &#8211; Dataset over which we should parallelize</li>
+<li><strong>split_axes</strong> &#8211; List of integer axis indicies over which we should parallelize</li>
+<li><strong>main_data_param_name</strong> &#8211; The name of data input parameter of the task function</li>
+<li><strong>root</strong> &#8211; The master MPI rank (Default=0)</li>
+<li><strong>schedule</strong> &#8211; The task scheduling schema to be used (see parallel_over_axes.SCHEDULES</li>
+<li><strong>comm</strong> &#8211; The MPI communicator used for the parallelization. Default value is None, in which case
+MPI.COMM_WORLD is used</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="omsi.shared.mpi_helper.parallel_over_axes.MPI_MESSAGE_TAGS">
+<code class="descname">MPI_MESSAGE_TAGS</code><em class="property"> = {'BLOCK_MSG': 12, 'COLLECT_MSG': 13, 'RANK_MSG': 11}</em><a class="headerlink" href="#omsi.shared.mpi_helper.parallel_over_axes.MPI_MESSAGE_TAGS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.shared.mpi_helper.parallel_over_axes.SCHEDULES">
+<code class="descname">SCHEDULES</code><em class="property"> = {'DYNAMIC': 'DYNAMIC', 'STATIC_1D': 'STATIC_1D', 'STATIC': 'STATIC'}</em><a class="headerlink" href="#omsi.shared.mpi_helper.parallel_over_axes.SCHEDULES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="omsi.shared.mpi_helper.parallel_over_axes.collect_data">
+<code class="descname">collect_data</code><span class="sig-paren">(</span><em>force_collect=False</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.parallel_over_axes.collect_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect the results from the parallel execution to the self.root rank.</p>
+<dl class="docutils">
+<dt>NOTE: On the root the self.result, self.blocks, and self.block_times variables are</dt>
+<dd>updated with the collected data as well and self.__data_collected will be set</dd>
+<dt>NOTE: If the data has already been collected previously (ie., collect_data has been called</dt>
+<dd>before), then the collection will not be performed again, unless force_collect is set.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>force_collect</strong> &#8211; Set this parameter to force that data collection is performed again.
+By default the collect_data is performed only once for each time the run(..) function
+is called and the results are reused to ensure consistent data structures. We can
+force that collect will be reexecuted anyways by setting force_collect.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">On worker ranks (i.e., MPI_RANK!=self.root) this is simply the
+self.result and self.blocks containing the result created by run function.
+On the root rank (i.e., MPI_RANK!=self.root) this is a tuple of two lists
+containing the combined data of all  self.result and self.blocks from all ranks respectively.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.shared.mpi_helper.parallel_over_axes.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.parallel_over_axes.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this function to run the function in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Tuple with the following elements:<ol class="arabic simple">
+<li>List with the results from the local execution of the task_function. Each
+entry is the result from one return of the task_function. In the case of static
+execution, this is always a list of length 1.</li>
+<li>List of block_indexes. Each block_index is a tuple with the selection used to
+divide the data into sub-blocks. In the case of static decomposition we have
+a range slice object along the axes used for decomposition whereas in the
+case of dynamic scheduling we usually have single integer point selections
+for each task.</li>
+</ol>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.shared.mpi_helper.test_mpi_available">
+<code class="descclassname">omsi.shared.mpi_helper.</code><code class="descname">test_mpi_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.shared.mpi_helper.test_mpi_available" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function import MPI in a seperate process to safely check if
+MPI is available. This precaution is necessary as on Cray systems
+importing MPI can lead to a crash on, e.g., login nodes where the
+use of MPI is not permitted. By executing the import in a separate
+process we avoid crashing the main process and we can safely check
+whether the process aborted or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">False if the import failed, otherwise return True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="omsi.workflow.html" class="btn btn-neutral float-right" title="workflow Package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="omsi.datastructures.metadata.html" class="btn btn-neutral" title="metadata Package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

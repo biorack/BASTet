@@ -1,0 +1,746 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>driver Package &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="up" title="workflow Package" href="omsi.workflow.html"/>
+        <link rel="next" title="executor Package" href="omsi.workflow.executor.html"/>
+        <link rel="prev" title="workflow Package" href="omsi.workflow.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="omsi.html">omsi Package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="omsi.analysis.html">analysis Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.shared.html">shared Package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="omsi.workflow.html">workflow Package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#id1"><code class="docutils literal"><span class="pre">workflow</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.workflow.html#module-omsi.workflow.common"><code class="docutils literal"><span class="pre">common</span></code> Module</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="omsi.workflow.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="omsi.html">omsi Package</a> &raquo;</li>
+      
+          <li><a href="omsi.workflow.html">workflow Package</a> &raquo;</li>
+      
+    <li>driver Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/omsi.workflow.driver.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="driver-package">
+<h1>driver Package<a class="headerlink" href="#driver-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">driver</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-omsi.workflow.driver"></span><p>Package with drivers for analyses and workflows. Drivers are intented to control the set up
+&#8212;i.e., creation and initialization&#8212;of workflows. The execution of workflows itself is typically
+performed by a workflow executor.</p>
+</div>
+<div class="section" id="module-omsi.workflow.driver.base">
+<span id="base-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">base</span></code> Module<a class="headerlink" href="#module-omsi.workflow.driver.base" title="Permalink to this headline">¶</a></h2>
+<p>Module with base classes for workflow drivers.</p>
+<p>Workflow drivers are responsible for the creation and initialization of workflows. The execution
+of workflows is then controlled by the workflow executor.</p>
+<dl class="class">
+<dt id="omsi.workflow.driver.base.analysis_driver_base">
+<em class="property">class </em><code class="descclassname">omsi.workflow.driver.base.</code><code class="descname">analysis_driver_base</code><span class="sig-paren">(</span><em>analysis_class</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.analysis_driver_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#omsi.workflow.driver.base.driver_base" title="omsi.workflow.driver.base.driver_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.workflow.driver.base.driver_base</span></code></a></p>
+<p>Base class defining the minimal interface for drivers of a single analysis based on the type/class of the analysis.</p>
+<p>This is a class-based execution, i.e, the user defines only the type of analysis and inputs but does not actually
+create the analysis.</p>
+<p>Derived classes must implement the main(...) function where the analysis is created and executed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>analysis_class</strong> &#8211; The analysis class for which we want to execute the analysis.
+The analysis class must derive from omsi.analysis.analysis_base. May be None
+in case that we use other means to set the analysis_class, e.g., via the
+command-line.</td>
+</tr>
+</tbody>
+</table>
+<p>Initialize the analysis driver</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>analysis_class</strong> &#8211; The analysis class for which we want to execute the analysis.
+The analysis class must derive from omsi.analysis.analysis_base. May be None
+in case that we use other means to set the analysis_class, e.g., via the
+command-line.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="omsi.workflow.driver.base.analysis_driver_base.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.analysis_driver_base.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main function for running the analysis.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.workflow.driver.base.driver_base">
+<em class="property">class </em><code class="descclassname">omsi.workflow.driver.base.</code><code class="descname">driver_base</code><a class="headerlink" href="#omsi.workflow.driver.base.driver_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Primitve base class for driving the execution of an object</p>
+<dl class="method">
+<dt id="omsi.workflow.driver.base.driver_base.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.driver_base.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as main</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.base.driver_base.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.driver_base.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main function for running the analysis.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.workflow.driver.base.workflow_driver_base">
+<em class="property">class </em><code class="descclassname">omsi.workflow.driver.base.</code><code class="descname">workflow_driver_base</code><span class="sig-paren">(</span><em>workflow_executor</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.workflow_driver_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class defining the minimal interface for drivers of complex analysis workflows.</p>
+<p>Workflows may be specified via scripts or given via a set of analysis objects.</p>
+<p>Derived classes must implement the main(...) function where the analysis is created and executed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>workflow_executor</strong> &#8211; The executor of the workflow.</td>
+</tr>
+</tbody>
+</table>
+<p>Initalize the workflow driver</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow_executor</strong> &#8211; The executor of the workflow we want to drive.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="omsi.workflow.driver.base.workflow_driver_base.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.base.workflow_driver_base.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main function for running the analysis.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.workflow.driver.cl_analysis_driver">
+<span id="cl-analysis-driver-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">cl_analysis_driver</span></code> Module<a class="headerlink" href="#module-omsi.workflow.driver.cl_analysis_driver" title="Permalink to this headline">¶</a></h2>
+<p>Module used to help with driving the execution of omsi-based analyses.</p>
+<dl class="class">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver">
+<em class="property">class </em><code class="descclassname">omsi.workflow.driver.cl_analysis_driver.</code><code class="descname">cl_analysis_driver</code><span class="sig-paren">(</span><em>analysis_class</em>, <em>add_analysis_class_arg=False</em>, <em>add_output_arg=True</em>, <em>add_log_level_arg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#omsi.workflow.driver.base.analysis_driver_base" title="omsi.workflow.driver.base.analysis_driver_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.workflow.driver.base.analysis_driver_base</span></code></a></p>
+<p>Command-line analysis driver.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name" title="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name"><strong>analysis_class_arg_name</strong></a> &#8211; The name for the argument where the positional argument for defining the
+analysis class should be stored.</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name" title="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name"><strong>output_save_arg_name</strong></a> &#8211; Name of the optional keyword argument for specifying the name
+and target for the analysis</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name" title="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name"><strong>analysis_class_arg_name</strong></a> &#8211; Name of the optional first positional argument to be used
+to define the analysis class to be used.</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name" title="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name"><strong>log_level_arg_name</strong></a> &#8211; Name of the keyword cl argument to define the level of logging ot be used.</li>
+<li><strong>analysis_class</strong> &#8211; The class (subclass of analysis_base) defining the analysis to be executed</li>
+<li><strong>analysis_object</strong> &#8211; Instance of the analysis object to be executed</li>
+<li><strong>add_analysis_class_arg</strong> &#8211; Boolean indicating whether an optional positional command line argument
+should be used to determine the analysis class (or whether the analysis class will be set explicitly)</li>
+<li><strong>add_output_arg</strong> &#8211; Boolean indicating whether an optional keyword argument should be added to define
+the output target for the analysis.</li>
+<li><strong>add_log_level_arg</strong> &#8211; Boolean indicating whether the &#8211;loglevel argument should be added to the command line</li>
+<li><strong>parser</strong> &#8211; The argparse.ArgumentParser instance used for defining command-line arguments</li>
+<li><strong>required_argument_group</strong> &#8211; argparse.ArgumentParser argument group used to define required command line arguments</li>
+<li><strong>custom_argument_groups</strong> &#8211; Dict of custom argparse.ArgumentParser argument groups specified by the analysis</li>
+<li><strong>output_target</strong> &#8211; Specification of the output target where the analysis result should be stored</li>
+<li><strong>analysis_arguments</strong> &#8211; Dictionary defining the input arguments to be used for the analysis</li>
+<li><strong>mpi_root</strong> &#8211; Integer indicating the root rank when running using MPI</li>
+<li><strong>mpi_comm</strong> &#8211; Integer indicating the MPI communicator to be used when running in parallel using MPI</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>analysis_class</strong> (<a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><em>omsi.analysis.base.analysis_base</em></a>) &#8211; The analysis class for which we want to execute the analysis.
+The analysis class must derive from omsi.analysis.analysis_base. May be None
+in case that we use the command-line to define the analysis class via the optional
+positional argument for the command class (i.e., set add_analysis_class_arg to True).</li>
+<li><strong>add_analysis_class_arg</strong> &#8211; Boolean indicating whether we will use the positional
+command-line argument to determine the analysis class name</li>
+<li><strong>add_output_arg</strong> &#8211; Boolean indicating whether we should add the optional keyword
+argument for defining the output target for the analysis.</li>
+<li><strong>add_log_level_arg</strong> &#8211; Boolean indicating wither we should add the option keyword argument to specify the
+logging level via the command line.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">A ValueError is raised in the case of conflicting inputs, i.e., if
+i) analysis_class==None and add_analysis_class_arg=False, i.e., the analysis class is not determined or
+ii) analysis_class!=None and add_analysis_class_arg=False, i.e, the analysis class is determined
+via two separate mechanisms.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.add_and_parse_analysis_arguments">
+<code class="descname">add_and_parse_analysis_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.add_and_parse_analysis_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function assumes that the command line parser has been setup using the initialize_argument_parser(..)</p>
+<p>This function is responsible for adding all command line arguments that are specific to the analysis and
+to then parse those argument and save the relevant data in the self.analysis_arguments dictionary.
+Command-line arguments that are specific to the command line driver are removed, so that only
+arguments that can be consumed by the analysis are handed to the analysis.</p>
+<p><em>Side effects:</em> The function sets <code class="docutils literal"><span class="pre">self.analysis_arguments</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name">
+<code class="descname">analysis_class_arg_name</code><em class="property"> = '__analysis_class'</em><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.analysis_class_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name where the positional argument for defining the analysis class will be stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.create_analysis_object">
+<code class="descname">create_analysis_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.create_analysis_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the analysis object, i.e., set self.analysis_object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.get_analysis_class_from_cl">
+<code class="descname">get_analysis_class_from_cl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.get_analysis_class_from_cl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal helper function used to get the analysis class object based on the
+analysis_class_arg_name positional argument from the command line.</p>
+<p><em>Side effects:</em> The function sets <a href="#id2"><span class="problematic" id="id3">``</span></a>self.analysis_class`</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">ImportError in case that the analysis module cannot be loaded</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">AttributeError in case that the analysis class cannot be extracted from the module</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.initialize_argument_parser">
+<code class="descname">initialize_argument_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.initialize_argument_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal helper function used to initialize the argument parser.
+NOTE: self.analysis_class must be set before calling this function.</p>
+<p><em>Side effects:</em> The function sets <code class="docutils literal"><span class="pre">self.parser</span></code> and <code class="docutils literal"><span class="pre">self.required_argument_group</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.log_level_arg_name">
+<code class="descname">log_level_arg_name</code><em class="property"> = 'loglevel'</em><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.log_level_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the keyword argument used to specify the level of logging to be used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default main function for running an analysis from the command line.
+The default implementation exposes all specified analysis parameters as command
+line options to the user. The default implementation also provides means to
+print a help text for the function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">ValueError is raised in case that the analysis class is unknown</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name">
+<code class="descname">output_save_arg_name</code><em class="property"> = 'save'</em><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the key-word argument used to define</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.parse_cl_arguments">
+<code class="descname">parse_cl_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.parse_cl_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function assumes that the command line parser has been setup using the initialize_argument_parser(..)</p>
+<p>This function parses all arguments that are specific to the command-line parser itself. Analysis
+arguments are added and parsed later by the add_and_parse_analysis_arguments(...) function.
+The reason for this is two-fold: i) to separate the parsing of analysis arguments and arguments of the
+command-line driver and ii) if the same HDF5 file is used as input and output target, then we need to
+open it first here in append mode before it gets opened in read mode later by the arguments.</p>
+<p><em>Side effects:</em> The function sets <code class="docutils literal"><span class="pre">self.output_target</span></code> and <code class="docutils literal"><span class="pre">self.profile_analysis</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.print_settings">
+<code class="descname">print_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.print_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the analysis settings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.remove_output_target">
+<code class="descname">remove_output_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.remove_output_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to delete any output target files created by the
+command line driver. This is done in case that an error occurred and
+we do not want to leave garbage files left over.</p>
+<p><em>Side effects</em> The function modifies <code class="docutils literal"><span class="pre">self.output_target</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean indicating whether we succesfully cleaned up the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.reset_analysis_object">
+<code class="descname">reset_analysis_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.reset_analysis_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the analysis object and recreate it, i.e., delete self.analysis_object and set it again.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.workflow.driver.cl_workflow_driver">
+<span id="cl-workflow-driver-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">cl_workflow_driver</span></code> Module<a class="headerlink" href="#module-omsi.workflow.driver.cl_workflow_driver" title="Permalink to this headline">¶</a></h2>
+<p>Module used to help with driving the execution of analysis workflows</p>
+<dl class="class">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver">
+<em class="property">class </em><code class="descclassname">omsi.workflow.driver.cl_workflow_driver.</code><code class="descname">cl_workflow_driver</code><span class="sig-paren">(</span><em>workflow_executor=None</em>, <em>add_script_arg=False</em>, <em>add_output_arg=True</em>, <em>add_log_level_arg=True</em>, <em>add_profile_arg=False</em>, <em>add_mem_profile_arg=False</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#omsi.workflow.driver.base.workflow_driver_base" title="omsi.workflow.driver.base.workflow_driver_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.workflow.driver.base.workflow_driver_base</span></code></a></p>
+<p>Command-line workflow driver.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.script_arg_name" title="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.script_arg_name"><strong>script_arg_name</strong></a> &#8211; Name of the optional keyword cl argument for defining workflow scripts to be executed</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name" title="omsi.workflow.driver.cl_analysis_driver.cl_analysis_driver.output_save_arg_name"><strong>output_save_arg_name</strong></a> &#8211; Name of the optional keyword argument for specifying the name
+and target for the workflow. This may be a folder or an HDF5 file ending with .h5</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_arg_name" title="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_arg_name"><strong>profile_arg_name</strong></a> &#8211; Name of the keyword argument used to enable profiling of the analysis</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_mem_arg_name" title="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_mem_arg_name"><strong>profile_mem_arg_name</strong></a> &#8211; Name of the keyword argument used to enable profiling of memory usage of an analysis</li>
+<li><a class="reference internal" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name" title="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name"><strong>log_level_arg_name</strong></a> &#8211; Name of the keyword cl argument to define the level of logging ot be used.</li>
+<li><strong>workflow_executor</strong> &#8211; The workflow executor object used to execute the analysis workflow.
+The workflow executor must derive from omsi.workflow.executor.base.workflow_executor_base.
+May be None in case that we use the command-line to define workflow executor or if the
+default executor should be used. The default executur class is defined by
+omsi.workflow.executor.base.workflow_executor_base.</li>
+<li><strong>script_files</strong> &#8211; List of strings with the paths to files with workflow scripts to be executed.</li>
+<li><strong>add_script_arg</strong> &#8211; Boolean indicating whether the &#8211;script keyword argument should be added to the
+command-line, to define the workflow scripts via the CL (or whether the scripts will be set explicitly)</li>
+<li><strong>add_output_arg</strong> &#8211; Boolean indicating whether an optional keyword argument should be added to define
+the output target for the analysis.</li>
+<li><strong>add_profile_arg</strong> &#8211; Add the optional &#8211;profile keyword argument for profiling the analysis</li>
+<li><strong>add_mem_profile_arg</strong> &#8211; Boolean indicating whether we should add the optional
+keyword argument for enabling memory profiling of the analysis.</li>
+<li><strong>add_log_level_arg</strong> &#8211; Boolean indicating wither we should add the option keyword argument to specify the
+logging level via the command line.</li>
+<li><strong>parser</strong> &#8211; The argparse.ArgumentParser instance used for defining command-line arguments</li>
+<li><strong>required_argument_group</strong> &#8211; argparse.ArgumentParser argument group used to define required command line arguments</li>
+<li><strong>optional_argument_group</strong> &#8211; argparse.ArgumentParser argument group used to define optional command line arguments</li>
+<li><strong>custom_argument_groups</strong> &#8211; Dict of custom argparse.ArgumentParser argument groups specified by the analysis</li>
+<li><strong>identifier_argname_seperator</strong> &#8211; String used to seperate the analysis identifier and argument name when
+creating custom command-line options for the individual analyses of the workflow</li>
+<li><strong>output_target</strong> &#8211; Specification of the output target where the analysis result should be stored</li>
+<li><strong>profile_analyses</strong> &#8211; Boolean indicating whether we should profile the analysis for time and usage</li>
+<li><strong>profile_analyses_mem</strong> &#8211; Boolean indicating whether we should profile the memory usage of the individual analyses</li>
+<li><strong>analysis_arguments</strong> &#8211; Dictionary defining the custom input arguments to be used for the analysis</li>
+<li><strong>workflow_executor_arguments</strong> &#8211; Dictionary defining the custom input arguments routed to the workflow executor</li>
+<li><strong>__output_target_self</strong> &#8211; Private member variable used to store the output files created by this object.</li>
+<li><strong>user_log_level</strong> &#8211; The custom logging level specified by the user (or None)</li>
+<li><strong>mpi_root</strong> &#8211; The root rank used when running in parallel</li>
+<li><strong>mpi_comm</strong> &#8211; The mpit communicator to be used when running in parallel</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>workflow_executor</strong> (<a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><em>omsi.analysis.base.analysis_base</em></a>) &#8211; The workflow executor object used to execute the analysis workflow.
+The workflow executor must derive from omsi.workflow.executor.base.workflow_executor_base.
+May be None in case that we use the command-line to define workflow executor or if the
+default executor should be used. The default executur class is defined by
+omsi.workflow.executor.base.workflow_executor_base.</li>
+<li><strong>add_script_arg</strong> &#8211; Boolean indicating whether the &#8211;script keyword argument should be added to the
+command-line, to define the workflow scripts via the CL (or whether the scripts will be set explicitly)</li>
+<li><strong>add_output_arg</strong> &#8211; Boolean indicating whether we should add the optional keyword
+argument for defining the output target for the analysis.</li>
+<li><strong>add_log_level_arg</strong> &#8211; Boolean indicating wither we should add the option keyword argument to specify the</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>logging level via the command line.
+:param add_profile_arg: Boolean indicating whether we should add the optional keyword</p>
+<blockquote>
+<div>argument for enabling profiling of the analysis.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>add_mem_profile_arg</strong> &#8211; Boolean indicating whether we should add the optional
+keyword argument for enabling memory profiling of the analysis.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">A ValueError is raised in the case of conflicting inputs, i.e., if
+i) workflow_executor==None and add_script_arg=False, i.e., the analysis class is not determined or
+ii) workflow_executor!=None and add_script_arg=False, i.e, the analysis class is determined
+via two separate mechanisms.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.add_and_parse_workflow_arguments">
+<code class="descname">add_and_parse_workflow_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.add_and_parse_workflow_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function assumes that the command line parser has been setup using the initialize_argument_parser(..)</p>
+<p>This function is responsible for adding all command line arguments that are specific to the workflow and
+to then parse those arguments and save the relevant data in the self.analysis_arguments dictionary.
+Command-line arguments that are specific to the command line driver are removed, so that only
+arguments that can be consumed by the analysis are handed to the analysis.</p>
+<dl class="docutils">
+<dt><em>Side effects:</em> The function sets <code class="docutils literal"><span class="pre">self.analysis_arguments</span></code> and updates the analysis parameters of the</dt>
+<dd>analyses stored in <code class="docutils literal"><span class="pre">self.workflow_executor.analysis_tasks</span></code></dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.create_workflow_executor_object">
+<code class="descname">create_workflow_executor_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.create_workflow_executor_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the workflow executor object, i.e., set self.workflow_executor</p>
+<p><em>Side effects</em> This function potentially modifies self.workflow_executor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.initialize_argument_parser">
+<code class="descname">initialize_argument_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.initialize_argument_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal helper function used to initialize the argument parser.</p>
+<p><em>Side effects:</em> The function sets:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">self.parser</span></code></li>
+<li><code class="docutils literal"><span class="pre">self.required_argument_group</span></code></li>
+<li><code class="docutils literal"><span class="pre">self.opitonal_argument_group</span></code></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name">
+<code class="descname">log_level_arg_name</code><em class="property"> = 'loglevel'</em><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.log_level_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the keyword argument used to specify the level of logging to be used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.main">
+<code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default main function for running an analysis from the command line.
+The default implementation exposes all specified analysis parameters as command
+line options to the user. The default implementation also provides means to
+print a help text for the function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">ValueError is raised in case that the analysis class is unknown</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.output_save_arg_name">
+<code class="descname">output_save_arg_name</code><em class="property"> = 'save'</em><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.output_save_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the key-word argument used to define</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.parse_cl_arguments">
+<code class="descname">parse_cl_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.parse_cl_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function assumes that the command line parser has been setup using the initialize_argument_parser(..)</p>
+<p>This function parses all arguments that are specific to the command-line parser itself. Analysis workflow
+arguments are added and parsed later by the add_and_parse_workflow_arguments(...) function.
+The reason for this is two-fold: i) to separate the parsing of analysis arguments and arguments of the
+command-line driver and ii) if the same HDF5 file is used as input and output target, then we need to
+open it first here in append mode before it gets opened in read mode later by the arguments.</p>
+<p><em>Side effects:</em> The function sets:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">self.output_target</span></code></li>
+<li><code class="docutils literal"><span class="pre">self.profile_analyses</span></code></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_memory_profiles">
+<code class="descname">print_memory_profiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_memory_profiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the memory profiles if available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_settings">
+<code class="descname">print_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the analysis settings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_time_and_usage_profiles">
+<code class="descname">print_time_and_usage_profiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.print_time_and_usage_profiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the profiling data for time and usage if available</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_arg_name">
+<code class="descname">profile_arg_name</code><em class="property"> = 'profile'</em><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the keyword argument used to enable profiling of the analysis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_mem_arg_name">
+<code class="descname">profile_mem_arg_name</code><em class="property"> = 'memprofile'</em><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.profile_mem_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the keyword argument used to enable profiling of memory usage of an analysis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.remove_output_target">
+<code class="descname">remove_output_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.remove_output_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to delete any output target files created by the
+command line driver. This is done in case that an error occurred and
+we do not want to leave garbage files left over.</p>
+<p><em>Side effects</em> The function modifies <code class="docutils literal"><span class="pre">self.output_target</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean indicating whether we succesfully cleaned up the output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.reset_workflow_executor_object">
+<code class="descname">reset_workflow_executor_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.reset_workflow_executor_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove and recreate the workflow executor object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.script_arg_name">
+<code class="descname">script_arg_name</code><em class="property"> = 'script'</em><a class="headerlink" href="#omsi.workflow.driver.cl_workflow_driver.cl_workflow_driver.script_arg_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name where the positional argument for defining the analysis class will be stored.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="omsi.workflow.executor.html" class="btn btn-neutral float-right" title="executor Package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="omsi.workflow.html" class="btn btn-neutral" title="workflow Package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

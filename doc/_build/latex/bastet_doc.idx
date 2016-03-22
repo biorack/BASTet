@@ -1,0 +1,934 @@
+\indexentry{omsi.analysis (module)|hyperpage}{76}
+\indexentry{analysis\_data (class in omsi.analysis)|hyperpage}{76}
+\indexentry{ana\_hdf5link (omsi.analysis.analysis\_data attribute)|hyperpage}{77}
+\indexentry{analysis\_base (class in omsi.analysis)|hyperpage}{77}
+\indexentry{add\_custom\_data\_to\_omsi\_file() (omsi.analysis.analysis\_base method)|hyperpage}{79}
+\indexentry{add\_parameter() (omsi.analysis.analysis\_base method)|hyperpage}{79}
+\indexentry{analysis\_identifier\_defined() (omsi.analysis.analysis\_base method)|hyperpage}{79}
+\indexentry{check\_ready\_to\_execute() (omsi.analysis.analysis\_base method)|hyperpage}{79}
+\indexentry{clear\_analysis() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{clear\_analysis\_data() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{clear\_and\_restore() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{clear\_parameter\_data() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{clear\_run\_info\_data() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{define\_missing\_parameters() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{enable\_memory\_profiling() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{enable\_time\_and\_usage\_profiling() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{execute() (omsi.analysis.analysis\_base method)|hyperpage}{80}
+\indexentry{execute\_all() (omsi.analysis.analysis\_base class method)|hyperpage}{80}
+\indexentry{execute\_analysis() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{execute\_recursive() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_all\_analysis\_data() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_all\_dependency\_data() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_all\_parameter\_data() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_all\_run\_info() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_analysis\_data() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_analysis\_data\_by\_name() (omsi.analysis.analysis\_base method)|hyperpage}{81}
+\indexentry{get\_analysis\_data\_names() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_analysis\_identifier() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_analysis\_instances() (omsi.analysis.analysis\_base class method)|hyperpage}{82}
+\indexentry{get\_analysis\_type() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_default\_dtypes() (omsi.analysis.analysis\_base static method)|hyperpage}{82}
+\indexentry{get\_default\_parameter\_groups() (omsi.analysis.analysis\_base static method)|hyperpage}{82}
+\indexentry{get\_help\_string() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_memory\_profile\_info() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_num\_analysis\_data() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_num\_dependency\_data() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_num\_parameter\_data() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_omsi\_analysis\_storage() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_parameter\_data() (omsi.analysis.analysis\_base method)|hyperpage}{82}
+\indexentry{get\_parameter\_data\_by\_name() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{get\_parameter\_names() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{get\_profile\_stats\_object() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{has\_omsi\_analysis\_storage() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{keys() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{locate\_analysis() (omsi.analysis.analysis\_base class method)|hyperpage}{83}
+\indexentry{read\_from\_omsi\_file() (omsi.analysis.analysis\_base method)|hyperpage}{83}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.analysis\_base method)|hyperpage}{84}
+\indexentry{results\_ready() (omsi.analysis.analysis\_base method)|hyperpage}{84}
+\indexentry{set\_analysis\_identifier() (omsi.analysis.analysis\_base method)|hyperpage}{84}
+\indexentry{set\_parameter\_values() (omsi.analysis.analysis\_base method)|hyperpage}{84}
+\indexentry{update\_analysis\_parameters() (omsi.analysis.analysis\_base method)|hyperpage}{84}
+\indexentry{v\_qmz() (omsi.analysis.analysis\_base class method)|hyperpage}{85}
+\indexentry{v\_qslice() (omsi.analysis.analysis\_base class method)|hyperpage}{85}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.analysis\_base class method)|hyperpage}{85}
+\indexentry{v\_qspectrum() (omsi.analysis.analysis\_base class method)|hyperpage}{86}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_base class method)|hyperpage}{86}
+\indexentry{write\_analysis\_data() (omsi.analysis.analysis\_base method)|hyperpage}{86}
+\indexentry{AnalysisReadyError|hyperpage}{87}
+\indexentry{analysis\_generic (class in omsi.analysis)|hyperpage}{87}
+\indexentry{DEFAULT\_OUTPUT\_PREFIX (omsi.analysis.analysis\_generic attribute)|hyperpage}{87}
+\indexentry{execute() (omsi.analysis.analysis\_generic method)|hyperpage}{87}
+\indexentry{execute\_analysis() (omsi.analysis.analysis\_generic method)|hyperpage}{87}
+\indexentry{from\_function() (omsi.analysis.analysis\_generic class method)|hyperpage}{87}
+\indexentry{get\_analysis\_type() (omsi.analysis.analysis\_generic class method)|hyperpage}{87}
+\indexentry{get\_real\_analysis\_type() (omsi.analysis.analysis\_generic method)|hyperpage}{87}
+\indexentry{read\_from\_omsi\_file() (omsi.analysis.analysis\_generic method)|hyperpage}{88}
+\indexentry{v\_qmz() (omsi.analysis.analysis\_generic class method)|hyperpage}{88}
+\indexentry{v\_qslice() (omsi.analysis.analysis\_generic class method)|hyperpage}{88}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.analysis\_generic class method)|hyperpage}{88}
+\indexentry{v\_qspectrum() (omsi.analysis.analysis\_generic class method)|hyperpage}{88}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_generic class method)|hyperpage}{88}
+\indexentry{write\_analysis\_data() (omsi.analysis.analysis\_generic method)|hyperpage}{88}
+\indexentry{omsi\_findpeaks\_global (class in omsi.analysis)|hyperpage}{88}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_findpeaks\_global method)|hyperpage}{88}
+\indexentry{v\_qmz() (omsi.analysis.omsi\_findpeaks\_global class method)|hyperpage}{88}
+\indexentry{v\_qslice() (omsi.analysis.omsi\_findpeaks\_global class method)|hyperpage}{88}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_global class method)|hyperpage}{88}
+\indexentry{v\_qspectrum() (omsi.analysis.omsi\_findpeaks\_global class method)|hyperpage}{88}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_global class method)|hyperpage}{88}
+\indexentry{omsi\_findpeaks\_local (class in omsi.analysis)|hyperpage}{88}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_findpeaks\_local method)|hyperpage}{89}
+\indexentry{v\_qmz() (omsi.analysis.omsi\_findpeaks\_local class method)|hyperpage}{89}
+\indexentry{v\_qslice() (omsi.analysis.omsi\_findpeaks\_local class method)|hyperpage}{89}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_local class method)|hyperpage}{89}
+\indexentry{v\_qspectrum() (omsi.analysis.omsi\_findpeaks\_local class method)|hyperpage}{89}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_local class method)|hyperpage}{89}
+\indexentry{write\_analysis\_data() (omsi.analysis.omsi\_findpeaks\_local method)|hyperpage}{89}
+\indexentry{omsi\_nmf (class in omsi.analysis)|hyperpage}{89}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_nmf method)|hyperpage}{89}
+\indexentry{v\_qmz() (omsi.analysis.omsi\_nmf class method)|hyperpage}{89}
+\indexentry{v\_qslice() (omsi.analysis.omsi\_nmf class method)|hyperpage}{89}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.omsi\_nmf class method)|hyperpage}{89}
+\indexentry{v\_qspectrum() (omsi.analysis.omsi\_nmf class method)|hyperpage}{89}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_nmf class method)|hyperpage}{89}
+\indexentry{omsi\_cx (class in omsi.analysis)|hyperpage}{90}
+\indexentry{comp\_lev\_exact() (omsi.analysis.omsi\_cx class method)|hyperpage}{90}
+\indexentry{dimension\_index (omsi.analysis.omsi\_cx attribute)|hyperpage}{90}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_cx method)|hyperpage}{90}
+\indexentry{v\_qmz() (omsi.analysis.omsi\_cx class method)|hyperpage}{90}
+\indexentry{v\_qslice() (omsi.analysis.omsi\_cx class method)|hyperpage}{90}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.omsi\_cx class method)|hyperpage}{91}
+\indexentry{v\_qspectrum() (omsi.analysis.omsi\_cx class method)|hyperpage}{91}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_cx class method)|hyperpage}{92}
+\indexentry{omsi\_kmeans (class in omsi.analysis)|hyperpage}{92}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_kmeans method)|hyperpage}{92}
+\indexentry{omsi\_tic\_norm (class in omsi.analysis)|hyperpage}{92}
+\indexentry{execute\_analysis() (omsi.analysis.omsi\_tic\_norm method)|hyperpage}{92}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.omsi\_tic\_norm method)|hyperpage}{92}
+\indexentry{v\_qmz() (omsi.analysis.omsi\_tic\_norm class method)|hyperpage}{92}
+\indexentry{v\_qslice() (omsi.analysis.omsi\_tic\_norm class method)|hyperpage}{93}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.omsi\_tic\_norm class method)|hyperpage}{93}
+\indexentry{v\_qspectrum() (omsi.analysis.omsi\_tic\_norm class method)|hyperpage}{93}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_tic\_norm class method)|hyperpage}{94}
+\indexentry{omsi.analysis.base (module)|hyperpage}{94}
+\indexentry{AnalysisReadyError|hyperpage}{94}
+\indexentry{analysis\_base (class in omsi.analysis.base)|hyperpage}{94}
+\indexentry{add\_custom\_data\_to\_omsi\_file() (omsi.analysis.base.analysis\_base method)|hyperpage}{96}
+\indexentry{add\_parameter() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{analysis\_identifier\_defined() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{check\_ready\_to\_execute() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{clear\_analysis() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{clear\_analysis\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{clear\_and\_restore() (omsi.analysis.base.analysis\_base method)|hyperpage}{97}
+\indexentry{clear\_parameter\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{clear\_run\_info\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{define\_missing\_parameters() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{enable\_memory\_profiling() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{enable\_time\_and\_usage\_profiling() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{execute() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{execute\_all() (omsi.analysis.base.analysis\_base class method)|hyperpage}{98}
+\indexentry{execute\_analysis() (omsi.analysis.base.analysis\_base method)|hyperpage}{98}
+\indexentry{execute\_recursive() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_all\_analysis\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_all\_dependency\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_all\_parameter\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_all\_run\_info() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_analysis\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_analysis\_data\_by\_name() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_analysis\_data\_names() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_analysis\_identifier() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_analysis\_instances() (omsi.analysis.base.analysis\_base class method)|hyperpage}{99}
+\indexentry{get\_analysis\_type() (omsi.analysis.base.analysis\_base method)|hyperpage}{99}
+\indexentry{get\_default\_dtypes() (omsi.analysis.base.analysis\_base static method)|hyperpage}{100}
+\indexentry{get\_default\_parameter\_groups() (omsi.analysis.base.analysis\_base static method)|hyperpage}{100}
+\indexentry{get\_help\_string() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_memory\_profile\_info() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_num\_analysis\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_num\_dependency\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_num\_parameter\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_omsi\_analysis\_storage() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_parameter\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_parameter\_data\_by\_name() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_parameter\_names() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{get\_profile\_stats\_object() (omsi.analysis.base.analysis\_base method)|hyperpage}{100}
+\indexentry{has\_omsi\_analysis\_storage() (omsi.analysis.base.analysis\_base method)|hyperpage}{101}
+\indexentry{keys() (omsi.analysis.base.analysis\_base method)|hyperpage}{101}
+\indexentry{locate\_analysis() (omsi.analysis.base.analysis\_base class method)|hyperpage}{101}
+\indexentry{read\_from\_omsi\_file() (omsi.analysis.base.analysis\_base method)|hyperpage}{101}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.base.analysis\_base method)|hyperpage}{102}
+\indexentry{results\_ready() (omsi.analysis.base.analysis\_base method)|hyperpage}{102}
+\indexentry{set\_analysis\_identifier() (omsi.analysis.base.analysis\_base method)|hyperpage}{102}
+\indexentry{set\_parameter\_values() (omsi.analysis.base.analysis\_base method)|hyperpage}{102}
+\indexentry{update\_analysis\_parameters() (omsi.analysis.base.analysis\_base method)|hyperpage}{102}
+\indexentry{v\_qmz() (omsi.analysis.base.analysis\_base class method)|hyperpage}{102}
+\indexentry{v\_qslice() (omsi.analysis.base.analysis\_base class method)|hyperpage}{103}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.base.analysis\_base class method)|hyperpage}{103}
+\indexentry{v\_qspectrum() (omsi.analysis.base.analysis\_base class method)|hyperpage}{103}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.base.analysis\_base class method)|hyperpage}{104}
+\indexentry{write\_analysis\_data() (omsi.analysis.base.analysis\_base method)|hyperpage}{104}
+\indexentry{omsi.analysis.generic (module)|hyperpage}{104}
+\indexentry{analysis\_generic (class in omsi.analysis.generic)|hyperpage}{104}
+\indexentry{DEFAULT\_OUTPUT\_PREFIX (omsi.analysis.generic.analysis\_generic attribute)|hyperpage}{105}
+\indexentry{execute() (omsi.analysis.generic.analysis\_generic method)|hyperpage}{105}
+\indexentry{execute\_analysis() (omsi.analysis.generic.analysis\_generic method)|hyperpage}{105}
+\indexentry{from\_function() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{get\_analysis\_type() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{get\_real\_analysis\_type() (omsi.analysis.generic.analysis\_generic method)|hyperpage}{105}
+\indexentry{read\_from\_omsi\_file() (omsi.analysis.generic.analysis\_generic method)|hyperpage}{105}
+\indexentry{v\_qmz() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{v\_qslice() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{v\_qspectrum() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.generic.analysis\_generic class method)|hyperpage}{105}
+\indexentry{write\_analysis\_data() (omsi.analysis.generic.analysis\_generic method)|hyperpage}{106}
+\indexentry{bastet\_analysis() (in module omsi.analysis.generic)|hyperpage}{106}
+\indexentry{omsi.analysis.analysis\_views (module)|hyperpage}{106}
+\indexentry{analysis\_views (class in omsi.analysis.analysis\_views)|hyperpage}{106}
+\indexentry{analysis\_name\_to\_class() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{106}
+\indexentry{available\_analysis() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{106}
+\indexentry{available\_analysis\_descriptions() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{106}
+\indexentry{get\_axes() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{107}
+\indexentry{get\_qslice\_viewer\_options() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{107}
+\indexentry{get\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{107}
+\indexentry{get\_slice() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{107}
+\indexentry{get\_spectra() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{108}
+\indexentry{supports\_slice() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{108}
+\indexentry{supports\_spectra() (omsi.analysis.analysis\_views.analysis\_views class method)|hyperpage}{108}
+\indexentry{omsi.analysis.findpeaks (module)|hyperpage}{108}
+\indexentry{omsi\_findpeaks\_global (class in omsi.analysis.findpeaks)|hyperpage}{109}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_global method)|hyperpage}{109}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method)|hyperpage}{109}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method)|hyperpage}{109}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method)|hyperpage}{109}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method)|hyperpage}{109}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method)|hyperpage}{109}
+\indexentry{omsi\_findpeaks\_local (class in omsi.analysis.findpeaks)|hyperpage}{109}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_local method)|hyperpage}{109}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method)|hyperpage}{109}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method)|hyperpage}{109}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method)|hyperpage}{109}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method)|hyperpage}{109}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method)|hyperpage}{109}
+\indexentry{write\_analysis\_data() (omsi.analysis.findpeaks.omsi\_findpeaks\_local method)|hyperpage}{109}
+\indexentry{omsi.analysis.findpeaks.omsi\_findpeaks\_global (module)|hyperpage}{110}
+\indexentry{omsi\_findpeaks\_global (class in omsi.analysis.findpeaks.omsi\_findpeaks\_global)|hyperpage}{110}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global method)|hyperpage}{110}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method)|hyperpage}{110}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method)|hyperpage}{110}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method)|hyperpage}{110}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method)|hyperpage}{110}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method)|hyperpage}{110}
+\indexentry{omsi.analysis.findpeaks.omsi\_findpeaks\_local (module)|hyperpage}{110}
+\indexentry{omsi\_findpeaks\_local (class in omsi.analysis.findpeaks.omsi\_findpeaks\_local)|hyperpage}{110}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local method)|hyperpage}{110}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method)|hyperpage}{110}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method)|hyperpage}{110}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method)|hyperpage}{110}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method)|hyperpage}{111}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method)|hyperpage}{111}
+\indexentry{write\_analysis\_data() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local method)|hyperpage}{111}
+\indexentry{omsi.analysis.findpeaks.third\_party (module)|hyperpage}{111}
+\indexentry{omsi.analysis.findpeaks.third\_party.findpeaks (module)|hyperpage}{111}
+\indexentry{findpeaks (class in omsi.analysis.findpeaks.third\_party.findpeaks)|hyperpage}{111}
+\indexentry{Name (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks attribute)|hyperpage}{111}
+\indexentry{display() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method)|hyperpage}{111}
+\indexentry{peakdet() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method)|hyperpage}{111}
+\indexentry{sliding\_window\_minimum() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method)|hyperpage}{111}
+\indexentry{smoothListGaussian() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method)|hyperpage}{111}
+\indexentry{omsi.analysis.findpeaks.experimental (module)|hyperpage}{111}
+\indexentry{omsi.analysis.findpeaks.experimental.omsi\_peakcube (module)|hyperpage}{112}
+\indexentry{main() (in module omsi.analysis.findpeaks.experimental.omsi\_peakcube)|hyperpage}{112}
+\indexentry{omsi\_peakcube (class in omsi.analysis.findpeaks.experimental.omsi\_peakcube)|hyperpage}{112}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method)|hyperpage}{112}
+\indexentry{getGlobalMz() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method)|hyperpage}{112}
+\indexentry{getPeakCube() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method)|hyperpage}{112}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method)|hyperpage}{112}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method)|hyperpage}{112}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method)|hyperpage}{112}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method)|hyperpage}{112}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method)|hyperpage}{112}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method)|hyperpage}{112}
+\indexentry{stop() (in module omsi.analysis.findpeaks.experimental.omsi\_peakcube)|hyperpage}{112}
+\indexentry{omsi.analysis.findpeaks.experimental.pfrun (module)|hyperpage}{112}
+\indexentry{generateScript() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{main() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{printHelp() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{queuePCjob() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{run\_lpf() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{run\_npg() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{run\_peakcube() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{stop() (in module omsi.analysis.findpeaks.experimental.pfrun)|hyperpage}{112}
+\indexentry{omsi.analysis.findpeaks.experimental.omsi\_lpf (module)|hyperpage}{112}
+\indexentry{cl\_peakfind() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{112}
+\indexentry{execute\_analysis() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{112}
+\indexentry{main() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{112}
+\indexentry{omsi\_lpf (class in omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{112}
+\indexentry{v\_qmz (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{113}
+\indexentry{v\_qslice (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{113}
+\indexentry{v\_qslice\_viewer\_options (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{113}
+\indexentry{v\_qspectrum (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{113}
+\indexentry{v\_qspectrum\_viewer\_options (in module omsi.analysis.findpeaks.experimental.omsi\_lpf)|hyperpage}{113}
+\indexentry{omsi.analysis.findpeaks.experimental.omsi\_npg (module)|hyperpage}{114}
+\indexentry{Node (class in omsi.analysis.findpeaks.experimental.omsi\_npg)|hyperpage}{114}
+\indexentry{main() (in module omsi.analysis.findpeaks.experimental.omsi\_npg)|hyperpage}{114}
+\indexentry{omsi\_npg (class in omsi.analysis.findpeaks.experimental.omsi\_npg)|hyperpage}{114}
+\indexentry{Find() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{MakeSet() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{Union() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{execute\_analysis() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getClustersInfo() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getCoordIdxB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getCoordInfoB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getCoordPeaksB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getNearestPeakIndex() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getPixelMap() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{getnpgimage() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{getnpgspec() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{myHC() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{splitLabelsList() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method)|hyperpage}{114}
+\indexentry{v\_qmz() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{v\_qslice() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{v\_qspectrum() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{114}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method)|hyperpage}{115}
+\indexentry{stop() (in module omsi.analysis.findpeaks.experimental.omsi\_npg)|hyperpage}{115}
+\indexentry{omsi.analysis.findpeaks.experimental.mypeakfinder (module)|hyperpage}{115}
+\indexentry{generateScript() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{getJobOutput() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{getPFcmd() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{main() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{monitorJob() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{printHelp() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{stop() (in module omsi.analysis.findpeaks.experimental.mypeakfinder)|hyperpage}{115}
+\indexentry{omsi.analysis.multivariate\_stats (module)|hyperpage}{115}
+\indexentry{omsi\_nmf (class in omsi.analysis.multivariate\_stats)|hyperpage}{115}
+\indexentry{execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_nmf method)|hyperpage}{115}
+\indexentry{v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_nmf class method)|hyperpage}{115}
+\indexentry{v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_nmf class method)|hyperpage}{115}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf class method)|hyperpage}{115}
+\indexentry{v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_nmf class method)|hyperpage}{115}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf class method)|hyperpage}{115}
+\indexentry{omsi\_cx (class in omsi.analysis.multivariate\_stats)|hyperpage}{116}
+\indexentry{comp\_lev\_exact() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{116}
+\indexentry{dimension\_index (omsi.analysis.multivariate\_stats.omsi\_cx attribute)|hyperpage}{116}
+\indexentry{execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_cx method)|hyperpage}{116}
+\indexentry{v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{116}
+\indexentry{v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{116}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{117}
+\indexentry{v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{117}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_cx class method)|hyperpage}{117}
+\indexentry{omsi\_kmeans (class in omsi.analysis.multivariate\_stats)|hyperpage}{118}
+\indexentry{execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_kmeans method)|hyperpage}{118}
+\indexentry{omsi.analysis.multivariate\_stats.omsi\_nmf (module)|hyperpage}{118}
+\indexentry{omsi\_nmf (class in omsi.analysis.multivariate\_stats.omsi\_nmf)|hyperpage}{118}
+\indexentry{execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf method)|hyperpage}{118}
+\indexentry{v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method)|hyperpage}{118}
+\indexentry{v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method)|hyperpage}{118}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method)|hyperpage}{118}
+\indexentry{v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method)|hyperpage}{118}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method)|hyperpage}{118}
+\indexentry{omsi.analysis.multivariate\_stats.third\_party (module)|hyperpage}{118}
+\indexentry{omsi.analysis.multivariate\_stats.third\_party.nmf (module)|hyperpage}{119}
+\indexentry{nlssubprob() (in module omsi.analysis.multivariate\_stats.third\_party.nmf)|hyperpage}{119}
+\indexentry{nmf() (in module omsi.analysis.multivariate\_stats.third\_party.nmf)|hyperpage}{119}
+\indexentry{omsi.analysis.multivariate\_stats.experimental (module)|hyperpage}{119}
+\indexentry{omsi.analysis.msi\_filtering (module)|hyperpage}{119}
+\indexentry{omsi\_tic\_norm (class in omsi.analysis.msi\_filtering)|hyperpage}{119}
+\indexentry{execute\_analysis() (omsi.analysis.msi\_filtering.omsi\_tic\_norm method)|hyperpage}{119}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.msi\_filtering.omsi\_tic\_norm method)|hyperpage}{120}
+\indexentry{v\_qmz() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method)|hyperpage}{120}
+\indexentry{v\_qslice() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method)|hyperpage}{120}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method)|hyperpage}{120}
+\indexentry{v\_qspectrum() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method)|hyperpage}{121}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method)|hyperpage}{121}
+\indexentry{omsi.analysis.msi\_filtering.omsi\_tic\_norm (module)|hyperpage}{122}
+\indexentry{omsi\_tic\_norm (class in omsi.analysis.msi\_filtering.omsi\_tic\_norm)|hyperpage}{122}
+\indexentry{execute\_analysis() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm method)|hyperpage}{122}
+\indexentry{record\_execute\_analysis\_outputs() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm method)|hyperpage}{122}
+\indexentry{v\_qmz() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method)|hyperpage}{122}
+\indexentry{v\_qslice() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method)|hyperpage}{122}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method)|hyperpage}{123}
+\indexentry{v\_qspectrum() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method)|hyperpage}{123}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method)|hyperpage}{123}
+\indexentry{omsi.analysis.msi\_filtering.third\_party (module)|hyperpage}{124}
+\indexentry{omsi.analysis.msi\_filtering.experimental (module)|hyperpage}{124}
+\indexentry{omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask (module)|hyperpage}{124}
+\indexentry{omsi\_filter\_by\_mask (class in omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask)|hyperpage}{124}
+\indexentry{execute\_analysis() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask method)|hyperpage}{124}
+\indexentry{v\_qmz() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method)|hyperpage}{124}
+\indexentry{v\_qslice() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method)|hyperpage}{125}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method)|hyperpage}{125}
+\indexentry{v\_qspectrum() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method)|hyperpage}{125}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method)|hyperpage}{126}
+\indexentry{omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster (module)|hyperpage}{126}
+\indexentry{omsi\_mask\_by\_cluster (class in omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster)|hyperpage}{126}
+\indexentry{execute\_analysis() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster method)|hyperpage}{126}
+\indexentry{v\_qmz() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method)|hyperpage}{126}
+\indexentry{v\_qslice() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method)|hyperpage}{126}
+\indexentry{v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method)|hyperpage}{127}
+\indexentry{v\_qspectrum() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method)|hyperpage}{127}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method)|hyperpage}{127}
+\indexentry{omsi.analysis.compound\_stats (module)|hyperpage}{128}
+\indexentry{omsi.analysis.compound\_stats.omsi\_score\_midas (module)|hyperpage}{128}
+\indexentry{omsi\_score\_midas (class in omsi.analysis.compound\_stats.omsi\_score\_midas)|hyperpage}{128}
+\indexentry{execute\_analysis() (omsi.analysis.compound\_stats.omsi\_score\_midas.omsi\_score\_midas method)|hyperpage}{128}
+\indexentry{omsi.analysis.compound\_stats.omsi\_score\_pactolus (module)|hyperpage}{129}
+\indexentry{omsi\_score\_pactolus (class in omsi.analysis.compound\_stats.omsi\_score\_pactolus)|hyperpage}{129}
+\indexentry{execute\_analysis() (omsi.analysis.compound\_stats.omsi\_score\_pactolus.omsi\_score\_pactolus method)|hyperpage}{129}
+\indexentry{omsi.analysis.compound\_stats.third\_party (module)|hyperpage}{129}
+\indexentry{omsi.analysis.compound\_stats.experimental (module)|hyperpage}{129}
+\indexentry{omsi.dataformat.omsi\_file (module)|hyperpage}{131}
+\indexentry{omsi.dataformat.omsi\_file.format (module)|hyperpage}{131}
+\indexentry{omsi\_format\_analysis (class in omsi.dataformat.omsi\_file.format)|hyperpage}{131}
+\indexentry{analysis\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{analysis\_identifier (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{analysis\_parameter\_group (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{analysis\_parameter\_help\_attr (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{analysis\_runinfo\_group (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{analysis\_type (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute)|hyperpage}{131}
+\indexentry{omsi\_format\_common (class in omsi.dataformat.omsi\_file.format)|hyperpage}{131}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{131}
+\indexentry{str\_type (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{131}
+\indexentry{str\_type\_unicode (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{131}
+\indexentry{timestamp\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{132}
+\indexentry{type\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{132}
+\indexentry{version\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute)|hyperpage}{132}
+\indexentry{omsi\_format\_data (class in omsi.dataformat.omsi\_file.format)|hyperpage}{132}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute)|hyperpage}{132}
+\indexentry{data\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute)|hyperpage}{132}
+\indexentry{dataset\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute)|hyperpage}{132}
+\indexentry{omsi\_format\_dependencies (class in omsi.dataformat.omsi\_file.format)|hyperpage}{132}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencies attribute)|hyperpage}{132}
+\indexentry{dependencies\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencies attribute)|hyperpage}{132}
+\indexentry{omsi\_format\_dependencydata (class in omsi.dataformat.omsi\_file.format)|hyperpage}{132}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{132}
+\indexentry{dependency\_datasetname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{132}
+\indexentry{dependency\_mainname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{132}
+\indexentry{dependency\_parameter (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{132}
+\indexentry{dependency\_parameter\_help\_attr (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{133}
+\indexentry{dependency\_selection (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{133}
+\indexentry{dependency\_typename (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute)|hyperpage}{133}
+\indexentry{omsi\_format\_experiment (class in omsi.dataformat.omsi\_file.format)|hyperpage}{133}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute)|hyperpage}{133}
+\indexentry{exp\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute)|hyperpage}{133}
+\indexentry{exp\_identifier\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute)|hyperpage}{133}
+\indexentry{omsi\_format\_file (class in omsi.dataformat.omsi\_file.format)|hyperpage}{133}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_file attribute)|hyperpage}{133}
+\indexentry{omsi\_format\_instrument (class in omsi.dataformat.omsi\_file.format)|hyperpage}{133}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute)|hyperpage}{133}
+\indexentry{instrument\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute)|hyperpage}{133}
+\indexentry{instrument\_mz\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute)|hyperpage}{133}
+\indexentry{instrument\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute)|hyperpage}{133}
+\indexentry{omsi\_format\_metadata\_collection (class in omsi.dataformat.omsi\_file.format)|hyperpage}{133}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute)|hyperpage}{134}
+\indexentry{description\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute)|hyperpage}{134}
+\indexentry{metadata\_collection\_groupname\_default (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute)|hyperpage}{134}
+\indexentry{ontology\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute)|hyperpage}{134}
+\indexentry{unit\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute)|hyperpage}{134}
+\indexentry{omsi\_format\_methods (class in omsi.dataformat.omsi\_file.format)|hyperpage}{134}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute)|hyperpage}{134}
+\indexentry{methods\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute)|hyperpage}{134}
+\indexentry{methods\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute)|hyperpage}{134}
+\indexentry{methods\_old\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute)|hyperpage}{134}
+\indexentry{omsi\_format\_msidata (class in omsi.dataformat.omsi\_file.format)|hyperpage}{134}
+\indexentry{current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute)|hyperpage}{134}
+\indexentry{format\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute)|hyperpage}{134}
+\indexentry{format\_types (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute)|hyperpage}{134}
+\indexentry{mzdata\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute)|hyperpage}{134}
+\indexentry{omsi\_format\_msidata\_partial\_cube (class in omsi.dataformat.omsi\_file.format)|hyperpage}{134}
+\indexentry{inv\_xy\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute)|hyperpage}{135}
+\indexentry{shape\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute)|hyperpage}{135}
+\indexentry{xy\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute)|hyperpage}{135}
+\indexentry{omsi\_format\_msidata\_partial\_spectra (class in omsi.dataformat.omsi\_file.format)|hyperpage}{135}
+\indexentry{mz\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_spectra attribute)|hyperpage}{135}
+\indexentry{xy\_index\_end\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_spectra attribute)|hyperpage}{135}
+\indexentry{omsi.dataformat.omsi\_file.common (module)|hyperpage}{135}
+\indexentry{omsi\_file\_common (class in omsi.dataformat.omsi\_file.common)|hyperpage}{135}
+\indexentry{create\_path\_string() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method)|hyperpage}{135}
+\indexentry{get\_h5py\_object() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method)|hyperpage}{136}
+\indexentry{get\_managed\_group() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method)|hyperpage}{136}
+\indexentry{get\_num\_items() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method)|hyperpage}{136}
+\indexentry{get\_omsi\_object() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method)|hyperpage}{136}
+\indexentry{get\_timestamp() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method)|hyperpage}{137}
+\indexentry{get\_version() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method)|hyperpage}{137}
+\indexentry{is\_managed() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method)|hyperpage}{137}
+\indexentry{items() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method)|hyperpage}{137}
+\indexentry{parse\_path\_string() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method)|hyperpage}{137}
+\indexentry{same\_file() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method)|hyperpage}{137}
+\indexentry{omsi\_file\_object\_manager (class in omsi.dataformat.omsi\_file.common)|hyperpage}{138}
+\indexentry{omsi.dataformat.omsi\_file.main\_file (module)|hyperpage}{138}
+\indexentry{omsi\_file (class in omsi.dataformat.omsi\_file.main\_file)|hyperpage}{138}
+\indexentry{close\_file() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method)|hyperpage}{139}
+\indexentry{flush() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method)|hyperpage}{139}
+\indexentry{get\_filename() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method)|hyperpage}{139}
+\indexentry{get\_h5py\_file() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method)|hyperpage}{139}
+\indexentry{is\_valid\_dataset() (omsi.dataformat.omsi\_file.main\_file.omsi\_file class method)|hyperpage}{139}
+\indexentry{write\_xdmf\_header() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method)|hyperpage}{139}
+\indexentry{omsi.dataformat.omsi\_file.experiment (module)|hyperpage}{139}
+\indexentry{omsi\_experiment\_manager (class in omsi.dataformat.omsi\_file.experiment)|hyperpage}{139}
+\indexentry{create\_experiment() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method)|hyperpage}{140}
+\indexentry{get\_experiment() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method)|hyperpage}{140}
+\indexentry{get\_experiment\_by\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method)|hyperpage}{140}
+\indexentry{get\_experiment\_path() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager static method)|hyperpage}{140}
+\indexentry{get\_num\_experiments() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method)|hyperpage}{140}
+\indexentry{omsi\_file\_experiment (class in omsi.dataformat.omsi\_file.experiment)|hyperpage}{140}
+\indexentry{get\_experiment\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method)|hyperpage}{141}
+\indexentry{get\_experiment\_index() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method)|hyperpage}{141}
+\indexentry{get\_instrument\_info() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method)|hyperpage}{141}
+\indexentry{get\_method\_info() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method)|hyperpage}{141}
+\indexentry{set\_experiment\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method)|hyperpage}{141}
+\indexentry{omsi.dataformat.omsi\_file.metadata\_collection (module)|hyperpage}{141}
+\indexentry{omsi\_file\_metadata\_collection (class in omsi.dataformat.omsi\_file.metadata\_collection)|hyperpage}{141}
+\indexentry{add\_metadata() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method)|hyperpage}{141}
+\indexentry{get\_metadata() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method)|hyperpage}{142}
+\indexentry{keys() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method)|hyperpage}{142}
+\indexentry{values() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method)|hyperpage}{142}
+\indexentry{omsi\_metadata\_collection\_manager (class in omsi.dataformat.omsi\_file.metadata\_collection)|hyperpage}{142}
+\indexentry{create\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method)|hyperpage}{142}
+\indexentry{get\_default\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method)|hyperpage}{142}
+\indexentry{get\_metadata\_collections() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method)|hyperpage}{143}
+\indexentry{has\_default\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method)|hyperpage}{143}
+\indexentry{has\_metadata\_collections() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method)|hyperpage}{143}
+\indexentry{omsi.dataformat.omsi\_file.instrument (module)|hyperpage}{143}
+\indexentry{omsi\_file\_instrument (class in omsi.dataformat.omsi\_file.instrument)|hyperpage}{143}
+\indexentry{get\_instrument\_mz() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method)|hyperpage}{143}
+\indexentry{get\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method)|hyperpage}{143}
+\indexentry{has\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method)|hyperpage}{144}
+\indexentry{set\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method)|hyperpage}{144}
+\indexentry{omsi\_instrument\_manager (class in omsi.dataformat.omsi\_file.instrument)|hyperpage}{144}
+\indexentry{create\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method)|hyperpage}{144}
+\indexentry{get\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method)|hyperpage}{144}
+\indexentry{has\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method)|hyperpage}{144}
+\indexentry{omsi.dataformat.omsi\_file.methods (module)|hyperpage}{145}
+\indexentry{omsi\_file\_methods (class in omsi.dataformat.omsi\_file.methods)|hyperpage}{145}
+\indexentry{get\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method)|hyperpage}{145}
+\indexentry{has\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method)|hyperpage}{145}
+\indexentry{set\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method)|hyperpage}{145}
+\indexentry{omsi\_methods\_manager (class in omsi.dataformat.omsi\_file.methods)|hyperpage}{145}
+\indexentry{create\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method)|hyperpage}{145}
+\indexentry{get\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method)|hyperpage}{146}
+\indexentry{has\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method)|hyperpage}{146}
+\indexentry{omsi.dataformat.omsi\_file.msidata (module)|hyperpage}{146}
+\indexentry{omsi\_file\_msidata (class in omsi.dataformat.omsi\_file.msidata)|hyperpage}{146}
+\indexentry{copy\_dataset() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{148}
+\indexentry{create\_optimized\_chunking() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{148}
+\indexentry{get\_h5py\_datasets() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{149}
+\indexentry{get\_h5py\_mzdata() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{149}
+\indexentry{set\_fill\_space() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{149}
+\indexentry{set\_fill\_spectra() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method)|hyperpage}{149}
+\indexentry{omsi\_msidata\_manager (class in omsi.dataformat.omsi\_file.msidata)|hyperpage}{149}
+\indexentry{create\_msidata\_full\_cube() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{149}
+\indexentry{create\_msidata\_partial\_cube() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{150}
+\indexentry{create\_msidata\_partial\_spectra() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{151}
+\indexentry{get\_msidata() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{152}
+\indexentry{get\_msidata\_by\_name() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{152}
+\indexentry{get\_num\_msidata() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method)|hyperpage}{152}
+\indexentry{omsi.dataformat.omsi\_file.analysis (module)|hyperpage}{152}
+\indexentry{omsi\_analysis\_manager (class in omsi.dataformat.omsi\_file.analysis)|hyperpage}{152}
+\indexentry{create\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method)|hyperpage}{153}
+\indexentry{create\_analysis\_static() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager static method)|hyperpage}{153}
+\indexentry{get\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method)|hyperpage}{154}
+\indexentry{get\_analysis\_by\_identifier() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method)|hyperpage}{154}
+\indexentry{get\_analysis\_identifiers() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method)|hyperpage}{154}
+\indexentry{get\_num\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method)|hyperpage}{154}
+\indexentry{omsi\_file\_analysis (class in omsi.dataformat.omsi\_file.analysis)|hyperpage}{154}
+\indexentry{get\_all\_analysis\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{154}
+\indexentry{get\_all\_parameter\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{154}
+\indexentry{get\_all\_runinfo\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{154}
+\indexentry{get\_analysis\_data\_names() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{get\_analysis\_data\_shapes\_and\_types() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{get\_analysis\_identifier() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{get\_analysis\_index() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{get\_analysis\_type() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{recreate\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{restore\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method)|hyperpage}{155}
+\indexentry{omsi.dataformat.omsi\_file.dependencies (module)|hyperpage}{156}
+\indexentry{omsi\_dependencies\_manager (class in omsi.dataformat.omsi\_file.dependencies)|hyperpage}{156}
+\indexentry{add\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{156}
+\indexentry{create\_dependencies() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{156}
+\indexentry{get\_all\_dependency\_data() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{156}
+\indexentry{get\_all\_dependency\_data\_graph() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{157}
+\indexentry{get\_all\_dependency\_data\_recursive() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{158}
+\indexentry{has\_dependencies() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method)|hyperpage}{158}
+\indexentry{omsi\_file\_dependencies (class in omsi.dataformat.omsi\_file.dependencies)|hyperpage}{158}
+\indexentry{\_omsi\_file\_dependencies\_\_create\_dependency\_graph\_node() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies static method)|hyperpage}{159}
+\indexentry{add\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{159}
+\indexentry{get\_all\_dependency\_data() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{160}
+\indexentry{get\_all\_dependency\_data\_graph() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{160}
+\indexentry{get\_all\_dependency\_data\_recursive() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{161}
+\indexentry{get\_dependency\_omsiobject() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{161}
+\indexentry{get\_omsi\_file\_dependencydata() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method)|hyperpage}{162}
+\indexentry{omsi\_file\_dependencydata (class in omsi.dataformat.omsi\_file.dependencies)|hyperpage}{162}
+\indexentry{get\_dataset\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{162}
+\indexentry{get\_dependency\_objecttype() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{162}
+\indexentry{get\_dependency\_omsiobject() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{162}
+\indexentry{get\_dependency\_type() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{162}
+\indexentry{get\_link\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{162}
+\indexentry{get\_mainname() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{163}
+\indexentry{get\_omsi\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{163}
+\indexentry{get\_parameter\_help() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{163}
+\indexentry{get\_parameter\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{163}
+\indexentry{get\_selection\_string() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method)|hyperpage}{163}
+\indexentry{omsi.dataformat.file\_reader\_base (module)|hyperpage}{163}
+\indexentry{file\_reader\_base (class in omsi.dataformat.file\_reader\_base)|hyperpage}{163}
+\indexentry{available\_formats() (omsi.dataformat.file\_reader\_base.file\_reader\_base static method)|hyperpage}{164}
+\indexentry{close\_file() (omsi.dataformat.file\_reader\_base.file\_reader\_base method)|hyperpage}{164}
+\indexentry{format\_name() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{164}
+\indexentry{get\_dataset\_metadata() (omsi.dataformat.file\_reader\_base.file\_reader\_base method)|hyperpage}{164}
+\indexentry{get\_number\_of\_datasets() (omsi.dataformat.file\_reader\_base.file\_reader\_base method)|hyperpage}{164}
+\indexentry{get\_number\_of\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base method)|hyperpage}{164}
+\indexentry{is\_valid\_dataset() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{164}
+\indexentry{size() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{165}
+\indexentry{spectrum\_iter() (omsi.dataformat.file\_reader\_base.file\_reader\_base method)|hyperpage}{165}
+\indexentry{supports\_multidata() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{165}
+\indexentry{supports\_multiexperiment() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{165}
+\indexentry{supports\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method)|hyperpage}{165}
+\indexentry{file\_reader\_base\_multidata (class in omsi.dataformat.file\_reader\_base)|hyperpage}{165}
+\indexentry{get\_dataset\_dependencies() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method)|hyperpage}{165}
+\indexentry{get\_number\_of\_datasets() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method)|hyperpage}{166}
+\indexentry{set\_dataset\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method)|hyperpage}{166}
+\indexentry{supports\_multidata() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata class method)|hyperpage}{166}
+\indexentry{file\_reader\_base\_with\_regions (class in omsi.dataformat.file\_reader\_base)|hyperpage}{166}
+\indexentry{get\_dataset\_dependencies() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method)|hyperpage}{166}
+\indexentry{get\_number\_of\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method)|hyperpage}{167}
+\indexentry{get\_region\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method)|hyperpage}{167}
+\indexentry{get\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method)|hyperpage}{167}
+\indexentry{set\_region\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method)|hyperpage}{167}
+\indexentry{supports\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions class method)|hyperpage}{167}
+\indexentry{omsi.dataformat.img\_file (module)|hyperpage}{167}
+\indexentry{img\_file (class in omsi.dataformat.img\_file)|hyperpage}{167}
+\indexentry{close\_file() (omsi.dataformat.img\_file.img\_file method)|hyperpage}{167}
+\indexentry{get\_files\_from\_dir() (omsi.dataformat.img\_file.img\_file class method)|hyperpage}{167}
+\indexentry{is\_valid\_dataset() (omsi.dataformat.img\_file.img\_file class method)|hyperpage}{167}
+\indexentry{size() (omsi.dataformat.img\_file.img\_file class method)|hyperpage}{168}
+\indexentry{spectrum\_iter() (omsi.dataformat.img\_file.img\_file method)|hyperpage}{168}
+\indexentry{omsi.dataformat.bruckerflex\_file (module)|hyperpage}{168}
+\indexentry{bruckerflex\_file (class in omsi.dataformat.bruckerflex\_file)|hyperpage}{169}
+\indexentry{close\_file() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method)|hyperpage}{170}
+\indexentry{get\_dataset\_dependencies() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method)|hyperpage}{170}
+\indexentry{is\_valid\_dataset() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file class method)|hyperpage}{170}
+\indexentry{s\_mz\_from\_acqu() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method)|hyperpage}{170}
+\indexentry{s\_read\_acqu() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method)|hyperpage}{170}
+\indexentry{s\_read\_fid() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method)|hyperpage}{171}
+\indexentry{s\_read\_spotlist() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method)|hyperpage}{171}
+\indexentry{s\_spot\_from\_dir() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method)|hyperpage}{171}
+\indexentry{set\_region\_selection() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method)|hyperpage}{172}
+\indexentry{omsi.datastructures (module)|hyperpage}{172}
+\indexentry{omsi.datastructures.analysis\_data (module)|hyperpage}{172}
+\indexentry{analysis\_data (class in omsi.datastructures.analysis\_data)|hyperpage}{172}
+\indexentry{ana\_hdf5link (omsi.datastructures.analysis\_data.analysis\_data attribute)|hyperpage}{173}
+\indexentry{data\_dtypes (class in omsi.datastructures.analysis\_data)|hyperpage}{173}
+\indexentry{bool\_type() (omsi.datastructures.analysis\_data.data\_dtypes static method)|hyperpage}{173}
+\indexentry{get\_dtypes() (omsi.datastructures.analysis\_data.data\_dtypes static method)|hyperpage}{173}
+\indexentry{ndarray() (omsi.datastructures.analysis\_data.data\_dtypes static method)|hyperpage}{173}
+\indexentry{parameter\_data (class in omsi.datastructures.analysis\_data)|hyperpage}{173}
+\indexentry{clear\_data() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{174}
+\indexentry{copy() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{174}
+\indexentry{data\_ready() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{174}
+\indexentry{data\_set() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{175}
+\indexentry{default\_keys (omsi.datastructures.analysis\_data.parameter\_data attribute)|hyperpage}{175}
+\indexentry{get\_data\_or\_default() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{175}
+\indexentry{get\_group\_description() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{175}
+\indexentry{get\_group\_name() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{175}
+\indexentry{is\_dependency() (omsi.datastructures.analysis\_data.parameter\_data method)|hyperpage}{175}
+\indexentry{parameter\_manager (class in omsi.datastructures.analysis\_data)|hyperpage}{175}
+\indexentry{add\_parameter() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{175}
+\indexentry{clear\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{define\_missing\_parameters() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_all\_dependency\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_all\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_num\_dependency\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_num\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_parameter\_data\_by\_name() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{get\_parameter\_names() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{keys() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{set\_parameter\_default\_value() (omsi.datastructures.analysis\_data.parameter\_manager method)|hyperpage}{176}
+\indexentry{omsi.datastructures.dependency\_data (module)|hyperpage}{177}
+\indexentry{dependency\_dict (class in omsi.datastructures.dependency\_data)|hyperpage}{177}
+\indexentry{copy() (omsi.datastructures.dependency\_data.dependency\_dict method)|hyperpage}{178}
+\indexentry{dependency\_types (omsi.datastructures.dependency\_data.dependency\_dict attribute)|hyperpage}{178}
+\indexentry{get\_data() (omsi.datastructures.dependency\_data.dependency\_dict method)|hyperpage}{178}
+\indexentry{omsi.datastructures.run\_info\_data (module)|hyperpage}{178}
+\indexentry{run\_info\_dict (class in omsi.datastructures.run\_info\_data)|hyperpage}{178}
+\indexentry{DEFAULT\_TIME\_FORMAT (omsi.datastructures.run\_info\_data.run\_info\_dict attribute)|hyperpage}{178}
+\indexentry{clean\_up() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{178}
+\indexentry{clear() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{178}
+\indexentry{enable\_profile\_memory() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{enable\_profile\_time\_and\_usage() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{gather() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{get\_profile\_memory() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{get\_profile\_stats\_object() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{get\_profile\_time\_and\_usage() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{record\_postexecute() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{179}
+\indexentry{record\_preexecute() (omsi.datastructures.run\_info\_data.run\_info\_dict method)|hyperpage}{180}
+\indexentry{string\_to\_structime() (omsi.datastructures.run\_info\_data.run\_info\_dict static method)|hyperpage}{180}
+\indexentry{string\_to\_time() (omsi.datastructures.run\_info\_data.run\_info\_dict static method)|hyperpage}{180}
+\indexentry{omsi.datastructures.metadata (module)|hyperpage}{180}
+\indexentry{omsi.datastructures.metadata.metadata\_data (module)|hyperpage}{180}
+\indexentry{metadata\_dict (class in omsi.datastructures.metadata.metadata\_data)|hyperpage}{180}
+\indexentry{get\_metadata\_descriptions() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method)|hyperpage}{180}
+\indexentry{get\_metadata\_units() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method)|hyperpage}{180}
+\indexentry{get\_metadata\_values() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method)|hyperpage}{180}
+\indexentry{metadata\_value (class in omsi.datastructures.metadata.metadata\_data)|hyperpage}{180}
+\indexentry{omsi.datastructures.metadata.metadata\_ontologies (module)|hyperpage}{181}
+\indexentry{metadata\_ontologies (class in omsi.datastructures.metadata.metadata\_ontologies)|hyperpage}{181}
+\indexentry{omsi.shared.data\_selection (module)|hyperpage}{182}
+\indexentry{check\_selection\_string() (in module omsi.shared.data\_selection)|hyperpage}{183}
+\indexentry{construct\_reduce\_dict() (in module omsi.shared.data\_selection)|hyperpage}{184}
+\indexentry{construct\_transform\_dict() (in module omsi.shared.data\_selection)|hyperpage}{184}
+\indexentry{construct\_transform\_reduce\_list() (in module omsi.shared.data\_selection)|hyperpage}{184}
+\indexentry{evaluate\_transform\_parameter() (in module omsi.shared.data\_selection)|hyperpage}{184}
+\indexentry{is\_transform\_or\_reduce() (in module omsi.shared.data\_selection)|hyperpage}{185}
+\indexentry{json\_to\_transform\_reduce\_description() (in module omsi.shared.data\_selection)|hyperpage}{185}
+\indexentry{perform\_reduction() (in module omsi.shared.data\_selection)|hyperpage}{185}
+\indexentry{reduction\_allowed\_numpy\_function (in module omsi.shared.data\_selection)|hyperpage}{185}
+\indexentry{selection\_string\_to\_object() (in module omsi.shared.data\_selection)|hyperpage}{187}
+\indexentry{selection\_to\_indexlist() (in module omsi.shared.data\_selection)|hyperpage}{187}
+\indexentry{selection\_to\_string() (in module omsi.shared.data\_selection)|hyperpage}{187}
+\indexentry{selection\_type (in module omsi.shared.data\_selection)|hyperpage}{187}
+\indexentry{transform\_and\_reduce\_data() (in module omsi.shared.data\_selection)|hyperpage}{187}
+\indexentry{transform\_data\_single() (in module omsi.shared.data\_selection)|hyperpage}{188}
+\indexentry{transform\_datachunk() (in module omsi.shared.data\_selection)|hyperpage}{189}
+\indexentry{transform\_reduce\_description\_to\_json() (in module omsi.shared.data\_selection)|hyperpage}{189}
+\indexentry{transformation\_allowed\_numpy\_dual\_data (in module omsi.shared.data\_selection)|hyperpage}{189}
+\indexentry{transformation\_allowed\_numpy\_single\_data (in module omsi.shared.data\_selection)|hyperpage}{190}
+\indexentry{transformation\_type (in module omsi.shared.data\_selection)|hyperpage}{191}
+\indexentry{omsi.shared.omsi\_web\_helper (module)|hyperpage}{192}
+\indexentry{UserInput (class in omsi.shared.omsi\_web\_helper)|hyperpage}{192}
+\indexentry{userinput\_with\_timeout() (omsi.shared.omsi\_web\_helper.UserInput static method)|hyperpage}{192}
+\indexentry{userinput\_with\_timeout\_default() (omsi.shared.omsi\_web\_helper.UserInput static method)|hyperpage}{193}
+\indexentry{userinput\_with\_timeout\_windows() (omsi.shared.omsi\_web\_helper.UserInput static method)|hyperpage}{193}
+\indexentry{WebHelper (class in omsi.shared.omsi\_web\_helper)|hyperpage}{193}
+\indexentry{allowed\_nersc\_locations (omsi.shared.omsi\_web\_helper.WebHelper attribute)|hyperpage}{193}
+\indexentry{default\_db\_server\_url (omsi.shared.omsi\_web\_helper.WebHelper attribute)|hyperpage}{193}
+\indexentry{register\_file\_with\_db() (omsi.shared.omsi\_web\_helper.WebHelper static method)|hyperpage}{193}
+\indexentry{send\_email() (omsi.shared.omsi\_web\_helper.WebHelper static method)|hyperpage}{193}
+\indexentry{set\_apache\_acl() (omsi.shared.omsi\_web\_helper.WebHelper static method)|hyperpage}{194}
+\indexentry{super\_users (omsi.shared.omsi\_web\_helper.WebHelper attribute)|hyperpage}{194}
+\indexentry{update\_job\_status() (omsi.shared.omsi\_web\_helper.WebHelper static method)|hyperpage}{194}
+\indexentry{omsi.shared.spectrum\_layout (module)|hyperpage}{194}
+\indexentry{compute\_hilbert\_spectrum() (in module omsi.shared.spectrum\_layout)|hyperpage}{194}
+\indexentry{hilbert\_curve() (in module omsi.shared.spectrum\_layout)|hyperpage}{195}
+\indexentry{plot\_2d\_spectrum\_as\_image() (in module omsi.shared.spectrum\_layout)|hyperpage}{195}
+\indexentry{reinterpolate\_spectrum() (in module omsi.shared.spectrum\_layout)|hyperpage}{195}
+\indexentry{omsi.shared.log (module)|hyperpage}{195}
+\indexentry{log\_helper (class in omsi.shared.log)|hyperpage}{195}
+\indexentry{critical() (omsi.shared.log.log\_helper class method)|hyperpage}{196}
+\indexentry{debug() (omsi.shared.log.log\_helper class method)|hyperpage}{196}
+\indexentry{error() (omsi.shared.log.log\_helper class method)|hyperpage}{196}
+\indexentry{exception() (omsi.shared.log.log\_helper class method)|hyperpage}{197}
+\indexentry{get\_default\_format() (omsi.shared.log.log\_helper class method)|hyperpage}{197}
+\indexentry{get\_logger() (omsi.shared.log.log\_helper class method)|hyperpage}{197}
+\indexentry{global\_log\_level (omsi.shared.log.log\_helper attribute)|hyperpage}{197}
+\indexentry{info() (omsi.shared.log.log\_helper class method)|hyperpage}{197}
+\indexentry{initialized (omsi.shared.log.log\_helper attribute)|hyperpage}{198}
+\indexentry{log() (omsi.shared.log.log\_helper class method)|hyperpage}{198}
+\indexentry{log\_levels (omsi.shared.log.log\_helper attribute)|hyperpage}{198}
+\indexentry{log\_var() (omsi.shared.log.log\_helper class method)|hyperpage}{198}
+\indexentry{set\_log\_level() (omsi.shared.log.log\_helper class method)|hyperpage}{198}
+\indexentry{setup\_logging() (omsi.shared.log.log\_helper class method)|hyperpage}{198}
+\indexentry{warning() (omsi.shared.log.log\_helper class method)|hyperpage}{198}
+\indexentry{omsi.shared.mpi\_helper (module)|hyperpage}{199}
+\indexentry{barrier() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{broadcast() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{gather() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{get\_comm\_world() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{get\_rank() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{get\_size() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{imports\_mpi() (in module omsi.shared.mpi\_helper)|hyperpage}{199}
+\indexentry{is\_mpi\_available() (in module omsi.shared.mpi\_helper)|hyperpage}{200}
+\indexentry{mpi\_type\_from\_dtype() (in module omsi.shared.mpi\_helper)|hyperpage}{200}
+\indexentry{parallel\_over\_axes (class in omsi.shared.mpi\_helper)|hyperpage}{200}
+\indexentry{MPI\_MESSAGE\_TAGS (omsi.shared.mpi\_helper.parallel\_over\_axes attribute)|hyperpage}{201}
+\indexentry{SCHEDULES (omsi.shared.mpi\_helper.parallel\_over\_axes attribute)|hyperpage}{201}
+\indexentry{collect\_data() (omsi.shared.mpi\_helper.parallel\_over\_axes method)|hyperpage}{201}
+\indexentry{run() (omsi.shared.mpi\_helper.parallel\_over\_axes method)|hyperpage}{201}
+\indexentry{test\_mpi\_available() (in module omsi.shared.mpi\_helper)|hyperpage}{201}
+\indexentry{omsi.workflow (module)|hyperpage}{202}
+\indexentry{omsi.workflow.common (module)|hyperpage}{202}
+\indexentry{RawDescriptionDefaultHelpArgParseFormatter (class in omsi.workflow.common)|hyperpage}{202}
+\indexentry{analysis\_task\_list (class in omsi.workflow.common)|hyperpage}{202}
+\indexentry{add() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{202}
+\indexentry{add\_all() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{202}
+\indexentry{add\_analysis\_dependencies() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{202}
+\indexentry{all() (omsi.workflow.common.analysis\_task\_list class method)|hyperpage}{203}
+\indexentry{analysis\_identifiers\_unique() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{append() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{clear() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{enable\_memory\_profiling() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{enable\_time\_and\_usage\_profiling() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{from\_script\_files() (omsi.workflow.common.analysis\_task\_list class method)|hyperpage}{203}
+\indexentry{from\_scripts() (omsi.workflow.common.analysis\_task\_list class method)|hyperpage}{203}
+\indexentry{get\_additional\_analysis\_dependencies() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{get\_all\_analysis\_data() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{203}
+\indexentry{get\_all\_analysis\_identifiers() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{get\_all\_dependency\_data() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{get\_all\_parameter\_data() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{get\_all\_run\_info() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{insert() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{make\_analysis\_identifiers\_unique() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{set\_undefined\_analysis\_identifiers() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{update() (omsi.workflow.common.analysis\_task\_list method)|hyperpage}{204}
+\indexentry{omsi.workflow.driver (module)|hyperpage}{205}
+\indexentry{omsi.workflow.driver.base (module)|hyperpage}{205}
+\indexentry{analysis\_driver\_base (class in omsi.workflow.driver.base)|hyperpage}{205}
+\indexentry{main() (omsi.workflow.driver.base.analysis\_driver\_base method)|hyperpage}{205}
+\indexentry{driver\_base (class in omsi.workflow.driver.base)|hyperpage}{205}
+\indexentry{execute() (omsi.workflow.driver.base.driver\_base method)|hyperpage}{205}
+\indexentry{main() (omsi.workflow.driver.base.driver\_base method)|hyperpage}{205}
+\indexentry{workflow\_driver\_base (class in omsi.workflow.driver.base)|hyperpage}{205}
+\indexentry{main() (omsi.workflow.driver.base.workflow\_driver\_base method)|hyperpage}{205}
+\indexentry{omsi.workflow.driver.cl\_analysis\_driver (module)|hyperpage}{206}
+\indexentry{cl\_analysis\_driver (class in omsi.workflow.driver.cl\_analysis\_driver)|hyperpage}{206}
+\indexentry{add\_and\_parse\_analysis\_arguments() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{207}
+\indexentry{analysis\_class\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute)|hyperpage}{207}
+\indexentry{create\_analysis\_object() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{207}
+\indexentry{get\_analysis\_class\_from\_cl() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{207}
+\indexentry{initialize\_argument\_parser() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{207}
+\indexentry{log\_level\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute)|hyperpage}{207}
+\indexentry{main() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{207}
+\indexentry{output\_save\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute)|hyperpage}{207}
+\indexentry{parse\_cl\_arguments() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{208}
+\indexentry{print\_settings() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{208}
+\indexentry{remove\_output\_target() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{208}
+\indexentry{reset\_analysis\_object() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method)|hyperpage}{208}
+\indexentry{omsi.workflow.driver.cl\_workflow\_driver (module)|hyperpage}{208}
+\indexentry{cl\_workflow\_driver (class in omsi.workflow.driver.cl\_workflow\_driver)|hyperpage}{208}
+\indexentry{add\_and\_parse\_workflow\_arguments() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{210}
+\indexentry{create\_workflow\_executor\_object() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{210}
+\indexentry{initialize\_argument\_parser() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{210}
+\indexentry{log\_level\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute)|hyperpage}{210}
+\indexentry{main() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{210}
+\indexentry{output\_save\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute)|hyperpage}{210}
+\indexentry{parse\_cl\_arguments() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{print\_memory\_profiles() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{print\_settings() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{print\_time\_and\_usage\_profiles() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{profile\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute)|hyperpage}{211}
+\indexentry{profile\_mem\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute)|hyperpage}{211}
+\indexentry{remove\_output\_target() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{reset\_workflow\_executor\_object() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method)|hyperpage}{211}
+\indexentry{script\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute)|hyperpage}{211}
+\indexentry{omsi.workflow.executor (module)|hyperpage}{211}
+\indexentry{omsi.workflow.executor.base (module)|hyperpage}{211}
+\indexentry{workflow\_executor\_base (class in omsi.workflow.executor.base)|hyperpage}{211}
+\indexentry{DEFAULT\_EXECUTOR\_CLASS (omsi.workflow.executor.base.workflow\_executor\_base attribute)|hyperpage}{212}
+\indexentry{add\_analysis() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{add\_analysis\_all() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{add\_analysis\_dependencies() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{add\_analysis\_from\_scripts() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{clear() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{execute() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{212}
+\indexentry{from\_script\_files() (omsi.workflow.executor.base.workflow\_executor\_base class method)|hyperpage}{212}
+\indexentry{from\_scripts() (omsi.workflow.executor.base.workflow\_executor\_base class method)|hyperpage}{213}
+\indexentry{get\_analyses() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{213}
+\indexentry{get\_analysis() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{213}
+\indexentry{get\_default\_executor() (omsi.workflow.executor.base.workflow\_executor\_base class method)|hyperpage}{213}
+\indexentry{get\_default\_executor\_class() (omsi.workflow.executor.base.workflow\_executor\_base class method)|hyperpage}{213}
+\indexentry{main() (omsi.workflow.executor.base.workflow\_executor\_base method)|hyperpage}{213}
+\indexentry{omsi.workflow.executor.greedy\_executor (module)|hyperpage}{213}
+\indexentry{greedy\_executor (class in omsi.workflow.executor.greedy\_executor)|hyperpage}{213}
+\indexentry{main() (omsi.workflow.executor.greedy\_executor.greedy\_executor method)|hyperpage}{214}
+\indexentry{omsi.tools.convertToOMSI (module)|hyperpage}{214}
+\indexentry{ConvertFiles (class in omsi.tools.convertToOMSI)|hyperpage}{214}
+\indexentry{check\_format() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{214}
+\indexentry{convert\_files() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{214}
+\indexentry{create\_dataset\_list() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{215}
+\indexentry{suggest\_chunking() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{215}
+\indexentry{suggest\_chunkings\_for\_files() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{215}
+\indexentry{write\_data() (omsi.tools.convertToOMSI.ConvertFiles static method)|hyperpage}{216}
+\indexentry{ConvertSettings (class in omsi.tools.convertToOMSI)|hyperpage}{216}
+\indexentry{add\_file\_to\_db (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{auto\_chunk (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{available\_error\_options (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{available\_formats (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{available\_io\_options (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{available\_region\_options (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{check\_add\_nersc (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{chunks (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{compression (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{compression\_opts (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{dataset\_list (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{216}
+\indexentry{db\_server\_url (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{email\_error\_recipients (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{email\_success\_recipients (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{error\_handling (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{execute\_fpg (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{execute\_fpl (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{execute\_nmf (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{execute\_ticnorm (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{file\_user (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{format\_option (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{generate\_thumbnail (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{generate\_xdmf (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{io\_block\_size\_limit (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{io\_option (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{job\_id (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{metadata (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{nmf\_num\_component (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{nmf\_num\_iter (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{nmf\_timeout (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{nmf\_tolerance (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{nmf\_use\_raw\_data (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{omsi\_output\_file (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{217}
+\indexentry{parse\_input\_args() (omsi.tools.convertToOMSI.ConvertSettings class method)|hyperpage}{217}
+\indexentry{print\_help() (omsi.tools.convertToOMSI.ConvertSettings class method)|hyperpage}{217}
+\indexentry{recorded\_warnings (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{218}
+\indexentry{region\_option (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{218}
+\indexentry{suggest\_file\_chunkings (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{218}
+\indexentry{user\_additional\_chunks (omsi.tools.convertToOMSI.ConvertSettings attribute)|hyperpage}{218}
+\indexentry{main() (in module omsi.tools.convertToOMSI)|hyperpage}{218}
+\indexentry{omsi.tools.run\_analysis (module)|hyperpage}{218}
+\indexentry{omsi.tools.run\_analysis (module)|hyperpage}{218}
+\indexentry{omsi.tools.experimental (module)|hyperpage}{218}
+\indexentry{omsi.tools.misc (module)|hyperpage}{218}
+\indexentry{omsi.tools.misc.make\_thumb (module)|hyperpage}{218}
+\indexentry{main() (in module omsi.tools.misc.make\_thumb)|hyperpage}{218}
+\indexentry{omsi.tools.misc.create\_peak\_cube\_overview (module)|hyperpage}{218}
+\indexentry{main() (in module omsi.tools.misc.create\_peak\_cube\_overview)|hyperpage}{218}
+\indexentry{print\_help() (in module omsi.tools.misc.create\_peak\_cube\_overview)|hyperpage}{218}
+\indexentry{omsi.examples.simple\_viewer (module)|hyperpage}{219}
+\indexentry{MyViewer (class in omsi.examples.simple\_viewer)|hyperpage}{219}
+\indexentry{main() (in module omsi.examples.simple\_viewer)|hyperpage}{219}
+\indexentry{omsi.examples.testHDF5Optimization (module)|hyperpage}{219}
+\indexentry{generateTestFile() (in module omsi.examples.testHDF5Optimization)|hyperpage}{219}
+\indexentry{main() (in module omsi.examples.testHDF5Optimization)|hyperpage}{219}
+\indexentry{printHelp() (in module omsi.examples.testHDF5Optimization)|hyperpage}{219}
+\indexentry{omsi.examples.testHDF5Optimization\_alignedWrite (module)|hyperpage}{219}
+\indexentry{generateTestFile() (in module omsi.examples.testHDF5Optimization\_alignedWrite)|hyperpage}{219}
+\indexentry{main() (in module omsi.examples.testHDF5Optimization\_alignedWrite)|hyperpage}{219}
+\indexentry{printHelp() (in module omsi.examples.testHDF5Optimization\_alignedWrite)|hyperpage}{219}
+\indexentry{omsi.examples.test\_multiprocess\_slice (module)|hyperpage}{219}
+\indexentry{create\_process() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{219}
+\indexentry{generateBaseTestFile() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{219}
+\indexentry{generateChunkedTestFile() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{219}
+\indexentry{main() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{220}
+\indexentry{sliceSelect() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{220}
+\indexentry{spectraSelect() (in module omsi.examples.test\_multiprocess\_slice)|hyperpage}{220}
+\indexentry{omsi.examples.test\_par (module)|hyperpage}{220}
+\indexentry{create\_process() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{generateBaseTestFile() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{generateChunkedTestFile() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{main() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{sliceSelect() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{spectraSelect() (in module omsi.examples.test\_par)|hyperpage}{220}
+\indexentry{omsi.examples.test\_peakcube (module)|hyperpage}{220}
+\indexentry{main() (in module omsi.examples.test\_peakcube)|hyperpage}{220}
+\indexentry{printHelp() (in module omsi.examples.test\_peakcube)|hyperpage}{220}
+\indexentry{omsi.examples.testhdf5\_file\_read (module)|hyperpage}{220}
+\indexentry{main() (in module omsi.examples.testhdf5\_file\_read)|hyperpage}{220}
+\indexentry{printHelp() (in module omsi.examples.testhdf5\_file\_read)|hyperpage}{220}
+\indexentry{omsi.templates (module)|hyperpage}{221}
+\indexentry{omsi.templates.analysis\_template (module)|hyperpage}{221}
+\indexentry{analysis\_template (class in omsi.templates.analysis\_template)|hyperpage}{221}
+\indexentry{execute\_analysis() (omsi.templates.analysis\_template.analysis\_template method)|hyperpage}{221}
+\indexentry{groups (omsi.templates.analysis\_template.analysis\_template attribute)|hyperpage}{221}
+\indexentry{v\_qmz() (omsi.templates.analysis\_template.analysis\_template class method)|hyperpage}{221}
+\indexentry{v\_qslice() (omsi.templates.analysis\_template.analysis\_template class method)|hyperpage}{222}
+\indexentry{v\_qslice\_viewer\_options() (omsi.templates.analysis\_template.analysis\_template class method)|hyperpage}{222}
+\indexentry{v\_qspectrum() (omsi.templates.analysis\_template.analysis\_template class method)|hyperpage}{222}
+\indexentry{v\_qspectrum\_viewer\_options() (omsi.templates.analysis\_template.analysis\_template class method)|hyperpage}{223}

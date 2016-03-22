@@ -1,0 +1,611 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>multivariate_stats Package &mdash; BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BASTet: Berkeley Analysis and Storage Toolkit Documentation 2.0.0 documentation" href="index.html"/>
+        <link rel="up" title="analysis Package" href="omsi.analysis.html"/>
+        <link rel="next" title="msi_filtering Package" href="omsi.analysis.msi_filtering.html"/>
+        <link rel="prev" title="findpeaks Package" href="omsi.analysis.findpeaks.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BASTet: Berkeley Analysis and Storage Toolkit Documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert_files.html">Converting and Files and Making them Accessible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_filereader.html">Integrating new file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_analysis.html">Developing a new Analysis for BASTet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html">Defining and Executing Analysis Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_workflows.html#workflow-tools">Workflow Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format.html">OMSI Data Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HDF5_format_performance.html">HDF5 I/O Performance</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="omsi.html">omsi Package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="omsi.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="omsi.analysis.html">analysis Package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#id1"><code class="docutils literal"><span class="pre">analysis</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="omsi.analysis.html#module-omsi.analysis.analysis_views"><code class="docutils literal"><span class="pre">analysis_views</span></code> Module</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="omsi.analysis.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.dataformat.html">dataformat Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.datastructures.html">datastructures Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.shared.html">shared Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.workflow.html">workflow Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.tools.html">tools Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.examples.html">examples Package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="omsi.templates.html">templates Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BASTet: Berkeley Analysis and Storage Toolkit Documentation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="omsi.html">omsi Package</a> &raquo;</li>
+      
+          <li><a href="omsi.analysis.html">analysis Package</a> &raquo;</li>
+      
+    <li>multivariate_stats Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/omsi.analysis.multivariate_stats.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="multivariate-stats-package">
+<h1>multivariate_stats Package<a class="headerlink" href="#multivariate-stats-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">multivariate_stats</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-omsi.analysis.multivariate_stats"></span><p>Multivariate statistics analysis</p>
+<dl class="class">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf">
+<em class="property">class </em><code class="descclassname">omsi.analysis.multivariate_stats.</code><code class="descname">omsi_nmf</code><span class="sig-paren">(</span><em>name_key='undefined'</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a></p>
+<p>Class defining a basic nmf analysis.</p>
+<p>The function has primarily been tested we MSI datasets but should support
+arbitrary n-D arrays (n&gt;=2). The last dimension of the input array must be the
+spectrum dimnensions.</p>
+<p>Initalize the basic data members</p>
+<dl class="method">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.execute_analysis">
+<code class="descname">execute_analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.execute_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the nmf for the given msidata</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.v_qmz">
+<em class="property">classmethod </em><code class="descname">v_qmz</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>qslice_viewer_option=0</em>, <em>qspectrum_viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.v_qmz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qmz URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.v_qslice">
+<em class="property">classmethod </em><code class="descname">v_qslice</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>z</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.v_qslice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qslice URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.v_qslice_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qslice_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.v_qslice_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which viewer_options are supported for qspectrum URL&#8217;s</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.v_qspectrum">
+<em class="property">classmethod </em><code class="descname">v_qspectrum</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>x</em>, <em>y</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.v_qspectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qspectrum URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.v_qspectrum_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qspectrum_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.v_qspectrum_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which viewer_options are supported for qspectrum URL&#8217;s</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx">
+<em class="property">class </em><code class="descclassname">omsi.analysis.multivariate_stats.</code><code class="descname">omsi_cx</code><span class="sig-paren">(</span><em>name_key='undefined'</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a></p>
+<p>Class used to implement CX factorization on MSI data.</p>
+<p>Initalize the basic data members</p>
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.comp_lev_exact">
+<em class="property">classmethod </em><code class="descname">comp_lev_exact</code><span class="sig-paren">(</span><em>A</em>, <em>k</em>, <em>axis</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.comp_lev_exact" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function computes the column or row leverage scores of the input matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> &#8211; n-by-d matrix</li>
+<li><strong>k</strong> &#8211; rank parameter, k &lt;= min(n,d)</li>
+<li><strong>axis</strong> &#8211; 0: compute row leverage scores; 1: compute column leverage scores.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">1D array of leverage scores. If axis = 0, the length of lev is n.  otherwise, the length of lev is d.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.dimension_index">
+<code class="descname">dimension_index</code><em class="property"> = {'pixelDim': 1, 'imageDim': 0}</em><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.dimension_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.execute_analysis">
+<code class="descname">execute_analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.execute_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>EDIT_ME:</p>
+<p>Replace this text with the appropriate documentation for the analysis.
+Describe what your analysis does and how a user can use it. Note, a user will
+call the function execute(...) which takes care of storing parameters, collecting
+execution data etc., so that you only need to implement your analysis, the rest
+is taken care of by analysis_base. omsi uses Sphynx syntax for the
+documentation.</p>
+<p>Keyword Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mydata</strong> &#8211; <p>...</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.v_qmz">
+<em class="property">classmethod </em><code class="descname">v_qmz</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>qslice_viewer_option=0</em>, <em>qspectrum_viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.v_qmz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the mz axes for the analysis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>analysis_object</strong> &#8211; The omsi_file_analysis object for which slicing should be performed</li>
+<li><strong>qslice_viewer_option</strong> &#8211; If multiple default viewer behaviors are available for a given
+analysis then this option is used to switch between them for the qslice URL pattern.</li>
+<li><strong>qspectrum_viewer_option</strong> &#8211; If multiple default viewer behaviors are available for a
+given analysis then this option is used to switch between them for the qspectrum URL pattern.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>The following four arrays are returned by the analysis:</p>
+<ul class="simple">
+<li>mz_spectra : Array with the static mz values for the spectra.</li>
+<li>label_spectra : Lable for the spectral mz axis</li>
+<li>mz_slice : Array of the static mz values for the slices or None if identical to the mz_spectra.</li>
+<li>label_slice : Lable for the slice mz axis or None if identical to label_spectra.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.v_qslice">
+<em class="property">classmethod </em><code class="descname">v_qslice</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>z</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.v_qslice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get 3D analysis dataset for which z-slices should be extracted for presentation in the OMSI viewer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>analysis_object</strong> &#8211; The omsi_file_analysis object for which slicing should be performed</li>
+<li><strong>z</strong> &#8211; Selection string indicting which z values should be selected.</li>
+<li><strong>viewer_option</strong> &#8211; If multiple default viewer behaviors are available for a given analysis
+then this option is used to switch between them.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy array with the data to be displayed in the image slice viewer. Slicing will
+be performed typically like [:,:,zmin:zmax].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.v_qslice_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qslice_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.v_qslice_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of strings describing the different default viewer options for the analysis for qslice.
+The default implementation tries to take care of handling the spectra retrieval for all the depencies
+but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+implementation is often called at the end of custom implementations to also allow access to data from
+other dependencies.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis_object</strong> &#8211; The omsi_file_analysis object for which slicing should be performed.  For
+most cases this is not needed here as the support for slice operations is usually a static decision
+based on the class type, however, in some cases additional checks may be needed (e.g., ensure that
+the required data is available).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of strings indicating the different available viewer options. The list should be empty
+if the analysis does not support qslice requests (i.e., v_qslice(...) is not available).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.v_qspectrum">
+<em class="property">classmethod </em><code class="descname">v_qspectrum</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>x</em>, <em>y</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.v_qspectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get from which 3D analysis spectra in x/y should be extracted for presentation in the OMSI viewer</p>
+<dl class="docutils">
+<dt>Developer Note: h5py currently supports only a single index list. If the user provides an index-list for both</dt>
+<dd>x and y, then we need to construct the proper merged list and load the data manually, or if
+the data is small enough, one can load the full data into a numpy array which supports
+mulitple lists in the selection.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>analysis_object</strong> &#8211; The omsi_file_analysis object for which slicing should be performed</li>
+<li><strong>x</strong> &#8211; x selection string</li>
+<li><strong>y</strong> &#8211; y selection string</li>
+<li><strong>viewer_option</strong> &#8211; If multiple default viewer behaviors are available for a given analysis then
+this option is used to switch between them.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>The following two elemnts are expected to be returned by this function :</p>
+<ol class="arabic simple">
+<li>1D, 2D or 3D numpy array of the requested spectra. NOTE: The mass (m/z) axis must be the last                 axis. For index selection x=1,y=1 a 1D array is usually expected. For indexList selections x=[0]&amp;y=[1]                 usually a 2D array is expected. For ragne selections x=0:1&amp;y=1:2 we one usually expects a 3D array.</li>
+<li>None in case that the spectra axis returned by v_qmz are valid for the returned spectrum. Otherwise,                 return a 1D numpy array with the m/z values for the spectrum (i.e., if custom m/z values are needed                 for interpretation of the returned spectrum).This may be needed, e.g., in cases where a per-spectrum                 peak analysis is performed and the peaks for each spectrum appear at different m/z values.</li>
+</ol>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_cx.v_qspectrum_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qspectrum_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_cx.v_qspectrum_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of strings describing the different default viewer options for the analysis for qspectrum.
+The default implementation tries to take care of handling the spectra retrieval for all the depencies
+but can naturally not decide how the qspectrum should be handled by a derived class. However, this
+implementation is often called at the end of custom implementations to also allow access to data from
+other dependencies.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis_object</strong> &#8211; The omsi_file_analysis object for which slicing should be performed.  For most cases
+this is not needed here as the support for slice operations is usually a static decission based on the
+class type, however, in some cases additional checks may be needed (e.g., ensure that the
+required data is available).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of strings indicating the different available viewer options. The list should be empty
+if the analysis does not support qspectrum requests (i.e., v_qspectrum(...) is not available).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="omsi.analysis.multivariate_stats.omsi_kmeans">
+<em class="property">class </em><code class="descclassname">omsi.analysis.multivariate_stats.</code><code class="descname">omsi_kmeans</code><span class="sig-paren">(</span><em>name_key='undefined'</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_kmeans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a></p>
+<p>Class defining a basic nmf analysis for a 2D MSI data file or slice of the data</p>
+<p>Initalize the basic data members</p>
+<dl class="method">
+<dt id="omsi.analysis.multivariate_stats.omsi_kmeans.execute_analysis">
+<code class="descname">execute_analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_kmeans.execute_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the kmeans clustering for the given msidata</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-omsi.analysis.multivariate_stats.omsi_nmf">
+<span id="omsi-nmf-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">omsi_nmf</span></code> Module<a class="headerlink" href="#module-omsi.analysis.multivariate_stats.omsi_nmf" title="Permalink to this headline">¶</a></h2>
+<p>Module for performing non-negative matrix factorization (NMF) for MSI data.</p>
+<dl class="class">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf">
+<em class="property">class </em><code class="descclassname">omsi.analysis.multivariate_stats.omsi_nmf.</code><code class="descname">omsi_nmf</code><span class="sig-paren">(</span><em>name_key='undefined'</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="omsi.analysis.html#omsi.analysis.base.analysis_base" title="omsi.analysis.base.analysis_base"><code class="xref py py-class docutils literal"><span class="pre">omsi.analysis.base.analysis_base</span></code></a></p>
+<p>Class defining a basic nmf analysis.</p>
+<p>The function has primarily been tested we MSI datasets but should support
+arbitrary n-D arrays (n&gt;=2). The last dimension of the input array must be the
+spectrum dimnensions.</p>
+<p>Initalize the basic data members</p>
+<dl class="method">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.execute_analysis">
+<code class="descname">execute_analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.execute_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the nmf for the given msidata</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qmz">
+<em class="property">classmethod </em><code class="descname">v_qmz</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>qslice_viewer_option=0</em>, <em>qspectrum_viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qmz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qmz URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qslice">
+<em class="property">classmethod </em><code class="descname">v_qslice</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>z</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qslice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qslice URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qslice_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qslice_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qslice_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which viewer_options are supported for qspectrum URL&#8217;s</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qspectrum">
+<em class="property">classmethod </em><code class="descname">v_qspectrum</code><span class="sig-paren">(</span><em>analysis_object</em>, <em>x</em>, <em>y</em>, <em>viewer_option=0</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qspectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement support for qspectrum URL requests for the viewer</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qspectrum_viewer_options">
+<em class="property">classmethod </em><code class="descname">v_qspectrum_viewer_options</code><span class="sig-paren">(</span><em>analysis_object</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.omsi_nmf.omsi_nmf.v_qspectrum_viewer_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define which viewer_options are supported for qspectrum URL&#8217;s</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="multivariate-stats-third-party-package">
+<h1>multivariate_stats.third_party Package<a class="headerlink" href="#multivariate-stats-third-party-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id2">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">multivariate_stats.third_party</span></code> Package<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-omsi.analysis.multivariate_stats.third_party"></span><p>Package containing shared third-party code modules included here to reduce the need for external
+dependencies when only small parts of external code are used.</p>
+</div>
+<div class="section" id="module-omsi.analysis.multivariate_stats.third_party.nmf">
+<span id="nmf-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">nmf</span></code> Module<a class="headerlink" href="#module-omsi.analysis.multivariate_stats.third_party.nmf" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2005-2008 Chih-Jen Lin
+All rights reserved.</p>
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:</p>
+<p>1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</p>
+<p>2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.</p>
+<p>3. Neither name of copyright holders nor the names of its contributors
+may be used to endorse or promote products derived from this software
+without specific prior written permission.</p>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+<a href="#id3"><span class="problematic" id="id4">``</span></a>AS IS&#8217;&#8217; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<dl class="function">
+<dt id="omsi.analysis.multivariate_stats.third_party.nmf.nlssubprob">
+<code class="descclassname">omsi.analysis.multivariate_stats.third_party.nmf.</code><code class="descname">nlssubprob</code><span class="sig-paren">(</span><em>V</em>, <em>W</em>, <em>Hinit</em>, <em>tol</em>, <em>maxiter</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.third_party.nmf.nlssubprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>H, grad: output solution and gradient
+iter: #iterations used
+V, W: constant matrices
+Hinit: initial solution
+tol: stopping tolerance
+maxiter: limit of iterations</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="omsi.analysis.multivariate_stats.third_party.nmf.nmf">
+<code class="descclassname">omsi.analysis.multivariate_stats.third_party.nmf.</code><code class="descname">nmf</code><span class="sig-paren">(</span><em>V</em>, <em>Winit</em>, <em>Hinit</em>, <em>tol</em>, <em>timelimit</em>, <em>maxiter</em><span class="sig-paren">)</span><a class="headerlink" href="#omsi.analysis.multivariate_stats.third_party.nmf.nmf" title="Permalink to this definition">¶</a></dt>
+<dd><p>(W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter)
+W,H: output solution
+Winit,Hinit: initial solution
+tol: tolerance for a relative stopping condition
+timelimit, maxiter: limit of time and iterations</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="multivariate-stats-experimental-package">
+<h1>multivariate_stats.experimental Package<a class="headerlink" href="#multivariate-stats-experimental-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id5">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">multivariate_stats.experimental</span></code> Package<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-omsi.analysis.multivariate_stats.experimental"></span><p>Module with experimental analysis code, i.e., code that is
+not (yet) used in production but is under development.
+Often this is code that is used in a specific research.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="omsi.analysis.msi_filtering.html" class="btn btn-neutral float-right" title="msi_filtering Package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="omsi.analysis.findpeaks.html" class="btn btn-neutral" title="findpeaks Package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Oliver Rübel and Ben Bowen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

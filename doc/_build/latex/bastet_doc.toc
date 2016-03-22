@@ -1,0 +1,204 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}Mass Spectrometry Imaging}{3}{section.1.1}
+\contentsline {section}{\numberline {1.2}OpenMSI: Science Gateway}{3}{section.1.2}
+\contentsline {section}{\numberline {1.3}OpenMSI: Software Infrastructure}{4}{section.1.3}
+\contentsline {chapter}{\numberline {2}Converting and Files and Making them Accessible}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}Converting an MSI file at NERSC}{5}{section.2.1}
+\contentsline {section}{\numberline {2.2}Making a converted file accessible to OpenMSI (Private)}{5}{section.2.2}
+\contentsline {section}{\numberline {2.3}Changing file permissions:}{5}{section.2.3}
+\contentsline {section}{\numberline {2.4}\texttt {convertToOMSI}: Usage and Options}{5}{section.2.4}
+\contentsline {chapter}{\numberline {3}Integrating new file formats}{9}{chapter.3}
+\contentsline {section}{\numberline {3.1}Developing a file reader}{9}{section.3.1}
+\contentsline {section}{\numberline {3.2}Integrating the file reader with OpenMSI}{10}{section.3.2}
+\contentsline {chapter}{\numberline {4}Developing a new Analysis for BASTet}{13}{chapter.4}
+\contentsline {section}{\numberline {4.1}Overview:}{13}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Some important features of \texttt {analysis\_base}}{13}{subsection.4.1.1}
+\contentsline {subsubsection}{Slicing}{14}{subsubsection*.3}
+\contentsline {subsubsection}{Important Member Variables}{14}{subsubsection*.4}
+\contentsline {subsubsection}{I/O functions}{14}{subsubsection*.5}
+\contentsline {subsubsection}{Web API Functions}{14}{subsubsection*.6}
+\contentsline {subsubsection}{Executing, saving, and restoring an analysis object}{15}{subsubsection*.7}
+\contentsline {section}{\numberline {4.2}Integrating a new Analysis using the OpenMSI Analysis Template}{17}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Step 1) Basic integration}{17}{subsection.4.2.1}
+\contentsline {subsubsection}{1.1 Creating a new analysis skeleton}{18}{subsubsection*.8}
+\contentsline {subsubsection}{1.2 Specifying analysis inputs and outputs}{18}{subsubsection*.9}
+\contentsline {subsubsection}{1.3: Implementing the \texttt {execute\_analysis} function}{19}{subsubsection*.10}
+\contentsline {subsection}{\numberline {4.2.2}Step 2) Integrating the Analysis with the OpenMSI Web API:}{20}{subsection.4.2.2}
+\contentsline {subsubsection}{2.1 Implementing the \texttt {qslice} pattern}{20}{subsubsection*.11}
+\contentsline {subsubsection}{2.2 Implementing the \texttt {qspectrum} pattern}{21}{subsubsection*.12}
+\contentsline {subsubsection}{2.3 Implementing the \texttt {qmz} pattern}{22}{subsubsection*.13}
+\contentsline {subsection}{\numberline {4.2.3}Step 3) Making your analysis self-sufficient}{24}{subsection.4.2.3}
+\contentsline {section}{\numberline {4.3}Advanced: Customizing core features}{26}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Custom data save}{26}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Custom analysis restore}{26}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Custom analysis execution}{26}{subsection.4.3.3}
+\contentsline {subsubsection}{Customizing setting of parameters}{27}{subsubsection*.14}
+\contentsline {subsubsection}{Customizing setting of default settings}{27}{subsubsection*.15}
+\contentsline {subsubsection}{Customizing the recording of runtime information}{27}{subsubsection*.16}
+\contentsline {subsubsection}{Customizing the analysis execution}{27}{subsubsection*.17}
+\contentsline {subsubsection}{Customizing the recording of analysis outputs}{27}{subsubsection*.18}
+\contentsline {section}{\numberline {4.4}Wrapping a function: The quick-and-dirty way}{28}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Option 1: Explicitly track specific excutions of a function}{28}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}Option 2: Implicitly track the last execution of a function}{28}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Example 1: Defining and using wrapped functions}{29}{subsection.4.4.3}
+\contentsline {chapter}{\numberline {5}Defining and Executing Analysis Workflows}{33}{chapter.5}
+\contentsline {section}{\numberline {5.1}Step 1: Create the analysis tasks:}{34}{section.5.1}
+\contentsline {section}{\numberline {5.2}Step 2: Define analysis inputs:}{34}{section.5.2}
+\contentsline {section}{\numberline {5.3}Step 3: Execute}{34}{section.5.3}
+\contentsline {subsection}{\numberline {5.3.1}Executing a single analysis}{34}{subsection.5.3.1}
+\contentsline {subsection}{\numberline {5.3.2}Executing a single sub-workflow}{34}{subsection.5.3.2}
+\contentsline {subsection}{\numberline {5.3.3}Executing all analyses}{35}{subsection.5.3.3}
+\contentsline {subsection}{\numberline {5.3.4}Executing multiple sub-workflows}{35}{subsection.5.3.4}
+\contentsline {section}{\numberline {5.4}Example: Normalizing an image}{35}{section.5.4}
+\contentsline {chapter}{\numberline {6}Workflow Tools}{39}{chapter.6}
+\contentsline {section}{\numberline {6.1}Workflow Scripts}{39}{section.6.1}
+\contentsline {chapter}{\numberline {7}OMSI Data Format}{43}{chapter.7}
+\contentsline {section}{\numberline {7.1}Data Layout}{43}{section.7.1}
+\contentsline {section}{\numberline {7.2}Accessing OMSI data files}{46}{section.7.2}
+\contentsline {section}{\numberline {7.3}Convert Mass Spectrometry Imaging Data to OMSI (HDF5) format}{47}{section.7.3}
+\contentsline {chapter}{\numberline {8}HDF5 I/O Performance}{49}{chapter.8}
+\contentsline {section}{\numberline {8.1}Test Platforms}{49}{section.8.1}
+\contentsline {subsection}{\numberline {8.1.1}\texttt {hopper.nersc.gov}}{49}{subsection.8.1.1}
+\contentsline {subsection}{\numberline {8.1.2}\texttt {portal-auth.nersc.gov}}{50}{subsection.8.1.2}
+\contentsline {section}{\numberline {8.2}Test Cases}{50}{section.8.2}
+\contentsline {subsection}{\numberline {8.2.1}Case 1: m/z Slice Selection}{50}{subsection.8.2.1}
+\contentsline {subsection}{\numberline {8.2.2}Case 2: Spectra Selection}{50}{subsection.8.2.2}
+\contentsline {subsection}{\numberline {8.2.3}Case 3: 3D Subcube Selection}{51}{subsection.8.2.3}
+\contentsline {subsection}{\numberline {8.2.4}Case 4: Data Write}{51}{subsection.8.2.4}
+\contentsline {subsection}{\numberline {8.2.5}Case 5: File Size}{51}{subsection.8.2.5}
+\contentsline {subsection}{\numberline {8.2.6}Test Data}{51}{subsection.8.2.6}
+\contentsline {section}{\numberline {8.3}Dataset Layout}{52}{section.8.3}
+\contentsline {subsection}{\numberline {8.3.1}Baseline Performance}{53}{subsection.8.3.1}
+\contentsline {section}{\numberline {8.4}Chunking: Part 1}{55}{section.8.4}
+\contentsline {subsection}{\numberline {8.4.1}File Size}{55}{subsection.8.4.1}
+\contentsline {subsection}{\numberline {8.4.2}Data Write}{56}{subsection.8.4.2}
+\contentsline {subsection}{\numberline {8.4.3}Selection Performance}{58}{subsection.8.4.3}
+\contentsline {subsection}{\numberline {8.4.4}Summary}{60}{subsection.8.4.4}
+\contentsline {section}{\numberline {8.5}Chunking: Part 2}{61}{section.8.5}
+\contentsline {subsection}{\numberline {8.5.1}Image-aligned Chunking}{61}{subsection.8.5.1}
+\contentsline {section}{\numberline {8.6}Compression}{61}{section.8.6}
+\contentsline {subsection}{\numberline {8.6.1}Compression Ratio}{62}{subsection.8.6.1}
+\contentsline {subsection}{\numberline {8.6.2}Data Write}{64}{subsection.8.6.2}
+\contentsline {subsection}{\numberline {8.6.3}Selection Performance}{64}{subsection.8.6.3}
+\contentsline {subsection}{\numberline {8.6.4}Aggression Parameter Study}{65}{subsection.8.6.4}
+\contentsline {section}{\numberline {8.7}Local Scalability: Multi-processing}{68}{section.8.7}
+\contentsline {section}{\numberline {8.8}Discussion}{73}{section.8.8}
+\contentsline {subsection}{\numberline {8.8.1}Data Layout}{73}{subsection.8.8.1}
+\contentsline {subsection}{\numberline {8.8.2}System Performance}{73}{subsection.8.8.2}
+\contentsline {subsection}{\numberline {8.8.3}Future Work}{74}{subsection.8.8.3}
+\contentsline {chapter}{\numberline {9}omsi Package}{75}{chapter.9}
+\contentsline {section}{\numberline {9.1}Subpackages}{75}{section.9.1}
+\contentsline {subsection}{\numberline {9.1.1}analysis Package}{76}{subsection.9.1.1}
+\contentsline {subsubsection}{\texttt {analysis} Package}{76}{subsubsection*.19}
+\contentsline {subsubsection}{\texttt {base} Module}{94}{subsubsection*.133}
+\contentsline {subsubsection}{\texttt {generic} Module}{104}{subsubsection*.189}
+\contentsline {subsubsection}{\texttt {analysis\_views} Module}{106}{subsubsection*.205}
+\contentsline {subsubsection}{Subpackages}{108}{subsubsection*.217}
+\contentsline {paragraph}{findpeaks Package}{108}{paragraph*.218}
+\contentsline {subparagraph}{\texttt {findpeaks} Package}{108}{subparagraph*.219}
+\contentsline {subparagraph}{\texttt {omsi\_findpeaks\_global} Module}{110}{subparagraph*.236}
+\contentsline {subparagraph}{\texttt {omsi\_findpeaks\_local} Module}{110}{subparagraph*.244}
+\contentsline {paragraph}{findpeaks.third\_party Package}{111}{paragraph*.253}
+\contentsline {subparagraph}{\texttt {findpeaks.third\_party} Package}{111}{subparagraph*.254}
+\contentsline {subparagraph}{\texttt {findpeaks} Module}{111}{subparagraph*.256}
+\contentsline {paragraph}{findpeaks.experimental Package}{111}{paragraph*.263}
+\contentsline {subparagraph}{\texttt {findpeaks.experimental} Package}{111}{subparagraph*.264}
+\contentsline {subparagraph}{\texttt {omsi\_peakcube} Module}{112}{subparagraph*.266}
+\contentsline {subparagraph}{\texttt {pfrun} Module}{112}{subparagraph*.279}
+\contentsline {subparagraph}{\texttt {omsi\_lpf} Module}{112}{subparagraph*.288}
+\contentsline {subparagraph}{\texttt {omsi\_npg} Module}{114}{subparagraph*.298}
+\contentsline {subparagraph}{\texttt {mypeakfinder} Module}{115}{subparagraph*.323}
+\contentsline {paragraph}{multivariate\_stats Package}{115}{paragraph*.331}
+\contentsline {subparagraph}{\texttt {multivariate\_stats} Package}{115}{subparagraph*.332}
+\contentsline {subparagraph}{\texttt {omsi\_nmf} Module}{118}{subparagraph*.352}
+\contentsline {paragraph}{multivariate\_stats.third\_party Package}{118}{paragraph*.360}
+\contentsline {subparagraph}{\texttt {multivariate\_stats.third\_party} Package}{118}{subparagraph*.361}
+\contentsline {subparagraph}{\texttt {nmf} Module}{119}{subparagraph*.363}
+\contentsline {paragraph}{multivariate\_stats.experimental Package}{119}{paragraph*.366}
+\contentsline {subparagraph}{\texttt {multivariate\_stats.experimental} Package}{119}{subparagraph*.367}
+\contentsline {paragraph}{msi\_filtering Package}{119}{paragraph*.369}
+\contentsline {subparagraph}{\texttt {msi\_filtering} Package}{119}{subparagraph*.370}
+\contentsline {subparagraph}{\texttt {omsi\_tic\_norm} Module}{122}{subparagraph*.380}
+\contentsline {paragraph}{msi\_filtering.third\_party Package}{124}{paragraph*.389}
+\contentsline {subparagraph}{\texttt {msi\_filtering.third\_party} Package}{124}{subparagraph*.390}
+\contentsline {paragraph}{msi\_filtering.experimental Package}{124}{paragraph*.392}
+\contentsline {subparagraph}{\texttt {msi\_filtering.experimental} Package}{124}{subparagraph*.393}
+\contentsline {subparagraph}{\texttt {omsi\_filter\_by\_mask} Module}{124}{subparagraph*.395}
+\contentsline {subparagraph}{\texttt {omsi\_mask\_by\_cluster} Module}{126}{subparagraph*.403}
+\contentsline {paragraph}{compound\_stats Package}{128}{paragraph*.411}
+\contentsline {subparagraph}{\texttt {compound\_stats} Package}{128}{subparagraph*.412}
+\contentsline {subparagraph}{\texttt {omsi\_score\_midas} Module}{128}{subparagraph*.414}
+\contentsline {subparagraph}{\texttt {omsi\_score\_pactolus} Module}{129}{subparagraph*.417}
+\contentsline {paragraph}{compound\_stats.third\_party Package}{129}{paragraph*.420}
+\contentsline {subparagraph}{\texttt {compound\_stats.third\_party} Package}{129}{subparagraph*.421}
+\contentsline {paragraph}{compound\_stats.experimental Package}{129}{paragraph*.423}
+\contentsline {subparagraph}{\texttt {compound\_stats.experimental} Package}{129}{subparagraph*.424}
+\contentsline {subsection}{\numberline {9.1.2}dataformat Package}{130}{subsection.9.1.2}
+\contentsline {subsubsection}{OMSI Dataformat Package}{130}{subsubsection*.426}
+\contentsline {paragraph}{\texttt {omsi\_file} Package}{131}{paragraph*.427}
+\contentsline {paragraph}{\texttt {format} Module}{131}{paragraph*.428}
+\contentsline {paragraph}{\texttt {common} Module}{135}{paragraph*.493}
+\contentsline {paragraph}{\texttt {main\_file} Module}{138}{paragraph*.507}
+\contentsline {paragraph}{\texttt {experiment} Module}{139}{paragraph*.515}
+\contentsline {paragraph}{\texttt {metadata\_collection} Module}{141}{paragraph*.528}
+\contentsline {paragraph}{\texttt {instrument} Module}{143}{paragraph*.540}
+\contentsline {paragraph}{\texttt {methods} Module}{145}{paragraph*.550}
+\contentsline {paragraph}{\texttt {msidata} Module}{146}{paragraph*.559}
+\contentsline {paragraph}{\texttt {analysis} Module}{152}{paragraph*.574}
+\contentsline {paragraph}{\texttt {dependencies} Module}{156}{paragraph*.593}
+\contentsline {subsubsection}{\texttt {file\_reader\_base} Module}{163}{subsubsection*.620}
+\contentsline {subsubsection}{\texttt {img\_file} Module}{167}{subsubsection*.646}
+\contentsline {subsubsection}{\texttt {mzml\_file} Module}{168}{subsubsection*.653}
+\contentsline {subsubsection}{\texttt {bruckerflex\_file} Module}{168}{subsubsection*.654}
+\contentsline {subsection}{\numberline {9.1.3}datastructures Package}{172}{subsection.9.1.3}
+\contentsline {subsubsection}{\texttt {datastructures} Package}{172}{subsubsection*.665}
+\contentsline {subsubsection}{\texttt {analysis\_data} Module}{172}{subsubsection*.667}
+\contentsline {subsubsection}{\texttt {dependency\_data} Module}{177}{subsubsection*.697}
+\contentsline {subsubsection}{\texttt {run\_info\_data} Module}{178}{subsubsection*.702}
+\contentsline {subsubsection}{Subpackages}{180}{subsubsection*.717}
+\contentsline {paragraph}{metadata Package}{180}{paragraph*.718}
+\contentsline {subparagraph}{\texttt {metadata} Package}{180}{subparagraph*.719}
+\contentsline {subparagraph}{\texttt {metadata\_data} Module}{180}{subparagraph*.721}
+\contentsline {subparagraph}{\texttt {metadata\_ontologies} Module}{181}{subparagraph*.727}
+\contentsline {subsection}{\numberline {9.1.4}shared Package}{182}{subsection.9.1.4}
+\contentsline {subsubsection}{\texttt {data\_selection} Module}{182}{subsubsection*.729}
+\contentsline {subsubsection}{\texttt {omsi\_web\_helper} Module}{192}{subsubsection*.750}
+\contentsline {subsubsection}{\texttt {spectrum\_layout} Module}{194}{subsubsection*.763}
+\contentsline {subsubsection}{\texttt {log} Module}{195}{subsubsection*.768}
+\contentsline {subsubsection}{\texttt {mpi\_helper} Module}{199}{subsubsection*.785}
+\contentsline {subsection}{\numberline {9.1.5}workflow Package}{202}{subsection.9.1.5}
+\contentsline {subsubsection}{\texttt {workflow} Package}{202}{subsubsection*.801}
+\contentsline {subsubsection}{\texttt {common} Module}{202}{subsubsection*.803}
+\contentsline {subsubsection}{Subpackages}{205}{subsubsection*.827}
+\contentsline {paragraph}{driver Package}{205}{paragraph*.828}
+\contentsline {subparagraph}{\texttt {driver} Package}{205}{subparagraph*.829}
+\contentsline {subparagraph}{\texttt {base} Module}{205}{subparagraph*.831}
+\contentsline {subparagraph}{\texttt {cl\_analysis\_driver} Module}{206}{subparagraph*.839}
+\contentsline {subparagraph}{\texttt {cl\_workflow\_driver} Module}{208}{subparagraph*.853}
+\contentsline {paragraph}{executor Package}{211}{paragraph*.870}
+\contentsline {subparagraph}{\texttt {executor} Package}{211}{subparagraph*.871}
+\contentsline {subparagraph}{\texttt {base} Module}{211}{subparagraph*.873}
+\contentsline {subparagraph}{\texttt {greedy\_executor} Module}{213}{subparagraph*.889}
+\contentsline {subsection}{\numberline {9.1.6}tools Package}{214}{subsection.9.1.6}
+\contentsline {subsubsection}{\texttt {convertToOMSI} Module}{214}{subsubsection*.892}
+\contentsline {subsubsection}{\texttt {run\_analysis} Module}{218}{subsubsection*.941}
+\contentsline {subsubsection}{\texttt {run\_workflow} Module}{218}{subsubsection*.942}
+\contentsline {subsubsection}{Subpackages}{218}{subsubsection*.943}
+\contentsline {paragraph}{tools.experimental Package}{218}{paragraph*.944}
+\contentsline {subparagraph}{\texttt {tools.experimental} Package}{218}{subparagraph*.945}
+\contentsline {paragraph}{tools.misc Package}{218}{paragraph*.947}
+\contentsline {subparagraph}{\texttt {tools.misc} Package}{218}{subparagraph*.948}
+\contentsline {subparagraph}{\texttt {make\_thumb} Module}{218}{subparagraph*.950}
+\contentsline {subparagraph}{\texttt {create\_peak\_cube\_overview} Module}{218}{subparagraph*.952}
+\contentsline {subsection}{\numberline {9.1.7}examples Package}{218}{subsection.9.1.7}
+\contentsline {subsubsection}{\texttt {simple\_viewer} Module}{219}{subsubsection*.955}
+\contentsline {subsubsection}{\texttt {testHDF5Optimization} Module}{219}{subsubsection*.958}
+\contentsline {subsubsection}{\texttt {testHDF5Optimization\_alignedWrite} Module}{219}{subsubsection*.962}
+\contentsline {subsubsection}{\texttt {test\_multiprocess\_slice} Module}{219}{subsubsection*.966}
+\contentsline {subsubsection}{\texttt {test\_par} Module}{220}{subsubsection*.973}
+\contentsline {subsubsection}{\texttt {test\_peakcube} Module}{220}{subsubsection*.980}
+\contentsline {subsubsection}{\texttt {testhdf5\_file\_read} Module}{220}{subsubsection*.983}
+\contentsline {subsection}{\numberline {9.1.8}templates Package}{220}{subsection.9.1.8}
+\contentsline {subsubsection}{\texttt {templates} Package}{221}{subsubsection*.986}
+\contentsline {subsubsection}{\texttt {analysis\_template} Module}{221}{subsubsection*.988}

@@ -1,0 +1,1442 @@
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter {Symbols}
+  \item \_omsi\_file\_dependencies\_\_create\_dependency\_graph\_node() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies static method), 
+		\hyperpage{159}
+
+  \indexspace
+  \bigletter A
+  \item add() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{202}
+  \item add\_all() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{202}
+  \item add\_analysis() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{212}
+  \item add\_analysis\_all() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{212}
+  \item add\_analysis\_dependencies() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{202}
+  \item add\_analysis\_dependencies() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{212}
+  \item add\_analysis\_from\_scripts() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{212}
+  \item add\_and\_parse\_analysis\_arguments() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{207}
+  \item add\_and\_parse\_workflow\_arguments() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{210}
+  \item add\_custom\_data\_to\_omsi\_file() (omsi.analysis.analysis\_base method), \hyperpage{79}
+  \item add\_custom\_data\_to\_omsi\_file() (omsi.analysis.base.analysis\_base method), 
+		\hyperpage{96}
+  \item add\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{156}
+  \item add\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{159}
+  \item add\_file\_to\_db (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item add\_metadata() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method), 
+		\hyperpage{141}
+  \item add\_parameter() (omsi.analysis.analysis\_base method), \hyperpage{79}
+  \item add\_parameter() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item add\_parameter() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{175}
+  \item all() (omsi.workflow.common.analysis\_task\_list class method), \hyperpage{203}
+  \item allowed\_nersc\_locations (omsi.shared.omsi\_web\_helper.WebHelper attribute), 
+		\hyperpage{193}
+  \item ana\_hdf5link (omsi.analysis.analysis\_data attribute), \hyperpage{77}
+  \item ana\_hdf5link (omsi.datastructures.analysis\_data.analysis\_data attribute), 
+		\hyperpage{173}
+  \item analysis\_base (class in omsi.analysis), \hyperpage{77}
+  \item analysis\_base (class in omsi.analysis.base), \hyperpage{94}
+  \item analysis\_class\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute), 
+		\hyperpage{207}
+  \item analysis\_data (class in omsi.analysis), \hyperpage{76}
+  \item analysis\_data (class in omsi.datastructures.analysis\_data), \hyperpage{172}
+  \item analysis\_driver\_base (class in omsi.workflow.driver.base), \hyperpage{205}
+  \item analysis\_generic (class in omsi.analysis), \hyperpage{87}
+  \item analysis\_generic (class in omsi.analysis.generic), \hyperpage{104}
+  \item analysis\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_identifier (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_identifier\_defined() (omsi.analysis.analysis\_base method), \hyperpage{79}
+  \item analysis\_identifier\_defined() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item analysis\_identifiers\_unique() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{203}
+  \item analysis\_name\_to\_class() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{106}
+  \item analysis\_parameter\_group (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_parameter\_help\_attr (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_runinfo\_group (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_task\_list (class in omsi.workflow.common), \hyperpage{202}
+  \item analysis\_template (class in omsi.templates.analysis\_template), \hyperpage{221}
+  \item analysis\_type (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item analysis\_views (class in omsi.analysis.analysis\_views), \hyperpage{106}
+  \item AnalysisReadyError, \hyperpage{87}, \hyperpage{94}
+  \item append() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{203}
+  \item auto\_chunk (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item available\_analysis() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{106}
+  \item available\_analysis\_descriptions() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{106}
+  \item available\_error\_options (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{216}
+  \item available\_formats (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item available\_formats() (omsi.dataformat.file\_reader\_base.file\_reader\_base static method), 
+		\hyperpage{164}
+  \item available\_io\_options (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{216}
+  \item available\_region\_options (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{216}
+
+  \indexspace
+  \bigletter B
+  \item barrier() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item bastet\_analysis() (in module omsi.analysis.generic), \hyperpage{106}
+  \item bool\_type() (omsi.datastructures.analysis\_data.data\_dtypes static method), 
+		\hyperpage{173}
+  \item broadcast() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item bruckerflex\_file (class in omsi.dataformat.bruckerflex\_file), \hyperpage{169}
+
+  \indexspace
+  \bigletter C
+  \item check\_add\_nersc (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item check\_format() (omsi.tools.convertToOMSI.ConvertFiles static method), \hyperpage{214}
+  \item check\_ready\_to\_execute() (omsi.analysis.analysis\_base method), \hyperpage{79}
+  \item check\_ready\_to\_execute() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item check\_selection\_string() (in module omsi.shared.data\_selection), \hyperpage{183}
+  \item chunks (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item cl\_analysis\_driver (class in omsi.workflow.driver.cl\_analysis\_driver), \hyperpage{206}
+  \item cl\_peakfind() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{112}
+  \item cl\_workflow\_driver (class in omsi.workflow.driver.cl\_workflow\_driver), \hyperpage{208}
+  \item clean\_up() (omsi.datastructures.run\_info\_data.run\_info\_dict method), \hyperpage{178}
+  \item clear() (omsi.datastructures.run\_info\_data.run\_info\_dict method), \hyperpage{178}
+  \item clear() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{203}
+  \item clear() (omsi.workflow.executor.base.workflow\_executor\_base method), \hyperpage{212}
+  \item clear\_analysis() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item clear\_analysis() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item clear\_analysis\_data() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item clear\_analysis\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item clear\_and\_restore() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item clear\_and\_restore() (omsi.analysis.base.analysis\_base method), \hyperpage{97}
+  \item clear\_data() (omsi.datastructures.analysis\_data.parameter\_data method), \hyperpage{174}
+  \item clear\_parameter\_data() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item clear\_parameter\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item clear\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item clear\_run\_info\_data() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item clear\_run\_info\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item close\_file() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method), \hyperpage{170}
+  \item close\_file() (omsi.dataformat.file\_reader\_base.file\_reader\_base method), 
+		\hyperpage{164}
+  \item close\_file() (omsi.dataformat.img\_file.img\_file method), \hyperpage{167}
+  \item close\_file() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method), \hyperpage{139}
+  \item collect\_data() (omsi.shared.mpi\_helper.parallel\_over\_axes method), \hyperpage{201}
+  \item comp\_lev\_exact() (omsi.analysis.multivariate\_stats.omsi\_cx class method), 
+		\hyperpage{116}
+  \item comp\_lev\_exact() (omsi.analysis.omsi\_cx class method), \hyperpage{90}
+  \item compression (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item compression\_opts (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item compute\_hilbert\_spectrum() (in module omsi.shared.spectrum\_layout), \hyperpage{194}
+  \item construct\_reduce\_dict() (in module omsi.shared.data\_selection), \hyperpage{184}
+  \item construct\_transform\_dict() (in module omsi.shared.data\_selection), \hyperpage{184}
+  \item construct\_transform\_reduce\_list() (in module omsi.shared.data\_selection), 
+		\hyperpage{184}
+  \item convert\_files() (omsi.tools.convertToOMSI.ConvertFiles static method), \hyperpage{214}
+  \item ConvertFiles (class in omsi.tools.convertToOMSI), \hyperpage{214}
+  \item ConvertSettings (class in omsi.tools.convertToOMSI), \hyperpage{216}
+  \item copy() (omsi.datastructures.analysis\_data.parameter\_data method), \hyperpage{174}
+  \item copy() (omsi.datastructures.dependency\_data.dependency\_dict method), \hyperpage{178}
+  \item copy\_dataset() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{148}
+  \item create\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method), 
+		\hyperpage{153}
+  \item create\_analysis\_object() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{207}
+  \item create\_analysis\_static() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager static method), 
+		\hyperpage{153}
+  \item create\_dataset\_list() (omsi.tools.convertToOMSI.ConvertFiles static method), 
+		\hyperpage{215}
+  \item create\_dependencies() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{156}
+  \item create\_experiment() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method), 
+		\hyperpage{140}
+  \item create\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method), 
+		\hyperpage{144}
+  \item create\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method), 
+		\hyperpage{142}
+  \item create\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method), 
+		\hyperpage{145}
+  \item create\_msidata\_full\_cube() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{149}
+  \item create\_msidata\_partial\_cube() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{150}
+  \item create\_msidata\_partial\_spectra() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{151}
+  \item create\_optimized\_chunking() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{148}
+  \item create\_path\_string() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method), 
+		\hyperpage{135}
+  \item create\_process() (in module omsi.examples.test\_multiprocess\_slice), \hyperpage{219}
+  \item create\_process() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item create\_workflow\_executor\_object() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{210}
+  \item critical() (omsi.shared.log.log\_helper class method), \hyperpage{196}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_analysis attribute), 
+		\hyperpage{131}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{131}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute), 
+		\hyperpage{132}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencies attribute), 
+		\hyperpage{132}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{132}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute), 
+		\hyperpage{133}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_file attribute), 
+		\hyperpage{133}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute), 
+		\hyperpage{133}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute), 
+		\hyperpage{134}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute), 
+		\hyperpage{134}
+  \item current\_version (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute), 
+		\hyperpage{134}
+
+  \indexspace
+  \bigletter D
+  \item data\_dtypes (class in omsi.datastructures.analysis\_data), \hyperpage{173}
+  \item data\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute), 
+		\hyperpage{132}
+  \item data\_ready() (omsi.datastructures.analysis\_data.parameter\_data method), \hyperpage{174}
+  \item data\_set() (omsi.datastructures.analysis\_data.parameter\_data method), \hyperpage{175}
+  \item dataset\_list (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{216}
+  \item dataset\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_data attribute), 
+		\hyperpage{132}
+  \item db\_server\_url (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item debug() (omsi.shared.log.log\_helper class method), \hyperpage{196}
+  \item default\_db\_server\_url (omsi.shared.omsi\_web\_helper.WebHelper attribute), 
+		\hyperpage{193}
+  \item DEFAULT\_EXECUTOR\_CLASS (omsi.workflow.executor.base.workflow\_executor\_base attribute), 
+		\hyperpage{212}
+  \item default\_keys (omsi.datastructures.analysis\_data.parameter\_data attribute), 
+		\hyperpage{175}
+  \item DEFAULT\_OUTPUT\_PREFIX (omsi.analysis.analysis\_generic attribute), \hyperpage{87}
+  \item DEFAULT\_OUTPUT\_PREFIX (omsi.analysis.generic.analysis\_generic attribute), 
+		\hyperpage{105}
+  \item DEFAULT\_TIME\_FORMAT (omsi.datastructures.run\_info\_data.run\_info\_dict attribute), 
+		\hyperpage{178}
+  \item define\_missing\_parameters() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item define\_missing\_parameters() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item define\_missing\_parameters() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item dependencies\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencies attribute), 
+		\hyperpage{132}
+  \item dependency\_datasetname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{132}
+  \item dependency\_dict (class in omsi.datastructures.dependency\_data), \hyperpage{177}
+  \item dependency\_mainname (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{132}
+  \item dependency\_parameter (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{132}
+  \item dependency\_parameter\_help\_attr (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{133}
+  \item dependency\_selection (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{133}
+  \item dependency\_typename (omsi.dataformat.omsi\_file.format.omsi\_format\_dependencydata attribute), 
+		\hyperpage{133}
+  \item dependency\_types (omsi.datastructures.dependency\_data.dependency\_dict attribute), 
+		\hyperpage{178}
+  \item description\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute), 
+		\hyperpage{134}
+  \item dimension\_index (omsi.analysis.multivariate\_stats.omsi\_cx attribute), \hyperpage{116}
+  \item dimension\_index (omsi.analysis.omsi\_cx attribute), \hyperpage{90}
+  \item display() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method), 
+		\hyperpage{111}
+  \item driver\_base (class in omsi.workflow.driver.base), \hyperpage{205}
+
+  \indexspace
+  \bigletter E
+  \item email\_error\_recipients (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{217}
+  \item email\_success\_recipients (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{217}
+  \item enable\_memory\_profiling() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item enable\_memory\_profiling() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item enable\_memory\_profiling() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{203}
+  \item enable\_profile\_memory() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item enable\_profile\_time\_and\_usage() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item enable\_time\_and\_usage\_profiling() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item enable\_time\_and\_usage\_profiling() (omsi.analysis.base.analysis\_base method), 
+		\hyperpage{98}
+  \item enable\_time\_and\_usage\_profiling() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{203}
+  \item error() (omsi.shared.log.log\_helper class method), \hyperpage{196}
+  \item error\_handling (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item evaluate\_transform\_parameter() (in module omsi.shared.data\_selection), \hyperpage{184}
+  \item exception() (omsi.shared.log.log\_helper class method), \hyperpage{197}
+  \item execute() (omsi.analysis.analysis\_base method), \hyperpage{80}
+  \item execute() (omsi.analysis.analysis\_generic method), \hyperpage{87}
+  \item execute() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item execute() (omsi.analysis.generic.analysis\_generic method), \hyperpage{105}
+  \item execute() (omsi.workflow.driver.base.driver\_base method), \hyperpage{205}
+  \item execute() (omsi.workflow.executor.base.workflow\_executor\_base method), \hyperpage{212}
+  \item execute\_all() (omsi.analysis.analysis\_base class method), \hyperpage{80}
+  \item execute\_all() (omsi.analysis.base.analysis\_base class method), \hyperpage{98}
+  \item execute\_analysis() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), 
+		\hyperpage{112}
+  \item execute\_analysis() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item execute\_analysis() (omsi.analysis.analysis\_generic method), \hyperpage{87}
+  \item execute\_analysis() (omsi.analysis.base.analysis\_base method), \hyperpage{98}
+  \item execute\_analysis() (omsi.analysis.compound\_stats.omsi\_score\_midas.omsi\_score\_midas method), 
+		\hyperpage{128}
+  \item execute\_analysis() (omsi.analysis.compound\_stats.omsi\_score\_pactolus.omsi\_score\_pactolus method), 
+		\hyperpage{129}
+  \item execute\_analysis() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item execute\_analysis() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method), 
+		\hyperpage{112}
+  \item execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_global method), 
+		\hyperpage{109}
+  \item execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global method), 
+		\hyperpage{110}
+  \item execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_local method), 
+		\hyperpage{109}
+  \item execute\_analysis() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local method), 
+		\hyperpage{110}
+  \item execute\_analysis() (omsi.analysis.generic.analysis\_generic method), \hyperpage{105}
+  \item execute\_analysis() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask method), 
+		\hyperpage{124}
+  \item execute\_analysis() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster method), 
+		\hyperpage{126}
+  \item execute\_analysis() (omsi.analysis.msi\_filtering.omsi\_tic\_norm method), \hyperpage{119}
+  \item execute\_analysis() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm method), 
+		\hyperpage{122}
+  \item execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_cx method), \hyperpage{116}
+  \item execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_kmeans method), 
+		\hyperpage{118}
+  \item execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_nmf method), \hyperpage{115}
+  \item execute\_analysis() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf method), 
+		\hyperpage{118}
+  \item execute\_analysis() (omsi.analysis.omsi\_cx method), \hyperpage{90}
+  \item execute\_analysis() (omsi.analysis.omsi\_findpeaks\_global method), \hyperpage{88}
+  \item execute\_analysis() (omsi.analysis.omsi\_findpeaks\_local method), \hyperpage{89}
+  \item execute\_analysis() (omsi.analysis.omsi\_kmeans method), \hyperpage{92}
+  \item execute\_analysis() (omsi.analysis.omsi\_nmf method), \hyperpage{89}
+  \item execute\_analysis() (omsi.analysis.omsi\_tic\_norm method), \hyperpage{92}
+  \item execute\_analysis() (omsi.templates.analysis\_template.analysis\_template method), 
+		\hyperpage{221}
+  \item execute\_fpg (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item execute\_fpl (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item execute\_nmf (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item execute\_recursive() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item execute\_recursive() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item execute\_ticnorm (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item exp\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute), 
+		\hyperpage{133}
+  \item exp\_identifier\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_experiment attribute), 
+		\hyperpage{133}
+
+  \indexspace
+  \bigletter F
+  \item file\_reader\_base (class in omsi.dataformat.file\_reader\_base), \hyperpage{163}
+  \item file\_reader\_base\_multidata (class in omsi.dataformat.file\_reader\_base), 
+		\hyperpage{165}
+  \item file\_reader\_base\_with\_regions (class in omsi.dataformat.file\_reader\_base), 
+		\hyperpage{166}
+  \item file\_user (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item Find() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), \hyperpage{114}
+  \item findpeaks (class in omsi.analysis.findpeaks.third\_party.findpeaks), \hyperpage{111}
+  \item flush() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method), \hyperpage{139}
+  \item format\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute), 
+		\hyperpage{134}
+  \item format\_name() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{164}
+  \item format\_option (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item format\_types (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute), 
+		\hyperpage{134}
+  \item from\_function() (omsi.analysis.analysis\_generic class method), \hyperpage{87}
+  \item from\_function() (omsi.analysis.generic.analysis\_generic class method), \hyperpage{105}
+  \item from\_script\_files() (omsi.workflow.common.analysis\_task\_list class method), 
+		\hyperpage{203}
+  \item from\_script\_files() (omsi.workflow.executor.base.workflow\_executor\_base class method), 
+		\hyperpage{212}
+  \item from\_scripts() (omsi.workflow.common.analysis\_task\_list class method), \hyperpage{203}
+  \item from\_scripts() (omsi.workflow.executor.base.workflow\_executor\_base class method), 
+		\hyperpage{213}
+
+  \indexspace
+  \bigletter G
+  \item gather() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item gather() (omsi.datastructures.run\_info\_data.run\_info\_dict method), \hyperpage{179}
+  \item generate\_thumbnail (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item generate\_xdmf (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item generateBaseTestFile() (in module omsi.examples.test\_multiprocess\_slice), \hyperpage{219}
+  \item generateBaseTestFile() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item generateChunkedTestFile() (in module omsi.examples.test\_multiprocess\_slice), 
+		\hyperpage{219}
+  \item generateChunkedTestFile() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item generateScript() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), 
+		\hyperpage{115}
+  \item generateScript() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item generateTestFile() (in module omsi.examples.testHDF5Optimization), \hyperpage{219}
+  \item generateTestFile() (in module omsi.examples.testHDF5Optimization\_alignedWrite), 
+		\hyperpage{219}
+  \item get\_additional\_analysis\_dependencies() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{203}
+  \item get\_all\_analysis\_data() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_all\_analysis\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_all\_analysis\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{154}
+  \item get\_all\_analysis\_data() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{203}
+  \item get\_all\_analysis\_identifiers() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{204}
+  \item get\_all\_dependency\_data() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_all\_dependency\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_all\_dependency\_data() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{156}
+  \item get\_all\_dependency\_data() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{160}
+  \item get\_all\_dependency\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_all\_dependency\_data() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{204}
+  \item get\_all\_dependency\_data\_graph() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{157}
+  \item get\_all\_dependency\_data\_graph() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{160}
+  \item get\_all\_dependency\_data\_recursive() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{158}
+  \item get\_all\_dependency\_data\_recursive() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{161}
+  \item get\_all\_parameter\_data() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_all\_parameter\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_all\_parameter\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{154}
+  \item get\_all\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_all\_parameter\_data() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{204}
+  \item get\_all\_run\_info() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_all\_run\_info() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_all\_run\_info() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{204}
+  \item get\_all\_runinfo\_data() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{154}
+  \item get\_analyses() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{213}
+  \item get\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method), 
+		\hyperpage{154}
+  \item get\_analysis() (omsi.workflow.executor.base.workflow\_executor\_base method), 
+		\hyperpage{213}
+  \item get\_analysis\_by\_identifier() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method), 
+		\hyperpage{154}
+  \item get\_analysis\_class\_from\_cl() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{207}
+  \item get\_analysis\_data() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_analysis\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_analysis\_data\_by\_name() (omsi.analysis.analysis\_base method), \hyperpage{81}
+  \item get\_analysis\_data\_by\_name() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_analysis\_data\_names() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_analysis\_data\_names() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_analysis\_data\_names() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item get\_analysis\_data\_shapes\_and\_types() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item get\_analysis\_identifier() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_analysis\_identifier() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_analysis\_identifier() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item get\_analysis\_identifiers() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method), 
+		\hyperpage{154}
+  \item get\_analysis\_index() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item get\_analysis\_instances() (omsi.analysis.analysis\_base class method), \hyperpage{82}
+  \item get\_analysis\_instances() (omsi.analysis.base.analysis\_base class method), \hyperpage{99}
+  \item get\_analysis\_type() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_analysis\_type() (omsi.analysis.analysis\_generic class method), \hyperpage{87}
+  \item get\_analysis\_type() (omsi.analysis.base.analysis\_base method), \hyperpage{99}
+  \item get\_analysis\_type() (omsi.analysis.generic.analysis\_generic class method), 
+		\hyperpage{105}
+  \item get\_analysis\_type() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item get\_axes() (omsi.analysis.analysis\_views.analysis\_views class method), \hyperpage{107}
+  \item get\_comm\_world() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item get\_data() (omsi.datastructures.dependency\_data.dependency\_dict method), \hyperpage{178}
+  \item get\_data\_or\_default() (omsi.datastructures.analysis\_data.parameter\_data method), 
+		\hyperpage{175}
+  \item get\_dataset\_dependencies() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method), 
+		\hyperpage{170}
+  \item get\_dataset\_dependencies() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method), 
+		\hyperpage{165}
+  \item get\_dataset\_dependencies() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method), 
+		\hyperpage{166}
+  \item get\_dataset\_metadata() (omsi.dataformat.file\_reader\_base.file\_reader\_base method), 
+		\hyperpage{164}
+  \item get\_dataset\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{162}
+  \item get\_default\_dtypes() (omsi.analysis.analysis\_base static method), \hyperpage{82}
+  \item get\_default\_dtypes() (omsi.analysis.base.analysis\_base static method), \hyperpage{100}
+  \item get\_default\_executor() (omsi.workflow.executor.base.workflow\_executor\_base class method), 
+		\hyperpage{213}
+  \item get\_default\_executor\_class() (omsi.workflow.executor.base.workflow\_executor\_base class method), 
+		\hyperpage{213}
+  \item get\_default\_format() (omsi.shared.log.log\_helper class method), \hyperpage{197}
+  \item get\_default\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method), 
+		\hyperpage{142}
+  \item get\_default\_parameter\_groups() (omsi.analysis.analysis\_base static method), 
+		\hyperpage{82}
+  \item get\_default\_parameter\_groups() (omsi.analysis.base.analysis\_base static method), 
+		\hyperpage{100}
+  \item get\_dependency\_objecttype() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{162}
+  \item get\_dependency\_omsiobject() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{161}
+  \item get\_dependency\_omsiobject() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{162}
+  \item get\_dependency\_type() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{162}
+  \item get\_dtypes() (omsi.datastructures.analysis\_data.data\_dtypes static method), 
+		\hyperpage{173}
+  \item get\_experiment() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method), 
+		\hyperpage{140}
+  \item get\_experiment\_by\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method), 
+		\hyperpage{140}
+  \item get\_experiment\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method), 
+		\hyperpage{141}
+  \item get\_experiment\_index() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method), 
+		\hyperpage{141}
+  \item get\_experiment\_path() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager static method), 
+		\hyperpage{140}
+  \item get\_filename() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method), \hyperpage{139}
+  \item get\_files\_from\_dir() (omsi.dataformat.img\_file.img\_file class method), \hyperpage{167}
+  \item get\_group\_description() (omsi.datastructures.analysis\_data.parameter\_data method), 
+		\hyperpage{175}
+  \item get\_group\_name() (omsi.datastructures.analysis\_data.parameter\_data method), 
+		\hyperpage{175}
+  \item get\_h5py\_datasets() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{149}
+  \item get\_h5py\_file() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method), 
+		\hyperpage{139}
+  \item get\_h5py\_mzdata() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{149}
+  \item get\_h5py\_object() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method), 
+		\hyperpage{136}
+  \item get\_help\_string() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_help\_string() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_instrument\_info() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method), 
+		\hyperpage{141}
+  \item get\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method), 
+		\hyperpage{144}
+  \item get\_instrument\_mz() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method), 
+		\hyperpage{143}
+  \item get\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method), 
+		\hyperpage{143}
+  \item get\_link\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{162}
+  \item get\_logger() (omsi.shared.log.log\_helper class method), \hyperpage{197}
+  \item get\_mainname() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{163}
+  \item get\_managed\_group() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method), 
+		\hyperpage{136}
+  \item get\_memory\_profile\_info() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_memory\_profile\_info() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_metadata() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method), 
+		\hyperpage{142}
+  \item get\_metadata\_collections() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method), 
+		\hyperpage{143}
+  \item get\_metadata\_descriptions() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method), 
+		\hyperpage{180}
+  \item get\_metadata\_units() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method), 
+		\hyperpage{180}
+  \item get\_metadata\_values() (omsi.datastructures.metadata.metadata\_data.metadata\_dict method), 
+		\hyperpage{180}
+  \item get\_method\_info() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method), 
+		\hyperpage{141}
+  \item get\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method), 
+		\hyperpage{146}
+  \item get\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method), 
+		\hyperpage{145}
+  \item get\_msidata() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{152}
+  \item get\_msidata\_by\_name() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{152}
+  \item get\_num\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_analysis\_manager method), 
+		\hyperpage{154}
+  \item get\_num\_analysis\_data() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_num\_analysis\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_num\_dependency\_data() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_num\_dependency\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_num\_dependency\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_num\_experiments() (omsi.dataformat.omsi\_file.experiment.omsi\_experiment\_manager method), 
+		\hyperpage{140}
+  \item get\_num\_items() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method), 
+		\hyperpage{136}
+  \item get\_num\_msidata() (omsi.dataformat.omsi\_file.msidata.omsi\_msidata\_manager method), 
+		\hyperpage{152}
+  \item get\_num\_parameter\_data() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_num\_parameter\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_num\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_number\_of\_datasets() (omsi.dataformat.file\_reader\_base.file\_reader\_base method), 
+		\hyperpage{164}
+  \item get\_number\_of\_datasets() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method), 
+		\hyperpage{166}
+  \item get\_number\_of\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base method), 
+		\hyperpage{164}
+  \item get\_number\_of\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method), 
+		\hyperpage{167}
+  \item get\_omsi\_analysis\_storage() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_omsi\_analysis\_storage() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_omsi\_dependency() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{163}
+  \item get\_omsi\_file\_dependencydata() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencies method), 
+		\hyperpage{162}
+  \item get\_omsi\_object() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method), 
+		\hyperpage{136}
+  \item get\_parameter\_data() (omsi.analysis.analysis\_base method), \hyperpage{82}
+  \item get\_parameter\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_parameter\_data() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_parameter\_data\_by\_name() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item get\_parameter\_data\_by\_name() (omsi.analysis.base.analysis\_base method), 
+		\hyperpage{100}
+  \item get\_parameter\_data\_by\_name() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_parameter\_help() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{163}
+  \item get\_parameter\_name() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{163}
+  \item get\_parameter\_names() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item get\_parameter\_names() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_parameter\_names() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item get\_profile\_memory() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item get\_profile\_stats\_object() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item get\_profile\_stats\_object() (omsi.analysis.base.analysis\_base method), \hyperpage{100}
+  \item get\_profile\_stats\_object() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item get\_profile\_time\_and\_usage() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item get\_qslice\_viewer\_options() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{107}
+  \item get\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{107}
+  \item get\_rank() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item get\_real\_analysis\_type() (omsi.analysis.analysis\_generic method), \hyperpage{87}
+  \item get\_real\_analysis\_type() (omsi.analysis.generic.analysis\_generic method), 
+		\hyperpage{105}
+  \item get\_region\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method), 
+		\hyperpage{167}
+  \item get\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method), 
+		\hyperpage{167}
+  \item get\_selection\_string() (omsi.dataformat.omsi\_file.dependencies.omsi\_file\_dependencydata method), 
+		\hyperpage{163}
+  \item get\_size() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item get\_slice() (omsi.analysis.analysis\_views.analysis\_views class method), \hyperpage{107}
+  \item get\_spectra() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{108}
+  \item get\_timestamp() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method), 
+		\hyperpage{137}
+  \item get\_version() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method), 
+		\hyperpage{137}
+  \item getClustersInfo() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item getCoordIdxB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item getCoordInfoB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item getCoordPeaksB() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item getGlobalMz() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method), 
+		\hyperpage{112}
+  \item getJobOutput() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), 
+		\hyperpage{115}
+  \item getNearestPeakIndex() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item getnpgimage() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item getnpgspec() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item getPeakCube() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method), 
+		\hyperpage{112}
+  \item getPFcmd() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), \hyperpage{115}
+  \item getPixelMap() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item global\_log\_level (omsi.shared.log.log\_helper attribute), \hyperpage{197}
+  \item greedy\_executor (class in omsi.workflow.executor.greedy\_executor), \hyperpage{213}
+  \item groups (omsi.templates.analysis\_template.analysis\_template attribute), \hyperpage{221}
+
+  \indexspace
+  \bigletter H
+  \item has\_default\_metadata\_collection() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method), 
+		\hyperpage{143}
+  \item has\_dependencies() (omsi.dataformat.omsi\_file.dependencies.omsi\_dependencies\_manager method), 
+		\hyperpage{158}
+  \item has\_instrument\_info() (omsi.dataformat.omsi\_file.instrument.omsi\_instrument\_manager method), 
+		\hyperpage{144}
+  \item has\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method), 
+		\hyperpage{144}
+  \item has\_metadata\_collections() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_metadata\_collection\_manager method), 
+		\hyperpage{143}
+  \item has\_method\_info() (omsi.dataformat.omsi\_file.methods.omsi\_methods\_manager method), 
+		\hyperpage{146}
+  \item has\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method), 
+		\hyperpage{145}
+  \item has\_omsi\_analysis\_storage() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item has\_omsi\_analysis\_storage() (omsi.analysis.base.analysis\_base method), \hyperpage{101}
+  \item hilbert\_curve() (in module omsi.shared.spectrum\_layout), \hyperpage{195}
+
+  \indexspace
+  \bigletter I
+  \item img\_file (class in omsi.dataformat.img\_file), \hyperpage{167}
+  \item imports\_mpi() (in module omsi.shared.mpi\_helper), \hyperpage{199}
+  \item info() (omsi.shared.log.log\_helper class method), \hyperpage{197}
+  \item initialize\_argument\_parser() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{207}
+  \item initialize\_argument\_parser() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{210}
+  \item initialized (omsi.shared.log.log\_helper attribute), \hyperpage{198}
+  \item insert() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{204}
+  \item instrument\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute), 
+		\hyperpage{133}
+  \item instrument\_mz\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute), 
+		\hyperpage{133}
+  \item instrument\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_instrument attribute), 
+		\hyperpage{133}
+  \item inv\_xy\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute), 
+		\hyperpage{135}
+  \item io\_block\_size\_limit (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{217}
+  \item io\_option (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item is\_dependency() (omsi.datastructures.analysis\_data.parameter\_data method), 
+		\hyperpage{175}
+  \item is\_managed() (omsi.dataformat.omsi\_file.common.omsi\_file\_common class method), 
+		\hyperpage{137}
+  \item is\_mpi\_available() (in module omsi.shared.mpi\_helper), \hyperpage{200}
+  \item is\_transform\_or\_reduce() (in module omsi.shared.data\_selection), \hyperpage{185}
+  \item is\_valid\_dataset() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file class method), 
+		\hyperpage{170}
+  \item is\_valid\_dataset() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{164}
+  \item is\_valid\_dataset() (omsi.dataformat.img\_file.img\_file class method), \hyperpage{167}
+  \item is\_valid\_dataset() (omsi.dataformat.omsi\_file.main\_file.omsi\_file class method), 
+		\hyperpage{139}
+  \item items() (omsi.dataformat.omsi\_file.common.omsi\_file\_common method), \hyperpage{137}
+
+  \indexspace
+  \bigletter J
+  \item job\_id (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item json\_to\_transform\_reduce\_description() (in module omsi.shared.data\_selection), 
+		\hyperpage{185}
+
+  \indexspace
+  \bigletter K
+  \item keys() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item keys() (omsi.analysis.base.analysis\_base method), \hyperpage{101}
+  \item keys() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method), 
+		\hyperpage{142}
+  \item keys() (omsi.datastructures.analysis\_data.parameter\_manager method), \hyperpage{176}
+
+  \indexspace
+  \bigletter L
+  \item locate\_analysis() (omsi.analysis.analysis\_base class method), \hyperpage{83}
+  \item locate\_analysis() (omsi.analysis.base.analysis\_base class method), \hyperpage{101}
+  \item log() (omsi.shared.log.log\_helper class method), \hyperpage{198}
+  \item log\_helper (class in omsi.shared.log), \hyperpage{195}
+  \item log\_level\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute), 
+		\hyperpage{207}
+  \item log\_level\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute), 
+		\hyperpage{210}
+  \item log\_levels (omsi.shared.log.log\_helper attribute), \hyperpage{198}
+  \item log\_var() (omsi.shared.log.log\_helper class method), \hyperpage{198}
+
+  \indexspace
+  \bigletter M
+  \item main() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), \hyperpage{115}
+  \item main() (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{112}
+  \item main() (in module omsi.analysis.findpeaks.experimental.omsi\_npg), \hyperpage{114}
+  \item main() (in module omsi.analysis.findpeaks.experimental.omsi\_peakcube), \hyperpage{112}
+  \item main() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item main() (in module omsi.examples.simple\_viewer), \hyperpage{219}
+  \item main() (in module omsi.examples.test\_multiprocess\_slice), \hyperpage{220}
+  \item main() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item main() (in module omsi.examples.test\_peakcube), \hyperpage{220}
+  \item main() (in module omsi.examples.testhdf5\_file\_read), \hyperpage{220}
+  \item main() (in module omsi.examples.testHDF5Optimization), \hyperpage{219}
+  \item main() (in module omsi.examples.testHDF5Optimization\_alignedWrite), \hyperpage{219}
+  \item main() (in module omsi.tools.convertToOMSI), \hyperpage{218}
+  \item main() (in module omsi.tools.misc.create\_peak\_cube\_overview), \hyperpage{218}
+  \item main() (in module omsi.tools.misc.make\_thumb), \hyperpage{218}
+  \item main() (omsi.workflow.driver.base.analysis\_driver\_base method), \hyperpage{205}
+  \item main() (omsi.workflow.driver.base.driver\_base method), \hyperpage{205}
+  \item main() (omsi.workflow.driver.base.workflow\_driver\_base method), \hyperpage{205}
+  \item main() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{207}
+  \item main() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{210}
+  \item main() (omsi.workflow.executor.base.workflow\_executor\_base method), \hyperpage{213}
+  \item main() (omsi.workflow.executor.greedy\_executor.greedy\_executor method), \hyperpage{214}
+  \item make\_analysis\_identifiers\_unique() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{204}
+  \item MakeSet() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item metadata (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item metadata\_collection\_groupname\_default (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute), 
+		\hyperpage{134}
+  \item metadata\_dict (class in omsi.datastructures.metadata.metadata\_data), \hyperpage{180}
+  \item metadata\_ontologies (class in omsi.datastructures.metadata.metadata\_ontologies), 
+		\hyperpage{181}
+  \item metadata\_value (class in omsi.datastructures.metadata.metadata\_data), \hyperpage{180}
+  \item methods\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute), 
+		\hyperpage{134}
+  \item methods\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute), 
+		\hyperpage{134}
+  \item methods\_old\_groupname (omsi.dataformat.omsi\_file.format.omsi\_format\_methods attribute), 
+		\hyperpage{134}
+  \item monitorJob() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), \hyperpage{115}
+  \item MPI\_MESSAGE\_TAGS (omsi.shared.mpi\_helper.parallel\_over\_axes attribute), 
+		\hyperpage{201}
+  \item mpi\_type\_from\_dtype() (in module omsi.shared.mpi\_helper), \hyperpage{200}
+  \item myHC() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), \hyperpage{114}
+  \item MyViewer (class in omsi.examples.simple\_viewer), \hyperpage{219}
+  \item mz\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_spectra attribute), 
+		\hyperpage{135}
+  \item mzdata\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata attribute), 
+		\hyperpage{134}
+
+  \indexspace
+  \bigletter N
+  \item Name (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks attribute), \hyperpage{111}
+  \item ndarray() (omsi.datastructures.analysis\_data.data\_dtypes static method), \hyperpage{173}
+  \item nlssubprob() (in module omsi.analysis.multivariate\_stats.third\_party.nmf), 
+		\hyperpage{119}
+  \item nmf() (in module omsi.analysis.multivariate\_stats.third\_party.nmf), \hyperpage{119}
+  \item nmf\_num\_component (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item nmf\_num\_iter (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item nmf\_timeout (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item nmf\_tolerance (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item nmf\_use\_raw\_data (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item Node (class in omsi.analysis.findpeaks.experimental.omsi\_npg), \hyperpage{114}
+
+  \indexspace
+  \bigletter O
+  \item omsi.analysis (module), \hyperpage{76}
+  \item omsi.analysis.analysis\_views (module), \hyperpage{106}
+  \item omsi.analysis.base (module), \hyperpage{94}
+  \item omsi.analysis.compound\_stats (module), \hyperpage{128}
+  \item omsi.analysis.compound\_stats.experimental (module), \hyperpage{129}
+  \item omsi.analysis.compound\_stats.omsi\_score\_midas (module), \hyperpage{128}
+  \item omsi.analysis.compound\_stats.omsi\_score\_pactolus (module), \hyperpage{129}
+  \item omsi.analysis.compound\_stats.third\_party (module), \hyperpage{129}
+  \item omsi.analysis.findpeaks (module), \hyperpage{108}
+  \item omsi.analysis.findpeaks.experimental (module), \hyperpage{111}
+  \item omsi.analysis.findpeaks.experimental.mypeakfinder (module), \hyperpage{115}
+  \item omsi.analysis.findpeaks.experimental.omsi\_lpf (module), \hyperpage{112}
+  \item omsi.analysis.findpeaks.experimental.omsi\_npg (module), \hyperpage{114}
+  \item omsi.analysis.findpeaks.experimental.omsi\_peakcube (module), \hyperpage{112}
+  \item omsi.analysis.findpeaks.experimental.pfrun (module), \hyperpage{112}
+  \item omsi.analysis.findpeaks.omsi\_findpeaks\_global (module), \hyperpage{110}
+  \item omsi.analysis.findpeaks.omsi\_findpeaks\_local (module), \hyperpage{110}
+  \item omsi.analysis.findpeaks.third\_party (module), \hyperpage{111}
+  \item omsi.analysis.findpeaks.third\_party.findpeaks (module), \hyperpage{111}
+  \item omsi.analysis.generic (module), \hyperpage{104}
+  \item omsi.analysis.msi\_filtering (module), \hyperpage{119}
+  \item omsi.analysis.msi\_filtering.experimental (module), \hyperpage{124}
+  \item omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask (module), \hyperpage{124}
+  \item omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster (module), \hyperpage{126}
+  \item omsi.analysis.msi\_filtering.omsi\_tic\_norm (module), \hyperpage{122}
+  \item omsi.analysis.msi\_filtering.third\_party (module), \hyperpage{124}
+  \item omsi.analysis.multivariate\_stats (module), \hyperpage{115}
+  \item omsi.analysis.multivariate\_stats.experimental (module), \hyperpage{119}
+  \item omsi.analysis.multivariate\_stats.omsi\_nmf (module), \hyperpage{118}
+  \item omsi.analysis.multivariate\_stats.third\_party (module), \hyperpage{118}
+  \item omsi.analysis.multivariate\_stats.third\_party.nmf (module), \hyperpage{119}
+  \item omsi.dataformat.bruckerflex\_file (module), \hyperpage{168}
+  \item omsi.dataformat.file\_reader\_base (module), \hyperpage{163}
+  \item omsi.dataformat.img\_file (module), \hyperpage{167}
+  \item omsi.dataformat.omsi\_file (module), \hyperpage{131}
+  \item omsi.dataformat.omsi\_file.analysis (module), \hyperpage{152}
+  \item omsi.dataformat.omsi\_file.common (module), \hyperpage{135}
+  \item omsi.dataformat.omsi\_file.dependencies (module), \hyperpage{156}
+  \item omsi.dataformat.omsi\_file.experiment (module), \hyperpage{139}
+  \item omsi.dataformat.omsi\_file.format (module), \hyperpage{131}
+  \item omsi.dataformat.omsi\_file.instrument (module), \hyperpage{143}
+  \item omsi.dataformat.omsi\_file.main\_file (module), \hyperpage{138}
+  \item omsi.dataformat.omsi\_file.metadata\_collection (module), \hyperpage{141}
+  \item omsi.dataformat.omsi\_file.methods (module), \hyperpage{145}
+  \item omsi.dataformat.omsi\_file.msidata (module), \hyperpage{146}
+  \item omsi.datastructures (module), \hyperpage{172}
+  \item omsi.datastructures.analysis\_data (module), \hyperpage{172}
+  \item omsi.datastructures.dependency\_data (module), \hyperpage{177}
+  \item omsi.datastructures.metadata (module), \hyperpage{180}
+  \item omsi.datastructures.metadata.metadata\_data (module), \hyperpage{180}
+  \item omsi.datastructures.metadata.metadata\_ontologies (module), \hyperpage{181}
+  \item omsi.datastructures.run\_info\_data (module), \hyperpage{178}
+  \item omsi.examples.simple\_viewer (module), \hyperpage{219}
+  \item omsi.examples.test\_multiprocess\_slice (module), \hyperpage{219}
+  \item omsi.examples.test\_par (module), \hyperpage{220}
+  \item omsi.examples.test\_peakcube (module), \hyperpage{220}
+  \item omsi.examples.testhdf5\_file\_read (module), \hyperpage{220}
+  \item omsi.examples.testHDF5Optimization (module), \hyperpage{219}
+  \item omsi.examples.testHDF5Optimization\_alignedWrite (module), \hyperpage{219}
+  \item omsi.shared.data\_selection (module), \hyperpage{182}
+  \item omsi.shared.log (module), \hyperpage{195}
+  \item omsi.shared.mpi\_helper (module), \hyperpage{199}
+  \item omsi.shared.omsi\_web\_helper (module), \hyperpage{192}
+  \item omsi.shared.spectrum\_layout (module), \hyperpage{194}
+  \item omsi.templates (module), \hyperpage{221}
+  \item omsi.templates.analysis\_template (module), \hyperpage{221}
+  \item omsi.tools.convertToOMSI (module), \hyperpage{214}
+  \item omsi.tools.experimental (module), \hyperpage{218}
+  \item omsi.tools.misc (module), \hyperpage{218}
+  \item omsi.tools.misc.create\_peak\_cube\_overview (module), \hyperpage{218}
+  \item omsi.tools.misc.make\_thumb (module), \hyperpage{218}
+  \item omsi.tools.run\_analysis (module), \hyperpage{218}
+  \item omsi.workflow (module), \hyperpage{202}
+  \item omsi.workflow.common (module), \hyperpage{202}
+  \item omsi.workflow.driver (module), \hyperpage{205}
+  \item omsi.workflow.driver.base (module), \hyperpage{205}
+  \item omsi.workflow.driver.cl\_analysis\_driver (module), \hyperpage{206}
+  \item omsi.workflow.driver.cl\_workflow\_driver (module), \hyperpage{208}
+  \item omsi.workflow.executor (module), \hyperpage{211}
+  \item omsi.workflow.executor.base (module), \hyperpage{211}
+  \item omsi.workflow.executor.greedy\_executor (module), \hyperpage{213}
+  \item omsi\_analysis\_manager (class in omsi.dataformat.omsi\_file.analysis), \hyperpage{152}
+  \item omsi\_cx (class in omsi.analysis), \hyperpage{90}
+  \item omsi\_cx (class in omsi.analysis.multivariate\_stats), \hyperpage{116}
+  \item omsi\_dependencies\_manager (class in omsi.dataformat.omsi\_file.dependencies), 
+		\hyperpage{156}
+  \item omsi\_experiment\_manager (class in omsi.dataformat.omsi\_file.experiment), \hyperpage{139}
+  \item omsi\_file (class in omsi.dataformat.omsi\_file.main\_file), \hyperpage{138}
+  \item omsi\_file\_analysis (class in omsi.dataformat.omsi\_file.analysis), \hyperpage{154}
+  \item omsi\_file\_common (class in omsi.dataformat.omsi\_file.common), \hyperpage{135}
+  \item omsi\_file\_dependencies (class in omsi.dataformat.omsi\_file.dependencies), 
+		\hyperpage{158}
+  \item omsi\_file\_dependencydata (class in omsi.dataformat.omsi\_file.dependencies), 
+		\hyperpage{162}
+  \item omsi\_file\_experiment (class in omsi.dataformat.omsi\_file.experiment), \hyperpage{140}
+  \item omsi\_file\_instrument (class in omsi.dataformat.omsi\_file.instrument), \hyperpage{143}
+  \item omsi\_file\_metadata\_collection (class in omsi.dataformat.omsi\_file.metadata\_collection), 
+		\hyperpage{141}
+  \item omsi\_file\_methods (class in omsi.dataformat.omsi\_file.methods), \hyperpage{145}
+  \item omsi\_file\_msidata (class in omsi.dataformat.omsi\_file.msidata), \hyperpage{146}
+  \item omsi\_file\_object\_manager (class in omsi.dataformat.omsi\_file.common), \hyperpage{138}
+  \item omsi\_filter\_by\_mask (class in omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask), 
+		\hyperpage{124}
+  \item omsi\_findpeaks\_global (class in omsi.analysis), \hyperpage{88}
+  \item omsi\_findpeaks\_global (class in omsi.analysis.findpeaks), \hyperpage{109}
+  \item omsi\_findpeaks\_global (class in omsi.analysis.findpeaks.omsi\_findpeaks\_global), 
+		\hyperpage{110}
+  \item omsi\_findpeaks\_local (class in omsi.analysis), \hyperpage{88}
+  \item omsi\_findpeaks\_local (class in omsi.analysis.findpeaks), \hyperpage{109}
+  \item omsi\_findpeaks\_local (class in omsi.analysis.findpeaks.omsi\_findpeaks\_local), 
+		\hyperpage{110}
+  \item omsi\_format\_analysis (class in omsi.dataformat.omsi\_file.format), \hyperpage{131}
+  \item omsi\_format\_common (class in omsi.dataformat.omsi\_file.format), \hyperpage{131}
+  \item omsi\_format\_data (class in omsi.dataformat.omsi\_file.format), \hyperpage{132}
+  \item omsi\_format\_dependencies (class in omsi.dataformat.omsi\_file.format), \hyperpage{132}
+  \item omsi\_format\_dependencydata (class in omsi.dataformat.omsi\_file.format), \hyperpage{132}
+  \item omsi\_format\_experiment (class in omsi.dataformat.omsi\_file.format), \hyperpage{133}
+  \item omsi\_format\_file (class in omsi.dataformat.omsi\_file.format), \hyperpage{133}
+  \item omsi\_format\_instrument (class in omsi.dataformat.omsi\_file.format), \hyperpage{133}
+  \item omsi\_format\_metadata\_collection (class in omsi.dataformat.omsi\_file.format), 
+		\hyperpage{133}
+  \item omsi\_format\_methods (class in omsi.dataformat.omsi\_file.format), \hyperpage{134}
+  \item omsi\_format\_msidata (class in omsi.dataformat.omsi\_file.format), \hyperpage{134}
+  \item omsi\_format\_msidata\_partial\_cube (class in omsi.dataformat.omsi\_file.format), 
+		\hyperpage{134}
+  \item omsi\_format\_msidata\_partial\_spectra (class in omsi.dataformat.omsi\_file.format), 
+		\hyperpage{135}
+  \item omsi\_instrument\_manager (class in omsi.dataformat.omsi\_file.instrument), \hyperpage{144}
+  \item omsi\_kmeans (class in omsi.analysis), \hyperpage{92}
+  \item omsi\_kmeans (class in omsi.analysis.multivariate\_stats), \hyperpage{118}
+  \item omsi\_lpf (class in omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{112}
+  \item omsi\_mask\_by\_cluster (class in omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster), 
+		\hyperpage{126}
+  \item omsi\_metadata\_collection\_manager (class in omsi.dataformat.omsi\_file.metadata\_collection), 
+		\hyperpage{142}
+  \item omsi\_methods\_manager (class in omsi.dataformat.omsi\_file.methods), \hyperpage{145}
+  \item omsi\_msidata\_manager (class in omsi.dataformat.omsi\_file.msidata), \hyperpage{149}
+  \item omsi\_nmf (class in omsi.analysis), \hyperpage{89}
+  \item omsi\_nmf (class in omsi.analysis.multivariate\_stats), \hyperpage{115}
+  \item omsi\_nmf (class in omsi.analysis.multivariate\_stats.omsi\_nmf), \hyperpage{118}
+  \item omsi\_npg (class in omsi.analysis.findpeaks.experimental.omsi\_npg), \hyperpage{114}
+  \item omsi\_output\_file (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{217}
+  \item omsi\_peakcube (class in omsi.analysis.findpeaks.experimental.omsi\_peakcube), 
+		\hyperpage{112}
+  \item omsi\_score\_midas (class in omsi.analysis.compound\_stats.omsi\_score\_midas), 
+		\hyperpage{128}
+  \item omsi\_score\_pactolus (class in omsi.analysis.compound\_stats.omsi\_score\_pactolus), 
+		\hyperpage{129}
+  \item omsi\_tic\_norm (class in omsi.analysis), \hyperpage{92}
+  \item omsi\_tic\_norm (class in omsi.analysis.msi\_filtering), \hyperpage{119}
+  \item omsi\_tic\_norm (class in omsi.analysis.msi\_filtering.omsi\_tic\_norm), \hyperpage{122}
+  \item ontology\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute), 
+		\hyperpage{134}
+  \item output\_save\_arg\_name (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver attribute), 
+		\hyperpage{207}
+  \item output\_save\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute), 
+		\hyperpage{210}
+
+  \indexspace
+  \bigletter P
+  \item parallel\_over\_axes (class in omsi.shared.mpi\_helper), \hyperpage{200}
+  \item parameter\_data (class in omsi.datastructures.analysis\_data), \hyperpage{173}
+  \item parameter\_manager (class in omsi.datastructures.analysis\_data), \hyperpage{175}
+  \item parse\_cl\_arguments() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{208}
+  \item parse\_cl\_arguments() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item parse\_input\_args() (omsi.tools.convertToOMSI.ConvertSettings class method), 
+		\hyperpage{217}
+  \item parse\_path\_string() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method), 
+		\hyperpage{137}
+  \item peakdet() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method), 
+		\hyperpage{111}
+  \item perform\_reduction() (in module omsi.shared.data\_selection), \hyperpage{185}
+  \item plot\_2d\_spectrum\_as\_image() (in module omsi.shared.spectrum\_layout), \hyperpage{195}
+  \item print\_help() (in module omsi.tools.misc.create\_peak\_cube\_overview), \hyperpage{218}
+  \item print\_help() (omsi.tools.convertToOMSI.ConvertSettings class method), \hyperpage{217}
+  \item print\_memory\_profiles() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item print\_settings() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{208}
+  \item print\_settings() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item print\_time\_and\_usage\_profiles() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item printHelp() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), \hyperpage{115}
+  \item printHelp() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item printHelp() (in module omsi.examples.test\_peakcube), \hyperpage{220}
+  \item printHelp() (in module omsi.examples.testhdf5\_file\_read), \hyperpage{220}
+  \item printHelp() (in module omsi.examples.testHDF5Optimization), \hyperpage{219}
+  \item printHelp() (in module omsi.examples.testHDF5Optimization\_alignedWrite), \hyperpage{219}
+  \item profile\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute), 
+		\hyperpage{211}
+  \item profile\_mem\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute), 
+		\hyperpage{211}
+
+  \indexspace
+  \bigletter Q
+  \item queuePCjob() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+
+  \indexspace
+  \bigletter R
+  \item RawDescriptionDefaultHelpArgParseFormatter (class in omsi.workflow.common), \hyperpage{202}
+  \item read\_from\_omsi\_file() (omsi.analysis.analysis\_base method), \hyperpage{83}
+  \item read\_from\_omsi\_file() (omsi.analysis.analysis\_generic method), \hyperpage{88}
+  \item read\_from\_omsi\_file() (omsi.analysis.base.analysis\_base method), \hyperpage{101}
+  \item read\_from\_omsi\_file() (omsi.analysis.generic.analysis\_generic method), \hyperpage{105}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.analysis\_base method), \hyperpage{84}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.base.analysis\_base method), 
+		\hyperpage{102}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube method), 
+		\hyperpage{112}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.msi\_filtering.omsi\_tic\_norm method), 
+		\hyperpage{120}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm method), 
+		\hyperpage{122}
+  \item record\_execute\_analysis\_outputs() (omsi.analysis.omsi\_tic\_norm method), \hyperpage{92}
+  \item record\_postexecute() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{179}
+  \item record\_preexecute() (omsi.datastructures.run\_info\_data.run\_info\_dict method), 
+		\hyperpage{180}
+  \item recorded\_warnings (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{218}
+  \item recreate\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item reduction\_allowed\_numpy\_function (in module omsi.shared.data\_selection), 
+		\hyperpage{185}
+  \item region\_option (omsi.tools.convertToOMSI.ConvertSettings attribute), \hyperpage{218}
+  \item register\_file\_with\_db() (omsi.shared.omsi\_web\_helper.WebHelper static method), 
+		\hyperpage{193}
+  \item reinterpolate\_spectrum() (in module omsi.shared.spectrum\_layout), \hyperpage{195}
+  \item remove\_output\_target() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{208}
+  \item remove\_output\_target() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item reset\_analysis\_object() (omsi.workflow.driver.cl\_analysis\_driver.cl\_analysis\_driver method), 
+		\hyperpage{208}
+  \item reset\_workflow\_executor\_object() (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver method), 
+		\hyperpage{211}
+  \item restore\_analysis() (omsi.dataformat.omsi\_file.analysis.omsi\_file\_analysis method), 
+		\hyperpage{155}
+  \item results\_ready() (omsi.analysis.analysis\_base method), \hyperpage{84}
+  \item results\_ready() (omsi.analysis.base.analysis\_base method), \hyperpage{102}
+  \item run() (omsi.shared.mpi\_helper.parallel\_over\_axes method), \hyperpage{201}
+  \item run\_info\_dict (class in omsi.datastructures.run\_info\_data), \hyperpage{178}
+  \item run\_lpf() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item run\_npg() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item run\_peakcube() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+
+  \indexspace
+  \bigletter S
+  \item s\_mz\_from\_acqu() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method), 
+		\hyperpage{170}
+  \item s\_read\_acqu() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method), 
+		\hyperpage{170}
+  \item s\_read\_fid() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method), 
+		\hyperpage{171}
+  \item s\_read\_spotlist() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method), 
+		\hyperpage{171}
+  \item s\_spot\_from\_dir() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file static method), 
+		\hyperpage{171}
+  \item same\_file() (omsi.dataformat.omsi\_file.common.omsi\_file\_common static method), 
+		\hyperpage{137}
+  \item SCHEDULES (omsi.shared.mpi\_helper.parallel\_over\_axes attribute), \hyperpage{201}
+  \item script\_arg\_name (omsi.workflow.driver.cl\_workflow\_driver.cl\_workflow\_driver attribute), 
+		\hyperpage{211}
+  \item selection\_string\_to\_object() (in module omsi.shared.data\_selection), \hyperpage{187}
+  \item selection\_to\_indexlist() (in module omsi.shared.data\_selection), \hyperpage{187}
+  \item selection\_to\_string() (in module omsi.shared.data\_selection), \hyperpage{187}
+  \item selection\_type (in module omsi.shared.data\_selection), \hyperpage{187}
+  \item send\_email() (omsi.shared.omsi\_web\_helper.WebHelper static method), \hyperpage{193}
+  \item set\_analysis\_identifier() (omsi.analysis.analysis\_base method), \hyperpage{84}
+  \item set\_analysis\_identifier() (omsi.analysis.base.analysis\_base method), \hyperpage{102}
+  \item set\_apache\_acl() (omsi.shared.omsi\_web\_helper.WebHelper static method), \hyperpage{194}
+  \item set\_dataset\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata method), 
+		\hyperpage{166}
+  \item set\_experiment\_identifier() (omsi.dataformat.omsi\_file.experiment.omsi\_file\_experiment method), 
+		\hyperpage{141}
+  \item set\_fill\_space() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{149}
+  \item set\_fill\_spectra() (omsi.dataformat.omsi\_file.msidata.omsi\_file\_msidata method), 
+		\hyperpage{149}
+  \item set\_instrument\_name() (omsi.dataformat.omsi\_file.instrument.omsi\_file\_instrument method), 
+		\hyperpage{144}
+  \item set\_log\_level() (omsi.shared.log.log\_helper class method), \hyperpage{198}
+  \item set\_method\_name() (omsi.dataformat.omsi\_file.methods.omsi\_file\_methods method), 
+		\hyperpage{145}
+  \item set\_parameter\_default\_value() (omsi.datastructures.analysis\_data.parameter\_manager method), 
+		\hyperpage{176}
+  \item set\_parameter\_values() (omsi.analysis.analysis\_base method), \hyperpage{84}
+  \item set\_parameter\_values() (omsi.analysis.base.analysis\_base method), \hyperpage{102}
+  \item set\_region\_selection() (omsi.dataformat.bruckerflex\_file.bruckerflex\_file method), 
+		\hyperpage{172}
+  \item set\_region\_selection() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions method), 
+		\hyperpage{167}
+  \item set\_undefined\_analysis\_identifiers() (omsi.workflow.common.analysis\_task\_list method), 
+		\hyperpage{204}
+  \item setup\_logging() (omsi.shared.log.log\_helper class method), \hyperpage{198}
+  \item shape\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute), 
+		\hyperpage{135}
+  \item size() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{165}
+  \item size() (omsi.dataformat.img\_file.img\_file class method), \hyperpage{168}
+  \item sliceSelect() (in module omsi.examples.test\_multiprocess\_slice), \hyperpage{220}
+  \item sliceSelect() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item sliding\_window\_minimum() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method), 
+		\hyperpage{111}
+  \item smoothListGaussian() (omsi.analysis.findpeaks.third\_party.findpeaks.findpeaks method), 
+		\hyperpage{111}
+  \item spectraSelect() (in module omsi.examples.test\_multiprocess\_slice), \hyperpage{220}
+  \item spectraSelect() (in module omsi.examples.test\_par), \hyperpage{220}
+  \item spectrum\_iter() (omsi.dataformat.file\_reader\_base.file\_reader\_base method), 
+		\hyperpage{165}
+  \item spectrum\_iter() (omsi.dataformat.img\_file.img\_file method), \hyperpage{168}
+  \item splitLabelsList() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), 
+		\hyperpage{114}
+  \item stop() (in module omsi.analysis.findpeaks.experimental.mypeakfinder), \hyperpage{115}
+  \item stop() (in module omsi.analysis.findpeaks.experimental.omsi\_npg), \hyperpage{115}
+  \item stop() (in module omsi.analysis.findpeaks.experimental.omsi\_peakcube), \hyperpage{112}
+  \item stop() (in module omsi.analysis.findpeaks.experimental.pfrun), \hyperpage{112}
+  \item str\_type (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{131}
+  \item str\_type\_unicode (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{131}
+  \item string\_to\_structime() (omsi.datastructures.run\_info\_data.run\_info\_dict static method), 
+		\hyperpage{180}
+  \item string\_to\_time() (omsi.datastructures.run\_info\_data.run\_info\_dict static method), 
+		\hyperpage{180}
+  \item suggest\_chunking() (omsi.tools.convertToOMSI.ConvertFiles static method), \hyperpage{215}
+  \item suggest\_chunkings\_for\_files() (omsi.tools.convertToOMSI.ConvertFiles static method), 
+		\hyperpage{215}
+  \item suggest\_file\_chunkings (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{218}
+  \item super\_users (omsi.shared.omsi\_web\_helper.WebHelper attribute), \hyperpage{194}
+  \item supports\_multidata() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{165}
+  \item supports\_multidata() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_multidata class method), 
+		\hyperpage{166}
+  \item supports\_multiexperiment() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{165}
+  \item supports\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base class method), 
+		\hyperpage{165}
+  \item supports\_regions() (omsi.dataformat.file\_reader\_base.file\_reader\_base\_with\_regions class method), 
+		\hyperpage{167}
+  \item supports\_slice() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{108}
+  \item supports\_spectra() (omsi.analysis.analysis\_views.analysis\_views class method), 
+		\hyperpage{108}
+
+  \indexspace
+  \bigletter T
+  \item test\_mpi\_available() (in module omsi.shared.mpi\_helper), \hyperpage{201}
+  \item timestamp\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{132}
+  \item transform\_and\_reduce\_data() (in module omsi.shared.data\_selection), \hyperpage{187}
+  \item transform\_data\_single() (in module omsi.shared.data\_selection), \hyperpage{188}
+  \item transform\_datachunk() (in module omsi.shared.data\_selection), \hyperpage{189}
+  \item transform\_reduce\_description\_to\_json() (in module omsi.shared.data\_selection), 
+		\hyperpage{189}
+  \item transformation\_allowed\_numpy\_dual\_data (in module omsi.shared.data\_selection), 
+		\hyperpage{189}
+  \item transformation\_allowed\_numpy\_single\_data (in module omsi.shared.data\_selection), 
+		\hyperpage{190}
+  \item transformation\_type (in module omsi.shared.data\_selection), \hyperpage{191}
+  \item type\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{132}
+
+  \indexspace
+  \bigletter U
+  \item Union() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg method), \hyperpage{114}
+  \item unit\_value\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_metadata\_collection attribute), 
+		\hyperpage{134}
+  \item update() (omsi.workflow.common.analysis\_task\_list method), \hyperpage{204}
+  \item update\_analysis\_parameters() (omsi.analysis.analysis\_base method), \hyperpage{84}
+  \item update\_analysis\_parameters() (omsi.analysis.base.analysis\_base method), \hyperpage{102}
+  \item update\_job\_status() (omsi.shared.omsi\_web\_helper.WebHelper static method), 
+		\hyperpage{194}
+  \item user\_additional\_chunks (omsi.tools.convertToOMSI.ConvertSettings attribute), 
+		\hyperpage{218}
+  \item UserInput (class in omsi.shared.omsi\_web\_helper), \hyperpage{192}
+  \item userinput\_with\_timeout() (omsi.shared.omsi\_web\_helper.UserInput static method), 
+		\hyperpage{192}
+  \item userinput\_with\_timeout\_default() (omsi.shared.omsi\_web\_helper.UserInput static method), 
+		\hyperpage{193}
+  \item userinput\_with\_timeout\_windows() (omsi.shared.omsi\_web\_helper.UserInput static method), 
+		\hyperpage{193}
+
+  \indexspace
+  \bigletter V
+  \item v\_qmz (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{113}
+  \item v\_qmz() (omsi.analysis.analysis\_base class method), \hyperpage{85}
+  \item v\_qmz() (omsi.analysis.analysis\_generic class method), \hyperpage{88}
+  \item v\_qmz() (omsi.analysis.base.analysis\_base class method), \hyperpage{102}
+  \item v\_qmz() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item v\_qmz() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method), 
+		\hyperpage{112}
+  \item v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method), \hyperpage{109}
+  \item v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method), 
+		\hyperpage{110}
+  \item v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method), \hyperpage{109}
+  \item v\_qmz() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method), 
+		\hyperpage{110}
+  \item v\_qmz() (omsi.analysis.generic.analysis\_generic class method), \hyperpage{105}
+  \item v\_qmz() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method), 
+		\hyperpage{124}
+  \item v\_qmz() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method), 
+		\hyperpage{126}
+  \item v\_qmz() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method), \hyperpage{120}
+  \item v\_qmz() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method), 
+		\hyperpage{122}
+  \item v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_cx class method), \hyperpage{116}
+  \item v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_nmf class method), \hyperpage{115}
+  \item v\_qmz() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method), 
+		\hyperpage{118}
+  \item v\_qmz() (omsi.analysis.omsi\_cx class method), \hyperpage{90}
+  \item v\_qmz() (omsi.analysis.omsi\_findpeaks\_global class method), \hyperpage{88}
+  \item v\_qmz() (omsi.analysis.omsi\_findpeaks\_local class method), \hyperpage{89}
+  \item v\_qmz() (omsi.analysis.omsi\_nmf class method), \hyperpage{89}
+  \item v\_qmz() (omsi.analysis.omsi\_tic\_norm class method), \hyperpage{92}
+  \item v\_qmz() (omsi.templates.analysis\_template.analysis\_template class method), 
+		\hyperpage{221}
+  \item v\_qslice (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{113}
+  \item v\_qslice() (omsi.analysis.analysis\_base class method), \hyperpage{85}
+  \item v\_qslice() (omsi.analysis.analysis\_generic class method), \hyperpage{88}
+  \item v\_qslice() (omsi.analysis.base.analysis\_base class method), \hyperpage{103}
+  \item v\_qslice() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item v\_qslice() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method), 
+		\hyperpage{112}
+  \item v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method), \hyperpage{109}
+  \item v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method), 
+		\hyperpage{110}
+  \item v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method), \hyperpage{109}
+  \item v\_qslice() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method), 
+		\hyperpage{110}
+  \item v\_qslice() (omsi.analysis.generic.analysis\_generic class method), \hyperpage{105}
+  \item v\_qslice() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method), 
+		\hyperpage{125}
+  \item v\_qslice() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method), 
+		\hyperpage{126}
+  \item v\_qslice() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method), \hyperpage{120}
+  \item v\_qslice() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method), 
+		\hyperpage{122}
+  \item v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_cx class method), \hyperpage{116}
+  \item v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_nmf class method), \hyperpage{115}
+  \item v\_qslice() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method), 
+		\hyperpage{118}
+  \item v\_qslice() (omsi.analysis.omsi\_cx class method), \hyperpage{90}
+  \item v\_qslice() (omsi.analysis.omsi\_findpeaks\_global class method), \hyperpage{88}
+  \item v\_qslice() (omsi.analysis.omsi\_findpeaks\_local class method), \hyperpage{89}
+  \item v\_qslice() (omsi.analysis.omsi\_nmf class method), \hyperpage{89}
+  \item v\_qslice() (omsi.analysis.omsi\_tic\_norm class method), \hyperpage{93}
+  \item v\_qslice() (omsi.templates.analysis\_template.analysis\_template class method), 
+		\hyperpage{222}
+  \item v\_qslice\_viewer\_options (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), 
+		\hyperpage{113}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.analysis\_base class method), \hyperpage{85}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.analysis\_generic class method), \hyperpage{88}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.base.analysis\_base class method), 
+		\hyperpage{103}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method), 
+		\hyperpage{112}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method), 
+		\hyperpage{109}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method), 
+		\hyperpage{110}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method), 
+		\hyperpage{109}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method), 
+		\hyperpage{110}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.generic.analysis\_generic class method), 
+		\hyperpage{105}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method), 
+		\hyperpage{125}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method), 
+		\hyperpage{127}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method), 
+		\hyperpage{120}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method), 
+		\hyperpage{123}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_cx class method), 
+		\hyperpage{117}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf class method), 
+		\hyperpage{115}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method), 
+		\hyperpage{118}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.omsi\_cx class method), \hyperpage{91}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_global class method), 
+		\hyperpage{88}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_local class method), 
+		\hyperpage{89}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.omsi\_nmf class method), \hyperpage{89}
+  \item v\_qslice\_viewer\_options() (omsi.analysis.omsi\_tic\_norm class method), \hyperpage{93}
+  \item v\_qslice\_viewer\_options() (omsi.templates.analysis\_template.analysis\_template class method), 
+		\hyperpage{222}
+  \item v\_qspectrum (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), \hyperpage{113}
+  \item v\_qspectrum() (omsi.analysis.analysis\_base class method), \hyperpage{86}
+  \item v\_qspectrum() (omsi.analysis.analysis\_generic class method), \hyperpage{88}
+  \item v\_qspectrum() (omsi.analysis.base.analysis\_base class method), \hyperpage{103}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{114}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method), 
+		\hyperpage{112}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method), 
+		\hyperpage{109}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method), 
+		\hyperpage{110}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method), 
+		\hyperpage{109}
+  \item v\_qspectrum() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method), 
+		\hyperpage{111}
+  \item v\_qspectrum() (omsi.analysis.generic.analysis\_generic class method), \hyperpage{105}
+  \item v\_qspectrum() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method), 
+		\hyperpage{125}
+  \item v\_qspectrum() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method), 
+		\hyperpage{127}
+  \item v\_qspectrum() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method), \hyperpage{121}
+  \item v\_qspectrum() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method), 
+		\hyperpage{123}
+  \item v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_cx class method), \hyperpage{117}
+  \item v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_nmf class method), \hyperpage{115}
+  \item v\_qspectrum() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method), 
+		\hyperpage{118}
+  \item v\_qspectrum() (omsi.analysis.omsi\_cx class method), \hyperpage{91}
+  \item v\_qspectrum() (omsi.analysis.omsi\_findpeaks\_global class method), \hyperpage{88}
+  \item v\_qspectrum() (omsi.analysis.omsi\_findpeaks\_local class method), \hyperpage{89}
+  \item v\_qspectrum() (omsi.analysis.omsi\_nmf class method), \hyperpage{89}
+  \item v\_qspectrum() (omsi.analysis.omsi\_tic\_norm class method), \hyperpage{93}
+  \item v\_qspectrum() (omsi.templates.analysis\_template.analysis\_template class method), 
+		\hyperpage{222}
+  \item v\_qspectrum\_viewer\_options (in module omsi.analysis.findpeaks.experimental.omsi\_lpf), 
+		\hyperpage{113}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_base class method), \hyperpage{86}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.analysis\_generic class method), 
+		\hyperpage{88}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.base.analysis\_base class method), 
+		\hyperpage{104}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_npg.omsi\_npg class method), 
+		\hyperpage{115}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.experimental.omsi\_peakcube.omsi\_peakcube class method), 
+		\hyperpage{112}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global class method), 
+		\hyperpage{109}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_global.omsi\_findpeaks\_global class method), 
+		\hyperpage{110}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local class method), 
+		\hyperpage{109}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local class method), 
+		\hyperpage{111}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.generic.analysis\_generic class method), 
+		\hyperpage{105}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_filter\_by\_mask.omsi\_filter\_by\_mask class method), 
+		\hyperpage{126}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.experimental.omsi\_mask\_by\_cluster.omsi\_mask\_by\_cluster class method), 
+		\hyperpage{127}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm class method), 
+		\hyperpage{121}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.msi\_filtering.omsi\_tic\_norm.omsi\_tic\_norm class method), 
+		\hyperpage{123}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_cx class method), 
+		\hyperpage{117}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf class method), 
+		\hyperpage{115}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.multivariate\_stats.omsi\_nmf.omsi\_nmf class method), 
+		\hyperpage{118}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_cx class method), \hyperpage{92}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_global class method), 
+		\hyperpage{88}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_findpeaks\_local class method), 
+		\hyperpage{89}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_nmf class method), \hyperpage{89}
+  \item v\_qspectrum\_viewer\_options() (omsi.analysis.omsi\_tic\_norm class method), 
+		\hyperpage{94}
+  \item v\_qspectrum\_viewer\_options() (omsi.templates.analysis\_template.analysis\_template class method), 
+		\hyperpage{223}
+  \item values() (omsi.dataformat.omsi\_file.metadata\_collection.omsi\_file\_metadata\_collection method), 
+		\hyperpage{142}
+  \item version\_attribute (omsi.dataformat.omsi\_file.format.omsi\_format\_common attribute), 
+		\hyperpage{132}
+
+  \indexspace
+  \bigletter W
+  \item warning() (omsi.shared.log.log\_helper class method), \hyperpage{198}
+  \item WebHelper (class in omsi.shared.omsi\_web\_helper), \hyperpage{193}
+  \item workflow\_driver\_base (class in omsi.workflow.driver.base), \hyperpage{205}
+  \item workflow\_executor\_base (class in omsi.workflow.executor.base), \hyperpage{211}
+  \item write\_analysis\_data() (omsi.analysis.analysis\_base method), \hyperpage{86}
+  \item write\_analysis\_data() (omsi.analysis.analysis\_generic method), \hyperpage{88}
+  \item write\_analysis\_data() (omsi.analysis.base.analysis\_base method), \hyperpage{104}
+  \item write\_analysis\_data() (omsi.analysis.findpeaks.omsi\_findpeaks\_local method), 
+		\hyperpage{109}
+  \item write\_analysis\_data() (omsi.analysis.findpeaks.omsi\_findpeaks\_local.omsi\_findpeaks\_local method), 
+		\hyperpage{111}
+  \item write\_analysis\_data() (omsi.analysis.generic.analysis\_generic method), \hyperpage{106}
+  \item write\_analysis\_data() (omsi.analysis.omsi\_findpeaks\_local method), \hyperpage{89}
+  \item write\_data() (omsi.tools.convertToOMSI.ConvertFiles static method), \hyperpage{216}
+  \item write\_xdmf\_header() (omsi.dataformat.omsi\_file.main\_file.omsi\_file method), 
+		\hyperpage{139}
+
+  \indexspace
+  \bigletter X
+  \item xy\_index\_end\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_spectra attribute), 
+		\hyperpage{135}
+  \item xy\_index\_name (omsi.dataformat.omsi\_file.format.omsi\_format\_msidata\_partial\_cube attribute), 
+		\hyperpage{135}
+
+\end{theindex}

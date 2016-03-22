@@ -1,0 +1,7 @@
+This is makeindex, version 2.15 [TeX Live 2013] (kpathsea + Thai support).
+Scanning style file ./python.ist......done (6 attributes redefined, 0 ignored).
+Scanning input file bastet_doc.idx....done (934 entries accepted, 0 rejected).
+Sorting entries..........done (9681 comparisons).
+Generating output file bastet_doc.ind....done (1442 lines written, 0 warnings).
+Output written in bastet_doc.ind.
+Transcript written in bastet_doc.ilg.

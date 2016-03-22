@@ -6,6 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
+PUBLIC_BUILDDIR = ../../bastet_docs
+PUBLIC_PDF = ../../bastet_docs/html/_static/bastet_doc.pdf
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -45,6 +47,19 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+updatepublic: htmlpublic latexpdfpublic
+	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
+	cd $(PUBLIC_BUILDDIR)/html
+	git add .
+	git commit -m "rebuilt the public docs" .
+	git push origin gh-pages
+
+htmlpublic: html
+	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
+	@echo
+	cp -r $(BUILDDIR)/html/* $(PUBLIC_BUILDDIR)/html 
+	@echo "Copied html docs from $(BUILDDIR)/html/* to $(PUBLIC_BUILDDIR)/html ."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
@@ -108,6 +123,11 @@ latexpdf:
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
+latexpdfpublic: latexpdf
+	if [ ! -d "$(PUBLIC_BUILDDIR)/html" ]; then echo; echo "Public build dir does not exist"; echo;  exit 1;  fi
+	cp $(BUILDDIR)/latex/bastet_doc.pdf $(PUBLIC_PDF)
+	@echo "Copied in $(BUILDDIR)/latex/$(PUBLIC_PDF) to $(PUBLIC_PDF) ." 
+	
 text:
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
 	@echo
