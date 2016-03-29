@@ -22,7 +22,7 @@ The online documentation for BASTet is available at:
 
 The data format for storage of MSI data is described in the following publication:
 
-*Oliver Rübel, Annette Greiner, Shreyas Cholia, Katherine Louie, E. Wes Bethel, Trent R. Northen, and Benjamin P. Bowen, "OpenMSI: A High-Performance Web-Based Platform for Mass Spectrometry Imaging" Analytical Chemistry 2013 85 (21), 10354-10361, DOI: 10.1021/ac402540a. [BibTeX](https://openmsi.nersc.gov/site_media/openmsi/images/publications/openmsi_acs_2013.bib)[Online at ACS](http://pubs.acs.org/doi/abs/10.1021/ac402540a)*
+*Oliver Rübel, Annette Greiner, Shreyas Cholia, Katherine Louie, E. Wes Bethel, Trent R. Northen, and Benjamin P. Bowen, "OpenMSI: A High-Performance Web-Based Platform for Mass Spectrometry Imaging" Analytical Chemistry 2013 85 (21), 10354-10361, DOI: 10.1021/ac402540a. [[BibTeX]](https://openmsi.nersc.gov/site_media/openmsi/images/publications/openmsi_acs_2013.bib)[[Online at ACS]](http://pubs.acs.org/doi/abs/10.1021/ac402540a)*
 
 The broader storage, analysis, provenance, and workflow capabilities of BASTet are described in an upcoming publication:
 
