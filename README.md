@@ -7,8 +7,8 @@ Berkeley Analysis and Storage Toolkit (BASTet)
 
 The online documentation for BASTet is available at:
 
-* HTML: [https://biorack.github.io/BASTet/](https://oruebel.github.io/BASTet/).
-* PDF: [https://biorack.github.io/BASTet/_static/bastet_doc.pdf](https://oruebel.github.io/BASTet/_static/bastet_doc.pdf)
+* HTML: [https://biorack.github.io/BASTet/](https://biorack.github.io/BASTet/).
+* PDF: [https://biorack.github.io/BASTet/_static/bastet_doc.pdf](https://biorack.github.io/BASTet/_static/bastet_doc.pdf)
 
 ## Developer Notes
 
