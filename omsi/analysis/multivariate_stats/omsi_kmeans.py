@@ -4,7 +4,6 @@ Module for performing kmeans clustering for MSI data.
 import numpy as np
 
 from omsi.analysis.base import analysis_base
-from scipy.cluster.vq import kmeans, vq
 
 
 class omsi_kmeans(analysis_base):
@@ -60,6 +59,7 @@ class omsi_kmeans(analysis_base):
         """
         Execute the kmeans clustering for the given msidata
         """
+        from scipy.cluster.vq import kmeans, vq
 
         # Assign parameters to local variables for convenience
         current_msidata = self['msidata']
