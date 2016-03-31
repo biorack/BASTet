@@ -3,6 +3,8 @@ Berkeley Analysis and Storage Toolkit (BASTet)
 
 <img src="https://raw.githubusercontent.com/biorack/BASTet/master/doc/_static/bastet_logo_full.png" width="400" />
 
+The BASTet project page is located at [https://openmsi.nersc.gov/openmsi/client/bastet.html](https://openmsi.nersc.gov/openmsi/client/bastet.html)
+
 ## Documentation
 
 The online documentation for BASTet is available at:
