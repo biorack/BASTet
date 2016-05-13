@@ -57,22 +57,19 @@ class imzml_file(file_reader_base):
         self.scan_params = self.__parse_scan_parameters(self)
 
         # Compute step size
-        coordarray = np.asarray(self.coordinates)
-        self.x_pos = np.unique(coordarray[:, 0])
-        self.y_pos = np.unique(coordarray[:, 1])
+        self.x_pos = np.unique(self.coordinates[:, 0])
+        self.y_pos = np.unique(self.coordinates[:, 1])
+        self.x_pos_min = self.x_pos.min()
+        self.y_pos_min = self.y_pos.min()
         self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Compute the mz axis
-        self.mz_all = self.__compute_mz_axis(filename=self.basename,
-                                             mzml_filetype=self.mzml_type,
-                                             scan_types=self.scan_types)
-
+        self.mz, self.data_type = self.__compute_mz_axis_and_data_type(filename=self.basename,
+                                                                       mzml_filetype=self.mzml_type,
+                                                                       scan_types=self.scan_types)
         # Determine the shape of the dataset ## TODO: after solving imzML generation prob, fix this for multicube data
-
-        self.shape_all_data = [len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz_all)]
         self.select_dataset = 0   # Used for files types that support multiple datasets per file
-        self.shape = self.shape_all_data[self.select_dataset]
-        self.mz = self.mz_all[self.select_dataset]
+        self.shape = tuple([len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz)])
 
         # Read the data into memory
         self.data = None
@@ -86,7 +83,7 @@ class imzml_file(file_reader_base):
         function directly modifies the self.data entry.  Data is now a list of datacubes.
         """
 
-        self.data = np.zeros(shape=self.shape_all_data, dtype=self.data_type)
+        self.data = np.zeros(shape=self.shape, dtype=self.data_type)
         log_helper.info(__name__, 'Datacube shape is %s' % [self.data.shape])
 
         reader = ImzMLParser(filename)
@@ -97,7 +94,7 @@ class imzml_file(file_reader_base):
             try:
                 self.data[xidx-1, yidx-1, :] = intens
             except:
-                print xidx, yidx, len(mz), len(intens)
+                log_helper.error(__name__, "Bad data load: " + str((xidx, yidx, len(mz), len(intens))))
 
     def spectrum_iter(self):
         """
@@ -110,26 +107,30 @@ class imzml_file(file_reader_base):
         if self.select_dataset is None:
             # multiple datatypes are not supported in mzML files
             self.select_dataset = 0
+        coord_array = np.asarray(reader.coordinates)
 
         for idx in xrange(0, len(reader.coordinates)):
             xidx, yidx = reader.coordinates[idx]
             mz, intens = reader.getspectrum(idx)
 
-            yield (xidx-1, yidx-1), intens  # -1 because pyimzML coordinates are 1-based
+            # Coordinates may start at arbitrary locations, hence, we need to substract the minimum to recenter at (0,0)
+            yield (xidx-self.x_pos_min, yidx-self.y_pos_min), np.asarray(intens)
 
     @classmethod
-    def __compute_mz_axis(cls, filename, mzml_filetype, scan_types):
+    def __compute_mz_axis_and_data_type(cls, filename, mzml_filetype, scan_types):
         ## TODO completely refactor this to make it smartly handle profile or centroid datasets
         ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
         ## TODO: profile datasets should work as is
         ## TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
         """
-        Internal helper function used to compute the mz axis of each scantype
-        Returns a list of numpy arrays
+        Internal helper function used to compute the mz axis and data type for intensities
+
+        :return: Numpy arry with mz axis and string with data type
         """
         reader = ImzMLParser(filename)
         mz_axes, intens = reader.getspectrum(0)
-
+        dtype = np.asarray(intens).dtype.str
+        # NOTE: mz_axes is a tuple
         for ind, loc in enumerate(reader.coordinates):
             mz, intens = reader.getspectrum(ind)
             if mz == mz_axes:
@@ -139,7 +140,7 @@ class imzml_file(file_reader_base):
                                            'Currently OpenMSI supports only continuous-mode imzML.')
                 raise AttributeError
 
-        return mz_axes
+        return np.asarray(mz_axes), dtype
 
     @classmethod
     def __compute_filetype(cls, filename):
@@ -157,7 +158,7 @@ class imzml_file(file_reader_base):
         :returns: 2D numpy integer array of shape (numScans,2) indicating for each scan its x and y coordinate
         """
         reader = ImzMLParser(filename)
-        return reader.coordinates
+        return np.asarray(reader.coordinates)
 
     @classmethod
     def test(cls):
@@ -257,7 +258,6 @@ class imzml_file(file_reader_base):
                 del temp
                 return True
             except (RuntimeError, IOError) as e:
-                # print ('pyimzml could not parse your file.')
                 return False
 
 
@@ -305,20 +305,6 @@ class imzml_file(file_reader_base):
                     log_helper.warning(__name__, 'Could not find binary .ibd file for file %s . Skipping conversion of this file.' % currname)
 
         return filelist
-
-    # def get_number_of_datasets(self):
-    #    """
-    #    Get the number of available datasets.
-    #    """
-    #    return len(self.mz_all)
-
-    # def set_dataset_selection(self, dataset_index):
-    #    """
-    #    Define the current dataset to be read.
-    #    """
-    #    super(imzml_file, self).set_dataset_selection(dataset_index)
-    #    self.shape = self.shape_all_data[self.select_dataset]
-    #    self.mz = self.mz_all[self.select_dataset]
 
     def get_dataset_dependencies(self):
         """
