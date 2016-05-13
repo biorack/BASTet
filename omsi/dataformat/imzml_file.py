@@ -70,17 +70,15 @@ class imzml_file(file_reader_base):
         # Determine the shape of the dataset ## TODO: after solving imzML generation prob, fix this for multicube data
 
         self.shape_all_data = [len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz_all)]
-        self.shape = None
-        self.mz = None
-        self.select_dataset = None  # Used for files types that support multiple datasets per file
-        self.set_dataset_selection(0)  # Select the first dataset since we only support one
+        self.select_dataset = 0   # Used for files types that support multiple datasets per file
+        self.shape = self.shape_all_data[self.select_dataset]
+        self.mz = self.mz_all[self.select_dataset]
 
         # Read the data into memory
         self.data = None
         if requires_slicing:
             self.__read_all(filename=basename)
 
-        self.mz = self.mz
 
     def __read_all(self, filename):
         """
@@ -308,19 +306,19 @@ class imzml_file(file_reader_base):
 
         return filelist
 
-    def get_number_of_datasets(self):
-        """
-        Get the number of available datasets.
-        """
-        return len(self.mz_all)
+    # def get_number_of_datasets(self):
+    #    """
+    #    Get the number of available datasets.
+    #    """
+    #    return len(self.mz_all)
 
-    def set_dataset_selection(self, dataset_index):
-        """
-        Define the current dataset to be read.
-        """
-        super(imzml_file, self).set_dataset_selection(dataset_index)
-        self.shape = self.shape_all_data[self.select_dataset]
-        self.mz = self.mz_all[self.select_dataset]
+    # def set_dataset_selection(self, dataset_index):
+    #    """
+    #    Define the current dataset to be read.
+    #    """
+    #    super(imzml_file, self).set_dataset_selection(dataset_index)
+    #    self.shape = self.shape_all_data[self.select_dataset]
+    #    self.mz = self.mz_all[self.select_dataset]
 
     def get_dataset_dependencies(self):
         """
