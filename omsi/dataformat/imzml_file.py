@@ -72,7 +72,8 @@ class imzml_file(file_reader_base):
         self.shape_all_data = [len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz_all)]
         self.shape = None
         self.mz = None
-        self.select_dataset = None  # Used only for *.img files?
+        self.select_dataset = None  # Used for files types that support multiple datasets per file
+        self.set_dataset_selection(0)  # Select the first dataset since we only support one
 
         # Read the data into memory
         self.data = None

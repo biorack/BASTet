@@ -4,6 +4,10 @@ OpenMSI science gateway.
 """
 
 # TODO Rename self.driver to self.executor
+# TODO Add get_all_dependency_data_recursive back in (see all omsi.datastructures.analysis_data)
+# TODO Separate qmz, qslice, qspectrum viewer functionality into a separate base class
+# TODO Make list of viewer options unique (if we have a dependency graph rather than a tree) than the same option can occure multiple times
+
 
 import warnings
 import weakref
