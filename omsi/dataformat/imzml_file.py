@@ -9,19 +9,22 @@ import os
 # import xml parser
 from pyimzml.ImzMLParser import ImzMLParser
 from omsi.dataformat.file_reader_base import *
+from omsi.datastructures.metadata.metadata_data import metadata_dict, metadata_value
 from omsi.shared.log import log_helper
 
 class imzml_file(file_reader_base):
     """
     Interface for reading a single 2D imzml file with a single distinct scan types.
-    :ivar available_imzml_types: Dict of available mzml flavors.
     """
     # TODO: Rewrite the entire class to call the pyimzml.ImzMLParser only once for efficiency.
-    # TODO:   this code is derived from a pymzml-based parser for .mzML files which didn't read the whole file on import
 
-    available_imzml_types = {'unknown': 'unknown', 'thermo': 'thermo', 'bruker': 'bruker'}
+    available_imzml_types = {'unknown': 'unknown',
+                            'continuous': 'continuous',
+                            'processed': 'processed'}
 
-    def __init__(self, basename, requires_slicing=True):
+
+
+    def __init__(self, basename, requires_slicing=True, resolution=5):
         """
         Open an imzml file for data reading.
 
@@ -32,6 +35,10 @@ class imzml_file(file_reader_base):
         :param  requires_slicing:   Should the complete data be read into memory
                              (this makes slicing easier). (default is True)
         :type   requires_slicing:   bool
+
+        :param resolution: For processed data only, the minimum m/z spacing to use for creating the "full" reprofiled
+                            data cube
+        :type resolution: float
         """
         # Determine the correct base
         if os.path.isdir(basename):
@@ -43,33 +50,24 @@ class imzml_file(file_reader_base):
 
         # Call super constructor. This sets self.basename and self.readall
         super(imzml_file, self).__init__(basename=basename, requires_slicing=requires_slicing)
-        self.mzml_type = self.__compute_filetype(filename=self.basename)
-        self.data_type = 'uint32'  # TODO What data type should we use for the interpolated data?
-        self.num_scans = self.__compute_num_scans(filename=self.basename)
+        self.resolution=resolution
+
+        # Compute the mz axis, pixel coordinates data type etc.
+        self.coordinates, self.mz, self.data_type, self.imzml_type, self.imzml_metadata = \
+            self.__compute_file_info(filename=self.basename, resolution=self.resolution)
+        self.num_scans = self.coordinates.size
         log_helper.info(__name__, 'Read %s scans from imzML file.' % self.num_scans)
-        self.scan_types = self.__compute_scan_types(filename=self.basename)
-        self.scan_dependencies = self.__compute_scan_dependencies(scan_types=self.scan_types)
-
-        # Read x, y coordinates from file
-        self.coordinates = self.__compute_coordinates(filename=basename)
-
-        # Determine scan parameters ## TODO: after solving imzML generation prob, fix this for multicube data
-        self.scan_params = self.__parse_scan_parameters(self)
 
         # Compute step size
         self.x_pos = np.unique(self.coordinates[:, 0])
         self.y_pos = np.unique(self.coordinates[:, 1])
         self.x_pos_min = self.x_pos.min()
         self.y_pos_min = self.y_pos.min()
-        self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
-        # Compute the mz axis
-        self.mz, self.data_type = self.__compute_mz_axis_and_data_type(filename=self.basename,
-                                                                       mzml_filetype=self.mzml_type,
-                                                                       scan_types=self.scan_types)
+        # self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
+
         # Determine the shape of the dataset ## TODO: after solving imzML generation prob, fix this for multicube data
-        self.select_dataset = 0   # Used for files types that support multiple datasets per file
-        self.shape = tuple([len(np.unique(self.x_pos)), len(np.unique(self.y_pos)), len(self.mz)])
+        self.shape = (self.x_pos.size, self.y_pos.size, self.mz.size)
 
         # Read the data into memory
         self.data = None
@@ -85,16 +83,27 @@ class imzml_file(file_reader_base):
 
         self.data = np.zeros(shape=self.shape, dtype=self.data_type)
         log_helper.info(__name__, 'Datacube shape is %s' % [self.data.shape])
-
         reader = ImzMLParser(filename)
         log_helper.debug(__name__,'READING ALL DATA!! GIVE ME RAM (please)!')
+
+        # Compute the bin edges for reinterpolation if needed
+        if self.imzml_type == self.available_imzml_types['processed']:
+            shift = np.diff(self.mz).mean()
+            bin_edges = np.append(self.mz, self.mz[-1]+ shift)
+        else:
+            bin_edges = None
         for ind in xrange(0, len(reader.coordinates)):
             xidx, yidx = reader.coordinates[ind]
+            # Coordinates may start at arbitrary locations, hence, we need to substract the minimum to recenter at (0,0)
+            xidx -= self.x_pos_min
+            yidx -= self.y_pos_min
+            # Read the spectrum
             mz, intens = reader.getspectrum(ind)
-            try:
-                self.data[xidx-1, yidx-1, :] = intens
-            except:
-                log_helper.error(__name__, "Bad data load: " + str((xidx, yidx, len(mz), len(intens))))
+            # Reinterpolate intensities if we are in processed mode
+            if bin_edges is not None:
+                intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
+            # Save the intensity values in our data cube
+            self.data[xidx, yidx, :] = intens
 
     def spectrum_iter(self):
         """
@@ -104,61 +113,71 @@ class imzml_file(file_reader_base):
                                 and for the selected datacube type
         """
         reader = ImzMLParser(self.basename)
-        if self.select_dataset is None:
-            # multiple datatypes are not supported in mzML files
-            self.select_dataset = 0
-        coord_array = np.asarray(reader.coordinates)
-
         for idx in xrange(0, len(reader.coordinates)):
             xidx, yidx = reader.coordinates[idx]
-            mz, intens = reader.getspectrum(idx)
-
             # Coordinates may start at arbitrary locations, hence, we need to substract the minimum to recenter at (0,0)
-            yield (xidx-self.x_pos_min, yidx-self.y_pos_min), np.asarray(intens)
+            xidx -= self.x_pos_min
+            yidx -= self.y_pos_min
+            mz, intens = reader.getspectrum(idx)
+            # Rehistogram the data if we are in procesed mode
+            if self.imzml_type == self.available_imzml_types['processed']:
+                shift = np.diff(self.mz).mean()
+                bin_edges = np.append(self.mz, self.mz[-1]+ shift)
+                intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
+
+            yield (xidx, yidx), np.asarray(intens)
 
     @classmethod
-    def __compute_mz_axis_and_data_type(cls, filename, mzml_filetype, scan_types):
+    def __compute_file_info(cls, filename, resolution):
         ## TODO completely refactor this to make it smartly handle profile or centroid datasets
         ## TODO: centroid datasets should take in a user parameter "Resolution" and resample data at that resolution
         ## TODO: profile datasets should work as is
         ## TODO: checks for profile data vs. centroid data on the variation in length of ['m/z array']
         """
-        Internal helper function used to compute the mz axis and data type for intensities
+        Internal helper function used to compute the mz axis, data type for the intensities, format type
 
-        :return: Numpy arry with mz axis and string with data type
+        :return: Numpy array with mz axis
+        :return: string with data type
+        :return: imzml file type
+        :return:
         """
         reader = ImzMLParser(filename)
-        mz_axes, intens = reader.getspectrum(0)
+        # Read the first spectrum
+        mz_axes, intens = reader.getspectrum(0)   # NOTE: mz_axes is a tuple
+        # Read the coordinates
+        coordinates = np.asarray(reader.coordinates)
+        # Determine the data type for the internsity values
         dtype = np.asarray(intens).dtype.str
-        # NOTE: mz_axes is a tuple
-        for ind, loc in enumerate(reader.coordinates):
+
+        # Compute the mz axis and file type
+        file_type = cls.available_imzml_types['continuous']
+        min_mz, max_mz = np.amin(mz_axes), np.amax(mz_axes)
+        for ind in range(coordinates.shape[0]):      #for ind, loc in enumerate(reader.coordinates):
             mz, intens = reader.getspectrum(ind)
             if mz == mz_axes:
                 pass
             else:
-                log_helper.error(__name__, 'Inconsistent m/z axis from scan to scan. ' +
-                                           'Currently OpenMSI supports only continuous-mode imzML.')
-                raise AttributeError
+                file_type = cls.available_imzml_types['processed']
+                if min_mz > np.amin(mz):
+                    min_mz = np.amin(mz)
+                if max_mz < np.amax(mz):
+                    max_mz = np.amax(mz)
+        # Reinterpolate the mz-axis if we have a processed mode imzml file
+        if file_type == cls.available_imzml_types['processed']:
+            f = np.ceil(1e6 * np.log(max_mz/min_mz)/resolution)
+            mz_axes = np.logspace(np.log10(min_mz), np.log10(max_mz), f)
+            log_helper.info(__name__, "Reinterpolated m/z axis for processed imzML file")
 
-        return np.asarray(mz_axes), dtype
+        # Construct the imzml metadata information
+        imzml_metadata = metadata_dict()
+        for k, v in reader.imzmldict.iteritems():
+            imzml_metadata[k] = metadata_value(name=k,
+                                               value=v,
+                                               unit=None,
+                                               description=k,
+                                               ontology=None)
 
-    @classmethod
-    def __compute_filetype(cls, filename):
-        """
-        Internal helper function used to compute the filetype.
-        TODO: figure out if this will ever be useful for imzML
-        """
-        return cls.available_imzml_types['unknown']
-
-    @staticmethod
-    def __compute_coordinates(filename):
-        """
-        Internal helper function used to compute the coordinates for each scan.
-
-        :returns: 2D numpy integer array of shape (numScans,2) indicating for each scan its x and y coordinate
-        """
-        reader = ImzMLParser(filename)
-        return np.asarray(reader.coordinates)
+        return coordinates, np.asarray(mz_axes), dtype, file_type, imzml_metadata
 
     @classmethod
     def test(cls):
@@ -166,64 +185,6 @@ class imzml_file(file_reader_base):
         Test method
         """
         pass
-
-    @staticmethod
-    def __compute_num_scans(filename=None):
-        """
-        Internal helper function used to compute the number of scans in the imzml file.
-        """
-        reader = ImzMLParser(filename)
-        return len(reader.coordinates)
-
-    @staticmethod
-    def __compute_scan_types(filename=None):
-        """
-        Internal helper function used to compute a list of unique scan types in the imzml file.
-        """
-        # TODO: FIGURE OUT HOW TO WRITE THIS FUNCTION.  I cannot figure out how to use any publicly available
-        # TODO:               imzML parser to convert thermo .raw files to .imzml or to convert .mzML files to .imzml
-        # TODO:               http://www.cs.bham.ac.uk/~ibs/imzMLConverter/ is based on Java and does not run on my
-        # TODO:               macbook pro / Yosemite OSX  with java successfully installed.
-        # TODO:               'The Java JAR file "imzMLConverter.jar" could not be launched.  Check the Console for
-        # TODO:                possible error messages.'
-        # TODO:               http://www.imzml.org/index.php?option=com_content&view=article&id=312&Itemid=99
-        # TODO:               is a Windows .exe and did not run on the Windows machine I tried it on:
-        # TODO:               "Exception EOIeSysError in Modul imzMLConvert.exe bei 00078531.  Class not registered."
-
-        reader = ImzMLParser(filename)
-        scantypes = []
-        #for _ in reader:
-        #    try:
-        #        scanfilter = reader.next()['scanList']['scan'][0]['filter string']
-        #        if scanfilter not in scantypes:
-        #            scantypes.append(scanfilter)
-        #    except:
-        #        pass
-        #return scantypes
-        scantypes = ['1']
-        return scantypes
-
-    @staticmethod
-    def __parse_scan_parameters(self):
-        """
-        Internal helper function used to parse out scan parameters from the scan filter string
-        """
-        # TODO: implement this function for imzML files.  Right now inability to generate imzML from
-        # TODO:    arbitrary files is blocking
-
-        scan_params = []
-        return scan_params
-
-    @staticmethod
-    def __compute_scan_dependencies(scan_types=None):
-        """
-        Takes a scan_types list and returns a list of tuples (x, y) indicating that scan_type[y] depends on scan_type[x]
-        Internal helper function used to parse out scan parameters from the scan filter string
-        """
-        # TODO: implement this function for imzML files.  Right now inability to generate imzML from
-        # TODO:   arbitrary files is blocking
-        dependencies = []
-        return dependencies
 
     def __getitem__(self, key):
         """Enable slicing of img files"""
@@ -241,12 +202,13 @@ class imzml_file(file_reader_base):
 
     @classmethod
     def is_valid_dataset(cls, name):
-        """Check whether the given file or directory points to a img file.
+        """
+        Check whether the given file or directory points to a img file.
 
-           :param name: Name of the dir or file.
-           :type name: String
+        :param name: Name of the dir or file.
+        :type name: String
 
-           :returns: Boolean indicating whether the given file or folder is a valid img file.
+        :returns: Boolean indicating whether the given file or folder is a valid img file.
         """
         if os.path.isdir(name):  # If we point to a directory, check if the dir contains an imzML file
             filelist = cls.get_files_from_dir(name)
@@ -277,7 +239,6 @@ class imzml_file(file_reader_base):
         :returns: None
         """
         # TODO: implement sensible size estimation scheme for imzML, perhaps based on associated *.ibd file size
-
         basename = None
         if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
             filelist = cls.get_files_from_dir(name)
@@ -306,10 +267,15 @@ class imzml_file(file_reader_base):
 
         return filelist
 
-    def get_dataset_dependencies(self):
+    def get_dataset_metadata(self):
         """
-        Get the dependencies between the current dataset and any of the
-        other datasets stored in the current file.
+        Get dict of additional metadata associated with the current dataset.
+
+        Inherited from file_reader_base
+
+        :return: Dict where keys are strings and associated values to be stored as
+            metadata with the dataset.
+
         """
-        # TODO Implement dependencies between current dataset given by self.select_dataset and all other datasets
-        return []
+        return self.imzml_metadata
+
