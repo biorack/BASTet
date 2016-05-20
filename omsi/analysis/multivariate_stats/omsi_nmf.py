@@ -171,7 +171,7 @@ class omsi_nmf(analysis_base):
         current_time_out = self['timeOut']
         current_num_iter = self['numIter']
         current_tolerance = self['tolerance']
-        current_mask = self['mask'][:]
+        current_mask = self['mask']
 
         # Copy the input data
         data = current_msidata[:]
@@ -180,6 +180,7 @@ class omsi_nmf(analysis_base):
 
         # Mask the data if requested
         if current_mask is not None:
+            current_mask = current_mask[:]
             data = data[current_mask, :]
 
         # Determine the input shape after masking
