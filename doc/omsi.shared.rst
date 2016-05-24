@@ -10,7 +10,7 @@ shared Package
    omsi.shared.omsi_web_helper
    omsi.shared.spectrum_layout
    omsi.shared.third_party
-   omsi.shared.thirs_party.cloudpickle
+   omsi.shared.third_party.cloudpickle
 
 
 :mod:`data_selection` Module
