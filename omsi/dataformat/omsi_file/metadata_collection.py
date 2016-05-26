@@ -8,10 +8,12 @@ import json
 
 import h5py
 from numpy import nan as float_nan
+import numpy as np
 
 from omsi.dataformat.omsi_file.format import omsi_format_common, omsi_format_metadata_collection
 from omsi.dataformat.omsi_file.common import omsi_file_common, omsi_file_object_manager
 from omsi.datastructures.metadata.metadata_data import metadata_dict, metadata_value
+from omsi.shared.log import log_helper
 
 
 class omsi_metadata_collection_manager(omsi_file_object_manager):
@@ -120,6 +122,8 @@ class omsi_metadata_collection_manager(omsi_file_object_manager):
         """
         Check whether the omsi API object (or h5py.Group) contains any a metadata collection with
         the default name.
+
+        :param omsi_object: The omsi API object to be checked
 
         :returns: bool
         """
@@ -253,15 +257,19 @@ class omsi_file_metadata_collection(omsi_file_common):
         Get dict with the full description of the metadata for the given key or all
         metadata if no key is given.
 
+        :param key: The name of the metadata object to be retrieved. Default is None in
+                    which case all metadata will be retrieved.
+
         :returns: `omsi.shared.metadata_data.metadata_value` object if a key is given
             or a `omsi.shared.metadata_data.metadata_dict` with all metadata
-            if no key is specified.
+            if key is set to None.
 
         :raises: KeyError is raised in case that the specified key does not exist
         """
         descr_attr = omsi_format_metadata_collection.description_value_attribute
         unit_attr = omsi_format_metadata_collection.unit_value_attribute
         ontology_attr = omsi_format_metadata_collection.ontology_value_attribute
+        isjson_attr = omsi_format_metadata_collection.is_json_dict_attribute
         if key is None:
             output_meta_dict = metadata_dict()
             for metadata_name, metadata_dataset in self.managed_group.iteritems():
@@ -269,9 +277,15 @@ class omsi_file_metadata_collection(omsi_file_common):
                 description = None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr]
                 ontology = None if ontology_attr not in metadata_dataset.attrs else \
                     json.loads(metadata_dataset.attrs[ontology_attr])
+                md_value = metadata_dataset[:] if len(metadata_dataset.shape) > 0 else metadata_dataset[()]
+                if isjson_attr in metadata_dataset.attrs:
+                    try:
+                        md_value = json.loads(md_value)
+                    except:
+                        log_helper.error(__name__, "Parsing of json metadata object failed for " + str(metadata_name))
                 output_meta_dict[metadata_name] = metadata_value(
                     name=metadata_name,
-                    value=metadata_dataset[:] if len(metadata_dataset.shape) > 0 else metadata_dataset[()],
+                    value=md_value,
                     description=description,
                     unit=unit,
                     ontology=ontology)
@@ -282,13 +296,12 @@ class omsi_file_metadata_collection(omsi_file_common):
             description = None if descr_attr not in metadata_dataset.attrs else metadata_dataset.attrs[descr_attr]
             ontology = None if ontology_attr not in metadata_dataset.attrs else \
                 json.loads(metadata_dataset.attrs[ontology_attr])
-            metadata_value(
+            return metadata_value(
                 name=key,
                 value=metadata_dataset[:],
                 description=description,
                 unit=unit,
                 ontology=ontology)
-            return metadata_value
 
     def add_metadata(self, metadata):
         """
@@ -307,6 +320,7 @@ class omsi_file_metadata_collection(omsi_file_common):
                 self.add_metadata(metadata_val)
             return
 
+        metadata_dataset = None
         if isinstance(metadata['value'], basestring):
             metadata_dataset = self.managed_group.require_dataset(name=unicode(metadata['name']),
                                                                   shape=(1,),
@@ -315,16 +329,41 @@ class omsi_file_metadata_collection(omsi_file_common):
                 omsi_format_common.str_type_unicode else \
                 str(metadata['value'])
         else:
-            if metadata['value'] is not None:
-                self.managed_group[metadata['name']] = metadata['value']
+            md_value = metadata['value']
+            if md_value is not None:
+                # Save different data types
+                if isinstance(md_value, dict):
+                    try:
+                        json_value = json.dumps(md_value)
+                        self.managed_group[metadata['name']] = json_value
+                        isjson_attr_name = omsi_format_metadata_collection.is_json_dict_attribute
+                        self.managed_group[metadata['name']].attrs[isjson_attr_name] = True
+                        metadata_dataset = self.managed_group[metadata['name']]
+                    except:
+                        log_helper.error(__name__, "Metadata object for " + str(metadata['name'] +
+                                         "is not JSON serializable"))
+                        metadata_dataset = None
+
+                elif isinstance(md_value, list):
+                    try:
+                        self.managed_group[metadata['name']] = np.asarray(metadata['value'])
+                        metadata_dataset = self.managed_group[metadata['name']]
+                    except:
+                        log_helper.error(__name__, "Conversion and saving of list metadata failed for: " +
+                                         str(metadata['name']))
+                        metadata_dataset = None
+                else:
+                    self.managed_group[metadata['name']] = metadata['value']
+                    metadata_dataset = self.managed_group[metadata['name']]
             else:
                 self.managed_group[metadata['name']] = float_nan
-            metadata_dataset = self.managed_group[metadata['name']]
+                metadata_dataset = self.managed_group[metadata['name']]
 
-        metadata_dataset.attrs[omsi_format_metadata_collection.description_value_attribute] = metadata['description']
-        if metadata['unit'] is not None:
-            metadata_dataset.attrs[omsi_format_metadata_collection.unit_value_attribute] = metadata['unit']
-        if metadata['ontology'] is not None:
-            ontology_value = metadata['ontology'] if isinstance(metadata['ontology'], basestring) \
-                else json.dumps(metadata['ontology'])
-            metadata_dataset.attrs[omsi_format_metadata_collection.ontology_value_attribute] = ontology_value
+        if metadata_dataset is not None:
+            metadata_dataset.attrs[omsi_format_metadata_collection.description_value_attribute] = metadata['description']
+            if metadata['unit'] is not None:
+                metadata_dataset.attrs[omsi_format_metadata_collection.unit_value_attribute] = metadata['unit']
+            if metadata['ontology'] is not None:
+                ontology_value = metadata['ontology'] if isinstance(metadata['ontology'], basestring) \
+                    else json.dumps(metadata['ontology'])
+                metadata_dataset.attrs[omsi_format_metadata_collection.ontology_value_attribute] = ontology_value

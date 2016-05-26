@@ -66,6 +66,7 @@ class omsi_format_metadata_collection(omsi_format_common):
     :var unit_value_attribute: The attribute to be associated with each metatdata
         value describing the unit
     :var ontology_value_attribute: Optional ontology associated with a metadata value
+    :var is_json_dict_attribute: Name of the attribute used to define whether an object is json
     """
     def __init__(self):
         super(omsi_format_metadata_collection, self).__init__()
@@ -74,6 +75,7 @@ class omsi_format_metadata_collection(omsi_format_common):
     description_value_attribute = 'description'
     unit_value_attribute = 'unit'
     ontology_value_attribute = 'ontology'
+    is_json_dict_attribute = 'isjson'
     current_version = "0.1"
 
 class omsi_format_methods(omsi_format_metadata_collection):
