@@ -6,11 +6,17 @@ This module provides functionality for reading imzML mass spectrometry image fil
 import numpy as np
 import os
 
+# USE xmltodict to expand support for metadata from the imzml files
+
 # import xml parser
 from pyimzml.ImzMLParser import ImzMLParser
 from omsi.dataformat.file_reader_base import *
 from omsi.datastructures.metadata.metadata_data import metadata_dict, metadata_value
 from omsi.shared.log import log_helper
+try:
+    import xmltodict
+except ImportError:
+    import omsi.shared.third_party.xmltodict
 
 class imzml_file(file_reader_base):
     """
@@ -53,8 +59,9 @@ class imzml_file(file_reader_base):
         self.resolution=resolution
 
         # Compute the mz axis, pixel coordinates data type etc.
-        self.coordinates, self.mz, self.data_type, self.imzml_type, self.imzml_metadata = \
-            self.__compute_file_info(filename=self.basename, resolution=self.resolution)
+        self.coordinates, self.mz, self.data_type, self.imzml_type, self.dataset_metadata, self.instrument_metadata, \
+        self.method_metadata = self.__compute_file_info(filename=self.basename, resolution=self.resolution)
+
         self.num_scans = self.coordinates.size
         log_helper.info(__name__, 'Read %s scans from imzML file.' % self.num_scans)
 
@@ -73,6 +80,10 @@ class imzml_file(file_reader_base):
         self.data = None
         if requires_slicing:
             self.__read_all(filename=basename)
+
+        log_helper.info(__name__, "IMZML file type: " + str(self.imzml_type))
+        log_helper.info(__name__, "IMZML data type: " + str(self.data_type))
+
 
 
     def __read_all(self, filename):
@@ -169,15 +180,59 @@ class imzml_file(file_reader_base):
             log_helper.info(__name__, "Reinterpolated m/z axis for processed imzML file")
 
         # Construct the imzml metadata information
-        imzml_metadata = metadata_dict()
+        dataset_metadata = metadata_dict()
+        instrument_metadata = metadata_dict()
+        method_metadata = metadata_dict()
         for k, v in reader.imzmldict.iteritems():
-            imzml_metadata[k] = metadata_value(name=k,
-                                               value=v,
-                                               unit=None,
-                                               description=k,
-                                               ontology=None)
+            dataset_metadata[k] = metadata_value(name=k,
+                                                 value=v,
+                                                 unit=None,
+                                                 description=k,
+                                                 ontology=None)
 
-        return coordinates, np.asarray(mz_axes), dtype, file_type, imzml_metadata
+        # Delete the parser and read the metadata
+        del reader
+
+        # Parse the metadata for the file. We try to parse only the header and ignore the
+        # <run > group in the XML file to avoid going throught the whole file again
+        # while extracting the majority of the relevant metadata
+        try:
+            with open(filename, 'r') as ins:
+                metdata_header = ''
+                for line in ins:
+                    if '<run' in line:
+                        break
+                    else:
+                        metdata_header += line
+                metdata_header += '</mzML>'
+                metdata_header_dict = xmltodict.parse(metdata_header)['mzML']
+                for k, v in metdata_header_dict.iteritems():
+                    store_value = metadata_value(name=k,
+                                                 value=v,
+                                                 unit=None,
+                                                 description=str(k) + " extracted from imzML XML header.",
+                                                 ontology=None)
+                    if k == 'instrumentConfigurationList':
+                        instrument_metadata[k] = store_value
+                    elif k == 'dataProcessingList':
+                        method_metadata[k] = store_value
+                    elif k == 'scanSettingsList':
+                        dataset_metadata[k] = store_value
+                    elif k == 'softwareList':
+                        method_metadata[k] = store_value
+                    elif k =='sampleList':
+                        method_metadata[k] = store_value
+                    else:
+                        dataset_metadata[k] = store_value
+                dataset_metadata['imzml_xml_metadata_header'] = metadata_value(name='imzml_xml_metadata_header',
+                                                                               value=metdata_header,
+                                                                               unit=None,
+                                                                               description='XML imzML header',
+                                                                               ontology=None)
+        except:
+            log_helper.warning(__name__, "Extraction of additional imzML metadata failed")
+
+        return coordinates, np.asarray(mz_axes), dtype, file_type, dataset_metadata, instrument_metadata, method_metadata
 
     @classmethod
     def test(cls):
@@ -273,9 +328,28 @@ class imzml_file(file_reader_base):
 
         Inherited from file_reader_base
 
-        :return: Dict where keys are strings and associated values to be stored as
-            metadata with the dataset.
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
 
         """
-        return self.imzml_metadata
+        return self.dataset_metadata
+
+    def get_instrument_metadata(self):
+        """
+        Get dict of additional metadata associated with the current instrument
+
+        Inherited from file_reader_base
+
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
+        """
+        return self.instrument_metadata
+
+    def get_method_metadata(self):
+        """
+        Get dict of additional metadata associated with the current instrument
+
+        Inherited from file_reader_base
+
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
+        """
+        return self.method_metadata
 
