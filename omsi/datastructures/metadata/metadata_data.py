@@ -1,7 +1,7 @@
 """
 Define infrastructure for describing metadata (in memory)
 """
-
+import json
 
 class metadata_dict(dict):
     """
@@ -52,6 +52,14 @@ class metadata_value(dict):
     * `unit` The unit string
     * `ontology` Optional ontology
 
+    Data values:
+    ------------
+    - If data values are dicts, then the dict should  be JSON serializable in order for
+      the value to be stored in omsi HDF5 files
+    - If data values are lists, then the lists must be able to be converted to numpy
+      in a way that h5py understands
+
+
     """
     def __init__(self,
                  name,
@@ -93,7 +101,20 @@ class metadata_value(dict):
                 raise ValueError('The description value must be a string')
             elif key == 'unit' and not (isinstance(value, basestring) or value is None):
                 raise ValueError('The unit must be a string')
+
             dict.__setitem__(self, key, value)
         else:
             raise KeyError('Illegal key ' + str(key) + ' given. Valid keys are ' + str(self.keys()))
+
+    def __getattr__(self, item):
+        """
+        Expose the keys also as attributes for usability.
+        :param item: Name of the attribute
+        :return: Value of the attribute
+        :raises: AttributeError if the attribute is not found
+        """
+        if item in self.keys():
+            return self[item]
+        else:
+            raise AttributeError("'metadata_value' has not attribute " + str(item))
 
