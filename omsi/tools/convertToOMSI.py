@@ -1154,6 +1154,8 @@ class ConvertFiles(object):
             #  Add the metadata from the file-reader for the dataset          ##
             ####################################################################
             dataset_metadata_from_reader = input_file.get_dataset_metadata()
+            method_metadata_from_reader = input_file.get_method_metadata()
+            instrument_metadata_from_reader = input_file.get_instrument_metadata()
             if dataset_metadata_from_reader is not None:
                 curr_dataset['omsi_object'].create_metadata_collection(metadata=dataset_metadata_from_reader)
 
@@ -1168,7 +1170,12 @@ class ConvertFiles(object):
             method_meta_key = '--methods'+str(curr_index)
             notes_meta_key = '--notes'+str(curr_index)
             instrument_meta_key = '--instrument'+str(curr_index)
-            if method_meta_key in ConvertSettings.metadata or notes_meta_key in ConvertSettings.metadata:
+            has_method_metadata = method_meta_key in ConvertSettings.metadata or\
+                                  notes_meta_key in ConvertSettings.metadata or\
+                                  len(method_metadata_from_reader) > 0
+            has_instrument_metadata = instrument_meta_key in ConvertSettings.metadata or\
+                                      len(instrument_metadata_from_reader) > 0
+            if has_method_metadata:
                 methods_info = data.create_method_info()  # Create will return the existing one if one exists
                 if method_meta_key in ConvertSettings.metadata:
                     methods_info.add_metadata(metadata=metadata_value(
@@ -1180,20 +1187,25 @@ class ConvertFiles(object):
                         name='notes',
                         value=unicode(ConvertSettings.metadata[notes_meta_key]),
                         description='Additional notes about the methods'))
+                if len(method_metadata_from_reader) > 0:
+                    methods_info.add_metadata(method_metadata_from_reader)
 
-            if instrument_meta_key in ConvertSettings.metadata:
+            if has_instrument_metadata:
+
                 parent_instrument_info = exp.get_instrument_info()
                 if parent_instrument_info and parent_instrument_info.get_instrument_name():
                     inst_name = parent_instrument_info.get_instrument_name()[0]
                 else:
                     inst_name = None
-                instrument_info = data.create_instrument_info(
-                    instrument_name=inst_name)
-                # mzdata=mzdata)  # Create will return the existing one if one exists
-                instrument_info.add_metadata(metadata=metadata_value(
-                                             name='description',
-                                             value=unicode(ConvertSettings.metadata[instrument_meta_key]),
-                                             description='Description of the instrument'))
+                instrument_info = data.create_instrument_info(instrument_name=inst_name)
+                # Create will return the existing one if one exists
+                if instrument_meta_key in ConvertSettings.metadata:
+                    instrument_info.add_metadata(metadata=metadata_value(
+                                                 name='description',
+                                                 value=unicode(ConvertSettings.metadata[instrument_meta_key]),
+                                                 description='Description of the instrument'))
+                if len(instrument_metadata_from_reader) > 0:
+                    instrument_info.add_metadata(instrument_metadata_from_reader)
 
             ####################################################################
             #  Execute the requested analyses                                 ##
