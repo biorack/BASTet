@@ -103,6 +103,32 @@ class file_reader_base(object):
         """
         return metadata_dict()
 
+    def get_instrument_metadata(self):
+        """
+        Get dict of additional metadata associated with the current instrument
+
+        NOTE: In the case that multiple regions and/or datasets are supported,
+        this function should return the metadata of the currently selected
+        dataset only. If no particular dataset is selected, then all should
+        be returned.
+
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
+        """
+        return metadata_dict()
+
+    def get_method_metadata(self):
+        """
+        Get dict of additional metadata associated with the current instrument
+
+        NOTE: In the case that multiple regions and/or datasets are supported,
+        this function should return the metadata of the currently selected
+        dataset only. If no particular dataset is selected, then all should
+        be returned.
+
+        :return: Instance of omsi.shared.metadata_data.metadata_dict
+        """
+        return metadata_dict()
+
     @classmethod
     def is_valid_dataset(cls, name):
         """
