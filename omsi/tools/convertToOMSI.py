@@ -196,10 +196,10 @@ def main(argv=None):
     ####################################################################
     try:
         # Convert all files and record warnings for reporting purposes
-        # with warnings.catch_warnings(record=True) as w:
-        #     warnings.simplefilter("always")
-        ConvertFiles.convert_files()
-        #    ConvertSettings.recorded_warnings += w
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            ConvertFiles.convert_files()
+            ConvertSettings.recorded_warnings += w
     except:
         emailmsg = "ERROR: An error occurred during the file conversion. \n"
         log_helper.warning(__name__, "ERROR: An error occurred during the file conversion.")
@@ -1211,52 +1211,80 @@ class ConvertFiles(object):
             #  Execute the requested analyses                                 ##
             ####################################################################
             # Compute the local peak finding and add the peak-cube data to the file
-            if ConvertSettings.execute_fpl:
-                log_helper.info(__name__, "Executing local peak finding")
-                # Execute the peak finding
-                fpl = omsi_findpeaks_local(name_key="omsi_findpeaks_local_" + str(time.ctime()))
-                fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
-                # Save the peak-finding to file
-                ana, anaindex = exp.create_analysis(fpl)
+            try:
+                if ConvertSettings.execute_fpl:
+                    log_helper.info(__name__, "Executing local peak finding")
+                    # Execute the peak finding
+                    fpl = omsi_findpeaks_local(name_key="omsi_findpeaks_local_" + str(time.ctime()))
+                    fpl.execute(msidata=data, mzdata=mzdata, printStatus=True)
+                    # Save the peak-finding to file
+                    ana, anaindex = exp.create_analysis(fpl)
+            except:
+                warnings.warn("Local peak finding failed.")
+                e = sys.exc_info()[0]
+                log_helper.warning(__name__, "Local peak finding failed. " + str(e))
             # Compute the global peak finding and add the peak-cube data to the
             # file
-            if ConvertSettings.execute_fpg:
-                log_helper.info(__name__, "Executing global peak finding")
-                # Execute the peak finding
-                fpg = omsi_findpeaks_global(name_key="omsi_findpeaks_global_" + str(time.ctime()))
-                fpg.execute(msidata=data, mzdata=mzdata)
-                # Save the peak-finding to file
-                ana, anaindex = exp.create_analysis(fpg)
-                fpgpath = ana.get_managed_group().name
-            # Compute the nmf analysis if requested
-            if ConvertSettings.execute_nmf:
-                log_helper.info(__name__, "Executing nmf")
-                # Exectue the nmf analysis on the peak-cube or if peak finding was not performed then
-                # execute nmf on the raw data data
-                nmf = omsi_nmf(name_key="omsi_nmf_" + str(time.ctime()))
-                if ConvertSettings.execute_fpg and not ConvertSettings.nmf_use_raw_data:
-                    log_helper.info(__name__, "   Using peak-cube data for NMF")
-                    fpgdata = ana['peak_cube']
-                    nmf.execute(msidata=fpgdata,
-                                numComponents=ConvertSettings.nmf_num_component,
-                                timeOut=ConvertSettings.nmf_timeout,
-                                numIter=ConvertSettings.nmf_num_iter,
-                                tolerance=ConvertSettings.nmf_tolerance)
-                else:
-                    log_helper.info(__name__, "   Using raw data for NMF")
-                    nmf.execute(msidata=data,
-                                numComponents=ConvertSettings.nmf_num_component,
-                                timeOut=ConvertSettings.nmf_timeout,
-                                numIter=ConvertSettings.nmf_num_iter,
-                                tolerance=ConvertSettings.nmf_tolerance)
-                # Save the nmf results to file
-                ana, anaindex = exp.create_analysis(nmf)
-            # Compute the tic normalization
-            if ConvertSettings.execute_ticnorm:
-                log_helper.info(__name__, "Executing tic normalization")
-                tic = omsi_tic_norm(name_key="tic_norm_" + str(time.ctime()))
-                tic.execute(msidata=data, mzdata=mzdata)
-                ana, anaindex = exp.create_analysis(tic)
+            try:
+                fpg_executed = False
+                if ConvertSettings.execute_fpg:
+                    log_helper.info(__name__, "Executing global peak finding")
+                    # Execute the peak finding
+                    fpg = omsi_findpeaks_global(name_key="omsi_findpeaks_global_" + str(time.ctime()))
+                    fpg.execute(msidata=data, mzdata=mzdata)
+                    # Save the peak-finding to file
+                    ana, anaindex = exp.create_analysis(fpg)
+                    fpgpath = ana.get_managed_group().name
+                    fpg_executed = True
+            except:
+                warnings.warn("Global peak finding failed")
+                e = sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: Global peak finding failed: " + str(e))
+                fpg_executed = False
+            try:
+                # Compute the nmf analysis if requested
+                if ConvertSettings.execute_nmf:
+                    log_helper.info(__name__, "Executing nmf")
+                    # Exectue the nmf analysis on the peak-cube or if peak finding was not performed then
+                    # execute nmf on the raw data data
+                    nmf = omsi_nmf(name_key="omsi_nmf_" + str(time.ctime()))
+                    if ConvertSettings.execute_fpg and not ConvertSettings.nmf_use_raw_data:
+                        if fpg_executed:
+                            log_helper.info(__name__, "   Using peak-cube data for NMF")
+                            fpgdata = ana['peak_cube']
+                            nmf.execute(msidata=fpgdata,
+                                        numComponents=ConvertSettings.nmf_num_component,
+                                        timeOut=ConvertSettings.nmf_timeout,
+                                        numIter=ConvertSettings.nmf_num_iter,
+                                        tolerance=ConvertSettings.nmf_tolerance)
+                        else:
+                            warnings.warn("Skipping NMF due to failed global peak finder.")
+                            log_helper.warning(__name__, "Skipping NMF due to failed global peak finder.")
+                    else:
+                        log_helper.info(__name__, "   Using raw data for NMF")
+                        nmf.execute(msidata=data,
+                                    numComponents=ConvertSettings.nmf_num_component,
+                                    timeOut=ConvertSettings.nmf_timeout,
+                                    numIter=ConvertSettings.nmf_num_iter,
+                                    tolerance=ConvertSettings.nmf_tolerance)
+                    # Save the nmf results to file
+                    ana, anaindex = exp.create_analysis(nmf)
+            except:
+                warnings.warn("NMF failed.")
+                e = sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: NMF failed: " + str(e))
+
+            try:
+                # Compute the tic normalization
+                if ConvertSettings.execute_ticnorm:
+                    log_helper.info(__name__, "Executing tic normalization")
+                    tic = omsi_tic_norm(name_key="tic_norm_" + str(time.ctime()))
+                    tic.execute(msidata=data, mzdata=mzdata)
+                    ana, anaindex = exp.create_analysis(tic)
+            except:
+                warnings.warn("TIC normalization failed.")
+                e = sys.exc_info()[0]
+                log_helper.warning(__name__, "ERROR: TIC normalization failed: " + str(e))
 
             ####################################################################
             #  Generate the thumbnail image for the current file              ##
