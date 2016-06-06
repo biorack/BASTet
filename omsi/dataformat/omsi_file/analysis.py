@@ -287,12 +287,12 @@ class omsi_file_analysis(omsi_dependencies_manager,
 
         # 3. Check if we need to save the analysis or whether it has already been saved
         if not(force_save or len(analysis.get_omsi_analysis_storage()) == 0):
-            # Check if the analysis has been saved before for the same parent_group
+             # Check if the analysis has been saved before for the same parent_group
             parent_filename = os.path.abspath(parent_group.file.filename)
             for prior_data_store in analysis.get_omsi_analysis_storage():
+                prior_group_name = os.path.split(prior_data_store.name)[0]
                 prior_filename = os.path.abspath(prior_data_store.managed_group.file.filename)
-                if prior_data_store.name == parent_group.name and \
-                        prior_filename == parent_filename:
+                if prior_group_name == parent_group.name and prior_filename == parent_filename:
                     return prior_data_store, prior_data_store.get_analysis_index()
 
         # 4. Create the group and define the required attributes
