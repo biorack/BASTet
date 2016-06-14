@@ -101,46 +101,81 @@ import sys
 import itertools
 import warnings
 
+################################################################
+#  Additional custom data processing functions                 #
+################################################################
+def area_near_peak(x1, halfpeakwidth=2, **kwargs):
+    """
+    Instead of simply taking the sum or the max to get the "size" of a peak, this code
+    finds the peak within a range and sums the data points 'halfpeakwidth' to the
+    left and to the right of the peak if there is no peak, the boundary condition ends up being
+    that it just takes the first halfpeakwidth+1 datapoints in the range
+    but if there is no peak, we assume this value is very low anyways.
+
+    :param x1: The data operand specifying the data the reduction should be performed on
+    :param halfpeakwidth: The halfpeakwidth around which the peak should be integrated
+    :param kwargs: Additional data parameters. These will be ignored. This is used
+                   to support the standard axis parameter that is ignored here.
+    """
+    if x1.ndim not in [2,3]:
+        raise ValueError("Area near peak only defined for 3D cubes of spectra")
+    if x1.ndim == 2:
+        return x1
+    result = np.zeros((x1.shape[0],x1.shape[1]), dtype=x1.dtype)
+    maxMasses = np.argmax(x1,2)
+    for x in range(x1.shape[0]):
+        for y in range(x1.shape[1]):
+            peak=(range(-halfpeakwidth, halfpeakwidth+1) + maxMasses[x,y]).astype(int)
+            for p in peak:
+                if p<0:
+                    continue
+                if p>= x1.shape[2]:
+                    continue
+                result[x,y] += x1[x,y,p]
+    return result
+
 
 #################################################################
 #  Basic specifications                                         #
 #################################################################
-reduction_allowed_numpy_function = ['all',
-                                    'alltrue',
-                                    'amax',
-                                    'amin',
-                                    'angle',
-                                    'any',
-                                    'append',
-                                    'argmax',
-                                    'argmin',
-                                    'argwhere'
-                                    'average',
-                                    'bincount',
-                                    'corrcoef',
-                                    'cumprod',
-                                    'cumproduct',
-                                    'cumsum',
-                                    'count_nonzero',
-                                    'diag',
-                                    'diag_indices',
-                                    'diagflat',
-                                    'diagonal',
-                                    'diff',
-                                    'max',
-                                    'min',
-                                    'median',
-                                    'mean',
-                                    'percentile',
-                                    'product',
-                                    'prod',
-                                    'ptp',
-                                    'select_values',
-                                    'squeeze',
-                                    'std',
-                                    'var',
-                                    'transpose',
-                                    'sum']
+reduction_allowed_functions = {'area_near_peak': area_near_peak,
+                               'all': np.all,
+                               'alltrue': np.alltrue,
+                               'amax': np.amax,
+                               'amin': np.amin,
+                               'angle': np.angle,
+                               'any': np.any,
+                               'append': np.append,
+                               'argmax': np.argmax,
+                               'argmin': np.argmin,
+                               'argwhere': np.argwhere,
+                               'average': np.average,
+                               'bincount': np.bincount,
+                               'corrcoef': np.corrcoef,
+                               'cumprod': np.cumprod,
+                               'cumproduct': np.cumproduct,
+                               'cumsum': np.cumsum,
+                               'count_nonzero': np.count_nonzero,
+                               'diag': np.diag,
+                               'diag_indices': np.diag_indices,
+                               'diagflat': np.diagflat,
+                               'diagonal': np.diagonal,
+                               'diff': np.diff,
+                               'max': np.max,
+                               'min': np.min,
+                               'median': np.median,
+                               'mean': np.mean,
+                               'percentile': np.percentile,
+                               'product': np.product,
+                               'prod': np.prod,
+                               'ptp': np.ptp,
+                               'squeeze': np.squeeze,
+                               'std': np.std,
+                               'var': np.var,
+                               'transpose': np.transpose,
+                               'sum': np.sum,
+                               'select_values': None, # Handled separately in the perform_reduction
+                               }
 """List of allowed numpy data reduction operations.
    Reduction operations are any single data operations that
    may change the shape of the data.
@@ -211,41 +246,41 @@ reduction_allowed_numpy_function = ['all',
 
 """
 
-transformation_allowed_numpy_single_data = ['abs',
-                                            'arccos',
-                                            'arccosh',
-                                            'arcsin',
-                                            'arcsinh',
-                                            'arctan',
-                                            'arctanh',
-                                            'argsort',
-                                            'around',
-                                            'ceil',
-                                            'clip',
-                                            'cos',
-                                            'cosh',
-                                            'deg2rad',
-                                            'degrees',
-                                            'exp',
-                                            'exp2',
-                                            'fabs',
-                                            'floor',
-                                            'hypot',
-                                            'invert',
-                                            'log',
-                                            'log2',
-                                            'log10',
-                                            'logical_not',
-                                            'negative',
-                                            'sign',
-                                            'round',
-                                            'sin',
-                                            'sinc',
-                                            'sinh'
-                                            'sqrt',
-                                            'sort',
-                                            'tan',
-                                            'tanh']
+transformation_allowed_single_data = {'abs': np.abs,
+                                      'arccos': np.arccos,
+                                      'arccosh': np.arccosh,
+                                      'arcsin': np.arcsin,
+                                      'arcsinh': np.arcsinh,
+                                      'arctan': np.arctanh,
+                                      'arctanh': np.arctanh,
+                                      'argsort': np.argsort,
+                                      'around': np.around,
+                                      'ceil': np.ceil,
+                                      'clip': np.clip,
+                                      'cos': np.cos,
+                                      'cosh': np.cosh,
+                                      'deg2rad': np.deg2rad,
+                                      'degrees': np.degrees,
+                                      'exp': np.exp,
+                                      'exp2': np.exp2,
+                                      'fabs': np.fabs,
+                                      'floor': np.floor,
+                                      'hypot': np.hypot,
+                                      'invert': np.invert,
+                                      'log': np.log,
+                                      'log2': np.log2,
+                                      'log10': np.log10,
+                                      'logical_not': np.logical_not,
+                                      'negative': np.negative,
+                                      'sign': np.sign,
+                                      'round': np.round,
+                                      'sin': np.sin,
+                                      'sinc': np.sinc,
+                                      'sinh': np.sinh,
+                                      'sqrt': np.sqrt,
+                                      'sort': np.sort,
+                                      'tan': np.tan,
+                                      'tanh': np.tanh}
 """List of allowed single data transformations. Single data transformation,
    are operations that operate on a single data input and which do not change
    the shape of the data. Below a list of available numpy options.
@@ -299,33 +334,33 @@ transformation_allowed_numpy_single_data = ['abs',
 
 """
 
-transformation_allowed_numpy_dual_data = ['add',
-                                          'arctan2',
-                                          'bitwise_and',
-                                          'bitwise_not',
-                                          'bitwise_or',
-                                          'bitwise_xor',
-                                          'corrcoef',
-                                          'cov',
-                                          'divide',
-                                          'equal',
-                                          'fmax',
-                                          'fmin',
-                                          'fmod',
-                                          'greater',
-                                          'greater_equal',
-                                          'left_shift',
-                                          'less',
-                                          'less_equal',
-                                          'logical_and',
-                                          'logical_or',
-                                          'logical_xor',
-                                          'mod',
-                                          'multiply',
-                                          'not_equal',
-                                          'power',
-                                          'right_shift',
-                                          'subtract']
+transformation_allowed_dual_data = {'add': np.add,
+                                    'arctan2': np.arctan2,
+                                    'bitwise_and': np.bitwise_and,
+                                    'bitwise_not': np.bitwise_not,
+                                    'bitwise_or': np.bitwise_or,
+                                    'bitwise_xor': np.bitwise_xor,
+                                    'corrcoef': np.corrcoef,
+                                    'cov': np.cov,
+                                    'divide': np.divide,
+                                    'equal': np.equal,
+                                    'fmax': np.fmax,
+                                    'fmin': np.fmin,
+                                    'fmod': np.fmod,
+                                    'greater': np.greater,
+                                    'greater_equal': np.greater_equal,
+                                    'left_shift': np.left_shift,
+                                    'less': np.less,
+                                    'less_equal': np.less_equal,
+                                    'logical_and': np.logical_and,
+                                    'logical_or': np.logical_or,
+                                    'logical_xor': np.logical_xor,
+                                    'mod': np.mod,
+                                    'multiply': np.multiply,
+                                    'not_equal': np.not_equal,
+                                    'power': np.power,
+                                    'right_shift': np.right_shift,
+                                    'subtract': np.subtract}
 """List of allowed dual data transformations. Dual data transformation,
    are operation that operate on a two data input datasets but which do not change
    the shape of the data. Below a list of available numpy function options.
@@ -351,7 +386,7 @@ transformation_allowed_numpy_dual_data = ['add',
    * 'less'          : out = x1 < x2 = numpy.less(x1,x2)
    * 'less_equal'    : out = x1 <= x2 = numpy.less_equal(x1,x2)
    * 'logical_and'   : out = numpy.logical_and(x1,x2)
-   * 'logical_not'   : See transformation_allowed_numpy_single_data instead.
+   * 'logical_not'   : See transformation_allowed_single_data instead.
    * 'logical_or'    : out = numpy.logical_or(x1,x2)
    * 'logical_xor'   : out = numpy.logical_xor(x1,x2)
    * 'mod'           : out = numpy.mod(x1,x2)
@@ -419,7 +454,7 @@ transformation_type = {'arithmetic': 'arithmetic',
                   outdata[negvalues] = np.log(data[negvalues]*-1.)*-1.
 
                     * 'operation' : String defining the scaling operations to be applied. \
-                      See the transformation_allowed_numpy_single_data list for a complete list
+                      See the transformation_allowed_single_data list for a complete list
                       of allowed scaling operations. Some of the more commonly used scaling\
                       operations include: 'abs', 'log', 'sqrt', 'around' etc.
                     * 'x1' : The first data operand for the scaling.
@@ -474,13 +509,14 @@ def check_selection_string(selection_string):
 
     :param selection_string: String given by the user with the desired selection
 
-    :returns: String indicating the type of selection as defined in selection_type:
+    :returns: Interger indicating the type of selection as defined in selection_type, e.g,:
 
-        * 'indexlist' : Selection of the form [1,2,3]
-        * 'all' : Selection of the form ':'
-        * 'range: Selection of the form 'a:b'
-        * 'index: A single index selection, e.g., '1'
-        * 'invalid': An unsupported selection
+        * 2 = 'indexlist' : Selection of the form [1,2,3]
+        * 3 = 'all' : Selection of the form ':'
+        * 4 = 'range: Selection of the form 'a:b'
+        * 0 = 'index: A single index selection, e.g., '1'
+        * 5 = 'multiaxis': A selection for multiple axies, e.g., '1:2|3:4'
+        * -1 'invalid': An unsupported selection
 
     """
     import re
@@ -713,15 +749,15 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         return None
 
     # 1.2) Check if we have a valid reduction operation
-    if reduction not in reduction_allowed_numpy_function:
+    if reduction not in reduction_allowed_functions:
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " not supported. Valid reduction operations are:" +
-                                        str(reduction_allowed_numpy_function))
+                                        str(reduction_allowed_functions.keys()))
         else:
             raise ValueError("Requested data reduction " + str(reduction) +
                              " not supported. Valid reduction operations are:" +
-                             str(reduction_allowed_numpy_function))
+                             str(reduction_allowed_functions.keys()))
 
     # 1.3) Check if we have a valid axis parameter
     axis_specified = 'axis' in kwargs
@@ -768,25 +804,25 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
 
     # 1.7 ) Perform the data reduction operation. This can be a large range of
     # numpy operations defined in
-    # omsi.shared.omsi_data_selection.reduction_allowed_numpy_function
+    # omsi.shared.omsi_data_selection.reduction_allowed_functions
     try:
-        numpy_operation = getattr(np, reduction)
+        reduction_operation = reduction_allowed_functions[reduction]  # getattr(np, reduction)
         # if data.shape[axis] > 1:
         if axis_specified:
-            data = numpy_operation(x1, axis=axis, **kwargs)
+            data = reduction_operation(x1, axis=axis, **kwargs)
         else:
-            data = numpy_operation(x1, **kwargs)
+            data = reduction_operation(x1, **kwargs)
         return data
     except:
         if http_error:
             return HttpResponseNotFound("Requested data reduction " + str(reduction) +
                                         " failed or not supported. Valid reduction" +
-                                        "operations are:" + str(reduction_allowed_numpy_function) +
+                                        "operations are:" + str(reduction_allowed_functions.keys()) +
                                         " " + str(sys.exc_info()))
         else:
             raise ValueError("Requested data reduction " + str(reduction) +
                              " failed or not supported. Valid reduction" +
-                             "operations are:" + str(reduction_allowed_numpy_function) +
+                             "operations are:" + str(reduction_allowed_functions.keys()) +
                              " " + str(sys.exc_info()))
 
 
@@ -1103,10 +1139,10 @@ def transform_datachunk(data,
             transformation == transformation_type['arithmetic']:
         # Retrieve the requested operation
         if 'operation' in kwargs:
-            if kwargs['operation'] not in transformation_allowed_numpy_dual_data:
+            if kwargs['operation'] not in transformation_allowed_dual_data:
                 raise AttributeError('Requested data operations not supported.')
             try:
-                operation = getattr(np, kwargs.pop('operation'))
+                operation = transformation_allowed_dual_data[kwargs.pop('operation')] # getattr(np, kwargs.pop('operation'))
             except AttributeError:
                 raise AttributeError('Requested data operations not supported.')
         else:
@@ -1132,7 +1168,7 @@ def transform_datachunk(data,
     elif transformation == transformation_type['singleDataTransform'] or transformation == transformation_type['scale']:
         specialzero = False
         if 'operation' in kwargs:
-            if kwargs['operation'] not in transformation_allowed_numpy_single_data:
+            if kwargs['operation'] not in transformation_allowed_single_data:
                 raise AttributeError(
                     'Requested scaling operation not supported.')
             try:
@@ -1140,7 +1176,7 @@ def transform_datachunk(data,
                    kwargs['operation'] == 'log10' or \
                    kwargs['operation'] == 'sqrt':
                     specialzero = True
-                operation = getattr(np, kwargs.pop('operation'))
+                operation =  transformation_allowed_single_data[kwargs.pop('operation')]  # getattr(np, kwargs.pop('operation'))
             except AttributeError:
                 raise AttributeError(
                     'Requested data operations not supported.')
@@ -1382,18 +1418,18 @@ def construct_transform_dict(trans_type, axes=None, **kwargs):
     # 1.1) Do we have a valid operation specified for arithmetic opertions
     if trans_type == transformation_type['dualDataTransform'] or trans_type == transformation_type['arithmetic']:
         if 'operation' in kwargs:
-            if not kwargs['operation'] in transformation_allowed_numpy_dual_data:
+            if not kwargs['operation'] in transformation_allowed_dual_data:
                 raise ValueError(unicode("Requested arithmetic operation not supported. Allowed operations are") +
-                                 unicode(transformation_allowed_numpy_dual_data))
+                                 unicode(transformation_allowed_dual_data.keys()))
         else:
             raise KeyError(
                 "Missing parameter operations for arithmetic data transformation.")
     # 1.2) Check if we have a scaling operation and if so if it is valid
     if trans_type == transformation_type['singleDataTransform'] or trans_type == transformation_type['scale']:
         if 'operation' in kwargs:
-            if not kwargs['operation'] in transformation_allowed_numpy_single_data:
+            if not kwargs['operation'] in transformation_allowed_single_data:
                 raise ValueError(unicode("Requested scale operation not supported. Allowed operations are") +
-                                 unicode(transformation_allowed_numpy_single_data))
+                                 unicode(transformation_allowed_single_data.keys()))
         else:
             raise KeyError("Missing parameter operations for scale data transformation.")
     # 1.3) Check if we have threshold parameter for the threshold operation
@@ -1433,9 +1469,9 @@ def construct_reduce_dict(reduction_type, **kwargs):
        :returns: Dictionary with the description of the reduction operation.
 
     """
-    if reduction_type not in reduction_allowed_numpy_function:
+    if reduction_type not in reduction_allowed_functions:
         raise ValueError(unicode("Requested reduction operation not supported. Allowed operations are") +
-                         unicode(reduction_allowed_numpy_function))
+                         unicode(reduction_allowed_functions.keys()))
     reducdict = {'reduction': unicode(reduction_type)}
     for key, value in kwargs.items():
         reducdict[unicode(key)] = value
