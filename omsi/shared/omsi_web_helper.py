@@ -35,17 +35,30 @@ class WebHelper(object):
         pass
 
     @staticmethod
-    def upload_file_to_nersc(filepath, username=None, target_dir=None, session=None, persist_session=False, machine='cori'):
+    def upload_file_to_nersc(filepath,
+                             username=None,
+                             target_dir=None,
+                             session=None,
+                             persist_session=False,
+                             machine='cori',
+                             register=False):
         """
         Upload a file to NERSC via NEWT
 
         :param filepath: The path of the file to be uploaded
         :param username: NERSC username, needed if different from local username
         :param target_dir: Location where the file should be placed if different from the user default location
+        :param session: The requests session to be used or None if the user should be asked to
+                         login as part of this call
+        :param persist_session: If True then the session will remain open, otherwise we'll log the user
+                        out of NERSC at the end
+        :param machine: The name of the machine at nersc to be used. Default is 'cori'
+        :param register: Boolean indicating whether we should register the file with the openmsi server (default=False)
         :return:
         """
         import requests
         import getpass
+        import urllib
 
         newt_base_url = "https://newt.nersc.gov/newt"
         newt_auth_url = newt_base_url+"/auth"
@@ -79,14 +92,34 @@ class WebHelper(object):
 
         # Upload the file to NEWT
         upload_url = newt_base_url + "/file/" + machine + target
+        fname = os.path.basename(filepath)
         cookies = {"newt_sessionid": newt_sessionid}
-        payload = {"name": os.path.basename(filepath),
+        payload = {"name": fname,
                    "file": open(filepath, 'rb'),
                    "submit": "upload"}
-        r = requests.post(upload_url, files=payload, cookies=cookies)
-        if r.status_code != 200:
+        result1 = requests.post(upload_url, files=payload, cookies=cookies)
+        if result1.status_code != 200:
             raise ValueError("Upload failed")
-        result = r.json()
+        #result = r.json()
+
+        # Set apache ACL at NERSC
+        fullname = target + "/" + fname
+        acl_url = "https://newt.nersc.gov/newt/command/" + machine
+        command = "setfacl -R -m u:48:rwx " + '"' +fullname + '"'
+        payload = {"executable": command, "loginenv": "true"}
+        result2 = requests.post(acl_url, data=payload, cookies=cookies)
+
+        # Register the file with the openmsi database
+        if register:
+            add_file_url = os.path.join(WebHelper.default_db_server_url, "openmsi/resources/addfile")
+            # addfilepath = fullname.lstrip("/global")
+            query_params= {'file': fullname, 'owner': uname}
+            add_file_url += "?"
+            add_file_url += urllib.urlencode(query_params)
+            result_3 = requests.get(url=add_file_url)
+        else:
+            result_3 = None
+
 
         # Logout user if requested
         if not persist_session:
@@ -94,7 +127,7 @@ class WebHelper(object):
             r = s.get(newt_logout_url)
             s = None
 
-        return result, s
+        return result1, result2, result_3, s
 
     @staticmethod
     def update_job_status(filepath, db_server, jobid, status='complete'):
@@ -196,7 +229,7 @@ class WebHelper(object):
                 pass  # Adding the file to the db is allowed
 
         # If we are at NERSC then set the NERSC Apache permissions
-        if 'nersc.gov' in db_server:
+        if 'nersc.gov' in db_server and check_add_nersc:
             WebHelper.set_apache_acl(filepath)
 
         # Determine the user
@@ -212,7 +245,7 @@ class WebHelper(object):
         # Correct the filepath if we are on openmsi.nersc.gov, as /global is not mounted but only /project.
         if db_server == WebHelper.default_db_server_url and addfilepath.startswith("/global/project/projectdirs"):
             addfilepath = filepath.lstrip("/global")
-        query_params = {'file': os.path.abspath(addfilepath), 'user': curr_user}
+        query_params = {'file': os.path.abspath(addfilepath), 'owner': curr_user}
         add_file_url += "?"
         add_file_url += urllib.urlencode(query_params)
         # add_file_url = add_file_url + "?file=" + \
