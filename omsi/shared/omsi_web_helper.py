@@ -35,6 +35,76 @@ class WebHelper(object):
         pass
 
     @staticmethod
+    def upload_file_to_nersc(filepath, username=None, target_dir=None, session=None, persist_session=False, machine='cori'):
+        """
+        Upload a file to NERSC via NEWT
+
+        :param filepath: The path of the file to be uploaded
+        :param username: NERSC username, needed if different from local username
+        :param target_dir: Location where the file should be placed if different from the user default location
+        :return:
+        """
+        import requests
+        import getpass
+
+        newt_base_url = "https://newt.nersc.gov/newt"
+        newt_auth_url = newt_base_url+"/auth"
+        newt_logout_url = newt_base_url+"/logout"
+
+        uname = username
+        if uname is None:
+            print "Please enter the user name"
+            if uname == "" or uname is None:
+                uname = getpass.getuser()
+                tmp = getpass.getpass("Username: (default="+uname+")")
+                uname = uname if tmp == "" else tmp
+                print tmp, uname
+        target = target_dir if target_dir is not None else ("/project/projectdirs/openmsi/omsi_data_private/" + uname)
+        target = "/global/homes/o/oruebel/tmp"
+
+        s = session
+        newt_sessionid = None
+        if s is None: # Login to newt
+
+            s = requests.Session()
+            print "Please enter your NERSC Password"
+            password =  getpass.getpass(prompt="Enter password for user \"" + uname + "\" \n")
+
+            r = s.post(newt_auth_url, {"username": uname, "password": password})
+            if r.status_code != 200:
+                raise ValueError("Authentication failed.")
+            result = r.json()
+            if not result['auth']:
+                raise ValueError("Authentication failed.")
+            newt_sessionid = result['newt_sessionid']
+
+        # Upload the file to NEWT
+        upload_url = newt_base_url + "/file/" + machine + target
+        print upload_url
+        cookies = {"newt_sessionid": newt_sessionid}
+        payload = {"name": os.path.basename(filepath),
+                   "file": open(filepath, 'rb'),
+                   "submit": "upload"}
+        r = requests.post(upload_url, files=payload, cookies=cookies)
+        print dir(r)
+        print r.text
+        print r.reason
+        print r.json()
+        if r.status_code != 200:
+            raise ValueError("Upload failed")
+        result = r.json
+
+        # Logout user if requested
+        if not persist_session:
+            s = requests.Session()
+            r = s.get(newt_logout_url)
+            s = None
+
+        return result, s
+
+
+
+    @staticmethod
     def update_job_status(filepath, db_server, jobid, status='complete'):
         """
         Function used to update the status of the job on the server
