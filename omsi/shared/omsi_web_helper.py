@@ -60,7 +60,6 @@ class WebHelper(object):
                 uname = uname if tmp == "" else tmp
                 print tmp, uname
         target = target_dir if target_dir is not None else ("/project/projectdirs/openmsi/omsi_data_private/" + uname)
-        target = "/global/homes/o/oruebel/tmp"
 
         s = session
         newt_sessionid = None
@@ -80,19 +79,14 @@ class WebHelper(object):
 
         # Upload the file to NEWT
         upload_url = newt_base_url + "/file/" + machine + target
-        print upload_url
         cookies = {"newt_sessionid": newt_sessionid}
         payload = {"name": os.path.basename(filepath),
                    "file": open(filepath, 'rb'),
                    "submit": "upload"}
         r = requests.post(upload_url, files=payload, cookies=cookies)
-        print dir(r)
-        print r.text
-        print r.reason
-        print r.json()
         if r.status_code != 200:
             raise ValueError("Upload failed")
-        result = r.json
+        result = r.json()
 
         # Logout user if requested
         if not persist_session:
@@ -101,8 +95,6 @@ class WebHelper(object):
             s = None
 
         return result, s
-
-
 
     @staticmethod
     def update_job_status(filepath, db_server, jobid, status='complete'):
