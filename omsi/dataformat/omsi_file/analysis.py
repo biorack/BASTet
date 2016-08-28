@@ -522,7 +522,7 @@ class omsi_file_analysis(omsi_dependencies_manager,
                                                   dtype=omsi_format_common.str_type)
             if len(unicode(ana_data['data'])) > 0:
                 if omsi_format_common.str_type_unicode:
-                    tempdata[0] = ana_data['data']
+                    tempdata[0] = unicode(ana_data['data'])
                 else:
                     tempdata[0] = str(ana_data['data'])
             else:
