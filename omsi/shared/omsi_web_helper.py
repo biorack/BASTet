@@ -76,11 +76,11 @@ class WebHelper(object):
 
         s = session
         newt_sessionid = None
-        if s is None: # Login to newt
+        if s is None:  # Login to newt
 
             s = requests.Session()
             print "Please enter your NERSC Password"
-            password =  getpass.getpass(prompt="Enter password for user \"" + uname + "\" \n")
+            password = getpass.getpass(prompt="Enter password for user \"" + uname + "\" \n")
 
             r = s.post(newt_auth_url, {"username": uname, "password": password})
             if r.status_code != 200:
@@ -100,12 +100,12 @@ class WebHelper(object):
         result1 = requests.post(upload_url, files=payload, cookies=cookies)
         if result1.status_code != 200:
             raise ValueError("Upload failed")
-        #result = r.json()
+        # result = r.json()
 
         # Set apache ACL at NERSC
         fullname = target + "/" + fname
         acl_url = "https://newt.nersc.gov/newt/command/" + machine
-        command = "setfacl -R -m u:48:rwx " + '"' +fullname + '"'
+        command = "setfacl -R -m u:48:rwx " + '"' + fullname + '"'
         payload = {"executable": command, "loginenv": "true"}
         result2 = requests.post(acl_url, data=payload, cookies=cookies)
 
@@ -113,13 +113,12 @@ class WebHelper(object):
         if register:
             add_file_url = os.path.join(WebHelper.default_db_server_url, "openmsi/resources/addfile")
             # addfilepath = fullname.lstrip("/global")
-            query_params= {'file': fullname, 'owner': uname}
+            query_params = {'file': fullname, 'owner': uname}
             add_file_url += "?"
             add_file_url += urllib.urlencode(query_params)
             result_3 = requests.get(url=add_file_url)
         else:
             result_3 = None
-
 
         # Logout user if requested
         if not persist_session:
@@ -162,7 +161,19 @@ class WebHelper(object):
             raise ValueError("ERROR: job status could not be updated: \n" +
                              "      Error-code:" + str(request_error.code) + "\n" +
                              "      Error info:" + str(request_error.read()))
-        return False
+        except urllib2.URLError as request_error:
+            if sys.version_info >= (2, 7, 9):
+                import ssl
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                url_response = urllib2.urlopen(url=update_status_url, context=ssl_context)
+                if url_response.code == 200:
+                    return True
+            else:
+                raise ValueError("ERROR: job status could not be updated: \n" +
+                                 "      Error-code:" + str(request_error.code) + "\n" +
+                                 "      Error info:" + str(request_error.read()))
 
     @staticmethod
     def register_file_with_db(filepath, db_server, file_user_name, jobid=None, check_add_nersc=True):
@@ -177,6 +188,8 @@ class WebHelper(object):
                           database instead of adding the file explicitly. I.e.,
                           instead of register_filer_with_db the update_job_status call
                           is executed.
+            :param check_add_nersc: Boolean if set to True performs additional actions to add the
+                         file to the pupblic OpenMSI gateway hosted at NERSC.
 
             :returns: Boolean indicating whether the operation was successful
 
@@ -266,9 +279,13 @@ class WebHelper(object):
 
     @staticmethod
     def set_apache_acl(filepath):
-        """Helper function used to set acl permissions for apache to make the given file accesible
-           to Apache at NERSC. This necessary to make the file readable for adding it to the
-           database.
+        """
+        Helper function used to set acl permissions for apache to make the given file accesible
+        to Apache at NERSC. This necessary to make the file readable for adding it to the
+        database.
+
+        :param filepath: String with the path to the file for which ACL permission should be set
+
         """
         log_helper.info(__name__, "Setting NERSC ACL permissions for Apache")
         # Note u:48 is a replacement for u:apache to ensure that
