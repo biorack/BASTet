@@ -1756,9 +1756,11 @@ class ConvertFiles(object):
                     data[xindex, yindex, :] = vals
                     spectrum_index += 1
                     if write_progress:
-                        sys.stdout.write("[" + str(int(100. * spectrum_index / num_spectra)) + "%]" + "\r")
-                        sys.stdout.flush()
-
+                        try:
+                            sys.stdout.write("[" + str(int(100. * spectrum_index / num_spectra)) + "%]" + "\r")
+                            sys.stdout.flush()
+                        except ValueError:
+                            write_progress = False
             else:
                 for xindex in xrange(0, input_file.shape[0]):
                     if write_progress:
