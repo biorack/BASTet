@@ -198,7 +198,8 @@ class omsi_analysis_manager(omsi_file_object_manager):
         :param analysis_identifier_string: The string used as identifier for the analysis.
         :type analysis_identifier_string: string
 
-        :returns: h5py obejct of the analysis or None in case the analysis is not found.
+        :returns: omsi_file_analysis object for the requested analysis. The function
+                      returns None in case the analysis object was not found.
         """
 
         # Iterate through all groups of the root folder
