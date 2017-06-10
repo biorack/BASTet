@@ -17,6 +17,18 @@ from omsi.datastructures.run_info_data import run_info_dict
 import omsi.shared.mpi_helper as mpi_helper
 from omsi.shared.log import log_helper
 
+#try:
+#    import cloudpickle   # Use the version of cloud-pickle installed on the system
+#    log_helper.debug(__name__, "Using system cloudpickle module")
+#except ImportError:
+#    try:
+import omsi.shared.third_party.cloudpickle as cloudpickle
+log_helper.debug(__name__, "Using fallback cloudpickle version")
+#    except ImportError:
+#        log_helper.warning(__name__, "cloudpickle could not be imported. Using standard pickle instead. " +
+#                           " Some features may not be available.")
+#        import pickle as cloudpickle
+import pickle
 
 # TODO create_analysis_static(...) and other create functions need to handle the case when a file is opened with the MPI I/O backend. Currently we assume a serial write from root
 
@@ -472,7 +484,22 @@ class omsi_file_analysis(omsi_dependencies_manager,
         # 10. Save the output object in the ist of omsi analysis data stores as part of the analysis object
         analysis.omsi_analysis_storage.append(re)
 
-        # 11. Retrun the new omsi_file_analysis object
+        # 11. Check if we need to pickle and save the analysis class in case this is a custom class that is not part of BASTet
+        try:
+            from omsi.analysis.analysis_views import analysis_views
+            _ = analysis_views.analysis_name_to_class(analysis.get_analysis_type())
+        except NameError:
+            class_pickle = cloudpickle.dumps(analysis.__class__)
+            # Convert the pickle string to an uint8 array to avoid problems
+            # with storing string with NULL characters in HDF5
+            class_pickle_arr = np.fromstring(class_pickle,
+                                            dtype=omsi_format_analysis.analysis_class_pickle_np_dtype)
+            analysis_group[unicode(omsi_format_analysis.analysis_class)] = class_pickle_arr
+        except:
+            log_helper.warning(__name__, "Could not save the analysis class.")
+            pass
+
+        # 12. Retrun the new omsi_file_analysis object
         return re
 
     @classmethod
@@ -496,6 +523,11 @@ class omsi_file_analysis(omsi_dependencies_manager,
         try:
             if curr_dtype == data_dtypes.get_dtypes()['bool']:
                 curr_dtype = bool
+        except TypeError:
+            pass
+        try:
+            if curr_dtype == data_dtypes.get_dtypes()['str']:
+                curr_dtype =  omsi_format_common.str_type
         except TypeError:
             pass
 
@@ -697,6 +729,30 @@ class omsi_file_analysis(omsi_dependencies_manager,
         except:
             return None
 
+    def get_analysis_class(self):
+        """
+        Get the analysis class corresponding to the save analysis. This may be
+        analysis_generic in case that the analysis type is not known or generic
+        :return:
+        """
+        from omsi.analysis.analysis_views import analysis_views
+        from omsi.analysis.generic import analysis_generic
+        try:
+            # Get the analysis from BASTet itself
+            analysis_class = analysis_views.analysis_name_to_class(self.get_analysis_type()[0])
+        except NameError:
+            # Try to restore the analysis pickle if we saved it to file
+            if omsi_format_analysis.analysis_class in self.managed_group.keys():
+                class_pickle = self.managed_group[unicode(omsi_format_analysis.analysis_class)][:]
+                # Restore the pickle string we stored as uint8 array to avoid problems with NULL
+                class_pickle_string = class_pickle.tostring()
+                analysis_class = pickle.loads(class_pickle_string)
+            else:
+                analysis_class = analysis_generic
+        except:
+            analysis_class = analysis_generic
+        return analysis_class
+
     def get_analysis_data_names(self):
         """
         This function returns all dataset names (and groups) that are custom
@@ -773,7 +829,10 @@ class omsi_file_analysis(omsi_dependencies_manager,
                             output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])][:]
                     else:
                         output_list[-1]['data'] = self.managed_group[unicode(item_obj[0])]
-                    output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
+                    if not isinstance(output_list[-1]['data'], basestring):
+                        output_list[-1]['dtype'] = str(output_list[-1]['data'].dtype)
+                    else:
+                        output_list[-1]['dtype'] = unicode
         return output_list
 
     def get_all_parameter_data(self,
@@ -800,9 +859,19 @@ class omsi_file_analysis(omsi_dependencies_manager,
                         curr_parameter_dataset.attrs[omsi_format_analysis.analysis_parameter_help_attr])
                 if load_data:
                     curr_parameter['data'] = curr_parameter_dataset[:]
+                    # try to restore string parameters as stings
+                    try:
+                        if curr_parameter['data'].size == 1:
+                            if isinstance(curr_parameter['data'][0], basestring):
+                                curr_parameter['data'] = curr_parameter['data'][0]
+                    except:
+                        raise
                 else:
                     curr_parameter['data'] = curr_parameter_dataset
-                curr_parameter['dtype'] = unicode(curr_parameter['data'].dtype)
+                if not isinstance(curr_parameter['data'], basestring):
+                    curr_parameter['dtype'] = unicode(curr_parameter['data'].dtype)
+                else:
+                    curr_parameter['dtype'] = unicode
                 output_list.append(curr_parameter)
         if not exclude_dependencies:
             dependency_data = self.get_all_dependency_data(omsi_dependency_format=False)
@@ -861,21 +930,15 @@ class omsi_file_analysis(omsi_dependencies_manager,
                  to rerun an analysis. May return analysis_generic in case that the
                  specific analysis is not known.
         """
-        from omsi.analysis.analysis_views import analysis_views
         from omsi.analysis.generic import analysis_generic
-        try:
-            analysis_class = analysis_views.analysis_name_to_class(self.get_analysis_type()[0])
-            ignore_type_conflict = False
-        except:
-            analysis_class = analysis_generic
-            ignore_type_conflict = True
+        analysis_class = self.get_analysis_class()
         analysis_instance = analysis_class()
         analysis_instance.read_from_omsi_file(analysis_object=self,
                                               load_data=load_data,
                                               load_parameters=load_parameters,
                                               load_runtime_data=load_runtime_data,
                                               dependencies_omsi_format=dependencies_omsi_format,
-                                              ignore_type_conflict=ignore_type_conflict)
+                                              ignore_type_conflict=isinstance(analysis_instance, analysis_generic))
         return analysis_instance
 
     def recreate_analysis(self, **kwargs):
