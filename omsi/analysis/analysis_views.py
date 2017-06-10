@@ -205,7 +205,7 @@ class analysis_views(object):
                name, e.g., `omsi.analysis.multivariate_stat.omsi_nmf` or a name
                relative to the omis.analysis module, e.g, `multivariate_stat.omsi_nmf`.
 
-        :raises: Attribute error in case that the class cannot be restored.
+        :raises: NameError in case that the class cannot be restored.
         """
         import types
         import sys
