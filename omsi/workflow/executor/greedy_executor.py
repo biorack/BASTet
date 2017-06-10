@@ -6,6 +6,7 @@ from omsi.shared.log import log_helper
 from omsi.datastructures.analysis_data import data_dtypes
 import omsi.shared.mpi_helper as mpi_helper
 
+# TODO Optimizee reduce_memory_usage to better deal with interactive workflows, i.e., avoid reexecution of already finished tasks if possible.
 
 class greedy_executor(workflow_executor_base):
     """
@@ -59,14 +60,15 @@ class greedy_executor(workflow_executor_base):
 
         # Add all dependencies to the workflow
         log_helper.debug(__name__, "Executing the workflow", root=self.mpi_root, comm=self.mpi_comm)
-        log_helper.info(__name__, "Adding all dependencies", root=self.mpi_root, comm=self.mpi_comm)
+        log_helper.debug(__name__, "Adding all dependencies", root=self.mpi_root, comm=self.mpi_comm)
         self.add_analysis_dependencies()
 
         # Execute the workflow in a greedy fashion (i.e., execute whichever analysis is ready and has not be run yet)
         log_helper.debug(__name__, "Running the analysis workflow", root=self.mpi_root, comm=self.mpi_comm)
         all_analyses = self.get_analyses()
         iterations = 0
-        while True:
+        continue_running = True
+        while continue_running:
             # Run all analyses that are ready
             for analysis in all_analyses:
                 if analysis.update_analysis and len(analysis.check_ready_to_execute()) == 0:
@@ -75,21 +77,32 @@ class greedy_executor(workflow_executor_base):
                     analysis.execute()
                     if self['reduce_memory_usage']:
                         analysis.clear_and_restore()
-            # Check if there is any other tasks that we need to execte now
-            num_tasks = 0
-            num_tasks_ready = 0
-            for analysis in all_analyses:
-                if analysis.update_analysis:
-                    num_tasks += 1
-                    if len(analysis.check_ready_to_execute()) == 0:
-                        num_tasks_ready += 1
-            if num_tasks == 0:
+            # Check if there is any other tasks that we need to execute now
+            num_tasks_completed, num_tasks_waiting, num_tasks_ready, num_tasks_blocked = \
+                all_analyses.task_status_stats()
+            if num_tasks_waiting == 0:
                 log_helper.info(__name__, "Completed executing the workflow.", root=self.mpi_root, comm=self.mpi_comm)
-                break
-            if num_tasks > 0 and num_tasks_ready == 0:
-                log_helper.warning(__name__, "Workflow could not be fully executed. " + str(num_tasks) +
-                                   " remain in the queue but cannot be completed due to unresolved dependencies.",
+                continue_running = False
+            if num_tasks_waiting > 0 and num_tasks_ready == 0:
+                blocking_tasks = all_analyses.get_blocking_tasks()
+                log_helper.warning(__name__, "Workflow could not be fully executed. " + str(num_tasks_waiting) +
+                                   " remain in the queue but cannot be completed due to unresolved dependencies." +
+                                   " The workflow will be restarted once the outputs of the blocking tasks are ready." +
+                                   " Blocking tasks are: " + str(blocking_tasks),
                                    root=self.mpi_root, comm=self.mpi_comm)
+                # Tell all blocking tasks that they should continue the workflow once they are ready
+                # This happens in omsi.analysis.analysis_base.outputs_ready(...) function
+                for block_task in blocking_tasks:
+                    block_task.continue_workflow_when_ready(self)
+                #  NOTE: if self['reduce_memory_usage'] is True then prior analyses were cleared, i.e.,
+                #        they will be rexecuted when the workflow is restarted. It is, therefore, not recommeneded
+                #        to use reduce_memory_usage option when performing interactive tasks.
+
+                continue_running = False
             iterations += 1
+        # All analyses are done, so we no longer need to coninue any analyses when we are done
+        if num_tasks_blocked == 0:
+            for analysis in all_analyses:
+                analysis.continue_analysis_when_ready = False
 
         log_helper.log_var(__name__, iterations=iterations, level='DEBUG', root=self.mpi_root, comm=self.mpi_comm)
