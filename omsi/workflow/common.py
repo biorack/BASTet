@@ -176,7 +176,7 @@ class analysis_task_list(list):
             if analysis_object in self:
                 log_helper.debug(__name__, "Analysis already in the list of tasks")
                 return
-            log_helper.info(__name__, "Adding analysis object to the workflow set. " + str(analysis_object))
+            log_helper.debug(__name__, "Adding analysis object to the workflow set. " + str(analysis_object))
             super(analysis_task_list, self).append(analysis_object)
         else:
             raise ValueError('Analysis is not of type omsi.analysis.base.analysis_base')
@@ -380,4 +380,45 @@ class analysis_task_list(list):
                 ana.set_analysis_identifier('ana_' + str(ana_index) + "_" + unicode(current_identifier))
             ana_index += 1
         return self
+
+    def task_status_stats(self):
+        """
+        Compute the number of tasks that are complete, ready to run, and waiting on dependencies
+        :return: Tuple of ints with:
+            * number of completed tasks
+            * total number of tasks waiting to be executed
+            * total number of waiting tasks that are ready to be run
+            * total number of waiting tasks that are blocked, e.g., cannot run due to unresolved dependencies
+
+        """
+        waiting_tasks = 0
+        ready_to_run_tasks = 0
+        blocked_tasks = 0
+        completed_tasks = 0
+        for analysis in self:
+            if analysis.update_analysis:
+                waiting_tasks += 1
+                if len(analysis.check_ready_to_execute()) == 0:
+                    ready_to_run_tasks += 1
+                else:
+                    blocked_tasks += 1
+            else:
+                completed_tasks += 1
+        return completed_tasks, waiting_tasks, ready_to_run_tasks, blocked_tasks
+
+    def get_blocking_tasks(self):
+        """
+        Get the tasks that are blocking other from running
+        :return: List of blocking tasks
+        """
+        from omsi.analysis.base import analysis_base
+        blocking_tasks = []
+        for analysis in self:
+            if analysis.update_analysis:
+                pending_inputs = analysis.check_ready_to_execute()
+                for pi in pending_inputs:
+                    if isinstance(pi['data']['omsi_object'], analysis_base):
+                        blocking_tasks.append(pi['data']['omsi_object'])
+        blocking_tasks = list(set(blocking_tasks))
+        return blocking_tasks
 

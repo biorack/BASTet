@@ -3,6 +3,7 @@ This module defines the basic format for storing mass spectrometry imaging data,
 metadata, and analysis in HDF5 in compliance with OpenMSI file format.
 """
 import h5py
+import numpy as np
 
 
 class omsi_format_common(object):
@@ -137,6 +138,8 @@ class omsi_format_analysis(omsi_format_common):
     analysis_groupname = "analysis_"
     analysis_identifier = "analysis_identifier"
     analysis_type = "analysis_type"
+    analysis_class = "analysis_class"
+    analysis_class_pickle_np_dtype = np.dtype('uint8')
     analysis_parameter_group = "parameter"
     analysis_parameter_help_attr = 'help'
     analysis_runinfo_group = "runinfo"

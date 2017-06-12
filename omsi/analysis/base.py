@@ -177,6 +177,7 @@ class analysis_base(parameter_manager):
         self.mpi_root = 0
         self.update_analysis = True
         self.driver = None
+        self.continue_analysis_when_ready = False  # If we have tasks waiting for us then continue the those tasks when we are done with our execution
 
         # Add common analysis parameters
         dtypes = self.get_default_dtypes()
@@ -247,7 +248,10 @@ class analysis_base(parameter_manager):
             self.set_parameter_values(**{key: value})
             self.omsi_analysis_storage = []
         elif key in self.data_names:
-            if 'numpy' not in str(type(value)):
+            if isinstance(value, dependency_dict):
+                ana_data = analysis_data(name=key,
+                                         data=value)
+            elif 'numpy' not in str(type(value)):
                 temp_value = np.asarray(value)
                 ana_data = analysis_data(name=key,
                                          data=temp_value,
@@ -357,11 +361,34 @@ class analysis_base(parameter_manager):
         :return: List of omsi_analysis_parameter objects that are not ready. If the
             returned list is empty, then the analysis is ready to run.
         """
-        pending_indputs = []
+        pending_inputs = []
         for param in self.parameters:
             if not param.data_ready():
-                pending_indputs.append(param)
-        return pending_indputs
+                pending_inputs.append(param)
+        return pending_inputs
+
+    def continue_workflow_when_ready(self, executor):
+        """
+        Continue the workflow defined by the given executor when ready
+        :param executor:
+        :return:
+        """
+        self.driver = executor
+        self.continue_analysis_when_ready = True
+
+    def outputs_ready(self):
+        """
+        Call this function to indicate that outputs are ready to use. This function is only used
+        in case not all outputs are defined by the execute_analysis function but instead generate
+        other dependencies. This may be the case, e.g., when we generate interactive apps where
+        outputs depend on user inputs. In this case, this function must be called manually by
+        the user to indicate that the outputs are now ready.
+        """
+         # Continue running tasks that are waiting on us
+        if self.continue_analysis_when_ready:
+            log_helper.info(__name__, "Outputs of " + str(self) + "are ready. Trying to continue blocked tasks.",
+                                     root=self.mpi_root, comm=self.mpi_comm)
+            self.driver.execute()
 
     def record_execute_analysis_outputs(self, analysis_output):
         """
@@ -423,7 +450,7 @@ class analysis_base(parameter_manager):
         log_helper.debug(__name__, "Run and profile the analysis: " + str(self),
                          root=self.mpi_root, comm=self.mpi_comm)
 
-        if True: # self.run_info is not None:
+        if self.run_info is not None:
             self.run_info.mpi_comm = self.mpi_comm
             self.run_info.mpi_root = self.mpi_root
             self.enable_time_and_usage_profiling(self['profile_time_and_usage'])
@@ -514,7 +541,7 @@ class analysis_base(parameter_manager):
         """
         root = 0 if executor is None else executor.mpi_root
         comm = mpi_helper.get_comm_world() if executor is None else executor.mpi_comm
-        log_helper.info(__name__, "Execute all analyses", root=root, comm=comm)
+        log_helper.debug(__name__, "Execute all analyses", root=root, comm=comm)
         log_helper.log_var(__name__, force_update=force_update, level='DEBUG', root=root, comm=comm)
         if executor is not None:
             log_helper.debug(__name__, "Using user-defined executor.",  root=root, comm=comm)
@@ -967,7 +994,10 @@ class analysis_base(parameter_manager):
         """
         Return a string indicating the type of analysis performed
         """
-        return self.__module__  # self.__class__.__name__
+        if self.__module__ != '__main__':
+            return self.__module__
+        else:
+            return self.__class__.__name__
 
     def get_analysis_data_names(self):
         """
