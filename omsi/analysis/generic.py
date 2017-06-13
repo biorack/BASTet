@@ -57,6 +57,7 @@ class analysis_generic(analysis_base):
     omsi package used.
     """
     DEFAULT_OUTPUT_PREFIX = "output_"
+    PICKLE_DTYPE = 'uint8'  # We store the pickle string as a uint8 array to avoid HDF5 and other special char issues
 
     @classmethod
     def from_function(cls, analysis_function, output_names=None, parameter_specs=None, name_key="undefined"):
@@ -142,12 +143,12 @@ class analysis_generic(analysis_base):
         # Add the analysis function as an internal parameter to our analysis
         generic_analysis.add_parameter(name='__analysis_function',
                                        help='The analysis function we want to execute',
-                                       dtype=str)
+                                       dtype=ana_dtypes['ndarray'])
         # Assign the names of the outputs
         if output_names is not None:
             generic_analysis.data_names = output_names
         # Pickle out analysis function and save it
-        generic_analysis['__analysis_function'] = cloudpickle.dumps(analysis_function)
+        generic_analysis['__analysis_function'] = np.fromstring(cloudpickle.dumps(analysis_function), cls.PICKLE_DTYPE)
         # Return our initalized analysis
         return generic_analysis
 
@@ -219,9 +220,9 @@ class analysis_generic(analysis_base):
                         input_dict[arg['name']] = arg['data']
             # When we restored the analysis we did not know that the parameter was supposed to be unicode
             log_helper.debug(__name__, "Unpickel the analysis function")
-            if isinstance(self['__analysis_function'], np.ndarray):
-                self['__analysis_function'] = self['__analysis_function'][0]
-            analysis_function = self['__analysis_function']
+            # Convert to string as we stored the pickle string as uint8 array to avoid problems
+            # with HDF5, NULL, and special chars
+            analysis_function = self['__analysis_function'].tostring()
             analysis_function = pickle.loads(analysis_function)
             log_helper.debug(__name__, "Executing the analysis function")
             result = analysis_function(**input_dict)
