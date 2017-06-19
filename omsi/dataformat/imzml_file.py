@@ -125,7 +125,7 @@ class imzml_file(file_reader_base):
         """
         reader = ImzMLParser(self.basename)
         for idx in xrange(0, len(reader.coordinates)):
-            xidx, yidx = reader.coordinates[idx]
+            xidx, yidx, zidx = reader.coordinates[idx]
             # Coordinates may start at arbitrary locations, hence, we need to substract the minimum to recenter at (0,0)
             xidx -= self.x_pos_min
             yidx -= self.y_pos_min
