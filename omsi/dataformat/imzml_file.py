@@ -5,7 +5,7 @@ This module provides functionality for reading imzML mass spectrometry image fil
 # import basic packages
 import numpy as np
 import os
-
+from scipy import interpolate
 # USE xmltodict to expand support for metadata from the imzml files
 
 # import xml parser
@@ -112,7 +112,9 @@ class imzml_file(file_reader_base):
             mz, intens = reader.getspectrum(ind)
             # Reinterpolate intensities if we are in processed mode
             if bin_edges is not None:
-                intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
+                f = interpolate.interp1d(mz,intens,fill_value=0,bounds_error=False)
+                intens = f(self.mz)
+                #intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
             # Save the intensity values in our data cube
             self.data[xidx, yidx, :] = intens
 
@@ -125,16 +127,18 @@ class imzml_file(file_reader_base):
         """
         reader = ImzMLParser(self.basename)
         for idx in xrange(0, len(reader.coordinates)):
-            xidx, yidx = reader.coordinates[idx]
+            xidx, yidx, zidx = reader.coordinates[idx]
             # Coordinates may start at arbitrary locations, hence, we need to substract the minimum to recenter at (0,0)
             xidx -= self.x_pos_min
             yidx -= self.y_pos_min
             mz, intens = reader.getspectrum(idx)
             # Rehistogram the data if we are in procesed mode
             if self.imzml_type == self.available_imzml_types['processed']:
-                shift = np.diff(self.mz).mean()
-                bin_edges = np.append(self.mz, self.mz[-1]+ shift)
-                intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
+                # shift = np.diff(self.mz).mean()
+                # bin_edges = np.append(self.mz, self.mz[-1]+ shift)
+                f = interpolate.interp1d(mz,intens,fill_value=0,bounds_error=False)
+                intens = f(self.mz)
+                # intens, bin_edges_new = np.histogram(mz, bins=bin_edges, weights=intens)
 
             yield (xidx, yidx), np.asarray(intens)
 
