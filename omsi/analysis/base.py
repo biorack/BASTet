@@ -7,7 +7,7 @@ OpenMSI science gateway.
 # TODO Add get_all_dependency_data_recursive back in (see all omsi.datastructures.analysis_data)
 # TODO Separate qmz, qslice, qspectrum viewer functionality into a separate base class
 # TODO Make list of viewer options unique (if we have a dependency graph rather than a tree) than the same option can occure multiple times
-
+# TODO Add ability to lable inidivdual outputs as ready or not to support per-output-based interactivity
 
 import warnings
 import weakref
@@ -231,9 +231,18 @@ class analysis_base(parameter_manager):
                                        omsi_object=self,
                                        selection=None,
                                        help=None)
-            return None
-        else:
-            return None
+        elif isinstance(key, tuple):
+            if len(key) == 2:
+                if isinstance(key[0], str) or isinstance(key[0], unicode):
+                    if key[0] in self.data_names:
+                        return dependency_dict(param_name=None,
+                                               link_name=None,
+                                               dataname=key[0],
+                                               omsi_object=self,
+                                               selection=key[1],
+                                               help=None)
+
+        return None
 
     def __setitem__(self,
                     key,
@@ -933,6 +942,11 @@ class analysis_base(parameter_manager):
         Check whether the results of the analysis are ready to be used
         :return: Boolean
         """
+        if not self.update_analysis:
+            for output in self.data_names:
+                if isinstance(self[output], dependency_dict):
+                    return False
+            return True
         return not self.update_analysis
 
     def get_memory_profile_info(self):
