@@ -65,19 +65,24 @@ class xmassmzml_file(file_reader_base_multidata):
 
         # Compute the mz axis
         log_helper.debug(__name__, 'Compute mz axes')
-        self.mz_all = self.__compute_mz_axis(filename=self.basename)
+        self.mz = self.__compute_mz_axis(filename=self.basename)
+        log_helper.debug(__name__, 'mz axes computed')
 
         # Determine the shape of the dataset, result is a list of shapes for each datacube
-        self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all]
-        self.shape = None
-        self.mz = None
+        # self.shape_all_data = [(self.x_pos.shape[0], self.y_pos.shape[0], mz.shape[0]) for mz in self.mz_all
 
-        # self.scan_dependencies = {'name':basename}
+        log_helper.debug(__name__, 'Compute shape')
+        self.shape = (self.x_pos.shape[0], self.y_pos.shape[0], len(self.mz))#self.shape[0])
+        # self.shape = None
+        # self.mz = None
 
         # Read the data into memory
-        self.data = None
+        # self.data = None
+        log_helper.debug(__name__, 'read all')
         if requires_slicing:
-            self.__read_all()
+            self.data = self.__read_all()
+        log_helper.debug(__name__, 'Finished with init')
+
 
     def __read_all(self):
         """
@@ -85,38 +90,38 @@ class xmassmzml_file(file_reader_base_multidata):
         function directly modifies the self.data entry.  Data is now a list of datacubes
         """
 
-        self.data = [np.zeros(shape=self.shape_all_data[scan_idx], dtype=self.data_type) for scan_idx, scantype in enumerate(self.scan_types)]
+        # self.data = np.zeros(shape=self.shape_all_data[scan_idx], dtype=self.data_type) for scan_idx, scantype in enumerate(self.scan_types)
+        data = np.zeros(self.shape)
+        reader = mzml.read(self.basename)
+        spectrumid = 0
+        # if not self.scan_profiled[scan_idx]:
+        #     shift = np.diff(self.mz_all[scan_idx]).mean()
+        #     bin_edges = np.append(self.mz_all[scan_idx], self.mz_all[scan_idx][-1]+ shift)
+        # else:
+        #     bin_edges = None
 
-        for scan_idx, scantype in enumerate(self.scan_types):
-            reader = mzml.read(self.basename)
-            spectrumid = 0
-            if not self.scan_profiled[scan_idx]:
-                shift = np.diff(self.mz_all[scan_idx]).mean()
-                bin_edges = np.append(self.mz_all[scan_idx], self.mz_all[scan_idx][-1]+ shift)
-            else:
-                bin_edges = None
-
-            for spectrum in reader:
-                if spectrum['scanList']['scan'][0]['filter string'] == scantype:
-                    x = spectrum['m/z array']
-                    try:
-                        y = spectrum['intensity array']
-                    except KeyError:
-                        raise KeyError
-                    if bin_edges is None:
-                        yi = np.interp(self.mz_all[scan_idx], x, y, 0, 0)  # Re-interpolate the data in profiled mode
-                    else:
-                         yi, _ = np.histogram(x, bins=bin_edges, weights=y)   # Re-histogram the data in centroided mode
-                    xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
-                    yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
-                    try:
-                        self.data[scan_idx][xidx, yidx, :] = yi
-                    except:
-                        log_helper.debug(__name__, spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape)
-            # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
-                if spectrumid%1000 == 0:
-                    log_helper.info(__name__, 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype))
-                spectrumid += 1
+        for spectrum in reader:
+            # if spectrum['scanList']['scan'][0]['filter string'] == scantype:
+            x = spectrum['m/z array']
+                # try:
+            y = spectrum['intensity array']
+                # except KeyError:
+                    # raise KeyError
+                # if bin_edges is None:
+            yi = np.interp(self.mz_all[scan_idx], x, y, 0, 0)  # Re-interpolate the data in profiled mode
+                # else:
+                     # yi, _ = np.histogram(x, bins=bin_edges, weights=y)   # Re-histogram the data in centroided mode
+                # xidx = np.nonzero(self.x_pos == self.coordinates[spectrumid, 0])[0]
+                # yidx = np.nonzero(self.y_pos == self.coordinates[spectrumid, 1])[0]
+                # try:
+            data[self.coordinates[spectrumid, 0], self.coordinates[spectrumid, 1], :] = yi
+                # except:
+                    # log_helper.debug(__name__, spectrumid, scan_idx, scantype, self.mz_all[scan_idx].shape)
+        # TODO Note if the data is expected to be of float precision then self.data_type needs to be set accordingly
+            # if spectrumid%1000 == 0:
+                # log_helper.info(__name__, 'Processed data for %s spectra to datacube for scan type %s' % (spectrumid, scantype))
+            spectrumid += 1
+        return data
 
     def spectrum_iter(self):
         """
@@ -181,8 +186,7 @@ class xmassmzml_file(file_reader_base_multidata):
                 mz_max = m
             
         mz_axes = np.arange(start=mz_min, stop=mz_max, step=mzdiff)
-        # needs to be a list to deal with different scan type formalism in standard mzml files
-        return [mz_axes]
+        return mz_axes
 
     @classmethod
     def __compute_coordinates(self,filename,num_scans):
@@ -209,12 +213,12 @@ class xmassmzml_file(file_reader_base_multidata):
         return coords
 
 
-    @classmethod
-    def test(cls):
-        """
-        Test method
-        """
-        pass
+    # @classmethod
+    # def test(cls):
+    #     """
+    #     Test method
+    #     """
+    #     pass
 
     @staticmethod
     def __compute_num_scans(filename=None):
@@ -238,91 +242,91 @@ class xmassmzml_file(file_reader_base_multidata):
         """Close the mzml file"""
         pass
 
-    @classmethod
-    def is_valid_dataset(cls, name):
-        """Check whether the given file or directory points to a img file.
+    # @classmethod
+    # def is_valid_dataset(cls, name):
+    #     """Check whether the given file or directory points to a img file.
 
-           :param name: Name of the dir or file.
-           :type name: String
+    #        :param name: Name of the dir or file.
+    #        :type name: String
 
-           :returns: Boolean indicating whether the given file or folder is a valid img file.
-        """
-        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
-            filelist = cls.get_files_from_dir(name)
-            return len(filelist) > 0
-        else:
-            try:
-                # Try to open the file and iterate over it
-                reader = mzml.read(name)
-                for _ in reader:
-                    pass
-                del reader
-                return True
-            except:
-                return False
+    #        :returns: Boolean indicating whether the given file or folder is a valid img file.
+    #     """
+    #     if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
+    #         filelist = cls.get_files_from_dir(name)
+    #         return len(filelist) > 0
+    #     else:
+    #         try:
+    #             # Try to open the file and iterate over it
+    #             reader = mzml.read(name)
+    #             for _ in reader:
+    #                 pass
+    #             del reader
+    #             return True
+    #         except:
+    #             return False
 
-    @classmethod
-    def size(cls, name, max_num_reads=1000):
-        """
-        Classmethod used to check the estimated size for the given file/folder.
-        For mzml this is an estimate of the final size of the full 3D datacube.
-        For efficiency the number of scans is estimated based on the size of
-        the first 1000 scans.
+    # @classmethod
+    # def size(cls, name, max_num_reads=1000):
+    #     """
+    #     Classmethod used to check the estimated size for the given file/folder.
+    #     For mzml this is an estimate of the final size of the full 3D datacube.
+    #     For efficiency the number of scans is estimated based on the size of
+    #     the first 1000 scans.
 
-        :param name: Name of the dir or file.
-        :type name: unicode
-        :param max_num_reads: The maximum number of spectrum reads to be performed to estimate the file size
-        :type max_num_reads: int
+    #     :param name: Name of the dir or file.
+    #     :type name: unicode
+    #     :param max_num_reads: The maximum number of spectrum reads to be performed to estimate the file size
+    #     :type max_num_reads: int
 
-        :returns: Integer indicating the size in byte or None if unknown.
-        """
-        basename = None
-        if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
-            filelist = cls.get_files_from_dir(name)
-            if len(filelist) > 0:
-                basename = filelist[0]
-        else:
-            basename = name
-        if basename is not None:
-            num_scans = -1
-            # Try to compute the number of scans by looking at the spectrumList count entry in the file
-            try:
-                size_line = os.popen('head -n 120 "' + basename + '" | grep "spectrumList count="').read()
-                if len(size_line) > 0:
-                    size_text = size_line.split('spectrumList count=')[1].split('"')[1]
-                    if size_text.isdigit():
-                        num_scans = int(size_text)
-            except:
-                pass
-            if num_scans < 0:
-                # Estimate the number of scans by reading the first 1000 spectra
-                index = 0
-                prev_tell = 0
-                sizes = []
-                reader = mzml.read(basename)
-                for _ in reader:
-                    if index >= max_num_reads:
-                        break
-                    current_tell = reader.file.file.tell()
-                    sizes.append(current_tell - prev_tell)
-                    prev_tell = current_tell
-                    index += 1
-                npsizes = np.asarray(sizes)
-                filesize = os.stat(basename).st_size
-                scansize = (npsizes.max() - npsizes.min()) / 2.
-                num_scans = int(filesize/scansize)
-            mz_axis_len = cls.__compute_mz_axis(filename=basename,
-                                                mzml_filetype=cls.__compute_filetype(filename=basename),
-                                                scan_types=cls.__compute_scan_types(filename=basename)).shape[0]
-            return num_scans*mz_axis_len
+    #     :returns: Integer indicating the size in byte or None if unknown.
+    #     """
+    #     basename = None
+    #     if os.path.isdir(name):  # If we point to a directory, check if the dir contains an mzML file
+    #         filelist = cls.get_files_from_dir(name)
+    #         if len(filelist) > 0:
+    #             basename = filelist[0]
+    #     else:
+    #         basename = name
+    #     if basename is not None:
+    #         num_scans = -1
+    #         # Try to compute the number of scans by looking at the spectrumList count entry in the file
+    #         try:
+    #             size_line = os.popen('head -n 120 "' + basename + '" | grep "spectrumList count="').read()
+    #             if len(size_line) > 0:
+    #                 size_text = size_line.split('spectrumList count=')[1].split('"')[1]
+    #                 if size_text.isdigit():
+    #                     num_scans = int(size_text)
+    #         except:
+    #             pass
+    #         if num_scans < 0:
+    #             # Estimate the number of scans by reading the first 1000 spectra
+    #             index = 0
+    #             prev_tell = 0
+    #             sizes = []
+    #             reader = mzml.read(basename)
+    #             for _ in reader:
+    #                 if index >= max_num_reads:
+    #                     break
+    #                 current_tell = reader.file.file.tell()
+    #                 sizes.append(current_tell - prev_tell)
+    #                 prev_tell = current_tell
+    #                 index += 1
+    #             npsizes = np.asarray(sizes)
+    #             filesize = os.stat(basename).st_size
+    #             scansize = (npsizes.max() - npsizes.min()) / 2.
+    #             num_scans = int(filesize/scansize)
+    #         mz_axis_len = cls.__compute_mz_axis(filename=basename,
+    #                                             mzml_filetype=cls.__compute_filetype(filename=basename),
+    #                                             scan_types=cls.__compute_scan_types(filename=basename)).shape[0]
+    #         return num_scans*mz_axis_len
 
-            # temp_mzml_file = cls(basename=basename, requires_slicing=False)
-            # itemsize = np.dtype(temp_mzml_file.data_type).itemsize
-            # size = np.asarray(temp_mzml_file.shape).prod() * itemsize
-            # print ('MZML size', size)
-            # return size
-        else:
-            return None
+    #         # temp_mzml_file = cls(basename=basename, requires_slicing=False)
+    #         # itemsize = np.dtype(temp_mzml_file.data_type).itemsize
+    #         # size = np.asarray(temp_mzml_file.shape).prod() * itemsize
+    #         # print ('MZML size', size)
+    #         # return size
+    #     else:
+    #         return None
 
     @classmethod
     def get_files_from_dir(cls, dirname):
@@ -337,43 +341,3 @@ class xmassmzml_file(file_reader_base_multidata):
                 filelist.append(currname)
         return filelist
 
-    def get_number_of_datasets(self):
-        """
-        Get the number of available datasets.
-        """
-        return len(self.mz_all)
-
-    def set_dataset_selection(self, dataset_index):
-        """
-        Define the current dataset to be read.
-        """
-        super(xmassmzml_file, self).set_dataset_selection(dataset_index)
-        self.shape = self.shape_all_data[self.select_dataset]
-        self.mz = self.mz_all[self.select_dataset]
-
-    def get_dataset_dependencies(self):
-        """
-        Get the dependencies between the current dataset and any of the
-        other datasets stored in the current file.
-
-        Inherited from
-        """
-        if self.select_dataset is not None:
-            return self.scan_dependencies[self.select_dataset]
-        else:
-            return self.scan_dependencies
-
-    def get_dataset_metadata(self):
-        """
-        Get dict of additional metadata associated with the current dataset.
-
-        Inherited from file_reader_base.file_reader_base_multidata.
-
-        :return: Dict where keys are strings and associated values to be stored as
-            metadata with the dataset.
-
-        """
-        if self.select_dataset is not None:
-            return self.scan_params[self.select_dataset]
-        else:
-            return self.scan_params
