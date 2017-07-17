@@ -386,7 +386,7 @@ class ConvertSettings(object):
                                 "split+merge"]
     # Available options for the data write. One chunk at a time ('chunk'), one
     # spectrum at a time ('spectrum'), or all at one once ('all')
-    available_io_options = ["chunk", "spectrum", "all"]
+    available_io_options = ["chunk", "spectrum", "all", "spectrum_to_image"]
     available_error_options = ["terminate-and-cleanup",
                                "terminate-only",
                                "continue-on-error"]
