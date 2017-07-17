@@ -30,6 +30,7 @@ def imzml_available():
 __all__ = ["img_file", "bruckerflex_file", "omsi_file", "file_reader_base"]
 if mzml_available():
     __all__.append("mzml_file")
+    __all__.append("xmassmzml_file")
 if imzml_available():
     __all__.append("imzml_file")
 
