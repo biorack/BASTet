@@ -318,7 +318,7 @@ class imzml_file(file_reader_base):
         for l in os.listdir(dirname):
             currname = os.path.join(dirname, l)
             filename_only, extension = os.path.splitext(currname)
-            if os.path.isfile(currname) and currname.endswith(".imzML"):
+            if os.path.isfile(currname) and currname.lower().endswith(".imzml"):
                 if os.path.isfile(filename_only + '.ibd'):
                     filelist.append(currname)
                 else:
