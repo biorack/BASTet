@@ -74,7 +74,10 @@ class imzml_file(file_reader_base):
         # self.step_size = min([min(np.diff(self.x_pos)), min(np.diff(self.y_pos))])
 
         # Determine the shape of the dataset ## TODO: after solving imzML generation prob, fix this for multicube data
-        self.shape = (self.x_pos.size, self.y_pos.size, self.mz.size)
+        num_x = self.x_pos.max() - self.x_pos.min() + 1
+        num_y = self.y_pos.max() - self.y_pos.min() + 1
+
+        self.shape = (num_x,num_y, self.mz.size)
 
         # Read the data into memory
         self.data = None
@@ -161,6 +164,12 @@ class imzml_file(file_reader_base):
         mz_axes, intens = reader.getspectrum(0)   # NOTE: mz_axes is a tuple
         # Read the coordinates
         coordinates = np.asarray(reader.coordinates)
+
+        # #Start the data at [0,0,0]
+        # coordinates[:,0] = coordinates[:,0] - np.amin(coordinates,axis=0)[0]
+        # coordinates[:,1] = coordinates[:,1] - np.amin(coordinates,axis=0)[1]
+        # coordinates[:,2] = coordinates[:,2] - np.amin(coordinates,axis=0)[2]
+
         # Determine the data type for the internsity values
         dtype = np.asarray(intens).dtype.str
 
