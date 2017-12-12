@@ -30,7 +30,7 @@ class imzml_file(file_reader_base):
 
 
 
-    def __init__(self, basename, requires_slicing=True, resolution=5):
+    def __init__(self, basename, requires_slicing=True, resolution=15):
         """
         Open an imzml file for data reading.
 
