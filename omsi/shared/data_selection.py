@@ -751,13 +751,9 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
     # 1.2) Check if we have a valid reduction operation
     if reduction not in reduction_allowed_functions:
         if http_error:
-            return HttpResponseNotFound("Requested data reduction " + str(reduction) +
-                                        " not supported. Valid reduction operations are:" +
-                                        str(reduction_allowed_functions.keys()))
+            return HttpResponseNotFound("Requested data reduction not found")
         else:
-            raise ValueError("Requested data reduction " + str(reduction) +
-                             " not supported. Valid reduction operations are:" +
-                             str(reduction_allowed_functions.keys()))
+            raise ValueError("Requested data reduction not supported")
 
     # 1.3) Check if we have a valid axis parameter
     axis_specified = 'axis' in kwargs
@@ -767,11 +763,11 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
             axis = int(axis)
         if axis >= len(data.shape):
             if http_error:
-                return HttpResponseNotFound("Data reduction " + str(reduction) + " failed." +
+                return HttpResponseNotFound("Data reduction   failed." +
                                             "The dimensionality of the data is lower than the axis" +
                                             "requested to be used for reduction")
             else:
-                raise IndexError("Data reduction " + str(reduction) + " failed." +
+                raise IndexError("Data reduction failed." +
                                  "The dimensionality of the data is lower than the axis" +
                                  "requested to be used for reduction")
 
@@ -815,15 +811,10 @@ def perform_reduction(data, reduction, secondary_data, min_dim=None, http_error=
         return data
     except:
         if http_error:
-            return HttpResponseNotFound("Requested data reduction " + str(reduction) +
-                                        " failed or not supported. Valid reduction" +
-                                        "operations are:" + str(reduction_allowed_functions.keys()) +
-                                        " " + str(sys.exc_info()))
+            return HttpResponseNotFound("Requested data reduction failed or not supported. Valid reduction" +
+                                        "operations are:")
         else:
-            raise ValueError("Requested data reduction " + str(reduction) +
-                             " failed or not supported. Valid reduction" +
-                             "operations are:" + str(reduction_allowed_functions.keys()) +
-                             " " + str(sys.exc_info()))
+            raise ValueError("Requested data reduction failed or not supported.")
 
 
 def transform_and_reduce_data(data,
@@ -1017,11 +1008,9 @@ def transform_data_single(data,
     # 1.1) Check input data
     if data is None:
         if http_error:
-            return HttpResponseNotFound("Data transformation " + str(transformation) +
-                                        " failed. None data cannot be reduced.")
+            return HttpResponseNotFound("Data transformation failed. None data cannot be reduced.")
         else:
-            raise ValueError("Data transformation " + str(transformation) +
-                             " failed. None data cannot be reduced.")
+            raise ValueError("Data transformation failed. None data cannot be reduced.")
 
     # 1.2) Check the axes parameter
     if not isinstance(axes, list) and axes is not None:
@@ -1030,11 +1019,11 @@ def transform_data_single(data,
         for axisindex in axes:
             if axisindex >= len(data.shape):
                 if http_error:
-                    return HttpResponseNotFound("Data transformation " + str(transformation) + " failed." +
+                    return HttpResponseNotFound("Data transformation failed." +
                                                 " The dimensionality of the data is lower than the axes " +
                                                 "requested to be used for reduction")
                 else:
-                    raise IndexError("Data transformation " + str(transformation) + " failed." +
+                    raise IndexError("Data transformation failed." +
                                      " The dimensionality of the data is lower than the axes " +
                                      "requested to be used for reduction")
 
@@ -1042,10 +1031,10 @@ def transform_data_single(data,
     if transformation not in transformation_type:
         if http_error:
             return HttpResponseBadRequest("Data transformation failed. Unsupported transformation option" +
-                                          " given as input. Supported options are: " + str(transformation_type))
+                                          " given as input. Supported options are: ")
         else:
             raise ValueError("Data transformation failed. Unsupported transformation option" +
-                             " given as input. Supported options are: " + str(transformation_type))
+                             " given as input. Supported options are: ")
 
     # 1.4) Check the additional keyword arguments
     if transform_kwargs is None:
