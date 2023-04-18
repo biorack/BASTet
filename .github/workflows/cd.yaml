@@ -1,7 +1,7 @@
 name: cd
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
     types: [closed]
   workflow_dispatch:
 
